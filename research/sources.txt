@@ -1,3 +1,13 @@
+----------------------------------------------------------------------------
+
+
+Computers and intractability : a guide to the theory of NP-completeness
+   Garey, Michael R.
+
+QA76.6 .G35 1979       1.       Definite Loan (Two Weeks Guaranteed)     Due: 9/15/2008
+
+----------------------------------------------------------------------------
+
 A random walk down wall street - Burton G Malkiel 2007.
 
 fftw - open source library
