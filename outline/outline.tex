@@ -1,0 +1,177 @@
+\documentclass[11pt, letterpaper]{article}
+
+\usepackage{algorithmic}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{fullpage}
+\usepackage{comment}
+
+\newtheorem*{thm}{Theorem}
+\newtheorem*{lem}{Lemma}
+\newtheorem*{cor}{Corollary}
+\theoremstyle{definition}
+\newtheorem*{defn}{Definition}
+
+
+\parindent 0ex
+
+\newcommand{\CC}{\mathbb{C}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\RRgtz}{\mathbb{R}_{>0}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\ZZgtz}{\mathbb{Z}_{>0}}
+\newcommand{\ZZgez}{\mathbb{Z}_{\ge 0}}
+\newcommand{\QQ}{\mathbb{Q}}
+\newcommand{\QQgtz}{\mathbb{Q}_{>0}}
+\newcommand{\QQgez}{\mathbb{Q}_{\ge 0}}
+\newcommand{\NP}{\textrm{NP}}
+\newcommand{\matrixot}[2]{\left( \begin{array}{r} #1 \\ #2 \end{array} \right)}
+\newcommand{\matrixtt}[4]{\left( \begin{array}{rr} #1 & #2 \\ #3 & #4 \end{array} \right)}
+\newcommand{\ntoinfty}{\lim_{n \rightarrow \infty}}
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
+\newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+
+
+\begin{document}
+
+
+\section{Improvements}
+Instead of using a sieve to flag which numbers are coprime and which are not within the area of interest, perform another pass over the sieve and build a list of gaps from one coprime to another.  This is smaller, and is constant time to jump from one coprime to another.
+
+\section{Description}
+The algorithm works by taking some prime form $f$ in the class group of $-N$, exponentiating it by the odd part of some large power primorial $P$.  Let $b=f^P$.  We then exponentiate $b$ by some sufficiently large $2^i$ and then perform a primorial steps search for the order of this element.  Once we know that, we know a large multiple of the order of $f$, more specifically, we know the odd order of the element $b$.  We exponentiate $b$ by the odd order and then square until we find an ambiguous form, i.e. the square root of the identity.
+
+\bigbreak
+This algorithm may fail to factor given a prime form $f$ and a discriminant $-N$ when one of several things happen:
+\begin{itemize}
+\item The number of steps for the primorial steps search is bounded and we do not find the order within the given number of steps.  In this case, the order of the element $f$ is not sufficiently smooth.  
+
+\item We find the order of the prime form $f$, but it is a multiple of $N = p /cdot q$ and so does not lead to a non-trivial factorization of $N$.
+\end{itemize}
+
+at this point, we can either switch to the next prime form, or change the multiplier of $N$. By changing the primeform, we hope that the new form has smooth order and it not a multiple of $N$.  If we are unlucky and the class group of $-N$ has a large prime in its class number, then by switching multipliers to some other class group $-kN$, we hope to find a class group whose class number is smooth and hence has prime forms with smooth order.
+
+\bigbreak
+Investigate if there are any particular multipliers that we would want to use.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% POWER PRIMORIAL EXPONENTIATION %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Exponentiation by power primorials}
+
+We did not investigate window techniques.
+
+\subsection{NAF-R2L}
+
+\bigbreak
+\begin{algorithm}
+\caption{Computes $A^N$}
+\label{NAF-R2l}
+\begin{algorithmic}[1]
+\REQUIRE $N \ge 0$ \\
+\STATE $T \gets A$ \\
+\STATE $R \gets 1_G$ \\
+\WHILE {$N \ne 0$}
+	\IF {$N \equiv 1 \pmod 4$}
+		\STATE $R \gets R \cdot T$ \\
+		\STATE $N \gets N-1$
+	\ELSIF {$N \equiv 3 \pmod 4$}
+		\STATE $R \gets R \cdot T^{-1}$ \\
+		\STATE $N \gets N+1$
+	\ENDIF
+	\STATE $T \gets T^2$ \\
+	\STATE $N \gets \frac{N}{2}$
+\ENDWHILE
+\RETURN $R$
+\end{algorithmic}
+\end{algorithm}
+
+\bigbreak
+This method can be improved by maintaining a carry flag $c$ and composing the inverses separately.  Let $Q$ be the composition of all inverses; initially $Q=1_G$.  Let $c$ be the carry flag; initially $c=1$.  We compute $m = (N+c) \bmod 4$.  When $m = 01$ in binary, we compute $R \gets R \cdot T$, and virtually subtract 1 from $N$ by clearing the carry.  When $m = 11$ in binary, we compute $Q \gets Q \cdot T$, and virtually add 1 to $N$ by setting the carry flag to 1. The result is $R \cdot Q^{-1}$.  See $\ref{Joye2000}$ for details.  The basic algorithm is given below.
+
+\bigbreak
+\begin{algorithm}
+\caption{Computes $A^N$ without modifying $N$ and by performing only one inverse.}
+\label{NAF-R2l}
+\begin{algorithmic}[1]
+\REQUIRE $N \ge 0$
+\STATE $c \gets 0$
+\STATE $i \gets 0$
+\STATE $R \gets 1_G$
+\STATE $Q \gets 1_G$
+\STATE $T \gets A$
+\WHILE {$N \ge 2^i$}
+	\STATE $m \gets \left(\floor{\frac{N}{2^i}}+c\right) \bmod 4$
+	\IF {$m = 1$}
+		\STATE $R \gets R \cdot T$
+		\STATE $c \gets 0$
+	\ELSIF {$m = 3$}
+		\STATE $Q \gets Q \cdot T$ \\
+		\STATE $c \gets 1$
+	\ENDIF
+	\STATE $T \gets T^2$ \\
+	\STATE $i \gets i+1$
+\ENDWHILE
+\IF {$c=1$} \STATE $R \gets R \cdot T$ \ENDIF
+\RETURN $R \cdot Q^{-1}$
+\end{algorithmic}
+\end{algorithm}
+
+\bigbreak
+It is an improvement to leave $N$ unmodified since if $N$ is very large, as in our case, the overhead of even simple arithmetic operations, such as addition by 1, is noticeable.  Line 7 in the above can be computed by sliding a window of 2 bits across $N$.  This is significantly faster than performing actual division with floor.
+
+\subsection{DBNS R2L chains $\pmod 3$ and $\pmod {2^23^2 = 36}$.}
+\subection{DBNS L2R chains}
+\subsection{DBNS Closest approximation}
+Greedy algorithm that finds
+\[
+	\min_{a,b} \left\{|N-2^a3^b| : 0 \le a \le A, 0 \le b \le B\right\}
+\]
+
+\subsection{$\pm 1$ and reduce}
+Greedy 
+\[
+	S_{i+1} = \left\{ \min \left\{ \left{\left| \frac{N \pm 1}{2^c3^d} \right| \right\} : N \in S_i \right\}
+\]
+at each step keeping only the $x=16$ smallest elements of $S$.
+
+\subsection{$\pm 2^a3^b$ and reduce}
+Greedy algorithm that finds
+\[
+	\min_{a,b,c,d} \left\{\left| \frac{N \pm 2^a3^b}{2^c3^d} \right| \right\}
+\]
+such that $0 \le a \le A$, $0 \le c \le A$, $0 \le b \le B$, and $0 \le d \le B$ for all terms.
+
+I also tried the above such that $0 \le c \le C$ and $0 \le d \le D$.
+
+\subsection{$\pm 2^a \pm 3^b$ and reduce}
+Greedy algorithm that finds
+\[
+	\min_{a,b,c,d} \left\{\left| \frac{N \pm 2^a \pm 3^b}{2^c3^d} \right| \right\}
+\]
+
+\subsection{Optimal Strictly Chained Partitions}
+Recursive tree method that finds optimal \emph{strictly chained} partitions.
+
+\subsection{Prunning variations}
+Prunning variations, where I keep the \emph{best} $x$ solutions to the above and then iterate on the best solutions, repeatedly pruning at each step.
+
+\subsection{Power Primorial vs list of Prime Powers}
+Tried representing the primorial as $\prod p_i^{e_i}$, then as 16-bit blocks, and finally as computing $b_i=b_{i-1}^{p_i^{e_i}}$.
+
+\subsection{Computing optimal representations for 16bit numbers}
+For exponents 0 through 65535, we computed optimal chains.  These work best for list based representation of primorials as well as for powering by small exponents.
+
+\subsection{Results}
+All other methods work better for larger primorial.
+
+
+\end{itemize}
+
+
+\end{document}
+
