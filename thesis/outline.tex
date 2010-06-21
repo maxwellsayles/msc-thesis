@@ -1,0 +1,159 @@
+\documentclass[11pt, letterpaper]{article}
+
+\usepackage{algorithmic}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{fullpage}
+\usepackage{comment}
+
+\newtheorem*{thm}{Theorem}
+\newtheorem*{lem}{Lemma}
+\newtheorem*{cor}{Corollary}
+\theoremstyle{definition}
+\newtheorem*{defn}{Definition}
+
+
+\parindent 0ex
+
+\newcommand{\CC}{\mathbb{C}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\RRgtz}{\mathbb{R}_{>0}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\ZZgtz}{\mathbb{Z}_{>0}}
+\newcommand{\ZZgez}{\mathbb{Z}_{\ge 0}}
+\newcommand{\QQ}{\mathbb{Q}}
+\newcommand{\QQgtz}{\mathbb{Q}_{>0}}
+\newcommand{\QQgez}{\mathbb{Q}_{\ge 0}}
+\newcommand{\NP}{\textrm{NP}}
+\newcommand{\matrixot}[2]{\left( \begin{array}{r} #1 \\ #2 \end{array} \right)}
+\newcommand{\matrixtt}[4]{\left( \begin{array}{rr} #1 & #2 \\ #3 & #4 \end{array} \right)}
+\newcommand{\ntoinfty}{\lim_{n \rightarrow \infty}}
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
+\newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+
+
+\begin{document}
+
+
+\section{Motivation}
+\begin{itemize}
+\item Factor residues in the double small prime variant of the number field sieve
+\item Other reasons why factoring small integers quickly is important
+\end{itemize}
+
+\bigbreak
+\section{SPAR}
+\subsection{Quadratic Forms}
+\subsection{Multipliers}
+
+
+\bigbreak
+\section{Primorial Steps Algorithm}
+\subsection{Baby-Step Giant-Step}
+\subsection{Sub-exponential run-time}
+
+
+\bigbreak
+\section{Double-Base Number System}
+\subsection{Chains vs Representations}
+\subsection{Encoding of chains/representations}
+\subsection{Sub-linearity in number of terms}
+
+\bigbreak
+\section{SuperSPAR}
+\begin{itemize}
+\item Putting it all together
+\end{itemize}
+
+\bigbreak
+\section{Experiments}
+
+\subsection{Coprime Finding}
+\begin{itemize}
+\item Wheeling
+\item Sieving
+\item Distance Table
+\end{itemize}
+
+\subsection{64bit, 128bit, MPZ variants}
+
+\subsection{Extended GCD}
+\begin{itemize}
+\item Euclidean GCD
+\item Binary GCD
+\item 8bit Block Binary GCD
+\item 8-bit Lehmer GCD
+\item Left-to-Right Binary GCD
+\end{itemize}
+
+\subsection{Double-Base representations}
+\subsubsection{Exponentiating by the Power Primorial}
+\begin{itemize}
+\item NAF-R2L
+\item $\pm$ 2,3 Chains R2L $\pmod{3}$
+\item $\pm$ 2,3 Chains R2L $\pmod{36=2^2 3^2}$
+\item $\pm$ 2,3 Chains L2R (Ostrowski based)
+\item Optimal strictly chained +2,3 partitions (incorporates cost).
+\item $\pm$ 2,3 Representation using best 2,3 approximation of $N$, i.e. $\min \{|N-2^a3^b|\}$.
+\item $\pm$ 2,3 Representation using $\min \left\{ \left| \frac{N \pm 1}{2^c3^d} \right| \right\}$.
+\item $\pm$ 2,3 Representation using $\min \left\{ \left| \frac{N \pm 2^a3^b}{2^c3^d} \right| \right\}$.
+\item Iterating on the \emph{best} 16 results for each of the greedy $\pm$ 2,3 representation algorithms: $\min \{|N-2^a3^b|\}$, $\min \left\{ \left| \frac{N \pm 1}{2^c3^d} \right| \right\}$, and $\min \left\{ \left| \frac{N \pm 2^a3^b}{2^c3^d} \right| \right\}$.
+\item Precomputing \emph{optimal} $\pm$ 2,3 representations for 16bit numbers
+	\begin{itemize}
+	\item algorithm, incoporating costs, cache efficiency
+	\item 16-bit blocking of primorial
+	\item comparison of precomputed representation with 
+	\end{itemize}
+\end{itemize}
+
+\subsubsection{Exponentiation by the list of Prime Powers}
+\begin{itemize}
+\item The primorial bounds used generate prime powers all $\le$ 16-bit.  As such, powering by precomputed representations is fastest when exponentiating by a list of prime powers.
+\item Possible advantage is that we can stop exponentiating once the identity element is reached.
+\item Disadvantaged is that we must first compute $a' = a^{2^{e_2}}$, then power $a'$ by each of the prime powers in the list, and then recompute $a'' = a^{{p_i}^{e_i}}$ for each prime power ${p_i}^{e_i}$ used, and square $a''$ until an ambiguous form is found.
+\end{itemize}
+
+
+
+\subsection{Search for best parameters for SuperSPAR}
+\begin{itemize}
+\item Best primorial bound for $n$-bit integers.
+\item Best number of primorial steps relative to size of primorial.
+\item Sequential prime forms vs Random prime forms.
+\item Ratio of prime forms to multipliers.
+\item Best multipliers to use.
+\item Exponentiating by Power Primorial vs list of Prime Powers.
+\end{itemize}
+
+
+
+\bigbreak
+\section{Empirical Results}
+
+\subsection{Extended GCD}
+\subsection{Power Primorial Exponentiation}
+\subsection{Parameters for SuperSPAR}
+
+\subsection{Comparison of factoring speeds with other algorithms}
+\begin{itemize}
+\item SQUFOF from Pari/GP
+\item GNU MSieve
+\item GMP-ECM
+\item Maple
+\item Sage (I believe Sage just uses Pari/GP)
+\item Jerome Milan (TIFA) (If available)
+\end{itemize}
+
+
+\bigbreak
+\section{Further Research}
+\begin{itemize}
+\item Parallelization using multipliers and a GPU
+\end{itemize}
+
+
+\end{document}
+
