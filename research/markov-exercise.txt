@@ -1,9 +1,0 @@
-1) A marketing analysis shows that 12% of the consumers who do not currently drink KickKola will purchase KickKola the next time they buy a cola and that 63% of the consumers who currently drink KickKola will purchase it the next time they buy a cola.
-
-Make a long-range prediction of KickKola’s ultimate market share, assuming that current trends continue.
-
-2) A census report shows that currently 32% of the residents of Metropolis own their home and that 68% rent.
-
-Of those that rent, 12% plan to buy a home in the next 12 months, while 3% of the homeowners plan to sell their home and rent instead.
-
-Make a long-range prediction of the percent of Metropolis residents who will own their home and the percent who will rent, assuming current trends hold.
