@@ -37,129 +37,175 @@
 
 \begin{document}
 
-
+% MOTIVATION
 \section{Motivation}
 \begin{itemize}
-\item Factor residues in the double small prime variant of the number field sieve
-\item Other reasons why factoring small integers quickly is important
+\item Motivate faster ideal exponentiation in imaginary quadratic fields
+\item Exponentiation with fixed exponents (when precomputation is okay).
+\item Faster class group computations
+\item Application in cryptography
+\item Example of fast ideal exponentiation in SuperSPAR
 \end{itemize}
 
-\bigbreak
-\section{SPAR}
-\subsection{Quadratic Forms}
-\subsubsection{Ambiguous Forms}
-\subsection{Multipliers}
 
+% IDEAL EXPONENTIATION
+\section{Ideal Exponentiation}
+\begin{itemize}
+\item Compose, Square, Cube
 
-\bigbreak
-\section{Primorial Steps Algorithm}
-\subsection{Baby-Step Giant-Step}
-\subsection{Sub-exponential run-time}
+\item Quadratic Forms
+	\begin{itemize}
+	\item Identity
+	\item Inverse
+	\item Prime Forms
+	\item Ambiguous Forms
+	\end{itemize}
+	
 
+\item Double-Base Number Systems
+	\begin{itemize}
+	\item When/why it is useful?
+	\item Chains vs Representations
+	\item Encoding of chains/representations
+	\item Sub-linearity in number of terms
+	\end{itemize}
+	
+	
+\end{itemize}
 
-\bigbreak
-\section{Double-Base Number System}
-\subsection{Chains vs Representations}
-\subsection{Encoding of chains/representations}
-\subsection{Sub-linearity in number of terms}
-
+% SUPERSPAR
 \bigbreak
 \section{SuperSPAR}
 \begin{itemize}
-\item Putting it all together
+\item As an example of ideal exponentiation
+\item SPAR Algorithm
+	\begin{itemize}
+		Complexity
+	\end{itemize}
+\item Primorial Steps Algorithm
+\item SuperSPAR Algorithm
+	\begin{itemize}
+		Complexity
+	\end{itemize}
 \end{itemize}
 
+
+% EXPERIMENTS
 \bigbreak
 \section{Experiments}
 
-\subsection{Coprime Finding}
 \begin{itemize}
-\item Wheeling
-\item Sieving
-\item Distance Table
-\end{itemize}
+\item Motivation: What is the best way that we know to do ideal exponentiation?  What is the best way to apply these results to SuperSPAR?
 
-\subsection{64bit, 128bit, MPZ variants}
-
-\subsection{Extended GCD}
-\begin{itemize}
-\item Euclidean GCD
-\item Binary GCD
-\item 8bit Block Binary GCD
-\item 8-bit Lehmer GCD
-\item Left-to-Right Binary GCD
-\end{itemize}
-
-\subsection{Double-Base representations}
-\subsubsection{Exponentiating by the Power Primorial}
-\begin{itemize}
-\item NAF-R2L
-\item $\pm$ 2,3 Chains R2L $\pmod{3}$
+\item Extended GCD
 	\begin{itemize}
-	\item Fast $\pmod 3$.
-	\item Fast divide by 3.
+	\item Euclidean GCD (partial)
+	\item Lehmer GCD (partial)
+	\item Binary GCD (non-partial)
+	\item 8-bit Block Binary GCD (non-partial)
+	\item Left-to-Right Binary GCD (partial)
+	\item 32bit, 64bit, 128bit
 	\end{itemize}
-\item $\pm$ 2,3 Chains R2L $\pmod{36=2^2 3^2}$
+	
+	
+\item Quadratic Form Arithmetic
 	\begin{itemize}
-	\item Fast $\pmod{36}$.
-	\end{itemize}
-\item $\pm$ 2,3 Chains L2R (Ostrowski based)
-\item Optimal strictly chained +2,3 partitions (incorporates cost).
-\item $\pm$ 2,3 Representation using best 2,3 approximation of $N$, i.e. $\min \{|N-2^a3^b|\}$.
-\item $\pm$ 2,3 Representation using $\min \left\{ \left| \frac{N \pm 1}{2^c3^d} \right| \right\}$.
-\item $\pm$ 2,3 Representation using $\min \left\{ \left| \frac{N \pm 2^a3^b}{2^c3^d} \right| \right\}$.
-\item Iterating on the \emph{best} 16 results for each of the greedy $\pm$ 2,3 representation algorithms: $\min \{|N-2^a3^b|\}$, $\min \left\{ \left| \frac{N \pm 1}{2^c3^d} \right| \right\}$, and $\min \left\{ \left| \frac{N \pm 2^a3^b}{2^c3^d} \right| \right\}$.
-\item Precomputing \emph{optimal} $\pm$ 2,3 representations for 16bit numbers
+	\item 64bit, 128bit, GMP-MPZ
+	\item When is cubing better than compose+square?
+	\item Average time for operations
+	\end{itemize}	
+	
+\item Exponentiation
 	\begin{itemize}
-	\item algorithm, incoporating costs, cache efficiency
-	\item 16-bit blocking of primorial
-	\item comparison of precomputed representation with 
+	\item NAF-R2L
+	\item $\pm$ 2,3 Chains R2L $\pmod{3}$
+		\begin{itemize}
+		\item Fast $\pmod 3$.
+		\item Fast divide by 3.
+		\end{itemize}
+	\item $\pm$ 2,3 Chains R2L $\pmod{36=2^2 3^2}$
+		\begin{itemize}
+		\item Fast $\pmod{36}$.
+		\end{itemize}
+	\item $\pm$ 2,3 Chains L2R (Ostrowski based)
+	\item Optimal +2,3 strictly chained partitions (incorporates cost).
+	\item $\pm$ 2,3 Representation using best 2,3 approximation of $N$, i.e. $\min \{|N-2^a3^b|\}$.
+	\item $\pm$ 2,3 Representation using $\min \left\{ \left| \frac{N \pm 1}{2^c3^d} \right| \right\}$.
+	\item $\pm$ 2,3 Representation using $\min \left\{ \left| \frac{N \pm 2^a3^b}{2^c3^d} \right| \right\}$.
+	\item $\pm$ 2,3 Representation using $\min \left\{ \left| \frac{N \pm 2^a \pm 3^b}{2^c3^d} \right| \right\}$.
+	\item Iterating on the \emph{best} 16 (or $x$) results for each of the greedy $\pm$ 2,3 representation algorithms: $\min \{|N-2^a3^b|\}$, $\min \left\{ \left| \frac{N \pm 1}{2^c3^d} \right| \right\}$, $\min \left\{ \left| \frac{N \pm 2^a3^b}{2^c3^d} \right| \right\}$, and $\min \left\{ \left| \frac{N \pm 2^a \pm 3^b}{2^c3^d} \right| \right\}$.
+	\item Precomputing \emph{optimal} $\pm$ 2,3 representations for 16bit numbers
+		\begin{itemize}
+		\item algorithm, incoporating costs, cache efficiency
+		\item 16-bit blocking of exponent
+		\item comparison of precomputed representation with greedy approaches
+		\end{itemize}
+	
+	\item By fixed primorial
+	\item By list of prime powers
+	\item By general integers (maybe some experiments)
 	\end{itemize}
+
+\item SuperSPAR
+	\begin{itemize}
+
+	\item Coprime Finding
+		\begin{itemize}
+		\item Wheeling
+		\item Sieving
+		\item Distance Table
+		\end{itemize}
+
+	\item Exponentiating 
+		\begin{itemize}
+		\item Primorial vs Prime Powers
+		\item Best primorial bound for $n$-bit integers.
+		\end{itemize}
+		
+	\item Time spent on search vs powering.
+	\item Sequential prime forms vs Random prime forms.
+	\item Ratio of prime forms to multipliers.
+	\item Best multipliers to use.
+	
+	\item Compare with other algorithms
+		\begin{itemize}
+		\item SQUFOF from Pari/GP
+		\item GNU MSieve
+		\item GMP-ECM
+		\item Maple
+		\item Sage (I believe Sage just uses Pari/GP)
+		\item Jerome Milan (TIFA) (If available)
+		\end{itemize}
+
+	\end{itemize}
+
 \end{itemize}
 
-\subsubsection{Exponentiation by the list of Prime Powers}
-\begin{itemize}
-\item The primorial bounds used generate prime powers all $\le$ 16-bit.  As such, powering by precomputed representations is fastest when exponentiating by a list of prime powers.
-\item Possible advantage is that we can stop exponentiating once the identity element is reached.
-\item Disadvantaged is that we must first compute $a' = a^{2^{e_2}}$, then power $a'$ by each of the prime powers in the list, and then recompute $a'' = a^{{p_i}^{e_i}}$ for each prime power ${p_i}^{e_i}$ used, and square $a''$ until an ambiguous form is found.
-\end{itemize}
 
-
-
-\subsection{Search for best parameters for SuperSPAR}
-\begin{itemize}
-\item Best primorial bound for $n$-bit integers.
-\item Best number of primorial steps relative to size of primorial.
-\item Sequential prime forms vs Random prime forms.
-\item Ratio of prime forms to multipliers.
-\item Best multipliers to use.
-\item Exponentiating by Power Primorial vs list of Prime Powers.
-\end{itemize}
-
-
-
+% EMPIRICAL RESULTS
 \bigbreak
 \section{Empirical Results}
 
-\subsection{Extended GCD}
-\subsection{Power Primorial Exponentiation}
-\subsection{Parameters for SuperSPAR}
-
-\subsection{Comparison of factoring speeds with other algorithms}
 \begin{itemize}
-\item SQUFOF from Pari/GP
-\item GNU MSieve
-\item GMP-ECM
-\item Maple
-\item Sage (I believe Sage just uses Pari/GP)
-\item Jerome Milan (TIFA) (If available)
+\item Follows the order in the section on Experiments
 \end{itemize}
 
 
+% FURTHER RESEARCH
 \bigbreak
 \section{Further Research}
 \begin{itemize}
-\item Parallelization using multipliers and a GPU
+\item Other types of Ideal Arithmetic?
+\item Function Fields?
+	\begin{itemize}
+	\item Hyperelliptic Curves?
+	\end{itemize}
+\item DBNS with other coprime bases?
+\item NS with three,four,etc bases?
+\item Further application to SuperSPAR?
+	\begin{itemize}
+	\item Parallelization using multipliers and a GPU?
+	\end{itemize}
 \end{itemize}
 
 
