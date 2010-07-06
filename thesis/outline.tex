@@ -43,25 +43,32 @@
 \item Motivate faster ideal exponentiation in imaginary quadratic fields
 \item Exponentiation with fixed exponents (when precomputation is okay).
 \item Faster class group computations
-\item Application in cryptography
+\item Applications in cryptography
 \item Example of fast ideal exponentiation in SuperSPAR
 \end{itemize}
 
 
-% IDEAL EXPONENTIATION
-\section{Ideal Exponentiation}
+% IDEAL ARITHMETIC
+\bigbreak
+\section{Ideal Arithmetic}
 \begin{itemize}
+\item Imaginary Quadratic Fields
+\item Maximal Subgroup of Algebraic Integers
+\item Ideals
+\item Definition of Class Group and Group Law
+\item Identity, Inverse, Prime Ideal, Order
 \item Compose, Square, Cube
-
-\item Quadratic Forms
+\item Computer Representation
 	\begin{itemize}
-	\item Identity
-	\item Inverse
-	\item Prime Forms
-	\item Ambiguous Forms
+	\item Explicit Algorithms
 	\end{itemize}
-	
+\end{itemize}
 
+% EXPONENTIATION
+\bigbreak
+\section{Exponentiation}
+\begin{itemize}
+\item Binary, NAF-R2L
 \item Double-Base Number Systems
 	\begin{itemize}
 	\item When/why it is useful?
@@ -69,46 +76,57 @@
 	\item Encoding of chains/representations
 	\item Sub-linearity in number of terms
 	\end{itemize}
-	
-	
+\item Methods for computing 2,3 Chains/Representations in the literature
+	\begin{itemize}
+	\item R2L Chains
+	\item L2R Chains (Ostrowski approximation)
+	\item Yao's method for representations
+	\item Pruned Trees
+	\end{itemize}
 \end{itemize}
+
 
 % SUPERSPAR
 \bigbreak
 \section{SuperSPAR}
 \begin{itemize}
 \item As an example of ideal exponentiation
+\item Connection of Ambiguous Ideals to Factorization of the Discriminant
 \item SPAR Algorithm
 	\begin{itemize}
-		Complexity
+		\item Complexity
 	\end{itemize}
 \item Primorial Steps Algorithm
 \item SuperSPAR Algorithm
 	\begin{itemize}
-		Complexity
+		\item Complexity
 	\end{itemize}
 \end{itemize}
 
 
-% EXPERIMENTS
+% IDEAL EXPONENTIATION EXPERIMENTS
 \bigbreak
-\section{Experiments}
+\section{Ideal Exponentiation Experiments}
 
 \begin{itemize}
-\item Motivation: What is the best way that we know to do ideal exponentiation?  What is the best way to apply these results to SuperSPAR?
+\item Motivation: What is the best way that we know to do ideal exponentiation?  
 
 \item Extended GCD
 	\begin{itemize}
-	\item Euclidean GCD (partial)
-	\item Lehmer GCD (partial)
-	\item Binary GCD (non-partial)
-	\item 8-bit Block Binary GCD (non-partial)
-	\item Left-to-Right Binary GCD (partial)
+	\item Euclidean GCD (w/ partial)
+	\item Lehmer GCD (w/ partial)
+	\item Binary GCD (w/o partial)
+	\item 8-bit Windowed Binary GCD (w/o partial)
+	\item Left-to-Right Binary GCD (w/ partial)
+		\begin{itemize}
+		\item Compute $\min_k \{ u-2^k \}$ (literature)
+		\item Compute $u-2^k$ where $k=\floor{log_2 u}$ (our method)
+		\end{itemize}
 	\item 32bit, 64bit, 128bit
 	\end{itemize}
 	
 	
-\item Quadratic Form Arithmetic
+\item Ideal Arithmetic
 	\begin{itemize}
 	\item 64bit, 128bit, GMP-MPZ
 	\item When is cubing better than compose+square?
@@ -145,50 +163,47 @@
 	\item By list of prime powers
 	\item By general integers (maybe some experiments)
 	\end{itemize}
+\end{itemize}
 
-\item SuperSPAR
+
+% SUPERSPAR EXPERIMENTS
+\bigbreak
+\section{SuperSPAR Experiments}
+\begin{itemize}
+\item Motivation: What is the best way to apply these results to SuperSPAR?
+
+
+\item Coprime Finding
 	\begin{itemize}
-
-	\item Coprime Finding
-		\begin{itemize}
-		\item Wheeling
-		\item Sieving
-		\item Distance Table
-		\end{itemize}
+	\item Wheeling
+	\item Sieving
+	\item Distance Table
+	\end{itemize}
 
 	\item Exponentiating 
-		\begin{itemize}
-		\item Primorial vs Prime Powers
-		\item Best primorial bound for $n$-bit integers.
-		\end{itemize}
-		
-	\item Time spent on search vs powering.
-	\item Sequential prime forms vs Random prime forms.
-	\item Ratio of prime forms to multipliers.
-	\item Best multipliers to use.
+	\begin{itemize}
+	\item Primorial vs Prime Powers
+	\item Best primorial bound for $n$-bit integers.
+	\end{itemize}
 	
-	\item Compare with other algorithms
-		\begin{itemize}
-		\item SQUFOF from Pari/GP
-		\item GNU MSieve
-		\item GMP-ECM
-		\item Maple
-		\item Sage (I believe Sage just uses Pari/GP)
-		\item Jerome Milan (TIFA) (If available)
-		\end{itemize}
+\item Time spent on search vs powering.
+\item Sequential prime ideals vs Random prime ideals.
+\item Ratio of prime ideals to multipliers.
+\item Best multipliers to use.
 
+\item Compare with other algorithms
+	\begin{itemize}
+	\item SQUFOF from Pari/GP
+	\item GNU MSieve
+	\item GMP-ECM
+	\item Maple
+	\item Sage (I believe Sage just uses Pari/GP)
+	\item Jerome Milan (TIFA) (If available)
 	\end{itemize}
 
 \end{itemize}
 
 
-% EMPIRICAL RESULTS
-\bigbreak
-\section{Empirical Results}
-
-\begin{itemize}
-\item Follows the order in the section on Experiments
-\end{itemize}
 
 
 % FURTHER RESEARCH
@@ -196,6 +211,9 @@
 \section{Further Research}
 \begin{itemize}
 \item Other types of Ideal Arithmetic?
+	\begin{itemize}
+	\item The Ideal Ring of Algebraic Integers of Real Quadratic Fields
+	\end{itemize}
 \item Function Fields?
 	\begin{itemize}
 	\item Hyperelliptic Curves?
