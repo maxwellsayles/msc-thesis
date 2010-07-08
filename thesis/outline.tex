@@ -40,7 +40,7 @@
 % MOTIVATION
 \section{Motivation}
 \begin{itemize}
-\item Motivate faster ideal exponentiation in imaginary quadratic fields
+\item Faster ideal exponentiation on imaginary quadratic fields
 \item Exponentiation with fixed exponents (when precomputation is okay).
 \item Faster class group computations
 \item Applications in cryptography
@@ -91,7 +91,7 @@
 \section{SuperSPAR}
 \begin{itemize}
 \item As an example of ideal exponentiation
-\item Connection of Ambiguous Ideals to Factorization of the Discriminant
+\item Connection of Ambiguous Ideals to the Factorization of the Discriminant
 \item SPAR Algorithm
 	\begin{itemize}
 		\item Complexity
@@ -119,10 +119,10 @@
 	\item 8-bit Windowed Binary GCD (w/o partial)
 	\item Left-to-Right Binary GCD (w/ partial)
 		\begin{itemize}
-		\item Compute $\min_k \{ u-2^k \}$ (literature)
-		\item Compute $u-2^k$ where $k=\floor{log_2 u}$ (our method)
+		\item Compute $\min_k \{ |u-2^k| \}$ (literature)
+		\item Compute $|u-2^k|$ where $k=\floor{log_2 u}$ (our method)
 		\end{itemize}
-	\item 32bit, 64bit, 128bit
+	\item 32bit, 64bit, 128bit Intel assembler
 	\end{itemize}
 	
 	
@@ -170,7 +170,7 @@
 \bigbreak
 \section{SuperSPAR Experiments}
 \begin{itemize}
-\item Motivation: What is the best way to apply these results to SuperSPAR?
+\item Motivation: How efficiently can we factor integers using SuperSPAR and the above improvements to ideal exponentiation?
 
 
 \item Coprime Finding
@@ -219,7 +219,7 @@
 	\item Hyperelliptic Curves?
 	\end{itemize}
 \item DBNS with other coprime bases?
-\item NS with three,four,etc bases?
+\item Number Systems with three,four,etc. bases?
 \item Further application to SuperSPAR?
 	\begin{itemize}
 	\item Parallelization using multipliers and a GPU?
