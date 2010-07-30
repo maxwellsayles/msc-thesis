@@ -1,0 +1,67 @@
+\documentclass[11pt, letterpaper]{book}
+
+\usepackage{algorithmic}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{fullpage}
+\usepackage{comment}
+
+\newtheorem*{thm}{Theorem}
+\newtheorem*{lem}{Lemma}
+\newtheorem*{cor}{Corollary}
+\theoremstyle{definition}
+\newtheorem*{defn}{Definition}
+
+
+\parindent 0ex
+
+\newcommand{\CC}{\mathbb{C}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\RRgtz}{\mathbb{R}_{>0}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\ZZgtz}{\mathbb{Z}_{>0}}
+\newcommand{\ZZgez}{\mathbb{Z}_{\ge 0}}
+\newcommand{\QQ}{\mathbb{Q}}
+\newcommand{\QQgtz}{\mathbb{Q}_{>0}}
+\newcommand{\QQgez}{\mathbb{Q}_{\ge 0}}
+\newcommand{\NP}{\textrm{NP}}
+\newcommand{\matrixot}[2]{\left( \begin{array}{r} #1 \\ #2 \end{array} \right)}
+\newcommand{\matrixtt}[4]{\left( \begin{array}{rr} #1 & #2 \\ #3 & #4 \end{array} \right)}
+\newcommand{\ntoinfty}{\lim_{n \rightarrow \infty}}
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
+\newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+
+
+\begin{document}
+
+\setcounter{chapter}{1}
+\chapter{Ideal Arithmetic}
+
+An \emph{algebraic number} $\alpha$ is a complex number that is a root of some unique irreducible (over $\QQ$) monic polynomial $f(x) \in \QQ[x]$.  An algebraic number field is any subfield of the set of all algebraic numbers.  Given an algebraic number $\alpha$ we can create an algebraic number field as the extension field of $\QQ$ adjoined $\alpha$ (denoted $\QQ(\alpha)$). Let
+\[
+	\mathbb{K} = \QQ(\alpha) = \left\{ \frac{f(\alpha)}{g(\alpha)} : f(x), g(x) \in \QQ[x]; g(\alpha) \ne 0 \right\}
+\]
+Then $\mathbb{k}$ is our algebraic number field.
+
+\bigbreak
+An \emph{algebraic integer} is a complex number that is a root of a monic polynomial $g(x) \in \ZZ[x]$.
+
+\bigbreak
+Rational numbers are algebraic numbers of degree 1, i.e. $a/b \in \QQ$ is the root of $bx - a$.
+
+\bigbreak
+Quadratic numbers are algebraic numbers of degree 2.  Given a degree 2 polynomial $ax^2 + bx + c$ the root is given by the quadratic formula
+\[
+	\frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
+\]
+If we let $D = b^2 -4ac$
+
+\section{Imaginary Quadratic Number Fields}
+
+
+
+\end{document}
+
