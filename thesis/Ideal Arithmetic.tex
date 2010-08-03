@@ -20,6 +20,9 @@
 \newcommand{\CC}{\mathbb{C}}
 \newcommand{\NN}{\mathbb{N}}
 \newcommand{\RR}{\mathbb{R}}
+\newcommand{\KK}{\mathbb{K}}
+\newcommand{\MM}{\mathcal{M}}
+\newcommand{\OO}{\mathcal{O}}
 \newcommand{\RRgtz}{\mathbb{R}_{>0}}
 \newcommand{\ZZ}{\mathbb{Z}}
 \newcommand{\ZZgtz}{\mathbb{Z}_{>0}}
@@ -37,27 +40,43 @@
 
 \begin{document}
 
+
 \setcounter{chapter}{1}
 \chapter{Ideal Arithmetic}
 
-An \emph{algebraic number} $\alpha$ is a complex number that is a root of some unique irreducible (over $\QQ$) monic polynomial $f(x) \in \QQ[x]$.  An algebraic number field is any subfield of the set of all algebraic numbers.  Given an algebraic number $\alpha$ we can create an algebraic number field as the extension field of $\QQ$ adjoined $\alpha$ (denoted $\QQ(\alpha)$). Let
+
+The material in this section is covered in depth in TODO.  Here we provide as a reminder some number theoretic concepts relevant to ideal arithmetic as it applies to this thesis.
+
+
+\bigbreak
+A complex number $\alpha$ is called an \emph{algebraic number} if it is a root of a polynomial $f(x) \in \QQ[x]$.  The polynomial $f(x) \in \QQ[x]$ can be expressed as a unique irreducible (over $\QQ$) monic polynomial.  If $\alpha$ is a root of a monic polynomial $f(x) \in \ZZ[x]$, then it is an \emph{algebraic integer}.  Given an algebraic number $\alpha$, we can create an algebraic number field as the extension field of $\QQ$ adjoined $\alpha$, denoted $\QQ(\alpha)$. Let $\KK$ be our algebraic number field; then
 \[
-	\mathbb{K} = \QQ(\alpha) = \left\{ \frac{f(\alpha)}{g(\alpha)} : f(x), g(x) \in \QQ[x]; g(\alpha) \ne 0 \right\}
+	\KK = \QQ(\alpha) = \left\{ \frac{f(\alpha)}{g(\alpha)} : f(x), g(x) \in \QQ[x]; g(\alpha) \ne 0 \right\}.
 \]
-Then $\mathbb{k}$ is our algebraic number field.
+
 
 \bigbreak
-An \emph{algebraic integer} is a complex number that is a root of a monic polynomial $g(x) \in \ZZ[x]$.
-
-\bigbreak
-Rational numbers are algebraic numbers of degree 1, i.e. $a/b \in \QQ$ is the root of $bx - a$.
-
-\bigbreak
-Quadratic numbers are algebraic numbers of degree 2.  Given a degree 2 polynomial $ax^2 + bx + c$ the root is given by the quadratic formula
+The rational numbers $\QQ$ are algebraic numbers of degree 1, i.e. $a/b \in \QQ$ is a root of $x - a/b$.  Quadratic numbers are algebraic numbers of degree 2.  For example, given a polynomial $f(x) = ax^2 + bx + c$ where $f(x) \in \QQ[x]$, the root is given by the quadratic formula
 \[
-	\frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
+	\alpha = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}.
 \]
-If we let $D = b^2 -4ac$
+If we let $\Delta = b^2 -4ac$ be the discriminant of $f(x)$, our quadratic number field is $\KK = \QQ(\alpha) = \QQ(\sqrt{\Delta})$.  If $\Delta = f^2 \Delta_0$ where $\Delta_0$ is squarefree, then $\KK = \QQ(\Delta_0)$.
+
+\bigbreak
+TODO: why?
+Let
+\[
+	r = \begin{cases}
+		1 \textrm{ when } \Delta_0 \not \equiv 1 \pmod 4 \\
+		2 \textrm{ when } \Delta_0 \equiv 1 \pmod 4
+	\end{cases}
+\]
+and $\omega_0 = (r-1+\sqrt{\Delta_0})/r$.  Then $\beta$ is an algebraic integer of $\KK = \QQ(\Delta_0)$ if and only if $\beta = x + y \omega_0$ for $x,y \in \ZZ$ $\cite{JacobsonCh4}[p.~77]$.
+
+\bigbreak
+Let $A$ be any additive abelian group, and $\MM$ is an additive abelian subgroup of $A$, then $\MM$ is a \emph{$(\ZZ)$-module} of $A$.
+
+
 
 \section{Imaginary Quadratic Number Fields}
 
