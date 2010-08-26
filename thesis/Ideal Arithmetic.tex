@@ -14,14 +14,13 @@
 \usepackage{amsthm}
 \usepackage{comment}
 
-\newtheorem*{thm}{Theorem}
-\newtheorem*{lem}{Lemma}
-\newtheorem*{cor}{Corollary}
-\theoremstyle{definition}
-\newtheorem*{defn}{Definition}
 
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{lemma}[thm]{Lemma}
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{defn}[thm]{Definition}
 
-\parindent 0ex
 
 \newcommand{\CC}{\mathbb{C}}
 \newcommand{\NN}{\mathbb{N}}
@@ -43,6 +42,8 @@
 \newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
 \newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
 
+%\setlength{\parindent}{0pt}
+%\setlength{\parskip}{2ex} 
 
 \begin{document}
 
@@ -50,32 +51,40 @@
 \setcounter{chapter}{1}
 \chapter{Ideal Arithmetic}
 
+In this chapter, we present concepts and algorithms relevant to the ideal class group of imaginary quadratic number fields relevant to the work of this thesis.  The material in this chapter is found in basic number theory texts, especially (TODO).  For a more definitive treatment of the material presented here, we direct the reader towards this material.  We provide additional citations when necessary.  
 
-The material in this section is covered in depth in TODO.  Here we provide as a reminder some number theoretic concepts relevant to ideal arithmetic as it applies to this thesis.
+%%%%%%%%%%%%%%%%%%%%%
+% ALGEBRAIC NUMBERS %
+%%%%%%%%%%%%%%%%%%%%%
+\section{Algebraic Numbers}
 
-
-\bigbreak
-A complex number $\alpha$ is called an \emph{algebraic number} if it is a root of a polynomial $f(x) \in \QQ[x]$.  Let $f'(x) = cf(x)$ for some $c \in \ZZ$ such that $f'(x) \in \ZZ[x]$.  Then $f'(x)$ has the same roots as $f(x)$.  If $f'(x) \in \ZZ[x]$ is a monic polynomial, then a root $\alpha$ is called an \emph{algebraic integer}.  Given an algebraic number $\alpha$, we create an algebraic number field as the extension field of $\QQ$ adjoined $\alpha$, denoted $\QQ(\alpha)$. Let $\KK$ be our algebraic number field:
+\begin{defn}
+A complex number $\alpha$ is called an \emph{algebraic number} if it is a root of a polynomial $f(x) \in \QQ[x]$.
+\end{defn}
+Let $f'(x) = cf(x)$ for some $c \in \ZZ$ such that $f'(x) \in \ZZ[x]$.  Then $f'(x)$ has the same roots as $f(x)$.  
+\begin{defn}
+If $f'(x) \in \ZZ[x]$ is a monic polynomial, then a root $\alpha$ is called an \emph{algebraic integer}. 
+\end{defn}
+Given an algebraic number $\alpha$, we create an algebraic number field as the extension field of $\QQ$ adjoined $\alpha$, denoted $\QQ(\alpha)$. Let $\KK$ be our algebraic number field:
 \[
 	\KK = \QQ(\alpha) = \left\{ \frac{f(\alpha)}{g(\alpha)} : f(x), g(x) \in \QQ[x]; g(\alpha) \ne 0 \right\}.
 \]
-
 
 \bigbreak
 The rational numbers $\QQ$ are algebraic numbers of degree 1, i.e. $a/b \in \QQ$ is a root of $bx - a$.  Quadratic numbers are algebraic numbers of degree 2.  For example, given a polynomial $f(x) = ax^2 + bx + c$ where $f(x) \in \ZZ[x]$, the root $\alpha$ is given by the quadratic formula
 \[
 	\alpha = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}.
 \]
-If we let $\Delta = b^2 -4ac$ such that $\Delta \in \ZZ$ be the discriminant of $f(x)$, our quadratic number field is 
+If we let $\Delta = b^2 -4ac$ such that $\Delta \in \ZZ$ is the discriminant of $f(x)$, our quadratic number field is 
 \[
 	\KK = \QQ(\alpha) = \QQ(\sqrt{\Delta}) = \{u + v\sqrt{\Delta} : u,v \in \QQ\}.
 \]
-Notice that if $\Delta = f^2 \Delta_0$ where $\Delta_0$ is squarefree, then $\KK = \QQ(\Delta_0)$.  
+Notice that if $\Delta = f^2 \Delta_0$ for some $f \in \ZZ$ where $\Delta_0$ is squarefree, then $\KK = \QQ(\Delta_0)$.
 
 
 \bigbreak
 \section{Quadratic Integers}
-An algebraic integer $\beta$ of $\KK = \QQ(\sqrt{\Delta_0})$ is $\beta = u+v \sqrt{\Delta_0}$ such that $\beta$ is the root of a monic quadratic polynomial $f(x) = x^2+bx+c \in \ZZ[x]$ for some $b,c \in \ZZ$.  Let us characterize the algebraic integers of $\KK = \QQ(\sqrt{\Delta_0})$.  A root $\beta$ is given by
+Let us characterize the algebraic integers of $\QQ(\sqrt{\Delta_0})$.  An algebraic integer $\beta$ of $\QQ(\sqrt{\Delta_0})$ is $\beta = u+v \sqrt{\Delta_0}$ such that $\beta$ is the root of a monic quadratic polynomial $f(x) = x^2+bx+c \in \ZZ[x]$ for some $b,c \in \ZZ$.  The root is given by
 \begin{eqnarray*}
 	\beta & = & \frac{-b \pm \sqrt{b^2-4c}}{2} \\
 	u + v \sqrt{\Delta_0} & = & -\frac{b}{2} \pm \frac{\sqrt{b^2-4c}}{2}
@@ -120,45 +129,122 @@ Let $v = \frac{j}{2}$ for some $j \in \ZZ$.
 \end{array}
 \end{equation*}
 
-
+\noindent
 This is only possible when $j \equiv 1,3 \pmod 4$ and $\Delta_0 \equiv 1 \pmod 4$.  Suppose $\Delta_0 \equiv 1 \pmod 4$, let $v = j/2$ and $u = i + j/2$ for some $i, j \in \ZZ$.  Then
 \begin{eqnarray*}
 	\beta & = & u + v \sqrt{\Delta_0} \\
 	& = & i + \frac{j}{2} + \frac{j \sqrt{\Delta_0}}{2} \\
 	& = & i + j \left( \frac{1 + \sqrt{\Delta_0}}{2} \right).
 \end{eqnarray*}
-The case of $\beta = u + v \sqrt{\Delta_0}$ when $u,v \in \ZZ$ is captured by the above when $j$ is even. When $\Delta_0 \not \equiv 1 \pmod 4$, there are no solutions for $b$ odd, so the quadratic integers are characterized exclusively by $\beta = u + v \sqrt{\Delta_0}$ for $u,v \in \ZZ$.
+The case of $\beta = u + v \sqrt{\Delta_0}$ when $u,v \in \ZZ$ is captured by the above when $j$ is even. When $\Delta_0 \not \equiv 1 \pmod 4$, there are no solutions for $b$ odd.
 
-\bigbreak
-As a result, we can completely characterize the quadratic integers with the following: Let
+\begin{defn}
+\emph{Quadratic integers} are the algebraic integers of $\QQ(\sqrt{\Delta_0})$ defined as follows: Let
 \[
-	\omega = \begin{cases}
-		\sqrt{\Delta} & \textrm{ when } \Delta \not \equiv 1 \pmod 4 \\
-		(1+\sqrt{\Delta})/2 & \textrm{ when } \Delta \equiv 1 \pmod 4
+	\omega_0 = \begin{cases}
+		\sqrt{\Delta_0} & \textrm{ when } \Delta_0 \not \equiv 1 \pmod 4 \\
+		\frac{1+\sqrt{\Delta_0}}{2} & \textrm{ when } \Delta_0 \equiv 1 \pmod 4.
 	\end{cases}
 \]
-then $\beta = i + j \omega$ where $i,j \in \ZZ$ is an algebraic integer of $\KK = \QQ(\Delta)$.
+Then $\beta = i + j \omega_0$ where $i,j \in \ZZ$ is a quadratic integer and an algebraic integer of $\QQ(\sqrt{\Delta_0})$.
+\end{defn}
 
 
+%%%%%%%%%%%%%%%%%
+% MAXIMAL ORDER %
+%%%%%%%%%%%%%%%%%
 \bigbreak
 \section{Maximal Order of Algebraic Integers}
-In order to define the maximal order of algebraic integers in a quadratic number field, we first begin by defining the \emph{$(\ZZ)$-module}.  Given a subset of a number field $X = \{ \xi_1, \xi_2, \xi_3, ..., \xi_n \} \subseteq \KK$, the \emph{$(\ZZ)$-module} $\MM$ is generated by $X$ as
+The set of all algebraic integers of a number field $\KK$ is a \emph{maximal order} of $\KK$.  To state a \emph{maximal order} of $\KK$, we begin by first defining a \emph{$\ZZ$-module}.  
+
+\begin{defn}
+Given a subset of a number field $X = \{ \xi_1, \xi_2, \xi_3, ..., \xi_n \} \subseteq \KK$, the \emph{$\ZZ$-module} $\MM$ is generated by $X$ as a linear combination of the elements of $X$:
 \[
-	M = \left \{ \sum_{i}^n x_i \xi_i : x_i \in \ZZ \right \}
+	\MM = \left \{ \sum_{i}^n x_i \xi_i : x_i \in \ZZ, \xi_i \in X \right \}.
 \]
-and is denoted
+We denote this
 \[
 	\MM = [ \xi_1, \xi_2, ..., \xi_n ].
 \]
-An \emph{order} of $\KK$ is a module $\MM$ of $\KK$ such that $1 \in \MM$ and 
+\end{defn}
 
-\cite{JacobsonCh4}[p.~80]
+\begin{defn}
+An \emph{order} $\OO$ of $\KK$ is a $\ZZ$-module $\MM$ of $\KK$ such that $\MM$ is a subring of $\KK$ that contains 1.  A \emph{quadratic order} is a $\ZZ$-module of $\QQ(\sqrt{\Delta_0})$ such that $\MM = [\xi_1, \xi_2]$, where $\xi_1 = a_1 + b_1 \sqrt{\Delta_0}$, $\xi_2 = a_1 + b_2 \sqrt{\Delta_0}$, and $a_1, b_1, a_2, b_2 \in \QQ$; with the additional property that $a_1b_2-b_1a_2 \ne 0$.
+\end{defn}
 
-The module $[1, \omega_0]$ is the module of algebraic integers in the quadratic number field $\QQ(\Delta_0)$.
+\bigbreak
+Given $\omega_0$ defined above; the module $[1, \omega_0]$ is the module of algebraic integers in the quadratic number field $\KK=\QQ(\sqrt{\Delta_0})$.  We denote this as $\OO_{\KK}$.  It is of maximal size as it is not contained by any other order of $\KK$, but also it is a subring of $\KK$ containing 1.  For any order $\OO_\Delta \subseteq \OO_\KK$, let $\Delta = f^2 \Delta_0$ for some $f, \Delta, \Delta_0 \in \ZZ$ such that $\Delta \equiv 0,1 \pmod 4$.  We call $f$ the \emph{conductor} of $\OO_\Delta$, and we express the order $\OO_\Delta$ as the $\ZZ$-module:
+\[
+	[1,f\omega_0] = \left[1, \frac{\Delta + \sqrt{\Delta}}{2} \right].
+\]
+When $\Delta$ is assumed to be known, we write $\OO$ for $\OO_\Delta$ and $\omega$ for $f\omega_0$.
+
+%%%%%%%%%%
+% IDEALS %
+%%%%%%%%%%
+\bigbreak
+\section{Ideals of $\OO_\Delta$}
+
+Here we define concepts of ideals of a quadratic order $\OO_\Delta$.
+
+\begin{defn}
+An integral \emph{ideal} $\mathfrak{a}$ of an order $\OO$, known as an $\OO$-ideal, is an additive subgroup of $\OO$ such that $\xi \mathfrak{a} \subseteq \mathfrak{a}$ for any $\xi \in \OO$.
+\end{defn}
+\noindent
+We denote an ideal $\mathfrak{a}$ as a two-dimensional $\OO$-module
+\[
+	\alpha \OO + \beta \OO = (\alpha, \beta)
+\]
+and represent it as a two-dimensional $\ZZ$-module
+\begin{equation}
+\label{eq:idealZModule}
+	\left[sa, s\left( \frac{b+ \sqrt{\Delta}}{2} \right) \right] = s \left(a \ZZ + \frac{b + \sqrt{\Delta}}{2} \ZZ \right)
+\end{equation}
+where $s$ is the largest term dividing both generators of the $\ZZ$-module, such that $s$ and $a$ are unique, $b$ is unique $\bmod~2a$, and $4a | (b^2-\Delta)$.
+
+\begin{defn}
+An ideal $\mathfrak{a} = [sa, s(b+\sqrt{\Delta})/2]$ with $s=1$ is said to be \emph{primitive}.
+\end{defn}
+
+\begin{defn}
+An ideal $\mathfrak{a}$ is \emph{principal} if it is generated by a single element $\alpha \in \OO$. We write $\mathfrak{a} = \alpha \OO = (\alpha)$.
+\end{defn}
+
+Two ideals $\mathfrak{a}$ and $\mathfrak{b}$ of $\OO_$ are \emph{equivalent} if there exist principal ideals $(\alpha)$ and $(\beta)$ with  $\alpha, \beta \in \OO$ and $\alpha\beta \neq 0$ such that $(\alpha)\mathfrak{a} = (\beta)\mathfrak{b}$.  Given an $\OO$-ideal $\mathfrak{a}$, the set of all $\OO$-ideals which are equivalent to $\mathfrak{a}$ is donated $[\mathfrak{a}]$ and is called an \emph{ideal class} of $\OO$.  This is the basis of the ideal class group.
 
 
-\section{Imaginary Quadratic Number Fields}
+%%%%%%%%%%%%%%%%%%%%%
+% IDEAL CLASS GROUP %
+%%%%%%%%%%%%%%%%%%%%%
+\bigbreak
+\section{Ideal Class Group}
 
+Given the above notions of ideals in $\OO_\Delta$, we define the \emph{ideal class group} $Cl_\Delta$ as equivalence classes of invertible $\OO$-ideals. The number of elements in the class group is denoted $h_\Delta = |Cl_\Delta|$ and is common called the \emph{class number}.
+
+\bigbreak
+The group operator is defined as multiplication of two ideal classes.  Given representatives $\mathfrak{a}_1$ and $\mathfrak{a}_2$ of ideal classes as $\ZZ$-modules shown in \eqref{eq:idealZModule}, multiplication is as follows: Let
+\begin{eqnarray*}
+	\mathfrak{a}_1 & = & a_1 \ZZ + \frac{b_1 + \sqrt{\Delta}}{2} \ZZ \\
+	\mathfrak{a}_2 & = & a_2 \ZZ + \frac{b_2 + \sqrt{\Delta}}{2} \ZZ.
+\end{eqnarray*}
+We want to compute
+\[
+	\mathfrak{a} = \mathfrak{a}_1 \cdot \mathfrak{a}_2 = sa \ZZ + s \left(\frac{b + \sqrt{\Delta}}{2}\right) \ZZ
+\]
+for some $s, a, b \in \ZZ$.  By definition we have
+\begin{eqnarray*}
+	\mathfrak{a}_1 \cdot \mathfrak{a}_2 & = & a_1a_2 \ZZ + a_1 \frac{b_2 + \sqrt{\Delta}}{2} \ZZ + a_2 \frac{b_1 + \sqrt{\Delta}}{2} \ZZ + \frac{b_1 + \sqrt{\Delta}}{2} \cdot \frac{b_2 + \sqrt{\Delta}}{2} \ZZ \\
+	& = & a_1a_2 \ZZ + \frac{a_1b_2 + a_1\sqrt{\Delta}}{2} \ZZ + \frac{a_2b_1 + a_2\sqrt{\Delta}}{2} \ZZ + \frac{b_1b_2 + b_1\sqrt{\Delta} + b_2\sqrt{\Delta} + \Delta}{4} \ZZ
+\end{eqnarray*}
+
+\bigbreak
+\section{To use still}
+
+
+\begin{defn}
+A \emph{prime ideal} of $\OO$ is an invertible $\OO$-ideal $\mathfrak{p} \neq \OO$ with the property that if $\mathfrak{p} | \mathfrak{a}\mathfrak{b}$, for $\OO$-ideals $\mathfrak{a}$ and $\mathfrak{b}$, then $\mathfrak{p} | \mathfrak{a}$ or $\mathfrak{p} | \mathfrak{b}$ \cite{JacobsonCh4}[p.~93].
+\end{defn}
+In the ideal class group, the reduced form of a prime ideal $\mathfrak{p}$ is given by $[p, \beta]$ where $p \in \ZZ$ is prime.
 
 
 \end{document}
