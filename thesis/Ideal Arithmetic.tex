@@ -54,9 +54,9 @@
 In this chapter, we present concepts and algorithms relevant to the ideal class group of imaginary quadratic number fields relevant to the work of this thesis.  The material in this chapter is found in basic number theory texts, especially (TODO).  For a more definitive treatment of the material presented here, we direct the reader towards this material.  We provide additional citations when necessary.  
 
 %%%%%%%%%%%%%%%%%%%%%
-% ALGEBRAIC NUMBERS %
+% QUADRATIC NUMBERS %
 %%%%%%%%%%%%%%%%%%%%%
-\section{Algebraic Numbers}
+\section{Quadratic Numbers}
 
 \begin{defn}
 A complex number $\alpha$ is called an \emph{algebraic number} if it is a root of a polynomial $f(x) \in \QQ[x]$.
@@ -79,7 +79,15 @@ If we let $\Delta = b^2 -4ac$ such that $\Delta \in \ZZ$ is the discriminant of 
 \[
 	\KK = \QQ(\alpha) = \QQ(\sqrt{\Delta}) = \{u + v\sqrt{\Delta} : u,v \in \QQ\}.
 \]
-Notice that if $\Delta = f^2 \Delta_0$ for some $f \in \ZZ$ where $\Delta_0$ is squarefree, then $\KK = \QQ(\Delta_0)$.
+Notice that
+\begin{eqnarray*}
+\begin{array}{l l l l}
+	\Delta & \equiv & b^2-4ac & \pmod 4 \\
+	& \equiv & b^2 & \pmod 4 \\
+	& \equiv & 0,1 & \pmod 4.
+\end{array}
+\end{eqnarray*}
+Also, if $\Delta = f^2 \Delta_0$ for some $f \in \ZZ$ where $\Delta_0$ is squarefree, then $\KK = \QQ(\Delta_0)$.
 
 
 \bigbreak
@@ -237,6 +245,10 @@ for some $s, a, b \in \ZZ$.  By definition we have
 	& = & a_1a_2 \ZZ + \frac{a_1b_2 + a_1\sqrt{\Delta}}{2} \ZZ + \frac{a_2b_1 + a_2\sqrt{\Delta}}{2} \ZZ + \frac{b_1b_2 + b_1\sqrt{\Delta} + b_2\sqrt{\Delta} + \Delta}{4} \ZZ
 \end{eqnarray*}
 
+
+%%%%%%%%%%%%%%%%
+% TO USE STILL %
+%%%%%%%%%%%%%%%%
 \bigbreak
 \section{To use still}
 
