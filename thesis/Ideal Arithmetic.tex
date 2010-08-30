@@ -144,18 +144,19 @@ This is only possible when $j \equiv 1,3 \pmod 4$ and $\Delta_0 \equiv 1 \pmod 4
 	& = & i + \frac{j}{2} + \frac{j \sqrt{\Delta_0}}{2} \\
 	& = & i + j \left( \frac{1 + \sqrt{\Delta_0}}{2} \right).
 \end{eqnarray*}
-The case of $\beta = u + v \sqrt{\Delta_0}$ when $u,v \in \ZZ$ is captured by the above when $j$ is even. When $\Delta_0 \not \equiv 1 \pmod 4$, there are no solutions for $b$ odd.
+The case of $\beta = u + v \sqrt{\Delta_0}$ when $u,v \in \ZZ$ is captured by the above when $j$ is even. When $\Delta_0 \not \equiv 1 \pmod 4$, there are no solutions for $b$ odd.  We summarize this with the following definition.
 
 \begin{defn}
-\emph{Quadratic integers} are the algebraic integers of $\QQ(\sqrt{\Delta_0})$ defined as follows: Let
+\label{defn:quadraticInteger}
+A \emph{quadratic integer} $\beta$ is an algebraic integer of $\QQ(\sqrt{\Delta_0})$ such that $\beta = i + j \omega_0$ for some $i,j \in \ZZ$ and
 \[
 	\omega_0 = \begin{cases}
 		\sqrt{\Delta_0} & \textrm{ when } \Delta_0 \not \equiv 1 \pmod 4 \\
 		\frac{1+\sqrt{\Delta_0}}{2} & \textrm{ when } \Delta_0 \equiv 1 \pmod 4.
 	\end{cases}
 \]
-Then $\beta = i + j \omega_0$ where $i,j \in \ZZ$ is a quadratic integer and an algebraic integer of $\QQ(\sqrt{\Delta_0})$.
 \end{defn}
+\bigbreak
 
 
 %%%%%%%%%%%%%%%%%
@@ -177,11 +178,11 @@ We denote this
 \end{defn}
 
 \begin{defn}
-An \emph{order} $\OO$ of $\KK$ is a $\ZZ$-module $\MM$ of $\KK$ such that $\MM$ is a subring of $\KK$ that contains 1.  A \emph{quadratic order} is a $\ZZ$-module of $\QQ(\sqrt{\Delta_0})$ such that $\MM = [\xi_1, \xi_2]$, where $\xi_1 = a_1 + b_1 \sqrt{\Delta_0}$, $\xi_2 = a_1 + b_2 \sqrt{\Delta_0}$, and $a_1, b_1, a_2, b_2 \in \QQ$; with the additional property that $a_1b_2-b_1a_2 \ne 0$.
+An \emph{order} $\OO$ of $\KK$ is a $\ZZ$-module of $\KK$ such that $\OO$ is a subring of $\KK$ containing 1.  A \emph{quadratic order} is a $\ZZ$-module of $\QQ(\sqrt{\Delta_0})$ such that $\OO_\Delta = [1, f\omega_0]$ where $\Delta = f^2\Delta_0$ for some $f \in \ZZ$.  We call $f$ the \emph{conductor} of $\OO_\Delta$.
 \end{defn}
 
 \bigbreak
-Given $\omega_0$ defined above; the module $[1, \omega_0]$ is the module of algebraic integers in the quadratic number field $\KK=\QQ(\sqrt{\Delta_0})$.  We denote this as $\OO_{\KK}$.  It is of maximal size as it is not contained by any other order of $\KK$, but also it is a subring of $\KK$ containing 1.  For any order $\OO_\Delta \subseteq \OO_\KK$, let $\Delta = f^2 \Delta_0$ for some $f, \Delta, \Delta_0 \in \ZZ$ such that $\Delta \equiv 0,1 \pmod 4$.  We call $f$ the \emph{conductor} of $\OO_\Delta$, and we express the order $\OO_\Delta$ as the $\ZZ$-module:
+Given $\omega_0$ defined above, the module $[1, \omega_0]$ is the module of algebraic integers in the quadratic number field $\KK=\QQ(\sqrt{\Delta_0})$.  We denote this as $\OO_{\KK}$.  The order $\OO_\KK$ is of maximal size since any order $\OO_\Delta = [1,f\omega_0]$ is a subring of $\OO_\KK$. In general, by definition \ref{defn:quadraticInteger}, we can express the order $\OO_\Delta$ as the $\ZZ$-module:
 \[
 	[1,f\omega_0] = \left[1, \frac{\Delta + \sqrt{\Delta}}{2} \right].
 \]
@@ -196,9 +197,9 @@ When $\Delta$ is assumed to be known, we write $\OO$ for $\OO_\Delta$ and $\omeg
 Here we define concepts of ideals of a quadratic order $\OO_\Delta$.
 
 \begin{defn}
-An integral \emph{ideal} $\mathfrak{a}$ of an order $\OO$, known as an $\OO$-ideal, is an additive subgroup of $\OO$ such that $\xi \mathfrak{a} \subseteq \mathfrak{a}$ for any $\xi \in \OO$.
+An integral \emph{ideal} $\mathfrak{a}$ of an order $\OO$, known as an \emph{$\OO$-ideal}, is an additive subgroup of $\OO$ such that $\xi \mathfrak{a} \subseteq \mathfrak{a}$ for any $\xi \in \OO$.
 \end{defn}
-\noindent
+
 We denote an ideal $\mathfrak{a}$ as a two-dimensional $\OO$-module
 \[
 	\alpha \OO + \beta \OO = (\alpha, \beta)
@@ -208,7 +209,10 @@ and represent it as a two-dimensional $\ZZ$-module
 \label{eq:idealZModule}
 	\left[sa, s\left( \frac{b+ \sqrt{\Delta}}{2} \right) \right] = s \left(a \ZZ + \frac{b + \sqrt{\Delta}}{2} \ZZ \right)
 \end{equation}
-where $s$ is the largest term dividing both generators of the $\ZZ$-module, such that $s$ and $a$ are unique, $b$ is unique $\bmod~2a$, and $4a | (b^2-\Delta)$.
+where $s$ is the largest term dividing both generators of the $\ZZ$-module, such that $s$, $a$, and $b$ are unique. Note that $b$ is unique $\bmod~2a$ since
+\[
+	\left[sa, s\left(\frac{2a+b+\sqrt{\Delta}}{2}\right)\right] = \left[s(a+1), s\left(\frac{b+\sqrt{\Delta}}{2}\right)\right].
+\]
 
 \begin{defn}
 An ideal $\mathfrak{a} = [sa, s(b+\sqrt{\Delta})/2]$ with $s=1$ is said to be \emph{primitive}.
