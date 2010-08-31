@@ -264,7 +264,7 @@ However, we want to reformulate this given the representation in equation \eqref
 for some $s, a, b \in \ZZ$.  Since the norm is distributive we have
 \begin{eqnarray*}
 	&& s^2a = N(\mathfrak{a}\mathfrak{b}) = N(\mathfrak{a})N(\mathfrak{b}) = a_1 a_2 \\
-	& \Rightarrow & a = \frac{a_1a_2}{s}.
+	& \Rightarrow & a = \frac{a_1a_2}{s^2}.
 \end{eqnarray*}
 Now, by the second term of equation \eqref{eq:composeExpanded} we know that $(a_1b_2 + a_1\sqrt{\Delta})/2 \in \mathfrak{a}\mathfrak{b}$.  It follows that there is some $x,y \in \ZZ$ such that
 \[
@@ -293,7 +293,7 @@ Again, by equating irrational parts we have:
 \end{eqnarray*}
 Since $s~|~\gcd(a_1, a_2, (b_1+b_2)/2)$, we have that $s = \gcd(a_1, a_2, (b_1+b_2)/2)$.  
 
-It remains to compute $b \pmod{2a}$.  Recall that $a = (a_1a_2)/s$.  This time, by equating the rational parts of \eqref{eq:composeSecond} we have:
+It remains to compute $b \pmod{2a}$.  Recall that $a = a_1a_2/s^2$.  This time, by equating the rational parts of \eqref{eq:composeSecond} we have:
 \begin{eqnarray*}
 	\frac{sb}{2} & = & ma_1a_2 + n\frac{a_1b_2}{2} + p\frac{a_2b_1}{2} + q\frac{b_1b_2 + \Delta}{4} \\
 	\Rightarrow b & = & \frac{2ma_1a_2}{s} + n\frac{a_1b_2}{s} + p\frac{a_2b_1}{s} + q\frac{b_1b_2 + \Delta}{2s} \\
