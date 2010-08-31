@@ -279,41 +279,59 @@ Equating irrational parts we have:
 \noindent
 Similarly, by the third and fourth terms of equation \eqref{eq:composeExpanded} we have $(a_2b_1+a_2\sqrt{\Delta})/2 \in \mathfrak{a}\mathfrak{b}$ which implies that $s~|~a_2$ and $(b_1b_2 + (b_1+b_2)\sqrt{\Delta} + \Delta)/4 \in \mathfrak{a}\mathfrak{b}$ which implies that \break $s~|~(b_1+b_2)/2$. 
 
-By the second generator $(sb+s\sqrt\Delta)/2$ of $\mathfrak{a}\mathfrak{b}$ there exists $m, n, p, q \in \ZZ$ such that
+By the second generator $s(b+\sqrt\Delta)/2$ of $\mathfrak{a}\mathfrak{b}$ and the entire right hand side of equation \eqref{eq:composeExpanded} there exists $m, n, p, q \in \ZZ$ such that
 \begin{equation}
+\label{eq:composeSecond}
 \begin{split}
 	\frac{sb+s\sqrt\Delta}{2} & = ma_1a_2 + n\frac{a_1b_2+a_1\sqrt\Delta}{2} + p\frac{a_2b_1 + a_2\sqrt{\Delta}}{2} + q\frac{b_1b_2 + (b_1+b_2)\sqrt{\Delta} + \Delta}{4} \\
-	& = ma_1a_2 + n\frac{a_1b_2}{2} + p\frac{a_2b_1}{2} + q\frac{b_1b_2 + \Delta}{4} + \left(n\frac{a_1}{2} + p\frac{a_2}{2} + q\frac{b_1+b_2}{4}\right)\sqrt\Delta. \label{eq:composeSecond}
+	& = ma_1a_2 + n\frac{a_1b_2}{2} + p\frac{a_2b_1}{2} + q\frac{b_1b_2 + \Delta}{4} + \left(n\frac{a_1}{2} + p\frac{a_2}{2} + q\frac{b_1+b_2}{4}\right)\sqrt\Delta. 
 \end{split}
 \end{equation}
+
+\noindent
 Again, by equating irrational parts we have:
-\begin{eqnarray*}
-	&& \frac{s\sqrt\Delta}{2} = \left(n\frac{a_1}{2} + p\frac{a_2}{2} + q\frac{b_1+b_2}{4}\right)\sqrt\Delta \\
-	& \Rightarrow & s = na_1 + pa_2 + q\frac{b_1+b_2}{2}.
-\end{eqnarray*}
+\begin{eqnarray}
+	\frac{s\sqrt\Delta}{2} & = & \left(n\frac{a_1}{2} + p\frac{a_2}{2} + q\frac{b_1+b_2}{4}\right)\sqrt\Delta \nonumber \\
+	\Rightarrow s & = & na_1 + pa_2 + q\frac{b_1+b_2}{2}. \label{eq:sAsGCD}
+\end{eqnarray}
 Since $s~|~\gcd(a_1, a_2, (b_1+b_2)/2)$, we have that $s = \gcd(a_1, a_2, (b_1+b_2)/2)$.  
 
 It remains to compute $b \pmod{2a}$.  Recall that $a = a_1a_2/s^2$.  This time, by equating the rational parts of \eqref{eq:composeSecond} we have:
+\begin{eqnarray}
+	\frac{sb}{2} & = & ma_1a_2 + n\frac{a_1b_2}{2} + p\frac{a_2b_1}{2} + q\frac{b_1b_2 + \Delta}{4} \nonumber \\
+	\Rightarrow b & = & \frac{2ma_1a_2}{s} + n\frac{a_1b_2}{s} + p\frac{a_2b_1}{s} + q\frac{b_1b_2 + \Delta}{2s} \nonumber \\
+	\Rightarrow b & \equiv & n\frac{a_1b_2}{s} + p\frac{a_2b_1}{s} + q\frac{b_1b_2 + \Delta}{2s} \pmod{2a} \label{eq:bMod2a}
+\end{eqnarray}
+
+\noindent
+By equation \eqref{eq:sAsGCD}, we have
 \begin{eqnarray*}
-	\frac{sb}{2} & = & ma_1a_2 + n\frac{a_1b_2}{2} + p\frac{a_2b_1}{2} + q\frac{b_1b_2 + \Delta}{4} \\
-	\Rightarrow b & = & \frac{2ma_1a_2}{s} + n\frac{a_1b_2}{s} + p\frac{a_2b_1}{s} + q\frac{b_1b_2 + \Delta}{2s} \\
-	\Rightarrow b & \equiv & n\frac{a_1b_2}{s} + p\frac{a_2b_1}{s} + q\frac{b_1b_2 + \Delta}{2s} \pmod{2a}
+	s & = & na_1 + pa_2 + q\frac{b_1+b_2}{2} \\
+	\Rightarrow 1 & = & n\frac{a_1}{s} + p\frac{a_2}{s} + q\frac{b_1+b_2}{2s}.
 \end{eqnarray*}
+
+\noindent
+Substituting into equation \eqref{eq:bMod2a} we get
+\[
+	b \equiv b_2(1-p\frac{a_2}{s} - q\frac{b_1+b_2}{2s}) + + p\frac{a_2b_1}{s} + q\frac{b_1b_2 + \Delta}{2s} \pmod{2a}
+\]
+
 
 
 %%%%%%%%%%%%%%%%
 % TO USE STILL %
 %%%%%%%%%%%%%%%%
+\begin{comment}
 \bigbreak
 \section{To use still}
 
-The number of elements in the class group is denoted $h_\Delta = |Cl_\Delta|$ and is known as the \emph{class number}.
 
 
 \begin{defn}
 A \emph{prime ideal} of $\OO$ is an invertible $\OO$-ideal $\mathfrak{p} \neq \OO$ with the property that if $\mathfrak{p} | \mathfrak{a}\mathfrak{b}$, for $\OO$-ideals $\mathfrak{a}$ and $\mathfrak{b}$, then $\mathfrak{p} | \mathfrak{a}$ or $\mathfrak{p} | \mathfrak{b}$ \cite{JacobsonCh4}[p.~93].
 \end{defn}
 In the ideal class group, the reduced form of a prime ideal $\mathfrak{p}$ is given by $[p, \beta]$ where $p \in \ZZ$ is prime.
+\end{comment}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
