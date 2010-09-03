@@ -1,5 +1,6 @@
 \documentclass[11pt, letterpaper]{article}
 
+\usepackage{algorithm}
 \usepackage{algorithmic}
 \usepackage{amsfonts}
 \usepackage{amssymb}
@@ -48,7 +49,7 @@ We did not investigate window techniques.
 \subsection{NAF-R2L}
 
 \bigbreak
-\begin{algorithm}
+\begin{algorithm}[h!]
 \caption{Computes $A^N$}
 \label{NAF-R2l}
 \begin{algorithmic}[1]
@@ -74,7 +75,7 @@ We did not investigate window techniques.
 This method can be improved by maintaining a carry flag $c$ and composing the inverses separately.  Let $Q$ be the composition of all inverses; initially $Q=1_G$.  Let $c$ be the carry flag; initially $c=1$.  We compute $m = (N+c) \bmod 4$.  When $m = 01$ in binary, we compute $R \gets R \cdot T$, and virtually subtract 1 from $N$ by clearing the carry.  When $m = 11$ in binary, we compute $Q \gets Q \cdot T$, and virtually add 1 to $N$ by setting the carry flag to 1. The result is $R \cdot Q^{-1}$.  See $\ref{Joye2000}$ for details.  The basic algorithm is given below.
 
 \bigbreak
-\begin{algorithm}
+\begin{algorithm}[h!]
 \caption{Computes $A^N$ without modifying $N$ and by performing only one inverse.}
 \label{NAF-R2l}
 \begin{algorithmic}[1]
@@ -105,7 +106,7 @@ This method can be improved by maintaining a carry flag $c$ and composing the in
 It is an improvement to leave $N$ unmodified since if $N$ is very large, as in our case, the overhead of even simple arithmetic operations, such as addition by 1, is noticeable.  Line 7 in the above can be computed by sliding a window of 2 bits across $N$.  This is significantly faster than performing actual division with floor.
 
 \subsection{DBNS R2L chains $\pmod 3$ and $\pmod {2^23^2 = 36}$.}
-\subection{DBNS L2R chains}
+\subsection{DBNS L2R chains}
 \subsection{DBNS Closest approximation}
 Greedy algorithm that finds
 \[
@@ -115,7 +116,7 @@ Greedy algorithm that finds
 \subsection{$\pm 1$ and reduce}
 Greedy 
 \[
-	S_{i+1} = \left\{ \min \left\{ \left{\left| \frac{N \pm 1}{2^c3^d} \right| \right\} : N \in S_i \right\}
+	S_{i+1} = \min \left\{ \left| \frac{N \pm 1}{2^c3^d} \right| : N \in S_i \right\}
 \]
 at each step keeping only the $x=16$ smallest elements of $S$.
 
@@ -149,8 +150,6 @@ For exponents 0 through 65535, we computed optimal chains.  These work best for 
 \subsection{Results}
 All other methods work better for larger primorial.
 
-
-\end{itemize}
 
 
 \end{document}
