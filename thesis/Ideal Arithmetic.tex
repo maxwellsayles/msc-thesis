@@ -205,7 +205,24 @@ We denote an ideal $\mathfrak{a}$ as a two-dimensional $\OO$-module
 \[
 	\alpha \OO + \beta \OO = (\alpha, \beta)
 \]
-for $\alpha, \beta \in \OO$.  Computationally, this is represented as a two-dimensional $\ZZ$-module
+for $\alpha, \beta \in \OO$.  This is a finitely generated submodule $\MM=[a,b+c\omega]$ of $\OO$ for some $a,b,c \in \ZZ$.  In the case that $\MM = [\xi_1]$ where $\xi_1 = a_1+b_1\omega$, this is clearly true.  Suppose $\MM = [\xi_1, \xi_2]$ for $\xi_1 = a_1 + b_1\omega$ and $\xi_2 = a_2+b_2\omega$.  Let $c = \gcd(b_1, b_2)$.  As such, there exists $x,y \in \ZZ$ such that 
+\[
+	c = xb_1 + yb_2.
+\]
+Rewritting, we get
+\[
+	\MM = [(a_1b_2-b_1a_2)/c, xa_1+ya_2+c\omega].
+\]
+Let
+\begin{align*}
+	a &= (a_1b_2-b_1a_2)/c &
+	\mbox{and} &&
+	b &= xa_1+ya_2
+\end{align*}
+and we have the desired form $\MM = [a, b+c\omega]$.
+
+
+Computationally, this is represented as a two-dimensional $\ZZ$-module
 \begin{equation}
 \label{eq:idealZModule}
 	(\alpha, \beta) = \left[sa, s\left( \frac{b+ \sqrt{\Delta}}{2} \right) \right] = s \left(a \ZZ + \frac{b + \sqrt{\Delta}}{2} \ZZ \right)
