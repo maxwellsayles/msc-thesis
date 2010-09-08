@@ -64,16 +64,18 @@ In this chapter, we present concepts and algorithms relevant to the ideal class 
 \begin{defn}
 A complex number $\alpha$ is an \emph{algebraic number} if it is a root of a polynomial $f(x) \in \QQ[x]$.
 \end{defn}
-Let $f'(x) = cf(x)$ for some $c \in \ZZ$ such that $f'(x) \in \ZZ[x]$.  Then $f'(x)$ has the same roots as $f(x)$.  This is true when $c$ is an integer multiple of the lowest common multiple of the denominator of each coefficient in $f(x)$.
+\noindent
+Let $c$ be an integer multiple of the lowest common multiple of the denominators of each coefficient in $f(x)$.
+Then the polynomial $g(x) = cf(x)$ is in $\ZZ[x]$ and $g(x)$ has the same roots as $f(x)$.
 \begin{defn}
-If $f'(x) \in \ZZ[x]$ is a monic polynomial, then a root $\alpha$ is called an \emph{algebraic integer}. 
+If $g(x) \in \ZZ[x]$ is monic, then a root $\alpha$ is called an \emph{algebraic integer}. 
 \end{defn}
 Given an algebraic number $\alpha$, we create an algebraic number field as the extension field of $\QQ$ adjoined $\alpha$, denoted $\QQ(\alpha)$. Let $\KK$ be our algebraic number field:
 \[
 	\KK = \QQ(\alpha) = \left\{ \frac{f(\alpha)}{g(\alpha)} : f(x), g(x) \in \QQ[x]; g(\alpha) \ne 0 \right\}.
 \]
 
-\bigbreak
+\noindent
 The rational numbers $\QQ$ are algebraic numbers of degree 1, i.e. $a/b \in \QQ$ is a root of $bx - a$.  Quadratic numbers are algebraic numbers of degree 2.  For example, given a polynomial $f(x) = ax^2 + bx + c$ where $f(x) \in \ZZ[x]$, the root $\alpha$ is given by the quadratic formula
 \[
 	\alpha = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}.
@@ -93,24 +95,40 @@ Notice that
 Also, if $\Delta = f^2 \Delta_0$ for some $f \in \ZZ$ where $\Delta_0$ is squarefree, then $\KK = \QQ(\Delta_0)$.
 
 
+%%%%%%%%%%%%%%%%%%%%%%
+% QUADRATIC INTEGERS %
+%%%%%%%%%%%%%%%%%%%%%%
 \bigbreak
 \section{Quadratic Integers}
-Let us characterize the algebraic integers of $\QQ(\sqrt{\Delta_0})$.  An algebraic integer $\beta$ of $\QQ(\sqrt{\Delta_0})$ is $\beta = u+v \sqrt{\Delta_0}$ such that $\beta$ is the root of a monic quadratic polynomial $f(x) = x^2+bx+c \in \ZZ[x]$ for some $b,c \in \ZZ$.  The root is given by
+
+\begin{defn}
+\label{defn:quadraticInteger}
+A \emph{quadratic integer} $\beta$ is an algebraic integer of $\QQ(\sqrt{\Delta_0})$ such that $\beta = i + j \omega_0$ for some $i,j \in \ZZ$ and
+\[
+	\omega_0 = \begin{cases}
+		\sqrt{\Delta_0} & \textrm{ when } \Delta_0 \not \equiv 1 \pmod 4 \\
+		\frac{1+\sqrt{\Delta_0}}{2} & \textrm{ when } \Delta_0 \equiv 1 \pmod 4.
+	\end{cases}
+\]
+\end{defn}
+
+\noindent
+To see this, recall that an algebraic number $\beta$ of $\QQ(\sqrt\Delta_0)$ is $\beta = u+v\sqrt\Delta_0$ for some $u,v \in \QQ$.  For $\beta$ to be an  algebraic integer it must be the root of a monic quadratic polynomial $f(x) = x^2+bx+c \in \ZZ[x]$ for some $b,c \in \ZZ$.  The root is given by
 \begin{eqnarray*}
 	\beta & = & \frac{-b \pm \sqrt{b^2-4c}}{2} \\
 	u + v \sqrt{\Delta_0} & = & -\frac{b}{2} \pm \frac{\sqrt{b^2-4c}}{2}
 \end{eqnarray*}
 for $u,v \in \QQ$ and $b,c,\Delta_0 \in \ZZ$.
 Equating rational and irrational parts we have
-\[
+\begin{equation*}
 	u = -\frac{b}{2}
-\]
+\end{equation*}
 and
-\begin{eqnarray*}
-	v \sqrt{\Delta_0} & = & \frac{\sqrt{b^2 -4c}}{2} \\
-	\sqrt{v^2 \Delta_0} & = & \sqrt{\frac{b^2}{4} - c} \\
-	v^2 \Delta_0 & = & \frac{b^2}{4} - c.
-\end{eqnarray*}
+\begin{align*}
+	v \sqrt{\Delta_0} &= \frac{\sqrt{b^2 -4c}}{2} \\
+	\sqrt{v^2 \Delta_0} &= \sqrt{\frac{b^2}{4} - c} \\
+	v^2 \Delta_0 &= \frac{b^2}{4} - c.
+\end{align*}
 
 
 There are two cases: when $b$ is even, and when $b$ is odd.  First, suppose $b$ is even.  Then $b=2b'$ for some $b' \in \ZZ$.  This implies that $u = -b'$ and $u \in \ZZ$.  Since $b', c, \Delta_0 \in \ZZ$ we have
@@ -147,17 +165,6 @@ This is only possible when $j \equiv 1,3 \pmod 4$ and $\Delta_0 \equiv 1 \pmod 4
 \end{eqnarray*}
 The case of $\beta = u + v \sqrt{\Delta_0}$ when $u,v \in \ZZ$ is captured above when $j$ is even. When $\Delta_0 \not \equiv 1 \pmod 4$, there are no solutions for $b$ odd.  We summarize this with the following definition.
 
-\begin{defn}
-\label{defn:quadraticInteger}
-A \emph{quadratic integer} $\beta$ is an algebraic integer of $\QQ(\sqrt{\Delta_0})$ such that $\beta = i + j \omega_0$ for some $i,j \in \ZZ$ and
-\[
-	\omega_0 = \begin{cases}
-		\sqrt{\Delta_0} & \textrm{ when } \Delta_0 \not \equiv 1 \pmod 4 \\
-		\frac{1+\sqrt{\Delta_0}}{2} & \textrm{ when } \Delta_0 \equiv 1 \pmod 4.
-	\end{cases}
-\]
-\end{defn}
-\bigbreak
 
 
 %%%%%%%%%%%%%%%%%
