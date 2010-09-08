@@ -270,7 +270,7 @@ Two ideals $\mathfrak{a}$ and $\mathfrak{b}$ of $\OO$ are \emph{equivalent} if t
 \bigbreak
 \section{Ideal Class Group}
 
-Using the above notions of ideals in $\OO_\Delta$, we define the \emph{ideal class group} $Cl_\Delta$ as the set of all equivalence classes of invertible $\OO$-ideals. The group operator is multiplication (referred to as composition) with reduction on ideal classes.  In section \ref{section:computerRepresentation} we give a concrete representation of the ideal class group of imaginary quadratic fields and the operations on elements of this group.  Here we state what it means for an ideal to be reduced and how to compose two reduced elements together.
+Using the above notions of ideals in $\OO_\Delta$, we define the \emph{ideal class group} $Cl_\Delta$ as the set of all equivalence classes of invertible $\OO$-ideals, with the group operation defined as the product (composition) of two class representatives.  Representatives are typically given in reduced form.  In section \ref{section:computerRepresentation} we give a concrete representation of the ideal class group of imaginary quadratic fields and the operations on elements of this group.  Here we state what it is for an ideal to be reduced and how to compose two reduced elements together.
 
 %%%%%%%%%%%%%
 % REDUCTION %
@@ -278,7 +278,7 @@ Using the above notions of ideals in $\OO_\Delta$, we define the \emph{ideal cla
 \subsection{Reduced Representatives}
 \label{subsec:reduction}
 \begin{defn}
-Ideals classes are represented in reduced form. Let $\mathfrak{a}$ be an $\OO$-ideal. Then $\mathfrak{a}$ is said to be \emph{reduced} if $\mathfrak{a}$ is primitive, and there does not exist a non-zero element $\beta \in \mathfrak{a}$ such that $|\beta| < N(\mathfrak{a})$ and $|\overline{\beta}| < N(\mathfrak{a})$.  In otherwords, $N(\mathfrak{a})$ is a minimum in $\mathfrak{a}$ \cite{Jac09}[p.~98].
+Ideals classes are represented in reduced form. Let $\mathfrak{a}$ be an $\OO$-ideal. Then $\mathfrak{a}$ is said to be \emph{reduced} if $\mathfrak{a}$ is primitive, and there does not exist a non-zero element $\beta \in \mathfrak{a}$ such that $|\beta| < N(\mathfrak{a})$ and $|\overline{\beta}| < N(\mathfrak{a})$.  In otherwords, $N(\mathfrak{a})$ is a minimum in $\mathfrak{a}$ \cite[p.~98]{Jac09}.
 \end{defn}
 
 Given an ideal $\mathfrak a = [a, (b+\sqrt\Delta)/2]$, reduction is performed by repeated application of the reduction operator $\rho$ \cite{Jac09}[p.~99] where
