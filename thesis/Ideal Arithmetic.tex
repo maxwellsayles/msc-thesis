@@ -14,6 +14,7 @@
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{comment}
+\usepackage{float}
 
 \theoremstyle{plain}
 \newtheorem{thm}{Theorem}[section]
@@ -204,9 +205,9 @@ An \emph{order} $\OO$ of $\KK$ is a $\ZZ$-module of $\KK$ such that $\OO$ is a s
 
 \bigbreak
 Given $\omega_0$ from definition \ref{defn:quadraticInteger}, the module $[1, \omega_0]$ is the order of algebraic integers in the quadratic number field $\KK=\QQ(\sqrt{\Delta_0})$.  We denote this as $\OO_{\KK}$.  The order $\OO_\KK$ is of maximal size since any order $\OO_\Delta = [1,f\omega_0]$ is a subring of $\OO_\KK$.  Furthermore, since $\Delta \equiv 0,1 \pmod 4$, we can write the order $\OO_\Delta$ as the $\ZZ$-module \cite[p.~81]{Jac09}:
-\[
+\begin{equation*}
 	\OO_\Delta = [1,f\omega_0] = \left[1, \frac{\Delta + \sqrt{\Delta}}{2} \right].
-\]
+\end{equation*}
 When $\Delta$ is assumed to be known, we write $\OO$ for $\OO_\Delta$ and $\omega$ for $f\omega_0$.
 
 
@@ -281,7 +282,7 @@ Two ideals $\mathfrak{a}$ and $\mathfrak{b}$ of $\OO$ are said to be \emph{equiv
 \bigbreak
 \section{Ideal Class Group}
 
-Using the above notions of ideals in $\OO_\Delta$, we define the \emph{ideal class group} $Cl_\Delta$ as the set of all equivalence classes of invertible $\OO$-ideals.  The group operation is defined as the product (composition) of two class representatives.  Representatives are typically given in reduced form.  In section \ref{section:computerRepresentation} we give a concrete representation of the ideal class group of imaginary quadratic fields and the operations on elements of this group.  Here we state what it is for an ideal to be reduced and how to compose two reduced elements together.
+Using the above notions of ideals in $\OO_\Delta$, we define the \emph{ideal class group} $Cl_\Delta$ as the set of all equivalence classes of invertible $\OO$-ideals.  The group operation is defined as the product (composition) of two class representatives.  Representatives are typically given in reduced form.  In \ref{subsec:reduction}, we state what it is for an ideal to be in reduced form.  In \ref{subsec:iipIdeals}, we define the identity ideal class, when a given ideal class is invertible, and when it is prime.  We cover, in subsection \ref{subsec:idealCompose}, the general case of how to compose two reduced class representatives together, and then in \ref{subsec:nucomp} we discuss how to perform composition such that the result is a reduced or almost reduced representative.  We then generalize this to the case of computing the square (\ref{subsec:nudupl}) and cube (\ref{subsec:nucube}) of an ideal class.  Finally, in section \ref{section:computerRepresentation} we give a concrete representation of the ideal class group of imaginary quadratic fields and the operations on the elements of this group. 
 
 %%%%%%%%%%%%%
 % REDUCTION %
@@ -339,10 +340,33 @@ for
 When $\Delta<0$, either ${\mathfrak a}_{i+2}$ is reduced or $\rho({\mathfrak a}_{i+2})$ is reduced.  See \cite[pp.~104-106]{Jac09} for additional details.  This use of a continued fraction expansion to reduce an ideal will be seen again in subsection \ref{subsec:nucomp} when we discuss Shanks' NUCOMP algorithm for computing the reduced or almost reduced product of two ideal class representatives.
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% IDENTITY, INVERSE, PRIME %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Identity, Inverses, and Prime Ideals}\label{subsec:iipIdeals}
+
+Having defined the class group as equivalence classes of ideals, we briefly define the identity ideal class, and what it means for a given class to be invertible or to be prime.
+
+\begin{defn}
+The \emph{identity ideal} is defined as $\OO_\Delta$ since for some ideal $\mathfrak a$, we have $\mathfrak a = \mathfrak a \OO_\Delta = \OO_\Delta \mathfrak a$.  The identity element in the ideal class group is defined as $[\OO_\Delta]$.  This is the class of principal ideals, since the identity ideal $\OO_\Delta$ is a principal ideal.  It has the property that for an ideal class $[\mathfrak a]$, that $[\mathfrak a] = [\mathfrak a \OO_\Delta] = [\OO_\Delta \mathfrak a]$. Furthermore, since the ideal class group $Cl_\Delta$ is finite, for a given ideal class $[\mathfrak a]$ there exists a non-zero integer $n$ such that $[{\mathfrak a}^n] = [\OO_\Delta]$.  Here, $n$ is known as the \emph{order} of $[\mathfrak a]$.  If the order of an ideal class is 2, i.e. $[\mathfrak a^2] = [\OO_\Delta]$, then the ideal is said to be \emph{ambiguous}.
+\end{defn}
+
+
+\begin{defn}
+An ideal $\mathfrak a \neq (0)$ is \emph{invertible} if there exists an ideal $\mathfrak b$ such that $\mathfrak a \mathfrak b$ is principal, in other words $\mathfrak a \mathfrak b \in [\OO_\Delta]$ \cite[Definition 4.29]{Jac09}. In terms of ideal classes, $[\mathfrak a]$ is invertible if $[\mathfrak a \mathfrak b] = [\OO_\Delta]$.  Furthermore, if $\mathfrak a = (\alpha)$ is a principal ideal, then let $\mathfrak b = (\overline{\alpha})$ and $\mathfrak b$ is also principal.  Hence, any principal ideal is invertible.
+\end{defn}
+
+\begin{defn}
+An invertible ideal $\mathfrak p$ is \emph{prime} if for any two ideals $\mathfrak a$ and $\mathfrak b$ such that $\mathfrak p ~|~ \mathfrak a \mathfrak b$ then either $\mathfrak p ~|~ \mathfrak a$ or $\mathfrak p ~|~ \mathfrak b$ \cite[Definition 4.40]{Jac09}.  Furthermore, if $\mathfrak p$ is a prime ideal, then there exists a unique rational prime $p$ such that $\mathfrak p ~|~ (p)$ \cite[Theorem 4.41]{Jac09}.
+\end{defn}
+
+
+
 %%%%%%%%%%%%%%%
 % COMPOSITION %
 %%%%%%%%%%%%%%%
-\subsection{Composition of Ideal Classes}
+\subsection{Composition of Ideal Classes}\label{subsec:idealCompose}
+
 Basic composition of ideal classes is as follows: given reduced representatives $\mathfrak{a}$ and $\mathfrak{b}$ of ideal classes as $\ZZ$-modules, let
 \begin{eqnarray*}
 	\mathfrak{a} & = & a_1 \ZZ + \frac{b_1 + \sqrt{\Delta}}{2} \ZZ \\
@@ -430,7 +454,7 @@ Let $c_2 = (\Delta - {b_2}^2)/4a_2$ and $U = V(b_1-b_2)/2 + Wc_2$ and we have
 \noindent
 Hence, given two representative ideals $\mathfrak a$ and $\mathfrak b$ in reduced form as $\ZZ$-modules, we can compute their (non-reduced) product using algorithm \ref{alg:idealCompose}.
 
-\begin{algorithm}[h!]
+\begin{algorithm}[h]
 \caption{Ideal Class Composition}
 \label{alg:idealCompose}
 \begin{algorithmic}[1]
@@ -449,8 +473,8 @@ Hence, given two representative ideals $\mathfrak a$ and $\mathfrak b$ in reduce
 %%%%%%%%%%
 % NUCOMP %
 %%%%%%%%%%
-\subsection{Fast Ideal Composition (NUCOMP)}
-\label{subsec:nucomp}
+\subsection{Fast Ideal Composition (NUCOMP)}\label{subsec:nucomp}
+
 Shanks gives an algorithm for composing two ideal class representatives such that their product is reduced or almost reduced.  The algorithm is known as NUCOMP and stands for ``New CoMPosition''.  This algorithm is often faster in practice as the intermediate numbers are smaller and the final product requires fewer (often no) applications of the reduction operator to be converted to reduced form.  The two main steps to computing a reduced product using NUCOMP is first, to compute the the same partial quotients $q_i$ that lead to a reduced ideal without explicitely computing the product form $[a,(b+\sqrt\Delta)/2]$, while the second component is to derive alternative formulas for $a_i$ and $b_i$ using the partial quotients $q_i$.  The description of NUCOMP provided here is a high level description of the algorithm based on \cite[pp.119-123]{Jac09} -- see here for a detailed treatment of what follows.
 
 In subsection \ref{subsec:reduction} we gave an algorithm to compute the reduced form of \break$\mathfrak a = [a, (b+\sqrt\Delta)/2]$ by developing the simple continued fraction expansion of $b/|a|$.  Since $b$ may be as large as $\Delta$, rather than computing the product form
@@ -491,7 +515,7 @@ where $c_2 = ({b_2}^2-\Delta)/4a_2$.  The ideal class representative $[a, (b+\sq
 %%%%%%%%%%
 % NUDUPL %
 %%%%%%%%%%
-\subsection{Fast Ideal Squaring (NUDUPL)}
+\subsection{Fast Ideal Squaring (NUDUPL)}\label{subsec:nudupl}
 
 In the case of ideal class squaring, much of the arithmetic used to compose two ideal classes can be simplified since in this case $a_1=a_2$ and $b_1=b_2$.  Let 
 \[
@@ -518,7 +542,7 @@ As before, the representative $[a, (b+\sqrt\Delta)/2]$ is either reduced or almo
 %%%%%%%%%%
 % NUCUBE %
 %%%%%%%%%%
-\subsection{Fast Ideal Cubing (NUCUBE)}
+\subsection{Fast Ideal Cubing (NUCUBE)}\label{subsec:nucube}
 
 Common exponentiation methods using binary representations of exponents make use of squaring and multiplication operations.  If we consider binary-ternary representations of exponents, cubing becomes practical.  In general, if we want to compute ${\mathfrak a}^3$ for an ideal class representative $\mathfrak a = [a, (b+\sqrt\Delta)/2]$, we can take advantage of the simplification that happens when expanding the computation of ${\mathfrak a}^2 \mathfrak a$.  Here we provide a high level description of a technique for cubing based on similar ideas to NUCOMP and NUDUPL, namely that of computing the quotients of a continued fraction expansion useful to computing a reduced ideal representative.  A detailed description and analysis of this technique can be found in \cite{Ijs2010}.
 
@@ -537,8 +561,8 @@ The cubed ideal ${\mathfrak a}^3$ can be computed from $R_i$ and $C_i$ following
 
 
 
-\begin{algorithm}[h!]
-\caption{Ideal Class Composition}
+\begin{algorithm}[h]
+\caption{Ideal Class Cubing}
 \label{alg:idealCube}
 \begin{algorithmic}[1]
 \REQUIRE Reduced ideal class representative $\mathfrak a = \left[a_1, \frac{b_1 + \sqrt\Delta}{2}\right]$ and $c_1 = ({b_1}^2-\Delta)/4a_1$.
@@ -560,21 +584,6 @@ The cubed ideal ${\mathfrak a}^3$ can be computed from $R_i$ and $C_i$ following
 \end{algorithm}
 
 
-%%%%%%%%%%%%%%%%
-% TO USE STILL %
-%%%%%%%%%%%%%%%%
-\begin{comment}
-\bigbreak
-\section{To use still}
-
-
-
-\begin{defn}
-A \emph{prime ideal} of $\OO$ is an invertible $\OO$-ideal $\mathfrak{p} \neq \OO$ with the property that if $\mathfrak{p} | \mathfrak{a}\mathfrak{b}$, for $\OO$-ideals $\mathfrak{a}$ and $\mathfrak{b}$, then $\mathfrak{p} | \mathfrak{a}$ or $\mathfrak{p} | \mathfrak{b}$ \cite[p.~93]{JacobsonCh4}.
-\end{defn}
-In the ideal class group, the reduced form of a prime ideal $\mathfrak{p}$ is given by $[p, \beta]$ where $p \in \ZZ$ is prime.
-\end{comment}
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 % COMPUTER REPRESENTATION %
@@ -582,6 +591,155 @@ In the ideal class group, the reduced form of a prime ideal $\mathfrak{p}$ is gi
 \bigbreak
 \section{Computer Representation}
 \label{section:computerRepresentation}
+
+Here we provide pseudo-code for operations in the ideal class group of imaginary quadratic number fields.  
+
+%%%%%%%%%%%%
+% IDENTITY %
+%%%%%%%%%%%%
+\begin{algorithm}[h]
+\caption{Identity}
+\label{alg:identity}
+\begin{algorithmic}[1]
+\ENSURE A reduced representative for the class of principal ideals.
+\IF {$\Delta \equiv 1 \pmod 4$}
+	\STATE Let $b = 1$.
+\ELSE
+	\STATE Let $b = 0$.
+\ENDIF
+\RETURN $[1, (b+\sqrt\Delta)/2]$.
+\end{algorithmic}
+\end{algorithm}
+
+%%%%%%%%%%%
+% INVERSE %
+%%%%%%%%%%%
+\begin{algorithm}[h]
+\caption{Iverse}
+\label{alg:inverse}
+\begin{algorithmic}[1]
+\REQUIRE A reduced representative $\mathfrak a = [a, (b+\sqrt\Delta)/2]$.
+\ENSURE A reduced representative $\mathfrak a^{-1}$ such that $\mathfrak a \mathfrak a^{-1}$ is principal.
+\RETURN $[a, (-b+\sqrt\Delta)/2]$.
+\end{algorithmic}
+\end{algorithm}
+
+
+%%%%%%%%%
+% PRIME %
+%%%%%%%%%
+\begin{algorithm}[h]
+\caption{Prime Ideal}
+\label{alg:prime}
+\begin{algorithmic}[1]
+\REQUIRE A prime integer $p \in \ZZ$.
+\ENSURE A reduced representative $\mathfrak p = [p, (b+\sqrt\Delta)/2]$ such that $\mathfrak p$ is a prime ideal if one exists.
+\STATE Compute $b \leftarrow \sqrt\Delta \pmod p$ \COMMENT{using Tonelli and Shanks or a lookup table}.
+\IF {$4p ~|~ b^2-\Delta$}
+	\RETURN $[p, (b+\sqrt\Delta)/2]$.	
+\ENDIF
+\STATE Let $b \leftarrow p-b$.
+\IF {$4p ~|~ b^2-\Delta$}
+	\RETURN $[p, (b+\sqrt\Delta)/2]$.	
+\ENDIF
+\RETURN None exists.
+\end{algorithmic}
+\end{algorithm}
+
+
+%%%%%%%%%%
+% REDUCE %
+%%%%%%%%%%
+\begin{algorithm}[h]
+\caption{Reduce (When $\Delta < 0$)}
+\label{alg:reduce}
+\begin{algorithmic}[1]
+\REQUIRE An ideal class representative $\mathfrak a_1 = [a_1, (b_1+\sqrt\Delta)/2]$ for an imaginary quadratic order, and $c_1 = ({b_1}^2 - \Delta)/4a_1$.
+\ENSURE A reduced representative $\mathfrak a = [a, (b+\sqrt\Delta)/2]$.
+\STATE Let $a \leftarrow a_1, b \leftarrow b_1, c \leftarrow c_1$.
+\WHILE {$a > c$ or $b > a$ or $b \le -a$}
+	\IF {$a > c$}
+		\STATE Swap $a$ with $c$ and let $b \leftarrow -b$.
+	\ENDIF
+	\IF {$b > a$ or $b \le -a$}
+		\STATE Compute $b'$ such that $-a < b' \le a$ and $b' \equiv b \pmod{2a}$.
+		\STATE Let $b \leftarrow b'$.
+		\STATE Compute $c \leftarrow (b^2-\Delta)/4a$.
+	\ENDIF
+\ENDWHILE
+\IF {$a=c$ and $b < 0$}
+	\STATE Let $b \leftarrow -b$.
+\ENDIF
+\RETURN $[a, (b+\sqrt\Delta)/2]$.
+\end{algorithmic}
+\end{algorithm}
+
+
+
+%%%%%%%%%%%%%
+% AMBIGUOUS %
+%%%%%%%%%%%%%
+\begin{algorithm}[h]
+\caption{Is Ambiguous?}
+\label{alg:ambiguous}
+\begin{algorithmic}[1]
+\REQUIRE A reduced representative $\mathfrak a = [a, (b+\sqrt\Delta)/2]$.
+\ENSURE True if $\mathfrak a$ is ambiguous, False otherwise.
+\IF {$a > 1$}
+	\IF {$b = 0$ or $a = b$ or $a = c$}
+		\RETURN True.
+	\ENDIF
+\ENDIF
+\RETURN False.
+\end{algorithmic}
+\end{algorithm}
+
+%%%%%%%%%%
+% NUCOMP %
+%%%%%%%%%%
+\begin{algorithm}[h]
+\caption{NUCOMP}
+\label{alg:nucomp}
+\begin{algorithmic}[1]
+\REQUIRE Reduced representatives $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$, $\mathfrak b = [a_2, (b_2+\sqrt\Delta)/2]$ with \break $c_1 = ({b_1}^2-\Delta)/4a_1$, $c_2 = ({b_2}^2-\Delta)/4a_2$, and discriminant $\Delta$.
+\ENSURE A reduced or almost reduced representative $\mathfrak a \mathfrak b$.
+\IF {$\mathfrak a$ is an identity element}
+	\RETURN $\mathfrak b$.
+\ELSIF {$\mathfrak b$ is an identity element}
+	\RETURN $\mathfrak a$.
+\ENDIF
+\STATE Compute $s \leftarrow Ya_1 + Va_2 + W \frac{b_1+b_2}{2}$ for $Y, V, W \in \ZZ$ \COMMENT{using the extended Euclidean algorithm}.
+\STATE Compute $U \leftarrow V(b_1-b_2)/2 + Wc_2$.
+\RETURN $[a, (b+\sqrt\Delta)/2]$.
+\end{algorithmic}
+\end{algorithm}
+
+%%%%%%%%%%%
+% NUDUPL %
+%%%%%%%%%%%
+\begin{algorithm}[h]
+\caption{NUDUPL}
+\label{alg:nudupl}
+\begin{algorithmic}[1]
+\REQUIRE A reduced representative $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$.
+\ENSURE A reduced or almost reduced representative $\mathfrak a^2$.
+\RETURN $[a, (b+\sqrt\Delta)/2]$.
+\end{algorithmic}
+\end{algorithm}
+
+%%%%%%%%%%
+% NUCUBE %
+%%%%%%%%%%
+\begin{algorithm}[h]
+\caption{NUCUBE}
+\label{alg:nucube}
+\begin{algorithmic}[1]
+\REQUIRE A reduced representative $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$.
+\ENSURE A reduced or almost reduced representative $\mathfrak a^3$.
+
+\RETURN $[a, (b+\sqrt\Delta)/2]$.
+\end{algorithmic}
+\end{algorithm}
 
 
 
