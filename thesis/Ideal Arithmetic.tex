@@ -56,7 +56,7 @@
 \setcounter{chapter}{1}
 \chapter{Ideal Arithmetic}
 
-In this thesis, we focus on fast arithmetic and fast exponentiation in the ideal class group of imaginary quadratic number fields.  The ideal class group is a group of equivalence classes of ideals in a maximal order of a quadratic number field.   We begin with the relevant theory of quadratic number fields, we discuss quadratic orders and then move to ideals of quadratic orders.  Finally, we discuss arithmetic in the ideal class group.  The theory presented here can be found in detail in reference texts on algebraic number theory such as (TODO). 
+In this thesis, we focus on fast arithmetic and fast exponentiation in the ideal class group of imaginary quadratic number fields.  The ideal class group is a group of equivalence classes of ideals in a maximal order of a quadratic number field.   We begin with the relevant theory of quadratic number fields, we then discuss quadratic orders and ideals of quadratic orders.  Finally, we discuss arithmetic in the ideal class group.  The theory presented here can be found in detail in reference texts on algebraic number theory such as \cite{IR90}, \cite{Hua82}, or \cite{Coh80}. 
 
 
 
@@ -446,28 +446,30 @@ Substituting into equation \eqref{eq:bMod2a} we get
 	& \equiv b_2 + V\frac{2a_2(b_1-b_2)}{2s} + W\frac{2a_2(\Delta - {b_2}^2)}{2a_2 \cdot 2s} && \pmod{2a} \\
 	& \equiv b_2 + \frac{2a_2}{s} \left( V\frac{b_1-b_2}{2} + W\frac{\Delta - {b_2}^2}{4a} \right) && \pmod{2a}.
 \end{alignat*}
-Let $c_2 = (\Delta - {b_2}^2)/4a_2$ and $U = V(b_1-b_2)/2 + Wc_2$ and we have
+Let $c_2 = ({b_2}^2 - \Delta)/4a_2$ and $U = V(b_1-b_2)/2 - Wc_2$ and we have
 \[
 	b \equiv b_2 + \frac{2a_2}{s} U \pmod{2a}.
 \]
 
-\noindent
-Hence, given two representative ideals $\mathfrak a$ and $\mathfrak b$ in reduced form as $\ZZ$-modules, we can compute their (non-reduced) product using algorithm \ref{alg:idealCompose}.
-
-\begin{algorithm}[h]
+\begin{algorithm}[b]
 \caption{Ideal Class Composition}
 \label{alg:idealCompose}
 \begin{algorithmic}[1]
-\REQUIRE Reduced ideal class representatives $\mathfrak a = \left[a_1, \frac{b_1 + \sqrt\Delta}{2}\right]$ and $\mathfrak b = \left[a_2, \frac{b_2 + \sqrt\Delta}{2}\right]$.
+\REQUIRE Reduced ideal class representatives $\mathfrak a = \left[a_1, \frac{b_1 + \sqrt\Delta}{2}\right]$ and $\mathfrak b = \left[a_2, \frac{b_2 + \sqrt\Delta}{2}\right]$ and ${c_2}^2 = ({b_2}^2-\Delta)/4a_2$.
 \ENSURE Non-reduced ideal class representative $\mathfrak a \cdot \mathfrak b$.
 \STATE Compute $s \leftarrow Ya_1 + Va_2 + W\frac{b_1+b_2}{2}$ for $Y, V, W \in \ZZ$ using the extended Euclidean algorithm.
 \STATE Compute $a \leftarrow (a_1a_2)/s$.
-\STATE Compute $c_2 \leftarrow (\Delta-{b_2}^2)/4a_2$.
-\STATE Compute $U \leftarrow V(b_1-b_2)/2 + Wc_2$.
+\STATE Compute $U \leftarrow V(b_1-b_2)/2 - Wc_2$.
 \STATE Compute $b \leftarrow (b_2 + 2Ua_2/s) \bmod{2a}$.
 \RETURN $[a, (b + \sqrt\Delta)/2]$.
 \end{algorithmic}
 \end{algorithm}
+
+
+
+\noindent
+Hence, given two representative ideals $\mathfrak a$ and $\mathfrak b$ in reduced form as $\ZZ$-modules, we can compute their (non-reduced) product using algorithm \ref{alg:idealCompose}.
+
 
 
 %%%%%%%%%%
@@ -504,12 +506,12 @@ only, according to \cite[Theorem 5.43]{Jac09}, we select $i$ such that
 \]
 We then compute
 \begin{align*}
-	M_1 &= \frac{a_2 R_i + (b_1-b_2)C_i}{a_1}  \in \ZZ, &
-	M_2 &= \frac{(b_1+b_2) R_i - s c_2 C_i}{a_1} \in \ZZ, \\
-	a &= M_1 R_i - M_2 C_i, &
-	b &\equiv \frac{a_2 R_i - a |C_{i+1}|}{C_i} \pmod{2a}
+	M_1 &= \frac{R_i a_2 + sC_i(b_1-b_2)/2}{a_1}  \in \ZZ, &
+	M_2 &= \frac{R_i (b_1+b_2)/2 - s C_i c_2}{a_1} \in \ZZ, \\
+	a &= (-1)^{i+1} (R_i M_1  - C_i M_2), &
+	b &\equiv \frac{R_i a_2 /s + C_{i-1} a}{C_i} \pmod{2a}
 \end{align*}
-where $c_2 = ({b_2}^2-\Delta)/4a_2$.  The ideal class representative $[a, (b+\sqrt\Delta)/2]$ in this case is reduced or almost reduced.  See algorithm \ref{alg:nucomp} for pseudocode of our implementation.
+where $c_2 = ({b_2}^2-\Delta)/4a_2$ \cite[Equation 5.44]{Jac09}.  The ideal class representative $[a, (b+\sqrt\Delta)/2]$ in this case is reduced or almost reduced.  See algorithm \ref{alg:nucomp} for pseudocode of our implementation.
 
 
 %%%%%%%%%%
@@ -519,11 +521,11 @@ where $c_2 = ({b_2}^2-\Delta)/4a_2$.  The ideal class representative $[a, (b+\sq
 
 In the case of ideal class squaring, much of the arithmetic used to compose two ideal classes can be simplified since in this case $a_1=a_2$ and $b_1=b_2$.  Let 
 \[
-	s = Xa_1 + Y_b1
+	s = Xa_1 + Yb_1
 \]
 for $X,Y \in \ZZ$ using the extended Euclidean algorithm; and let 
 \[
-	U = Yc_2.
+	U = Yc_1.
 \]
 As before, we compute the continued fraction expansion of $sU/a_1$, but the bound on $R_i$ simplifies to
 \[
@@ -532,9 +534,9 @@ As before, we compute the continued fraction expansion of $sU/a_1$, but the boun
 Computing the ideal class representative simplifies as well.  We have
 \begin{align*}
 	M_1 &= R_i, & 
-	M_2 &= \frac{2b_1R_i - sc_2C_i}{a_1}, \\
-	a &= {R_i}^2 - M_2C_i, &
-	b &\equiv \frac{a_1 R_i - a |C_{i+1}|}{C_i} \pmod{2a}.
+	M_2 &= \frac{R_i b_1 - sC_i c_1}{a_1}, \\
+	a &= (-1)^{i+1}({R_i}^2 - C_i M_2), &
+	b &\equiv \frac{R_i a_1/s  + C_{i-1} a}{C_i} \pmod{2a}.
 \end{align*}
 As before, the representative $[a, (b+\sqrt\Delta)/2]$ is either reduced or almost reduced.  \break Pseudocode for our implementation is given in algorithm \ref{alg:nudupl}.
 
@@ -546,34 +548,23 @@ As before, the representative $[a, (b+\sqrt\Delta)/2]$ is either reduced or almo
 
 Common exponentiation methods using binary representations of exponents make use of squaring and multiplication operations.  If we consider binary-ternary representations of exponents, cubing becomes practical.  In general, if we want to compute ${\mathfrak a}^3$ for an ideal class representative $\mathfrak a = [a, (b+\sqrt\Delta)/2]$, we can take advantage of the simplification that happens when expanding the computation of ${\mathfrak a}^2 \mathfrak a$.  Here we provide a high level description of a technique for cubing based on similar ideas to NUCOMP and NUDUPL, namely that of computing the quotients of a continued fraction expansion useful to computing a reduced ideal representative.  A detailed description and analysis of this technique can be found in \cite{Ijs2010}.
 
-An algorithm for ideal cubing in quadratic number fields is given as algorithm \ref{alg:idealCube} and is modified from \cite[Appendix A, Algorithm 5]{Ijs2010} so as to conform to the conventions used so far. To modify this algorithm to compute an almost reduced ideal, as in NUCOMP, we check after step 8 if $L < \sqrt{|a_1|} ~ |\Delta/4|^{1/4}$.  If so, we complete the cube as in algorithm \ref{alg:idealCube}.  Otherwise, similar to NUCOMP and NUCUBE, we compute the continued fraction expansion of $L/K = \langle q_0, q_1, \dots, q_i, \phi_{i+1}\rangle$ for $i$ such that
-\[
-	R_i < \sqrt{|a_1|} ~ |\Delta/4|^{1/4} < R_{i-1}.
-\]
-The cubed ideal ${\mathfrak a}^3$ can be computed from $R_i$ and $C_i$ following algorithm \ref{alg:idealCube} as follows:
-\begin{align*}
-	b_2 &= b_1 -2NK \pmod L, & \\
-	M_1 &= (NR_i + (b_2-b_1)C_i)/L, &
-	M_2 &= (R_i(b-1+b_2)+c_1s_2)/L, \\
-	a &= (-1)^{i-1}(R_iM_1-C_iM_2), &
-	b &= (NR_i + aC_{i-1})/C_i-b_1 \pmod {2a}.
-\end{align*}
-
-
-
 \begin{algorithm}[h]
-\caption{Ideal Class Cubing}
+\caption{Ideal Class Cubing (Non-Reduced)}
 \label{alg:idealCube}
 \begin{algorithmic}[1]
-\REQUIRE Reduced ideal class representative $\mathfrak a = \left[a_1, \frac{b_1 + \sqrt\Delta}{2}\right]$ and $c_1 = ({b_1}^2-\Delta)/4a_1$.
+\REQUIRE Reduced ideal class representative $\mathfrak a = \left[a_1, (b_1 + \sqrt\Delta)/2\right]$ and $c_1 = ({b_1}^2-\Delta)/4a_1$.
 \ENSURE Non-reduced ideal class representative ${\mathfrak a}^3$.
-\STATE Compute $s_1 \leftarrow u_1a_1 + v_1b_1$ using the extended Euclidean algorithm (only compute $s_1$ and $v_1$).
+\STATE Compute $s_1 \leftarrow U_1a_1 + V_1b_1$ for $U_1,V_1 \in \ZZ$ \COMMENT{using the extended Euclidean algorithm (only compute $s_1$ and $V_1$)}.
 \IF{$s_1 = 1$}
 	\STATE Let $s_2 \leftarrow 1$.
-	\STATE Let $N \leftarrow a_1, L \leftarrow {a_1}^2, K \leftarrow c_1v_1(2-v_1(b_1-v_1a_1c_1)) \pmod L$.
+	\STATE Let $N \leftarrow a_1$.
+	\STATE Let $L \leftarrow {a_1}^2$.
+	\STATE Let $K \leftarrow c_1V_1(2-V_1(b_1-V_1a_1c_1)) \pmod L$.
 \ELSE
-	\STATE Compute $s_2 \leftarrow u_2(s_1a_1) + v_2({b_2}^2-a_1c_1)$.
-	\STATE Let $N \leftarrow a_1/s_2, L \leftarrow Na_1, K \leftarrow c_1(u_2v_1a_1+v_2b_1) \pmod L$.
+	\STATE Compute $s_2 \leftarrow U_2(s_1a_1) + V_2({b_1}^2-a_1c_1)$ for $U_2, V_2 \in \ZZ$.
+	\STATE Let $N \leftarrow a_1/s_2$.
+	\STATE Let $L \leftarrow Na_1$.
+	\STATE Let $K \leftarrow c_1(U_2V_1a_1+V_2b_1) \pmod L$.
 \ENDIF
 \STATE Let $T \leftarrow NK$.
 \STATE Let $a \leftarrow NL$.
@@ -582,6 +573,20 @@ The cubed ideal ${\mathfrak a}^3$ can be computed from $R_i$ and $C_i$ following
 \RETURN $[a, (b+\sqrt\Delta)/2]$ (optionally $c$).
 \end{algorithmic}
 \end{algorithm}
+
+An algorithm for ideal cubing in quadratic number fields is given as algorithm \ref{alg:idealCube} and is modified from \cite[Appendix A, Algorithm 5]{Ijs2010} so as to conform to the conventions used so far. To modify this algorithm to compute an almost reduced ideal, as in NUCOMP, we check before step 13 if $L < \sqrt{|a_1|} ~ |\Delta/4|^{1/4}$.  If so, we complete the cube as in algorithm \ref{alg:idealCube}.  Otherwise, similar to NUCOMP and NUCUBE, we compute the continued fraction expansion of $L/K = \langle q_0, q_1, \dots, q_i, \phi_{i+1}\rangle$ for $i$ such that
+\[
+	R_i < \sqrt{|a_1|} ~ |\Delta/4|^{1/4} < R_{i-1}.
+\]
+Having computed $R_i$ and $C_i$, the almost reduced ideal ${\mathfrak a}^3$ can be computed as follows:
+\begin{align*}
+	b_2 &= b_1 -2NK \pmod L, & \\
+	M_1 &= (NR_i + (b_2-b_1)C_i)/L, &
+	M_2 &= (R_i(b_1+b_2)+c_1s_2)/L, \\
+	a &= (-1)^{i-1}(R_iM_1-C_iM_2), &
+	b &= (NR_i + aC_{i-1})/C_i-b_1.
+\end{align*}
+Then, $\mathfrak a^3 = [a, (b+\sqrt\Delta)/2]$.
 
 
 
@@ -592,7 +597,8 @@ The cubed ideal ${\mathfrak a}^3$ can be computed from $R_i$ and $C_i$ following
 \section{Computer Representation}
 \label{section:computerRepresentation}
 
-Here we provide pseudo-code for operations in the ideal class group of imaginary quadratic number fields.  
+Here we provide pseudo-code for operations in the ideal class group of imaginary quadratic number fields.  When algorithms \ref{alg:nucomp}, \ref{alg:nudupl}, and \ref{alg:nucube} specify to compute $s \leftarrow Va + Wb$ for some $V,W \in \ZZ$, the details of the computation are intentionally left out.  A sufficient method is to use the extended Euclidean algorithm.  Similarly, when these algorithms specify to compute $R_i$ to some bound using the recurrences in \eqref{eq:cf1} through \eqref{eq:cf3}, a bounded extended Euclidean algorithm for only one extended component suffices. In chapter 5 we discuss several variations of the extended Euclidean algorithm suitable to these computations and provide an empirical analysis of their performance on various bit sizes.
+
 
 %%%%%%%%%%%%
 % IDENTITY %
@@ -610,6 +616,7 @@ Here we provide pseudo-code for operations in the ideal class group of imaginary
 \RETURN $[1, (b+\sqrt\Delta)/2]$.
 \end{algorithmic}
 \end{algorithm}
+
 
 %%%%%%%%%%%
 % INVERSE %
@@ -694,6 +701,7 @@ Here we provide pseudo-code for operations in the ideal class group of imaginary
 \end{algorithmic}
 \end{algorithm}
 
+
 %%%%%%%%%%
 % NUCOMP %
 %%%%%%%%%%
@@ -703,13 +711,14 @@ Here we provide pseudo-code for operations in the ideal class group of imaginary
 \begin{algorithmic}[1]
 \REQUIRE Reduced representatives $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$, $\mathfrak b = [a_2, (b_2+\sqrt\Delta)/2]$ with \break $c_1 = ({b_1}^2-\Delta)/4a_1$, $c_2 = ({b_2}^2-\Delta)/4a_2$, and discriminant $\Delta$.
 \ENSURE A reduced or almost reduced representative $\mathfrak a \mathfrak b$.
-\IF {$\mathfrak a$ is an identity element}
-	\RETURN $\mathfrak b$.
-\ELSIF {$\mathfrak b$ is an identity element}
-	\RETURN $\mathfrak a$.
-\ENDIF
-\STATE Compute $s \leftarrow Ya_1 + Va_2 + W \frac{b_1+b_2}{2}$ for $Y, V, W \in \ZZ$ \COMMENT{using the extended Euclidean algorithm}.
+\STATE Compute $s \leftarrow Ya_1 + Va_2 + W (b_1+b_2)/2$ for $Y, V, W \in \ZZ$.
 \STATE Compute $U \leftarrow V(b_1-b_2)/2 + Wc_2$.
+\STATE Let $R_{-2} \leftarrow sU, R_{-1} \leftarrow a_1, C_{-2} \leftarrow -1, C_{-1} \leftarrow 0$.
+\STATE Find $i$ such that $R_i < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4} < R_{i-1}$ using the recurrences \break $q_i = \floor{R_{i-2}/R_{i-1}}, R_i = R_{i-2}-q_i R_{i-1}, C_i=C_{i-2}-q_i C_{i-1}$.
+\STATE Compute $M_1 \leftarrow (R_i a_2 + sC_i(b_1-b_2)/2)/a_1$.
+\STATE Compute $M_2 \leftarrow (R_i (b_1+b_2)/2 -sC_i c_2)/a_1$.
+\STATE Compute $a \leftarrow (-1)^{i+1}(R_i M_1 - C_i M_2)$.
+\STATE Compute $b \leftarrow ((R_i a_2/s + C_{i-1} a)/C_i) \bmod{2a}$.
 \RETURN $[a, (b+\sqrt\Delta)/2]$.
 \end{algorithmic}
 \end{algorithm}
@@ -721,8 +730,15 @@ Here we provide pseudo-code for operations in the ideal class group of imaginary
 \caption{NUDUPL}
 \label{alg:nudupl}
 \begin{algorithmic}[1]
-\REQUIRE A reduced representative $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$.
+\REQUIRE Reduced representative $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$ with $c_1 = ({b_1}^2-\Delta)/4a_1$ and discriminant $\Delta$.
 \ENSURE A reduced or almost reduced representative $\mathfrak a^2$.
+\STATE Compute $s \leftarrow Xa_1 + Yb_1$ for $X,Y \in \ZZ$.
+\STATE Compute $U \leftarrow Yc_1$.
+\STATE Let $R_{-2} \leftarrow sU, R_{-1} \leftarrow a_1, C_{-2} \leftarrow -1, C_{-1} \leftarrow 0$.
+\STATE Find $i$ such that $R_i < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4} < R_{i-1}$ using the recurrences \break $q_i = \floor{R_{i-2}/R_{i-1}}, R_i = R_{i-2}-q_i R_{i-1}, C_i=C_{i-2}-q_i C_{i-1}$.
+\STATE Compute $M_2 \leftarrow (R_i b_1 -sC_i c_1)/a_1$.
+\STATE Compute $a \leftarrow (-1)^{i+1}({R_i}^2 - C_i M_2)$.
+\STATE Compute $b \leftarrow ((R_i a_2/s + C_{i-1} a)/C_i) \bmod{2a}$.
 \RETURN $[a, (b+\sqrt\Delta)/2]$.
 \end{algorithmic}
 \end{algorithm}
@@ -736,8 +752,34 @@ Here we provide pseudo-code for operations in the ideal class group of imaginary
 \begin{algorithmic}[1]
 \REQUIRE A reduced representative $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$.
 \ENSURE A reduced or almost reduced representative $\mathfrak a^3$.
-
-\RETURN $[a, (b+\sqrt\Delta)/2]$.
+\STATE Compute $s_1 \leftarrow U_1a_1 + V_1b_1$ for $U_1,V_1 \in \ZZ$.
+\IF{$s_1 = 1$}
+	\STATE Let $s_2 \leftarrow 1$.
+	\STATE Let $N \leftarrow a_1$.
+	\STATE Let $L \leftarrow {a_1}^2$.
+	\STATE Let $K \leftarrow c_1V_1(2-V_1(b_1-V_1a_1c_1)) \pmod L$.
+\ELSE
+	\STATE Compute $s_2 \leftarrow U_2(s_1a_1) + V_2({b_1}^2-a_1c_1)$ for $U_2, V_2 \in \ZZ$.
+	\STATE Let $N \leftarrow a_1/s_2$.
+	\STATE Let $L \leftarrow Na_1$.
+	\STATE Let $K \leftarrow c_1(U_2V_1a_1+V_2b_1) \pmod L$.
+\ENDIF
+\IF {$L < \sqrt{a_1} ~ |\Delta/4|^{1/4}$}
+	\STATE Let $T \leftarrow NK$.
+	\STATE Let $a \leftarrow NL$.
+	\STATE Let $b \leftarrow b_1 - 2T$.
+\ELSE
+	\STATE Let $R_{-1} \leftarrow L, R_0 \leftarrow K, C_{-1} \leftarrow 0, C_0 \leftarrow -1$.
+	\STATE Find $i$ such that $R_i < \sqrt{a_1} ~ |\Delta/4|^{1/4} < R_{i-1}$ using recurrences \eqref{eq:cf1}, \eqref{eq:cf2}, and \eqref{eq:cf3} \break $q_i = \floor{R_{i-2}/R_{i-1}}, R_i = R_{i-2}-q_i R_{i-1}, C_i=C_{i-2}-q_i C_{i-1}$.
+	\STATE Compute $b_2 \leftarrow b_1 -2NK \pmod L$.
+	\STATE Compute $M_1 \leftarrow (NR_i + (b_2-b_1)C_i)/L$.
+	\STATE Compute $M_2 \leftarrow (R_i(b_1+b_2)+c_1s_2)/L$.
+	\STATE Compute $a \leftarrow (-1)^{i-1}(R_iM_1-C_iM_2)$.
+	\STATE Compute $b \leftarrow (NR_i + aC_{i-1})/C_i-b_1$.
+\ENDIF
+\STATE Let $b \leftarrow b \bmod 2a$.
+\STATE (optional) Let $c \leftarrow (b^2-\Delta)/4a$.
+\RETURN $[a, (b+\sqrt\Delta)/2]$ (and optionally $c$).
 \end{algorithmic}
 \end{algorithm}
 
