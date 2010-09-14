@@ -156,7 +156,7 @@ This method can be improved by maintaining a carry flag $c$; instead of adding $
 \end{algorithmic}
 \end{algorithm}
 
-The particular advantage of a Non-Adjacent Form exponentiation over a binary exponentiation is in regards to the number of operations required.  While the binary method required $\floor{\log_2 n}$ squares and on average $\floor{\log_2 n}/2$ multiplications, a Non-Adjacent Form exponentiation requires at most $\floor{\log_2 n}+1$ squares and on average $\floor{\log_2 n}/3$ multiplications.  To see this, recall that Non-Adjacent Form requires that not two non-zero terms be adjacent.  Consider any two adjacent terms.  With probability 2/3 the first term is non-zero, in which case, the second term must be zero.  With probability 1/3 the first term is zero, in which case, the probability is 2/3 that the second term is non-zero.  This means that 2/3 of the time, 1 of 2 terms will be non-zero, and $1/3 \times 2/3$ of the time, 1 of 2 terms will be non-zero.  Taken together, 2/3 of the time 1 of 2 terms will be non-zero, and as such, the probability of any given term being non zero is 1/3.
+The particular advantage of a Non-Adjacent Form exponentiation over a binary exponentiation is in regards to the number of operations required.  While the binary method required $\floor{\log_2 n}$ squares and on average $\floor{\log_2 n}/2$ multiplications, a Non-Adjacent Form exponentiation requires at most $\floor{\log_2 n}+1$ squares and on average $\floor{\log_2 n}/3$ multiplications.  To see this, recall that Non-Adjacent Form requires that no two non-zero terms be adjacent.  Consider any two adjacent terms.  With probability 2/3 the first term is non-zero, in which case, the second term must be zero.  With probability 1/3 the first term is zero, in which case, the probability is 2/3 that the second term is non-zero.  This means that 2/3 of the time, 1 of 2 terms will be non-zero, and $1/3 \times 2/3$ of the time, 1 of 2 terms will be non-zero; so the probability of a given term being non zero is 1/3.
 
 
 %%%%%%%%
@@ -165,6 +165,22 @@ The particular advantage of a Non-Adjacent Form exponentiation over a binary exp
 \bigbreak
 \section{Double-Base Number Systems}\label{section:dbns}
 
+A significant advantage of Non-Adjacent Form over a binary representation is that on average the number of non-zero terms (the density of the representation) is lower.  This advantage is accentuated when we extend the representation to a signed double-base representation.  Given two coprime integers $p$ and $q$ and some integer $n$, we represent $n$ as the sum and difference of the product of powers of $p$ and $q$,
+\[
+	n = \sum_i s_i p^{a_i} q^{b_i}.
+\]
+For example, consider the number $n=40824$ as above.  Given the bases $p=2$ and $q=3$, we can represent $n$ as
+\[
+	n = 2^5 3^6 + 2^3 3^7 = (32)(729) + (8)(2187) = 23328 + 17496 = 40824.
+\]
+
+The exponentiation of $g^n$ is
+\begin{align*}
+	g^n = g^{2^5 3^6} g^{2^3 3^7}.
+\
+
+
+\pagebreak
 \bigbreak
 \subsection{When/why is it useful?}
 
@@ -177,6 +193,9 @@ The particular advantage of a Non-Adjacent Form exponentiation over a binary exp
 \bigbreak
 \subsection{Encoding of chains/representations}
 TODO: this seems like a concrete representation.  Should come later.
+
+
+% END OF TODAY
 
 
 \bigbreak
@@ -195,6 +214,11 @@ TODO: this seems like a concrete representation.  Should come later.
 \subsection{Pruned Trees}
 
 
+
+
+\begin{defn}
+A non-increasing sequence of positive integers, called \emph{parts}, summing to $n$ is known as a \emph{partition} of $n$.
+\end{defn}
 
 
 
