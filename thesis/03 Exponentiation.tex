@@ -59,12 +59,14 @@
 Exponentiation is a fairly fundamental group operation and is useful in many different contexts.  Diffie-Hellman key exchange is an example where two parties can jointly establish a shared secret key over an insecure channel.  
  The fundamental operation of Diffie-Hellman key exchange is group exponentiation. Another application discussed in more detail in this thesis is that of computing the order of a group element.  A common approach in this case is to exponentiate a group element to the product of several small prime powers.  The result is an element whose order is known to not contain any of these small prime powers.  As such, it has a smaller order.  The order of this new element is then computed using Shanks' baby-step giant-step algorithm.  Determining the order of an element can be useful in computing the structure of a group, or in factoring an integer that is associated with the group.  In these examples, being able to perform group exponentiation faster means that we can perform a Diffie-Hellman key exchange faster, or that we can compute the order of a group element more quickly.
 
+In sections \ref{section:binary} and \ref{section:naf} we discuss standard exponentiation techniques that rely on a base 2 representation of the exponent.  These methods benefit when the cost of squaring a group element is less than the cost of composing two elements. The method using Non-Adjacent Form described in section \ref{section:naf} also benefits when the cost of computing the inverse of a group element is inexpensive or relatively free.  In section \ref{section:dbns} we introduce Double-Base Number Systems, which, as the name implies, are number systems that make use of multiple bases in the representation of a number.  In section \ref{section:dbnsMethods} we discuss some of methods to compute Double-Base representations found in the literature.  In this thesis, we pay particular attention to representations that use bases 2 and 3, since a representation using base 3 can benefit when the cost of cubing an element is less than the cost of multiplying an element with its square.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % BINARY EXPONENTIATION %
 %%%%%%%%%%%%%%%%%%%%%%%%%
 \bigbreak
-\section{Binary Exponentiation}
+\section{Binary Exponentiation}\label{section:binary}
 The most common and well known method of exponentiation is that of binary exponentation.  This method is often used in Computer Science as an exercise to teach algorithms.  Let $g$ be an element in the group $\mathcal G$ and $n$ be an integer.  We want to compute $g^n \in \mathcal G$.  We first represent $n$ in binary as
 \[
 	n = \sum_{i=0}^{\floor{log_2 n}} b_i 2^i
@@ -81,7 +83,7 @@ Binary exponentiation algorithms require on average $\floor{log_2 n}$ squarings 
 % NAF EXPONENTIATION %
 %%%%%%%%%%%%%%%%%%%%%%
 \bigbreak
-\section{Non-Adjacent Form Exponentiation}
+\section{Non-Adjacent Form Exponentiation}\label{section:naf}
 
 Non-Adjacent Form (NAF) refers to the representation of a number given a \emph{signed} base two representation.  That is, a number $n$ is represented such that
 \[
@@ -101,7 +103,6 @@ Similar to the binary case, we compute $g^n$ using
 \]
 Since $s_i$ may be 0, 1, or -1, Non-Adjacent Form is particularly useful when the cost of computing $g^{-1}$ is relatively inexpensive (or essentially free as in the case of the ideal class group).  However, as we shall see below, we can minimize the number of inversions required to at most 1.
 
-\bigbreak
 \begin{algorithm}[h]
 \caption{Computes $g^n$ using a right-to-left NAF}\label{alg:nafr2l}
 \begin{algorithmic}[1]
@@ -129,7 +130,6 @@ There are various methods for evaluating $g^n$ when $n$ is given in Non-Adjacent
 
 This method can be improved by maintaining a carry flag $c$; instead of adding $2^i$ to $n$, we instead let $c = 1$; instead of subtracting $2^i$ from $n$, we instead let $c = 0$.  The benefit is noticable for \emph{very} large $n$, since the cost of addition and subtraction is reduced from $O(\log n)$ to $O(1)$.  Furthermore, we can compute $g^n$ using at most one inversion by computing the product $Q = g^{s_i2^i}$ for all $s_i = -1$ separate from the product $R = g^{s_j2^j}$ for all $s_j = 1$.  The result is $g^n = R \cdot Q^{-1}$.  These improvements are given in algorithm \ref{alg:nafR2LImmutable} and in detail in \cite[p.4]{Joye2000}.  Note that integer computations such as ``$\floor{n/2^i} \bmod 4$'' can be performed by sliding a window of size 2 bits across the binary representation of $n$.
 
-\bigbreak
 \begin{algorithm}[h]
 \caption{Computes $g^n$ for immutable $n$ using only one inverse.}\label{alg:nafR2LImmutable}
 \begin{algorithmic}[1]
@@ -159,56 +159,41 @@ This method can be improved by maintaining a carry flag $c$; instead of adding $
 The particular advantage of a Non-Adjacent Form exponentiation over a binary exponentiation is in regards to the number of operations required.  While the binary method required $\floor{\log_2 n}$ squares and on average $\floor{\log_2 n}/2$ multiplications, a Non-Adjacent Form exponentiation requires at most $\floor{\log_2 n}+1$ squares and on average $\floor{\log_2 n}/3$ multiplications.  To see this, recall that Non-Adjacent Form requires that not two non-zero terms be adjacent.  Consider any two adjacent terms.  With probability 2/3 the first term is non-zero, in which case, the second term must be zero.  With probability 1/3 the first term is zero, in which case, the probability is 2/3 that the second term is non-zero.  This means that 2/3 of the time, 1 of 2 terms will be non-zero, and $1/3 \times 2/3$ of the time, 1 of 2 terms will be non-zero.  Taken together, 2/3 of the time 1 of 2 terms will be non-zero, and as such, the probability of any given term being non zero is 1/3.
 
 
+%%%%%%%%
+% DBNS %
+%%%%%%%%
+\bigbreak
+\section{Double-Base Number Systems}\label{section:dbns}
 
-%%%%%%%%%%
-% UNUSED %
-%%%%%%%%%%
-\pagebreak
+\bigbreak
+\subsection{When/why is it useful?}
 
-\subsection{DBNS R2L chains $\pmod 3$ and $\pmod {2^23^2 = 36}$.}
-\subsection{DBNS L2R chains}
-\subsection{DBNS Closest approximation}
-Greedy algorithm that finds
-\[
-	\min_{a,b} \left\{|N-2^a3^b| : 0 \le a \le A, 0 \le b \le B\right\}
-\]
+\subsubsection {Sub-linearity in number of terms}
 
-\subsection{$\pm 1$ and reduce}
-Greedy 
-\[
-	S_{i+1} = \min \left\{ \left| \frac{N \pm 1}{2^c3^d} \right| : N \in S_i \right\}
-\]
-at each step keeping only the $x=16$ smallest elements of $S$.
+\bigbreak
+\subsection{Chains vs Representations}
 
-\subsection{$\pm 2^a3^b$ and reduce}
-Greedy algorithm that finds
-\[
-	\min_{a,b,c,d} \left\{\left| \frac{N \pm 2^a3^b}{2^c3^d} \right| \right\}
-\]
-such that $0 \le a \le A$, $0 \le c \le A$, $0 \le b \le B$, and $0 \le d \le B$ for all terms.
 
-I also tried the above such that $0 \le c \le C$ and $0 \le d \le D$.
+\bigbreak
+\subsection{Encoding of chains/representations}
+TODO: this seems like a concrete representation.  Should come later.
 
-\subsection{$\pm 2^a \pm 3^b$ and reduce}
-Greedy algorithm that finds
-\[
-	\min_{a,b,c,d} \left\{\left| \frac{N \pm 2^a \pm 3^b}{2^c3^d} \right| \right\}
-\]
 
-\subsection{Optimal Strictly Chained Partitions}
-Recursive tree method that finds optimal \emph{strictly chained} partitions.
+\bigbreak
+\section{Methods for computing 2,3 Chains/Representations}\label{section:dbnsMethods}
 
-\subsection{Prunning variations}
-Prunning variations, where I keep the \emph{best} $x$ solutions to the above and then iterate on the best solutions, repeatedly pruning at each step.
+\bigbreak
+\subsection{R2L Chains}
 
-\subsection{Power Primorial vs list of Prime Powers}
-Tried representing the primorial as $\prod p_i^{e_i}$, then as 16-bit blocks, and finally as computing $b_i=b_{i-1}^{p_i^{e_i}}$.
+\bigbreak
+\subsection{L2R Chains (Ostrowski approximation)}
 
-\subsection{Computing optimal representations for 16bit numbers}
-For exponents 0 through 65535, we computed optimal chains.  These work best for list based representation of primorials as well as for powering by small exponents.
+\bigbreak
+\subsection{Yao's method for representations}
 
-\subsection{Results}
-All other methods work better for larger primorial.
+\bigbreak
+\subsection{Pruned Trees}
+
 
 
 
