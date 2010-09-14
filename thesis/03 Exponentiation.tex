@@ -165,7 +165,7 @@ The particular advantage of a Non-Adjacent Form exponentiation over a binary exp
 \bigbreak
 \section{Double-Base Number Systems}\label{section:dbns}
 
-A significant advantage of Non-Adjacent Form over a binary representation is that on average the number of non-zero terms (the density of the representation) is lower.  This advantage is accentuated when we extend the representation to a signed double-base representation.  Given two coprime integers $p$ and $q$ and some integer $n$, we represent $n$ as the sum and difference of the product of powers of $p$ and $q$,
+A significant advantage of Non-Adjacent Form over a binary representation is that on average the number of non-zero terms (the density of the representation) is lower.  This advantage is accentuated when we extend the representation to a signed double-base representation.  In general, one can prove that for a number $n$, one can represent $n$ with a sublinear number of double-base terms in $O(\log n / \log \log n)$ (TODO).  Given two coprime integers $p$ and $q$ and some integer $n$, we represent $n$ as the sum and difference of the product of powers of $p$ and $q$,
 \[
 	n = \sum_i s_i p^{a_i} q^{b_i}.
 \]
@@ -173,11 +173,12 @@ For example, consider the number $n=40824$ as above.  Given the bases $p=2$ and 
 \[
 	n = 2^5 3^6 + 2^3 3^7 = (32)(729) + (8)(2187) = 23328 + 17496 = 40824.
 \]
+The exponentiation of $g^n$ is given by
+\[
+	g^{40824} = g^{2^5 3^6} g^{2^3 3^7} = \left(g^{2^3 3^6}\right)^{3^1} \left(g^{2^3 3^6}\right)^{2^2}
+\]
+requiring 5 squares, 7 cubes, and 1 multiplication.  In this example, $n$ is represented by 2 terms.  In general, a number $n$ can be represented with a sublinear number of terms in $O(\log n / \log \log n)$ (TODO).
 
-The exponentiation of $g^n$ is
-\begin{align*}
-	g^n = g^{2^5 3^6} g^{2^3 3^7}.
-\
 
 
 \pagebreak
