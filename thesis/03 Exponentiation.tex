@@ -89,13 +89,13 @@ Non-Adjacent Form (NAF) refers to the representation of a number given a \emph{s
 \[
 	n = \sum_{i=0}^{\ceil{log_2 n}} s_i 2^i
 \]
-where $s_i \in \{0, 1, -1\}$.  As the name suggests, for a number to be in Non-Adjacent Form, there cannot be two non-zero terms adjacent in the representation.  For example, suppose $n = 40824$.  In a binary representation we have
+where $s_i \in \{0, 1, -1\}$.  As the name suggests, for a number to be in Non-Adjacent Form, there cannot be two non-zero terms adjacent in the representation.  For example, suppose $n = 23814216$.  In a binary representation we have
 \[
-	n = 2^3+2^4+2^5+2^6+2^8+2^9+2^{10}+2^{11}+2^{12}+2^{15}
+	23814216 = 2^3+2^6+2^{13}+2^{14}+2^{16}+2^{17}+2^{19}+2^{21}+2^{22}+2^{24}
 \]
 and in Non-Adjacent Form we have
 \[
-	n = -2^3-2^7+2^{13}+2^{15}.
+	23814216 = 2^3+2^6-2^{13}-2^{15}-2^{18}-2^{20}-2^{23}+2^{25}.
 \]
 Similar to the binary case, we compute $g^n$ using
 \[
@@ -106,7 +106,7 @@ Since $s_i$ may be 0, 1, or -1, Non-Adjacent Form is particularly useful when th
 \begin{algorithm}[h]
 \caption{Computes $g^n$ using a right-to-left NAF}\label{alg:nafr2l}
 \begin{algorithmic}[1]
-\REQUIRE $g \in \mathcal G, n \ge 0 \in \ZZ$
+\REQUIRE $g \in \mathcal G, n \in \ZZgez$
 \ENSURE $g^n \in \mathcal G$
 \STATE $i \gets 0$
 \STATE $T \gets g$ \COMMENT{invariant: $T = g^{2^i}$}
@@ -128,12 +128,12 @@ Since $s_i$ may be 0, 1, or -1, Non-Adjacent Form is particularly useful when th
 
 There are various methods for evaluating $g^n$ when $n$ is given in Non-Adjacent Form.  As in the binary case, we can compute the evaluation left-to-right, right-to-left, and we can use windowing techniques.  A standard technique is to inspect $n$ from right-to-left two bits at a time.  If the bit pattern at index $i$ is 01, let $s_i = 1$ and subtract $2^i$ from $n$.  If the bit pattern is 11, let $s_i = -1$ and add $2^i$ to $n$.  When the bit pattern is 00 or 10, let $s_i =0$.  Algorithm \ref{alg:nafr2l} captures this idea while evaluating $g^n$ at the same time.
 
-This method can be improved by maintaining a carry flag $c$; instead of adding $2^i$ to $n$, we instead let $c = 1$; instead of subtracting $2^i$ from $n$, we instead let $c = 0$.  The benefit is noticable for \emph{very} large $n$, since the cost of addition and subtraction is reduced from $O(\log n)$ to $O(1)$.  Furthermore, we can compute $g^n$ using at most one inversion by computing the product $Q = g^{s_i2^i}$ for all $s_i = -1$ separate from the product $R = g^{s_j2^j}$ for all $s_j = 1$.  The result is $g^n = R \cdot Q^{-1}$.  These improvements are given in algorithm \ref{alg:nafR2LImmutable} and in detail in \cite[p.4]{Joye2000}.  Note that integer computations such as ``$\floor{n/2^i} \bmod 4$'' can be performed by sliding a window of size 2 bits across the binary representation of $n$.
+This method can be improved by maintaining a carry flag $c$ \cite[p.4]{Joye2000}; instead of adding $2^i$ to $n$, we instead let $c = 1$; instead of subtracting $2^i$ from $n$, we instead let $c = 0$.  The benefit is noticable for \emph{very} large $n$, since the cost of addition and subtraction is reduced from $O(\log n)$ to $O(1)$.  Furthermore, we can compute $g^n$ using at most one inversion by computing the product $Q = g^{s_i2^i}$ for all $s_i = -1$ separate from the product $R = g^{s_j2^j}$ for all $s_j = 1$.  The result is $g^n = R \cdot Q^{-1}$.  In general, this technique can be used to exponentiate with any signed representation using only one inverse.  These improvements are given in algorithm \ref{alg:nafR2LImmutable}.  Note that integer computations such as ``$\floor{n/2^i} \bmod 4$'' can be performed by sliding a window of size 2 bits across the binary representation of $n$.
 
 \begin{algorithm}[h]
-\caption{Computes $g^n$ for immutable $n$ using only one inverse.}\label{alg:nafR2LImmutable}
+\caption{Computes $g^n$ for immutable $n$ using only one inverse and a R2L NAF.}\label{alg:nafR2LImmutable}
 \begin{algorithmic}[1]
-\REQUIRE $g \in \mathcal G, n \ge 0 \in \ZZ$
+\REQUIRE $g \in \mathcal G, n \in \ZZgez$
 \ENSURE $g^n \in \mathcal G$
 \STATE $c \gets 0$ \COMMENT{carry flag}
 \STATE $i \gets 0$
@@ -165,35 +165,52 @@ The particular advantage of a Non-Adjacent Form exponentiation over a binary exp
 \bigbreak
 \section{Double-Base Number Systems}\label{section:dbns}
 
-A significant advantage of Non-Adjacent Form over a binary representation is that on average the number of non-zero terms (the density of the representation) is lower.  This advantage is accentuated when we extend the representation to a signed double-base representation.  In general, one can prove that for a number $n$, one can represent $n$ with a sublinear number of double-base terms in $O(\log n / \log \log n)$ (TODO).  Given two coprime integers $p$ and $q$ and some integer $n$, we represent $n$ as the sum and difference of the product of powers of $p$ and $q$,
+A significant advantage of Non-Adjacent Form over a binary representation is that on average the number of non-zero terms (the density of the representation) is lower.  This advantage is accentuated when we extend the representation to a signed double-base representation.  Given two coprime integers $p$ and $q$ and some integer $n$, we represent $n$ as the sum and difference of the product of powers of $p$ and $q$,
 \[
-	n = \sum_i s_i p^{a_i} q^{b_i}.
+	n = \sum_i s_i p^{a_i} q^{b_i}
 \]
-For example, consider the number $n=40824$ as above.  Given the bases $p=2$ and $q=3$, we can represent $n$ as
+where $s_i \in \{-1, 1\}$ and $a_i, b_i \in \ZZgez$.  We will be particularly interested in double-base representations for $p=2$ and $q=3$ as the principal developments of this thesis are exponentiation in the ideal class group for which we have fast squaring and cubing algorithms.
+
+As an example of of a double-base representation, consider the number $n=23814216$ as above.  Given the bases $p=2$ and $q=3$, one representation of $n$ is
 \[
-	n = 2^5 3^6 + 2^3 3^7 = (32)(729) + (8)(2187) = 23328 + 17496 = 40824.
+	2^3 3^2 -2^{13} 3^2 +2^{15} 3^6 = 72 - 73728 + 23887872 = 23814216.
 \]
-The exponentiation of $g^n$ is given by
+Factoring common terms, we can express $n$ as
 \[
-	g^{40824} = g^{2^5 3^6} g^{2^3 3^7} = \left(g^{2^3 3^6}\right)^{3^1} \left(g^{2^3 3^6}\right)^{2^2}
+	2^3 3^2 -2^{13} 3^2 +2^{15} 3^6 = 2^3 3^2 (1 + 2^{10} (-1 + 2^2 3^4)) = 23814216.
 \]
-requiring 5 squares, 7 cubes, and 1 multiplication.  In this example, $n$ is represented by 2 terms.  In general, a number $n$ can be represented with a sublinear number of terms in $O(\log n / \log \log n)$ (TODO).
+The exponentiation of $g^n$ for some $g \in \mathcal G$ and $n \in \ZZ$ is then given by
+\[
+	g^{23814216} = g^{2^3 3^2 -2^{13} 3^2 +2^{15} 3^6} = g^{2^3 3^2 (1 + 2^{10} (-1 + 2^2 3^4))}
+\]
+requiring 15 squares, 6 cubes, 2 multiplications, and 1 inverse.  Recall, the binary representation of $n=23814216$ was 
+\[
+	23814216 = 2^3+2^6+2^{13}+2^{14}+2^{16}+2^{17}+2^{19}+2^{21}+2^{22}+2^{24}
+\]
+having 10 terms, while the Non-Adjacent Form  was
+\[
+	23814216 = 2^3+2^6-2^{13}-2^{15}-2^{18}-2^{20}-2^{23}+2^{25}
+\]
+having 8 terms.  The double base representation given above
+\[
+	23814216 = 2^3 3^2 -2^{13} 3^2 +2^{15} 3^6
+\]
+contains only three terms.  Note that while the Non-Adjacent Form has in expectation $\floor{\log_2 n}/3$ terms while a binary representation has in expectation $\floor{\log_2 n}/2$ terms, in both cases the number of terms are bound by $O(\log n)$.  In the case of 2,3 double-base representations, it was proved in \cite{Ciet2005} that the number of terms is bound by $O(\log n / \log \log n)$.  Therefore, even if there is no known efficient way to compute $g^3$ or $g^2$, for large enough $n$, the number of terms, and correspondingly the number of operations, will be asymptotically fewer than either a Non-Adjacent Form exponentiation or a binary exponentiation.  Naturally, the cost of a 2,3 double-base exponentiation is even less if the corresponding cost to compute $g^2$ is less than the cost to compute $g \cdot g$, or the cost to compute $g^3$ is less than the cost to compute $g^2 g$. 
 
-
-
-\pagebreak
-\bigbreak
-\subsection{When/why is it useful?}
-
-\subsubsection {Sub-linearity in number of terms}
 
 \bigbreak
 \subsection{Chains vs Representations}
 
+Chain's are by definition... and can be exponentiated this way...
+
+Representations are by definition... and can be exponentiated this way...
 
 \bigbreak
 \subsection{Encoding of chains/representations}
-TODO: this seems like a concrete representation.  Should come later.
+
+Chains are often on the fly, no encoding, or delta.
+
+Representations using Yao's....
 
 
 % END OF TODAY
@@ -207,9 +224,6 @@ TODO: this seems like a concrete representation.  Should come later.
 
 \bigbreak
 \subsection{L2R Chains (Ostrowski approximation)}
-
-\bigbreak
-\subsection{Yao's method for representations}
 
 \bigbreak
 \subsection{Pruned Trees}
