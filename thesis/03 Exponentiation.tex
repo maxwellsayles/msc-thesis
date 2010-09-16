@@ -253,21 +253,26 @@ Another class of algorithms compute more general 2,3 representations, representa
 \[
 	n = \sum_{i=1}^k s_i 2^{a_i} 3^{b_i}
 \]
-for $s_i \in \{-1, 1\}, a_i, b_i \in \ZZgez$.  This is essentially the same form as \eqref{eq:generalDbnsForm} but for fixed $p$ and $q$.  Given a general 2,3 representation for an integer $n$, M\'{e}loni and Hasan use a modification of Yao's Algorithm \cite[Section 3.2]{Meloni2009} to achieve the same bound on the number of operations as in algorithm \ref{alg:expWithChain}, but with a bound on the memory of $O(\min \{max_a, max_b\})$.
-
-\eqref{eq:unchainedEg}
+for $s_i \in \{-1, 1\}, a_i, b_i \in \ZZgez$.  This is essentially the same form as \eqref{eq:generalDbnsForm} but for fixed $p$ and $q$.  Given a general 2,3 representation for an integer $n$, M\'{e}loni and Hasan use a modification of Yao's Algorithm \cite[Section 3.2]{Meloni2009} to achieve the same bound on the number of operations as in algorithm \ref{alg:expWithChain}, but with a bound on the memory of $O(\min \{max_a, max_b\})$.  Suppose $max_b < max_a$.  The algorithm works by precomputing a table of $T_i = g^{3^i}$ for $0 \le i \le max_b$, and then sorting each term $s_i2^{a_i}3^{b_i}$ in the representation in descending order by $a_i$.  Beginning with the term $s_i2^{a_i}3^{b_i}$ with the largest $a_i$, it looks up $T_i = g^{3^{b_i}}$ and multiplies it with the running result.  Let $a'$ be the difference $a_i - a_j$ where $a_j$ is the next largest value.  It then squares the running result $a'$ times.  The algorithm removes the term $s_i2^{a_i}3^{b_i}$ from the list of terms, and continues this way with the term with now largest $a_i$.  Let $a_0 = 0$ and the algorithm terminates when there are no more terms in the list.
 
 
-The case where $max_b < max_a$ is given by algorithm \ref{alg:yaos} and requires $O(max_b)$ memory.  When $max_a < max_b$, the algorithm should precompute a table of $g^{2^i}$ for $0 \le i \le max_a$ instead of a table $g^{3^j}$ for $0 \le j \le max_b$.
-
-TODO: Give an example using weird rep of big number
-
+% figure of exponentiating 23814216 with unchained representation
 \begin{figure}[htb!]
 \centering
 \includegraphics{yao1}
 \caption{The construction of $2^3 3^3 - 2^4 3^6 - 2^8 3^5 + 2^{15} 3^6$ using algorithm \ref{alg:yaos}.}
 \label{fig:FigureExample}
 \end{figure}
+
+As an example, consider the 2,3 representation given in \eqref{eq:unchainedEg} $23814216 = 2^3 3^3 - 2^4 3^6 - 2^8 3^5 + 2^{15} 3^6$.  The algorithm first computes $T_i = g^{3^i}$ for $0 \le i \le 6$.  Note that it is sufficient to store only the values of $g^{3^i}$ that actually occur in terms (in this example, we need only store $T_3$, $T_5$, and $T_6$).  Let $R \gets 1_{\mathcal G}$ and $Q \gets 1_{\mathcal G}$ as in the other algorithms, and let $S \gets 1_{\mathcal G}$ represent the computation of the current term.  The term with the largest $a_i$ is $+2^{15}3^6$.  Let $S \gets S \cdot T_6$.  The term with the next largest $a_i$ is $-2^8 3^5$.   So, we square $S$ $15-8=7$ times.  Continuing in this way we have the following steps:
+\begin{align*}
+	R \gets R
+\end{align*}
+
+The case where $max_b < max_a$ is given by algorithm \ref{alg:yaos} and requires $O(max_b)$ memory.  When $max_a < max_b$, the algorithm should precompute a table of $g^{2^i}$ for $0 \le i \le max_a$ instead of a table $g^{3^j}$ for $0 \le j \le max_b$.
+
+TODO: Give an example using weird rep of big number
+
 
 \begin{algorithm}[htb!]
 \caption{Computes $g^n$ given $n$ as any 2,3 representation}\label{alg:yaos}
