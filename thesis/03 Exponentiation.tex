@@ -172,20 +172,19 @@ A significant advantage of non-adjacent form over a binary representation is tha
 \end{equation}
 where $s_i \in \{-1, 1\}$ and $a_i, b_i, k \in \ZZgez$.  Since this thesis focuses on exponentiation in the ideal class group, and since we can compute a square with less cost than a multiply and a cube with less cost than a square plus multiply, we will be particularly interested in bases $p=2$ and $q=3$.
 
-As an example of a 2,3 double-base representation, consider the number $n=23814216$ as above.  Given the bases $p=2$ and $q=3$, \emph{one} representation of $n$ is
+As an example of a 2,3 double-base representation, consider the number $n=23814216$ as above.  Given the bases $p=2$ and $q=3$, \emph{one} possible representation of $n$ is
 \begin{equation}\label{eq:chainedEg}
 	23814216 = 2^3 3^2 -2^{13} 3^2 +2^{15} 3^6.
 \end{equation}
-
 The exponentiation of $g^n$ for some $g \in \mathcal G$ is then given by
 \[
-	g^{23814216} = g^{2^3 3^2 -2^{13} 3^2 +2^{15} 3^6},
+	g^{23814216} = g^{2^3 3^2 -2^{13} 3^2 +2^{15} 3^6}.
 \]
-requiring 15 squares, 6 cubes, 2 multiplications, and 1 inverse.  Note that this was just one possible 2,3 representation of the number 23814216 -- there are many.  For example,
+Note that this was just one possible 2,3 representation of the number 23814216 -- there are many.  For example,
 \begin{equation}\label{eq:unchainedEg}
 	23814216 = 2^3 3^3 - 2^4 3^6 - 2^8 3^5 + 2^{15} 3^6
 \end{equation}
-is another valid 2,3 representation.  Exponentiation with this representation would require 1 more multiplication since there is one more term.  Different representations will trade off cubings for squarings and the best representation for exponentiation will depend on the actual cost of the individual operations.  Later, we shall see some algorithms that take this into account, but many that are designed to either find representations quickly, representations of a special form, or representations with few terms.
+is another valid 2,3 representation.  Different representations will trade off cubings for squarings and the best representation for exponentiation will depend on the actual cost of the individual operations.  Later, we shall see some algorithms that take this into account, but many that are designed to either find representations quickly, representations of a special form, or representations with few terms.
 
 Recall, the binary representation \eqref{eq:binaryEg}, non-adjacent form \eqref{eq:nafEg}, and 2,3 double-base representation \eqref{eq:chainedEg} of 23814216 were
 \begin{align*}
@@ -253,63 +252,54 @@ Another class of algorithms compute more general 2,3 representations, representa
 \[
 	n = \sum_{i=1}^k s_i 2^{a_i} 3^{b_i}
 \]
-for $s_i \in \{-1, 1\}, a_i, b_i \in \ZZgez$.  This is essentially the same form as \eqref{eq:generalDbnsForm} but for fixed $p$ and $q$.  Given a general 2,3 representation for an integer $n$, M\'{e}loni and Hasan use a modification of Yao's Algorithm \cite[Section 3.2]{Meloni2009} to achieve the same bound on the number of operations as in algorithm \ref{alg:expWithChain}, but with a bound on the memory of $O(\min \{max_a, max_b\})$.  Suppose $max_b < max_a$.  The algorithm works by precomputing a table of $T_i = g^{3^i}$ for $0 \le i \le max_b$, and then sorting each term $s_i2^{a_i}3^{b_i}$ in the representation in descending order by $a_i$.  Beginning with the term $s_i2^{a_i}3^{b_i}$ with the largest $a_i$, it looks up $T_i = g^{3^{b_i}}$ and multiplies it with the running result.  Let $a'$ be the difference $a_i - a_j$ where $a_j$ is the next largest value.  It then squares the running result $a'$ times.  The algorithm removes the term $s_i2^{a_i}3^{b_i}$ from the list of terms, and continues this way with the term with now largest $a_i$.  Let $a_0 = 0$ and the algorithm terminates when there are no more terms in the list.
-
-
-% figure of exponentiating 23814216 with unchained representation
-\begin{figure}[htb!]
-\centering
-\includegraphics{yao1}
-\caption{The construction of $2^3 3^3 - 2^4 3^6 - 2^8 3^5 + 2^{15} 3^6$ using algorithm \ref{alg:yaos}.  Steps are executed from left-to-right, top-to-bottom.}
-\label{fig:FigureExample}
-\end{figure}
-
-As an example, consider the 2,3 representation given in \eqref{eq:unchainedEg} $23814216 = 2^3 3^3 - 2^4 3^6 - 2^8 3^5 + 2^{15} 3^6$.  The algorithm first computes $T_i = g^{3^i}$ for $0 \le i \le 6$.  Note that it is sufficient to store only the values of $g^{3^i}$ that actually occur in terms (in this example, we need only store $T_3$, $T_5$, and $T_6$).  Let $R \gets 1_{\mathcal G}$ and $Q \gets 1_{\mathcal G}$ as in the other algorithms, and let $S \gets 1_{\mathcal G}$ represent the computation of the current term.  The term with the largest $a_i$ is $+2^{15}3^6$.  Let $S \gets S \cdot T_6$.  The term with the next largest $a_i$ is $-2^8 3^5$.   So, we square $S$ $15-8=7$ times.  Continuing in this way we have the following steps:
-\begin{align*}
-	R \gets R
-\end{align*}
-
-The case where $max_b < max_a$ is given by algorithm \ref{alg:yaos} and requires $O(max_b)$ memory.  When $max_a < max_b$, the algorithm should precompute a table of $g^{2^i}$ for $0 \le i \le max_a$ instead of a table $g^{3^j}$ for $0 \le j \le max_b$.
-
-TODO: Give an example using weird rep of big number
-
+for $s_i \in \{-1, 1\}, a_i, b_i \in \ZZgez$.  This is essentially the same form as \eqref{eq:generalDbnsForm} but for fixed $p$ and $q$.  Given a general 2,3 representation for an integer $n$, M\'{e}loni and Hasan use a modification of Yao's Algorithm \cite[Section 3.2]{Meloni2009} to achieve the same bound on the number of operations as in algorithm \ref{alg:expWithChain}, but with a bound of $O(\min \{max_a, max_b\})$ on the memory used.  Suppose $max_b < max_a$.  We require the terms to be sorted such that $a_k \ge ... \ge a_1$.  The algorithm works by precomputing a table of $T_b = g^{3^b}$ for $0 \le b \le max_b$.  Beginning with the first term $s_i2^{a_i}3^{b_i}$ with the largest $a_i$, it looks up $T_{b_i} = g^{3^{b_i}}$ and multiplies ${T_{b_i}}^{s_i}$ with the running result.  Let $a' = a_i - a_j$ where $a_j$ is the next largest value or 0 if there are no remaining.  It then squares the running result $a'$ times.  The algorithm removes the term $s_i2^{a_i}3^{b_i}$ from the list of terms, and continues in this way with the term with now largest $a_i$.  The algorithm terminates when there are no more terms in the list.  Algorithm  \ref{alg:yaos} gives pseudo-code for this approach and requires $O(max_b)$ memory.  When $max_a < max_b$, we use a related algorithm that requires the terms to be sorted such that $b_k \ge ... \ge b_1$; it precomputes $T_a = g^{2^a}$ for $0 \le a \le max_a$ and works similar to Algorithm \ref{alg:yaos} but with cubing and squaring appropriately swapped.
 
 \begin{algorithm}[htb!]
-\caption{Computes $g^n$ given $n$ as any 2,3 representation}\label{alg:yaos}
+\caption{Computes $g^n$ given $n$ in 2,3 representation.}\label{alg:yaos}
 \begin{algorithmic}[1]
 \REQUIRE $g \in \mathcal G,$ \\
 $n = \sum_{i=1}^k s_i2^{a_i}3^{b_i},$ \\
 $s_1,...,s_k \in \{-1, 1\},$ \\
-$a_1,...,a_k \in \ZZgez,$ \\
+$a_1 \ge ... \ge a_k \in \ZZgez,$ \\
 $b_1,...,b_k \in \ZZgez.$
 \ENSURE $g^n \in \mathcal G$
-\STATE $max_b \gets \max \{ b_1, ... b_k \}$.
-\STATE $T_i \gets g^{3^i}$ for $0 \le i \le max_b$.
-\STATE $i \gets 1$
-\STATE $a \gets 0$ \COMMENT{current power of 2}
-\STATE $b \gets 0$ \COMMENT{current power of 3}
-\STATE $T \gets g$ \COMMENT{loop invariant: $T = g^{2^a 3^b}$}
-\STATE $R \gets 1_{\mathcal G}$ \COMMENT{product of positive exponents}
-\STATE $Q \gets 1_{\mathcal G}$ \COMMENT{product of negative exponents}
-\WHILE {$i \le k$}
-	\WHILE {$a < a_i$}
-		\STATE $T \gets T^2$
-		\STATE $a \gets a + 1$
-	\ENDWHILE
-	\WHILE {$b < b_i$}
-		\STATE $T \gets T^3$
-		\STATE $b \gets b + 1$
-	\ENDWHILE
-	\IF {$s_i = 1$}
-		\STATE $R \gets R \cdot T$
-	\ELSE
-		\STATE $Q \gets Q \cdot T$
-	\ENDIF
+\IF {k = 1}
+	\RETURN $g^{2^{a_1} 3^{b_1}}$
+\ENDIF
+\STATE $max_b \gets \max \{ b_1, ..., b_k \}$.
+\STATE $T_b \gets g^{3^b}$ for $0 \le b \le max_b$ \COMMENT{by cubing $max_b$ number of times}
+\STATE $a' \gets a_1-a_2$
+\STATE $R \gets \left( T_{b_1} \right)^{2^{a'}}$ \COMMENT{by squaring $a_1-a_2$ number of times}
+\STATE $i \gets 2$
+\WHILE {$i < k$}
+	\STATE $R \gets R \cdot {T_{b_i}}^{s_i}$
+	\STATE $a' \gets a_i - a_{i+1}$
+	\STATE $R \gets R ^ {2^{a'}}$ \COMMENT{by squaring $a_i - a_{i+1}$ number of times}
 	\STATE $i \gets i + 1$
 \ENDWHILE
-\RETURN $R \cdot Q^{-1}$
+\STATE $R \gets R \cdot {T_{b_k}}^{s_k}$
+\STATE $R \gets R ^ {2^{a_k}}$ \COMMENT{by squaring $a_k$ number of times}
+\RETURN $R$
 \end{algorithmic}
 \end{algorithm}
+
+As an example, consider \eqref{eq:unchainedEg}, the 2,3 representation $23814216 = 2^3 3^3 - 2^4 3^6 - 2^8 3^5 + 2^{15} 3^6$.  The algorithm first computes $T_b = g^{3^b}$ for $0 \le b \le 6$.  Note that it is sufficient to store only the values of $g^{3^{b_i}}$ that actually occur in terms (in this example, we need only store $T_3$, $T_5$, and $T_6$).  Let $R_j$ represent the partial exponentiation of the $j$ terms with the largest $b_i$ with $g^{2^{a_{j-1}}}$ is factored out.  Let $R_0 = 1_{\mathcal G}$.  In this example, we compute 
+\begin{align*}
+	R_1 &= \left( T_6 \right)^{2^7} &&\Rightarrow g^{2^7 3^6}, \\
+	R_2 &= \left( R_1 {T_5}^{-1} \right)^{2^4} &&\Rightarrow g^{-2^4 3^5 + 2^{11} 3^6}, \\
+	R_3 &= \left( R_2 {T_6}^{-1} \right)^{2^1} &&\Rightarrow g^{-2^1 3^6 -2^5 3^5 + 2^{12} 3^6}, \\
+	R_4 &= \left( R_3 T_3 \right) ^ {2^3} &&\Rightarrow g^{2^3 3^3 -2^4 3^6 -2^8 3^5 + 2^{15} 3^6},
+\end{align*}
+% figure of exponentiating 23814216 with unchained representation
+\begin{figure}[H]
+\centering
+\includegraphics{yao1}
+\caption{The construction of $2^3 3^3 - 2^4 3^6 - 2^8 3^5 + 2^{15} 3^6$ using algorithm \ref{alg:yaos}.  Steps are executed from left-to-right, top-to-bottom.}
+\label{fig:yao1}
+\end{figure}
+as depicted by figure \ref{fig:yao1}.  The result of the computation is $g^{23814216} = R_4$.  
+
+
 
 
 
