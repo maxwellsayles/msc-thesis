@@ -56,7 +56,7 @@
 \setcounter{chapter}{1}
 \chapter{Ideal Arithmetic}
 
-In this thesis, we focus on fast arithmetic and fast exponentiation in the ideal class group of imaginary quadratic number fields.  The ideal class group is a group of equivalence classes of ideals in a maximal order of a quadratic number field.   We begin with the relevant theory of quadratic number fields, then discuss quadratic orders and ideals of quadratic orders.  Finally, we discuss arithmetic in the ideal class group.  The theory presented here is available in detail in reference texts on algebraic number theory such as \cite{IR90}, \cite{Hua82}, or \cite{Coh80}. 
+In this thesis, we focus on fast arithmetic and fast exponentiation in the ideal class group of imaginary quadratic number fields.  The ideal class group is the group of equivalence classes of ideals in the maximal order of a quadratic number field.   We begin with the relevant theory of quadratic number fields, then discuss quadratic orders and ideals of quadratic orders.  Finally, we discuss arithmetic in the ideal class group.  The theory presented here is available in detail in reference texts on algebraic number theory such as \cite{IR90}, \cite{Hua82}, or \cite{Coh80}. 
 
 
 
@@ -65,14 +65,14 @@ In this thesis, we focus on fast arithmetic and fast exponentiation in the ideal
 %%%%%%%%%%%%%%%%%%%%%
 \section{Quadratic Numbers}
 
-The ideal class group of imaginary quadratic numbers begins with quadratic numbers, and quadratic numbers are specific types of algebraic numbers, so we begin there.   
+The ideal class group of imaginary quadratic numbers begins with quadratic numbers, a type of algebraic number, so we begin there.   
 
 \begin{defn}
-An \emph{algebraic number} is a complex number $\alpha$ that is a root of a polynomial $f(x) \in \QQ[x]$.
+An \emph{algebraic number} is a root $\alpha$ of a polynomial $f(x) \in \QQ[x]$.
 \end{defn}
 
 \noindent
-Given an algebraic number $\alpha$, we create an algebraic number field as the extension field of $\QQ$ adjoined $\alpha$, denoted $\QQ(\alpha)$. Let $\KK$ be our algebraic number field:
+Given an algebraic number $\alpha$, we create an algebraic number field as the extension field of $\QQ$ obtained by adjoining $\alpha$, denoted $\QQ(\alpha)$. Let $\KK$ be our algebraic number field; we can write $\KK$ as
 \[
 	\KK = \QQ(\alpha) = \left\{ \frac{f(\alpha)}{g(\alpha)} : f(x), g(x) \in \QQ[x]; g(\alpha) \ne 0 \right\}.
 \]
@@ -80,13 +80,13 @@ Given an algebraic number $\alpha$, we create an algebraic number field as the e
 \noindent
 The rational numbers $\QQ$ are algebraic numbers of degree 1, i.e. $a/b \in \QQ$ is a root of $bx - a$.  Quadratic numbers are algebraic numbers of degree 2.  For example, given a polynomial $f(x) = ax^2 + bx + c$ where $f(x) \in \ZZ[x]$, the root $\alpha$ is given by the quadratic formula
 \[
-	\alpha = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}.
+	\alpha = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a} ~.
 \]
 Let $\Delta = b^2 -4ac$ such that $\Delta \in \ZZ$ is the discriminant of $f(x)$.  Then our quadratic number field is 
 \[
 	\KK = \QQ(\alpha) = \QQ(\sqrt{\Delta}) = \{u + v\sqrt{\Delta} : u,v \in \QQ\}.
 \]
-Notice that
+When $\Delta$ is positive, $\KK$ is a \emph{real} quadratic number field, and when $\Delta$ is negative, $\KK$ is an \emph{imaginary} quadratic number field.  This thesis will deal strictly with the imaginary case.  Notice that
 \begin{eqnarray*}
 \begin{array}{l l l l}
 	\Delta & \equiv & b^2-4ac & \pmod 4 \\
@@ -96,7 +96,7 @@ Notice that
 \end{eqnarray*}
 Also, if $\Delta = f^2 \Delta_0$ for some $f \in \ZZ$ where $\Delta_0$ is squarefree, then $\KK = \QQ(\Delta_0)$.
 
-Notice that if we are given a polynomial $f(x)$ with rational coefficients, we can compute a polynomial $g(x)$ with equivalent roots and integer coefficients by multiplying the coefficients of $f(x)$ by $c \in \ZZ$ where $c$ is an integer multiple of the lowest common multiple of the denominators of each coefficient in $f(x)$.  As such, we obtain a polynomial $g(x) = cf(x)$ with integer coefficients such that $g(x)$ has the same roots as $f(x)$.  This leads us to quadratic integers.
+Notice that if we are given a polynomial $f(x)$ with rational coefficients, we can compute a polynomial $g(x)$ with equal roots and integer coefficients by multiplying the coefficients of $f(x)$ by $c \in \ZZ$ where $c$ is an integer multiple of the lowest common multiple of the denominators of each coefficient in $f(x)$.  We obtain a polynomial $g(x) = cf(x)$ with integer coefficients such that $g(x)$ has the same roots as $f(x)$.  This leads us to quadratic integers.
 
 
 %%%%%%%%%%%%%%%%%%%%%%
@@ -105,44 +105,44 @@ Notice that if we are given a polynomial $f(x)$ with rational coefficients, we c
 \bigbreak
 \section{Quadratic Integers}
 
-We mentioned above that the ideal class group is a group of equivalence classes of ideals of a maximal order of a quadratic number field.  A maximal order is equivalent to the subring of quadratic integers in a quadratic number field.  A quadratic integer is a degree two algebraic integer, so here we discuss algebraic integers.
+We mentioned above that the ideal class group is the group of equivalence classes of ideals of the maximal order of a quadratic number field.  The maximal order is the largest subring of quadratic integers in a quadratic number field.  A quadratic integer is a degree two algebraic integer, so here we discuss algebraic integers.
 
 \begin{defn}
 An \emph{algebraic integer} is a root $\alpha$ of a monic polynomial $g(x) \in \ZZ[x]$.
 \end{defn}
 
 \noindent
-It is important that $g(x)$ is monic, since if $g(x)$ is not monic, we can divide each coefficient by the first coefficient to get a polynomial $f(x)$ with rational coefficients and equivalent roots.  As such, a root $\alpha$ of $g(x)$ is an algebraic number, but not an algebraic integer.
+It is important that $g(x)$ is monic, since if $g(x)$ is not monic, we can divide each coefficient by the first coefficient to get a polynomial $f(x)$ with rational coefficients and equal roots.  As such, a root $\alpha$ of $g(x)$ is an algebraic number, but not an algebraic integer.
 
 
 \begin{defn}
 \label{defn:quadraticInteger}
 A \emph{quadratic integer} $\beta$ is an algebraic integer of $\QQ(\sqrt{\Delta_0})$ such that $\beta = i + j \omega_0$ for some $i,j \in \ZZ$ where
-\[
+\begin{equation*}
 	\omega_0 = \begin{cases}
 		\sqrt{\Delta_0} & \textrm{ when } \Delta_0 \not \equiv 1 \pmod 4 \\
 		\frac{1+\sqrt{\Delta_0}}{2} & \textrm{ when } \Delta_0 \equiv 1 \pmod 4.
 	\end{cases}
-\]
+\end{equation*}
 \end{defn}
 
 \noindent
 To see this, recall that an algebraic number $\beta$ of $\QQ(\sqrt\Delta_0)$ is $\beta = u+v\sqrt\Delta_0$ for some $u,v \in \QQ$.  For $\beta$ to be an  algebraic integer it must be a root of a monic quadratic polynomial $f(x) = x^2+bx+c \in \ZZ[x]$ for some $b,c \in \ZZ$.  The root is given by
-\begin{align*}
-	\beta &= \frac{-b \pm \sqrt{b^2-4c}}{2} \\
-	u + v \sqrt{\Delta_0} &= -\frac{b}{2} \pm \frac{\sqrt{b^2-4c}}{2}
-\end{align*}
-for $u,v \in \QQ$ and $b,c,\Delta_0 \in \ZZ$.
-Equating rational and irrational parts we have
+\begin{equation*}
+	\beta = \frac{-b \pm \sqrt{b^2-4c}}{2} \\
+\end{equation*}
+for $b,c \in \ZZ$. Equating rational and irrational parts we have
 \begin{equation*}
 	u = -\frac{b}{2}
 \end{equation*}
 and
-\begin{align*}
-	v \sqrt{\Delta_0} &= \frac{\sqrt{b^2 -4c}}{2} \\
-	\sqrt{v^2 \Delta_0} &= \sqrt{\frac{b^2}{4} - c} \\
-	v^2 \Delta_0 &= \frac{b^2}{4} - c.
-\end{align*}
+\begin{equation*}
+	v \sqrt{\Delta_0} = \frac{\sqrt{b^2 -4c}}{2}
+\end{equation*}
+and so
+\begin{equation*}
+	v^2 \Delta_0 = \frac{b^2}{4} - c.
+\end{equation*}
 
 
 There are two cases: when $b$ is even, and when $b$ is odd.  First, suppose $b$ is even.  Then $b=2b'$ for some $b' \in \ZZ$.  This implies that $u = -b'$ and $u \in \ZZ$.  Since $b', c, \Delta_0 \in \ZZ$ we have
@@ -150,7 +150,7 @@ There are two cases: when $b$ is even, and when $b$ is odd.  First, suppose $b$ 
 	v^2 \Delta_0 & = & \frac{(2b')^2}{4} - c \\
 	& = & b'^2 - c
 \end{eqnarray*}
-and $v \in \ZZ$.  Therefore, when $u, v \in \ZZ$ it follows that $\beta = u + v \sqrt{\Delta_0}$ is a quadratic integer.
+and $v \in \ZZ$.  Therefore, when $b$ is even, i.e. $\Delta \equiv 0 \pmod 4$ it follows that $\beta = u + v \sqrt{\Delta_0}$ is a quadratic integer.
 
 \bigbreak
 Now suppose $b$ is odd; then $b=2b' + 1$ for some $b' \in \ZZ$.  Again, equating rational and irrational parts we have
@@ -162,22 +162,23 @@ and
 	v^2 \Delta_0 & = & \frac{(2b'+1)^2}{4} - c \\
 	& = & b'^2 + b' + \frac{1}{4} -c.
 \end{eqnarray*}
-Let $v = \frac{j}{2}$ for some $j \in \ZZ$.  
-\begin{align*}
-	v^2 \Delta_0 & = b'^2 + b' + \frac{1}{4} -c \\
-	\frac{j^2}{4} \Delta_0 & = b'^2 + b' + \frac{1}{4} -c \\
-	j^2 \Delta_0 & = 4b'^2 + 4b' + 1 - 4c \\
-	j^2 \Delta_0 & \equiv 1 \pmod 4.
-\end{align*}
+Let $v = \frac{j}{2}$ for some $j \in \ZZ$.  Then
+\begin{equation*}
+	\frac{j^2}{4} \Delta_0 = b'^2 + b' + \frac{1}{4} -c,
+\end{equation*}
+and as such
+\begin{equation*}
+	j^2 \Delta_0 \equiv 1 \pmod 4.
+\end{equation*}
 
 \noindent
-This is only possible when $j \equiv 1,3 \pmod 4$ and $\Delta_0 \equiv 1 \pmod 4$.  Suppose \break $\Delta_0 \equiv 1 \pmod 4$, let $v = j/2$ and $u = i + j/2$ for some $i, j \in \ZZ$.  Then
+This is only possible when $j \equiv 1,3 \pmod 4$ and $\Delta_0 \equiv 1 \pmod 4$.  Let $v = j/2$ and $u = i + j/2$ for some $i, j \in \ZZ$.  Then
 \begin{eqnarray*}
 	\beta & = & u + v \sqrt{\Delta_0} \\
 	& = & i + \frac{j}{2} + \frac{j \sqrt{\Delta_0}}{2} \\
 	& = & i + j \left( \frac{1 + \sqrt{\Delta_0}}{2} \right).
 \end{eqnarray*}
-The case of $\beta = u + v \sqrt{\Delta_0}$ when $u,v \in \ZZ$ is captured above when $j$ is even. When $\Delta_0 \not \equiv 1 \pmod 4$, there are no solutions for $b$ odd.  As such, definition \ref{defn:quadraticInteger} characterizes the quadratic integers of $\QQ(\sqrt\Delta_0)$.
+As such, definition \ref{defn:quadraticInteger} characterizes the quadratic integers of $\QQ(\sqrt\Delta_0)$.
 
 
 
@@ -186,29 +187,29 @@ The case of $\beta = u + v \sqrt{\Delta_0}$ when $u,v \in \ZZ$ is captured above
 %%%%%%%%%%%%%%%%%
 \bigbreak
 \section{Maximal Order of Algebraic Integers}
-In general, the set of all algebraic integers of a number field $\KK$ is a \emph{maximal order} of $\KK$.  To state a \emph{maximal order} of $\KK$, we begin by defining a \emph{$\ZZ$-module}.  
+The ring of all algebraic integers of a number field $\KK$ is the \emph{maximal order} of $\KK$.  To describe the \emph{maximal order} of $\KK$, we begin by defining a \emph{$\ZZ$-module}.  
 
 \begin{defn}
-Given a subset of a number field $X = \{ \xi_1, \xi_2, \xi_3, ..., \xi_n \} \subseteq \KK$, the \emph{$\ZZ$-module} $\MM$ is generated as a linear combination of the elements of $X$:
+Given a subset of a number field $X = \{ \xi_1, \xi_2, \xi_3, ..., \xi_n \} \subseteq \KK$, the \emph{$\ZZ$-module} $\MM$ is generated as the set of all linear combinations of the elements of $X$ with integer coefficients:
 \[
 	\MM = \left \{ \sum_{i}^n x_i \xi_i : x_i \in \ZZ, \xi_i \in X \right \}.
 \]
-We denote this
+We denote this as
 \[
 	\MM = [ \xi_1, \xi_2, ..., \xi_n ].
 \]
 \end{defn}
 
 \begin{defn}
-An \emph{order} $\OO$ of $\KK$ is a $\ZZ$-module of $\KK$ such that $\OO$ is a subring of $\KK$ containing 1.  A \emph{quadratic order} is a $\ZZ$-module of $\QQ(\sqrt{\Delta_0})$ such that $\OO_\Delta = [1, f\omega_0]$ where $\Delta = f^2\Delta_0$ for some $f \in \ZZ$.  We call $f$ the \emph{conductor} of $\OO_\Delta$.
+An \emph{order} $\OO$ of $\KK$ is a $\ZZ$-module of $\KK$ such that $\OO$ is a subring of $\KK$ containing 1.
 \end{defn}
 
-\bigbreak
-Given $\omega_0$ from definition \ref{defn:quadraticInteger}, the module $[1, \omega_0]$ is the order of algebraic integers in the quadratic number field $\KK=\QQ(\sqrt{\Delta_0})$.  We denote this as $\OO_{\KK}$.  The order $\OO_\KK$ is of maximal size since any order $\OO_\Delta = [1,f\omega_0]$ is a subring of $\OO_\KK$.  Furthermore, since $\Delta \equiv 0,1 \pmod 4$, we can write the order $\OO_\Delta$ as the $\ZZ$-module \cite[p.~81]{Jac09}:
+\noindent
+Orders of quadratic fields can be written as  $\OO_\Delta = [1, f\omega_0]$ where $\Delta = f^2\Delta_0$ for some $f \in \ZZ$.  We call $f$ the \emph{conductor} of $\OO_\Delta$.  Note that by Definition \ref{defn:quadraticInteger} quadratic orders $\OO_\Delta$ can also be written as  the $\ZZ$-module  \cite[p.~81]{Jac09}:
 \begin{equation*}
-	\OO_\Delta = [1,f\omega_0] = \left[1, \frac{\Delta + \sqrt{\Delta}}{2} \right].
+	\OO_\Delta = \left[1, \frac{\Delta + \sqrt{\Delta}}{2} \right].
 \end{equation*}
-When $\Delta$ is assumed to be known, we write $\OO$ for $\OO_\Delta$ and $\omega$ for $f\omega_0$.
+The maximal order of algebraic integers in the quadratic number field $\KK=\QQ(\sqrt{\Delta_0})$ is $[1, \omega_0]$.  We denote this as $\OO_{\KK}$.  The order $\OO_\KK$ is maximal since any order $\OO_\Delta = [1,f\omega_0]$ is a subring of $\OO_\KK$. 
 
 
 %%%%%%%%%%
@@ -224,30 +225,31 @@ An integral \emph{ideal} $\mathfrak{a}$ of an order $\OO$, known as an \emph{$\O
 \end{defn}
 
 \noindent
-We denote an ideal $\mathfrak{a}$ as a two-dimensional $\OO$-module
+An ideal $\mathfrak{a}$ of any order can be represented as a two-dimensional $\OO$-module
 \[
 	\alpha \OO + \beta \OO = (\alpha, \beta)
 \]
-for $\alpha, \beta \in \OO$.  Computationally, this is represented as a two dimensional $\ZZ$-module
+for generators $\alpha, \beta \in \OO$.  In the quadratic case, it can also be represented as a two dimensional $\ZZ$-module
 \begin{equation}
 \label{eq:idealZModule}
-	(\alpha, \beta) = \left[sa, s \frac{b+ \sqrt{\Delta}}{2} \right] = s \left(a \ZZ + \frac{b + \sqrt{\Delta}}{2} \ZZ \right)
+	(\alpha, \beta) = \left[sa, s \frac{b+ \sqrt{\Delta}}{2} \right] = sa \ZZ + s\frac{b + \sqrt{\Delta}}{2} \ZZ
 \end{equation}
-for some $s, a, b \in \ZZ$.  Notice that $s$, $a$, and $b$ are unique, and $b$ is unique $\bmod~2a$ since
+for some $s, a, b \in \ZZ$.  Notice that $s$ and $a$ are unique, and $b$ is unique $\bmod~2a$ since
 \begin{equation*}
-	\left[sa, s\frac{2a+b+\sqrt{\Delta}}{2}\right] = \left[s(a+1), s\frac{b+\sqrt{\Delta}}{2}\right].
+	\left[sa, s\frac{2ak+b+\sqrt{\Delta}}{2}\right] = \left[s(ak+1), s\frac{b+\sqrt{\Delta}}{2}\right]
 \end{equation*}
+for $k \in \ZZ$.
 
-To see that we can represent an ideal in the form of \eqref{eq:idealZModule}, we first express $\MM$ as a finitely generated submodule $\MM=[a',b'+c'\omega]$ for some $a',b',c' \in \ZZ$.  Here, we follow \cite[pp~85-86]{Jac09}.  In the case that $\MM = [\xi_1]$ where $\xi_1 = a_1+b_1\omega$, let $a'=0$, $b' = a_1$ and $c'=b_1$, and we have $\MM = [\xi_1] = [a', b'+c'\omega]$.  Now, suppose $\MM = [\xi_1, \xi_2]$ for $\xi_1 = a_1 + b_1\omega$ and $\xi_2 = a_2+b_2\omega$.  We want a linear combination of $\xi_1$ and $\xi_2$ such that $\MM = [a',b'+c'\omega] = [\xi_1, \xi_2]$.  Let $c = \gcd(b_1, b_2)$.  Then there exists $x,y \in \ZZ$ such that 
+To see that we can represent an ideal in the form of \eqref{eq:idealZModule}, we first express $\mathfrak a$ as a finitely generated submodule $\mathfrak a=[a',b'+c'\omega]$ for some $a',b',c' \in \ZZ$.  Here, we follow \cite[pp~85-86]{Jac09}.  In the case that $\mathfrak a = [\xi_1]$ where $\xi_1 = a_1+b_1\omega$, let $a'=0$, $b' = a_1$ and $c'=b_1$, and we have $\mathfrak a = [\xi_1] = [a', b'+c'\omega]$.  Now, suppose $\mathfrak a = [\xi_1, \xi_2]$ for $\xi_1 = a_1 + b_1\omega$ and $\xi_2 = a_2+b_2\omega$.  We want a linear combination of $\xi_1$ and $\xi_2$ such that $\mathfrak a = [a',b'+c'\omega] = [\xi_1, \xi_2]$.  Let $c = \gcd(b_1, b_2)$.  Then there exists $x,y \in \ZZ$ such that 
 \begin{equation}
 \label{eq:cLinear}
 	c = xb_1 + yb_2.
 \end{equation}
-Computing the product of the matrix
+The linear combination of $\xi_1$ and $\xi_2$ is represented by the matrix
 \[
 	M = \matrixtt{b_2/c}{x}{b_1/c}{y}
 \]
-with the module $\MM$ we get
+We get
 \begin{align*}
 	a' &= (b_2/c) \xi_1 - (b_1/c) \xi_2  \\
 	&= (b_2/c) (a_1+b_1\omega) - (b_1/c) (a_2+b_2\omega)  \\
@@ -263,7 +265,7 @@ and
 \end{align*}
 As such, 
 \[
-	\MM = [\xi_1,\xi_2] = [(a_1b_2-b_1a_2)/c, xa_1+ya_2+c\omega] = [a',b'+c'\omega].
+	\mathfrak a = [\xi_1,\xi_2] = [(a_1b_2-b_1a_2)/c, xa_1+ya_2+c\omega] = [a',b'+c'\omega].
 \]
 Now, since $\omega\mathfrak a \subseteq \mathfrak a$ and $\omega a' \in \mathfrak a$, we have $\omega a' = ua' + v(b'+c'\omega)$ for some $u,v \in \ZZ$. Equating irrational parts, we get $a' = vc'$ and so $c'~|~a'$.  Equating rational parts, we get $ua'+vb' = uvc'+vb' = 0$ which implies $b' = -uc'$ and hence $c'~|~b'$.  Letting $s=c'$, $a=a'/c$, and $b = b'/c$ if $\Delta \equiv 1 \pmod 4$ and $b = 2b'/c$ otherwise, we have
 \[
@@ -271,7 +273,7 @@ Now, since $\omega\mathfrak a \subseteq \mathfrak a$ and $\omega a' \in \mathfra
 \]
 which is the desired computational form.
 
-Here we provide some basic terminology useful when discussing ideals.  An ideal $\mathfrak{a} = [sa, s(b+\sqrt{\Delta})/2]$ with $s=1$ is called \emph{primitive}, while an ideal $\mathfrak{a}$ generated by a single element $\alpha \in \OO$ is \emph{principal}. A principal ideal $\mathfrak a$ is written $\mathfrak{a} = \alpha \OO = (\alpha)$.  An ideal $\mathfrak{a}$ is \emph{invertible} if there exists an ideal $\mathfrak{b}$ such that $\mathfrak{a}\mathfrak{b}$ is principal.  When $\OO$ is maximal, all ideals of $\OO$ are invertible.  If $\OO_\Delta$ for $\Delta = f^2\Delta_0$ is non-maximal, then an ideal $\mathfrak{a}$ is invertible if $\gcd(N(\mathfrak{a}),f)=1$.  $N(\mathfrak{a})$ is the \emph{norm} of an ideal defined as the number of distinct cosets in the group $\OO$ modulo $\mathfrak{a}$, denoted $|\OO/\mathfrak{a}|$ \cite[pp.~90-91]{Jac09}.  For an invertible ideal $\mathfrak{a} = [sa, s(b+\sqrt{\Delta})/2]$, the norm is $N(\mathfrak{a}) = s^2a$.  When two ideals $\mathfrak{a}$ and $\mathfrak{b}$ are invertible, the norm is multiplicative, i.e. $N(\mathfrak{a}\mathfrak{b}) = N(\mathfrak{a})N(\mathfrak{b})$ \cite[p.~92]{Jac09}.  The \emph{conjugate} of an ideal $\mathfrak{a} = (\alpha, \beta)$ is $\overline{\mathfrak{a}} = (\alpha, -\beta)$, and the \emph{trace} is $T(\mathfrak a) = \mathfrak a + \overline{\mathfrak a}$.  Finally, two ideals $\mathfrak{a}$ and $\mathfrak{b}$ of $\OO$ are said to be \emph{equivalent} if there exist principal ideals $(\alpha)$ and $(\beta)$ with  $\alpha, \beta \in \OO$ and $\alpha\beta \neq 0$ such that $(\alpha)\mathfrak{a} = (\beta)\mathfrak{b}$.  We denote the set of all ideals which are equivalent to an ideal $\mathfrak{a}$ as $[\mathfrak{a}]$ and this is called an \emph{ideal class} of $\OO$.  With this, we are  sufficiently able to describe the ideal class group.
+Here we provide some basic terminology useful when discussing ideals.  An ideal $\mathfrak{a} = [sa, s(b+\sqrt{\Delta})/2]$ with $s=1$ is called \emph{primitive}, and an ideal $\mathfrak{a}$ is \emph{invertible} if there exists an ideal $\mathfrak{b}$ such that $\mathfrak{a}\mathfrak{b}$ is primitive.  An ideal $\mathfrak{a}$ generated by a single element $\alpha \in \OO$ is \emph{principal}, and is written $\mathfrak{a} = \alpha \OO = (\alpha)$.  When $\OO$ is maximal, all ideals of $\OO$ are invertible.  If $\OO_\Delta$ for $\Delta = f^2\Delta_0$ is non-maximal, then an ideal $\mathfrak{a}$ is invertible if $\gcd(N(\mathfrak{a}),f)=1$.  $N(\mathfrak{a})$ is the \emph{norm} of an ideal defined as the number of distinct cosets in the group $\OO$ modulo $\mathfrak{a}$, denoted $|\OO/\mathfrak{a}|$ \cite[pp.~90-91]{Jac09}.  For an invertible ideal $\mathfrak{a} = [sa, s(b+\sqrt{\Delta})/2]$, the norm is $N(\mathfrak{a}) = s^2a$.  When two ideals $\mathfrak{a}$ and $\mathfrak{b}$ are invertible, the norm is multiplicative, i.e. $N(\mathfrak{a}\mathfrak{b}) = N(\mathfrak{a})N(\mathfrak{b})$ \cite[p.~92]{Jac09}.  The \emph{conjugate} of an ideal $\mathfrak{a} = (\alpha, \beta)$ is $\overline{\mathfrak{a}} = (\alpha, -\beta)$.  Finally, two ideals $\mathfrak{a}$ and $\mathfrak{b}$ of $\OO$ are said to be \emph{equivalent} if there exist principal ideals $(\alpha)$ and $(\beta)$ with  $\alpha, \beta \in \OO$ and $\alpha\beta \neq 0$ such that $(\alpha)\mathfrak{a} = (\beta)\mathfrak{b}$.  We denote the set of all ideals which are equivalent to an ideal $\mathfrak{a}$ as $[\mathfrak{a}]$ and this is called an \emph{ideal class} of $\OO$.  With this, we are  sufficiently able to describe the ideal class group.
 
 
 %%%%%%%%%%%%%%%%%%%%%
@@ -280,7 +282,7 @@ Here we provide some basic terminology useful when discussing ideals.  An ideal 
 \bigbreak
 \section{Ideal Class Group}
 
-Using the above notions of ideals in $\OO_\Delta$, we define the \emph{ideal class group} $Cl_\Delta$ as the set of all equivalence classes of invertible $\OO$-ideals.  The group operation is defined as the product (composition) of two class representatives.  Representatives are typically given in reduced form.  In \ref{subsec:reduction}, we state what it is for an ideal to be in reduced form.  In \ref{subsec:iipIdeals}, we define the identity ideal class, when a given ideal class is invertible, and when it is prime.  We cover, in subsection \ref{subsec:idealCompose}, the general case of how to compose two reduced class representatives together, and then in \ref{subsec:nucomp} we discuss how to perform composition such that the result is a reduced or almost reduced representative.  We then extend this to the case of computing the square (\ref{subsec:nudupl}) and cube (\ref{subsec:nucube}) of an ideal class.  Finally, in section \ref{section:computerRepresentation} we give a concrete representation of the ideal class group of imaginary quadratic fields and the operations on the elements of this group. 
+Using the above notions of ideals in $\OO_\Delta$, we define the \emph{ideal class group} $Cl_\Delta$ as the set of all equivalence classes of invertible $\OO$-ideals.  The group operation is defined as the product of two class representatives.  In \ref{subsec:reduction}, we state what it is for an ideal to be in reduced form.  In \ref{subsec:iipIdeals}, we define the identity ideal class, when a given ideal class is invertible, and when it is prime.  We cover, in subsection \ref{subsec:idealCompose}, the general case of how to compose two reduced class representatives together, and then in \ref{subsec:nucomp} we discuss how to perform composition such that the result is a reduced or almost reduced representative.  We then extend this to the case of computing the square (\ref{subsec:nudupl}) and cube (\ref{subsec:nucube}) of an ideal class.  Finally, in section \ref{section:computerRepresentation} we give a concrete representation of the ideal class group of imaginary quadratic fields and the operations on the elements of this group. 
 
 %%%%%%%%%%%%%
 % REDUCTION %
@@ -288,54 +290,11 @@ Using the above notions of ideals in $\OO_\Delta$, we define the \emph{ideal cla
 \subsection{Reduced Representatives}
 \label{subsec:reduction}
 \begin{defn}
-Ideals classes are represented in reduced form. Let $\mathfrak{a}$ be an $\OO$-ideal. Then $\mathfrak{a}$ is said to be \emph{reduced} if $\mathfrak{a}$ is primitive, and there does not exist a non-zero element $\beta \in \mathfrak{a}$ such that $|\beta| < N(\mathfrak{a})$ and $|\overline{\beta}| < N(\mathfrak{a})$.  In otherwords, $N(\mathfrak{a})$ is a minimum element in $\mathfrak{a}$ \cite[p.~98]{Jac09}.
+Let $\mathfrak{a}$ be an $\OO$-ideal. Then $\mathfrak{a}$ is said to be \emph{reduced} if $\mathfrak{a}$ is primitive, and there does not exist a non-zero element $\beta \in \mathfrak{a}$ such that $|\beta| < N(\mathfrak{a})$ and $|\overline{\beta}| < N(\mathfrak{a})$.  In otherwords, $\mathfrak a$ is reduced if $N(\mathfrak{a})$ is a minimum element in $\mathfrak{a}$ \cite[p.~98]{Jac09}.
 \end{defn}
 
-Given an ideal $\mathfrak a = [a, (b+\sqrt\Delta)/2]$, reduction is performed by repeated application of the reduction operator $\rho$ \cite[Lecture 2, Slide 5/21]{JacLecture} where
-\[
-	\rho(\mathfrak a) = \left[-\frac{N(\beta)}{a}, -\overline{\beta}\right]
-\]
-for
-\begin{align*}
-	\beta &= (b+\sqrt\Delta)/2 -qa \\
-	q &= \begin{cases}
-		\floor{\frac{b}{2a}} & \mbox{ if } \Delta < 0 \\
-		\floor{\frac{b+\sqrt\Delta}{2a}} & \mbox{ if } \Delta > 0.
-	\end{cases}
-\end{align*}
+We compute a reduced representative as follows:  Suppose $\mathfrak a = [a, (b + \sqrt\Delta)/2]$.  Let $c = (b^2 - \Delta)/4a$.  If $a > c$ compute ${\mathfrak a}^{-1}$ by swapping $a$ and $c$ and letting $b = -b$.  Since $b$ is unique $\bmod{~2a}$, we reduce $b \bmod{2a}$ and repeat while $\mathfrak a$ is not reduced.  Pseudo-code is given in Algorithm \ref{alg:reduce}.
 
-\noindent
-An ideal $\mathfrak a$ is reduced when $\mathfrak a$ is primitive and $N(\mathfrak a) < \sqrt{|\Delta|}/2$ \cite[Theorem 5.6 p.99, and Theorem 5.9 p.101]{Jac09}.  %In the imaginary case (when $\Delta < 0$) $\mathfrak a$ is reduced when either $a < c = (b^2-\Delta)/4a$ or $a=c$ and $b>0$ \cite[Lecture 2, Slide 6/21]{JacLecture}.  In the real case (when $\Delta > 0$) $\mathfrak a$ is reduced when $|\sqrt\Delta-2|a|| < b$ and $b \le \sqrt\Delta$ \cite[Lecture 2, Slide 7/21]{JacLecture}.
-
-The algorithm in \cite[pp.104-105]{Jac09} to produce a reduced ideal given $\mathfrak a = [a, (b+\sqrt\Delta)/2]$ is to compute the simple continued fraction expansion of $b/|a|$ by the Euclidean algorithm.  If $|a| < \sqrt{|\Delta|}/2$ then $\mathfrak a$ is reduced, so suppose $|a| > \sqrt{|\Delta|}/2$.  Let $R_{-2}=b$, $R_{-1}=|a|$, $C_{-2}=-1$, and $C_{-1} = 0$, then $b/|a| = \langle q_0, q_1, \dots, q_i, R_i/R_{i+1} \rangle$ is given by
-\begin{align}
-	q_i &= \floor{ R_{i-2}/R_{i-1} } \label{eq:cf1} \\
-	R_i &= R_{i-2} - q_i R_{i-1} \label{eq:cf2} \\
-	C_i &= C_{i-2} - q_i C_{i-1}. \label{eq:cf3}
-\end{align}
-Steps \eqref{eq:cf1} through \eqref{eq:cf3} are the Euclidean algorithm; as such, this terminates with $R_n = 0$ for some $n$.  Since $R_{-1} = |a| > \sqrt{|\Delta|}/2$ and $R_n = 0$, there must exist some integer $i$ such that $0 \le i \le n$ and 
-\[
-	R_i < \left(|a|\sqrt{|\Delta|}/2\right)^{1/2} = \sqrt{|a|} ~ {|\Delta/4|}^{1/4} < R_{i-1}.
-\]
-In the case of $\Delta>0$, the reduced form is given by
-\[
-	{\mathfrak a}_{i+2} = \left[ a_{i+1}, \frac{b_{i+1} + \sqrt\Delta}{2} \right]
-\]
-where
-\begin{align*}
-	a_{i+1} &= (-1)^{i+1} r\frac{ 4{R_i}^2 -\Delta{C_i}^2 }{|4a|}, &
-	b_{i+1} &= r\frac{R_i + a_{i+1}C_{i-1}}{C_i}
-\end{align*}
-for
-\[
-	r = \begin{cases}
-		1 & \mbox{ when } \Delta \equiv 0 \pmod 4 \\
-		2 & \mbox{ when } \Delta \equiv 1 \pmod 4.
-	\end{cases}
-\]
-
-\noindent
-When $\Delta<0$, either ${\mathfrak a}_{i+2}$ is reduced or $\rho({\mathfrak a}_{i+2})$ is reduced.  See \cite[pp.~104-106]{Jac09} for additional details.  This use of a continued fraction expansion to reduce an ideal will be seen again in subsection \ref{subsec:nucomp} when we discuss Shanks' NUCOMP algorithm for computing the reduced or almost reduced product of two ideal class representatives.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -602,9 +561,11 @@ Here we provide pseudo-code for operations in the ideal class group of imaginary
 \bigbreak
 \bigbreak
 
+
 %%%%%%%%%%%%
 % IDENTITY %
 %%%%%%%%%%%%
+\begin{comment}
 \begin{algorithm}[h]
 \caption{Identity}
 \label{alg:identity}
@@ -618,11 +579,12 @@ Here we provide pseudo-code for operations in the ideal class group of imaginary
 \RETURN $[1, (b+\sqrt\Delta)/2]$.
 \end{algorithmic}
 \end{algorithm}
-
+\end{comment}
 
 %%%%%%%%%%%
 % INVERSE %
 %%%%%%%%%%%
+\begin{comment}
 \begin{algorithm}[h]
 \caption{Iverse}
 \label{alg:inverse}
@@ -632,6 +594,7 @@ Here we provide pseudo-code for operations in the ideal class group of imaginary
 \RETURN $[a, (-b+\sqrt\Delta)/2]$.
 \end{algorithmic}
 \end{algorithm}
+\end{comment}
 
 
 %%%%%%%%%
@@ -660,7 +623,7 @@ Here we provide pseudo-code for operations in the ideal class group of imaginary
 % REDUCE %
 %%%%%%%%%%
 \begin{algorithm}[h]
-\caption{Reduce (When $\Delta < 0$)}
+\caption{Reduce}
 \label{alg:reduce}
 \begin{algorithmic}[1]
 \REQUIRE An ideal class representative $\mathfrak a_1 = [a_1, (b_1+\sqrt\Delta)/2]$ for an imaginary quadratic order, and $c_1 = ({b_1}^2 - \Delta)/4a_1$.
@@ -688,6 +651,7 @@ Here we provide pseudo-code for operations in the ideal class group of imaginary
 %%%%%%%%%%%%%
 % AMBIGUOUS %
 %%%%%%%%%%%%%
+\begin{comment}
 \begin{algorithm}[h]
 \caption{Is Ambiguous?}
 \label{alg:ambiguous}
@@ -702,7 +666,7 @@ Here we provide pseudo-code for operations in the ideal class group of imaginary
 \RETURN False.
 \end{algorithmic}
 \end{algorithm}
-
+\end{comment}
 
 %%%%%%%%%%
 % NUCOMP %
@@ -788,5 +752,54 @@ Here we provide pseudo-code for operations in the ideal class group of imaginary
 
 
 
-\end{document}
+\begin{comment}
+Given an ideal $\mathfrak a = [a, (b+\sqrt\Delta)/2]$, reduction is performed by repeated application of the reduction operator $\rho$ \cite[Lecture 2, Slide 5/21]{JacLecture} where
+\[
+	\rho(\mathfrak a) = \left[-\frac{N(\beta)}{a}, -\overline{\beta}\right]
+\]
+for
+\begin{align*}
+	\beta &= (b+\sqrt\Delta)/2 -qa \\
+	q &= \begin{cases}
+		\floor{\frac{b}{2a}} & \mbox{ if } \Delta < 0 \\
+		\floor{\frac{b+\sqrt\Delta}{2a}} & \mbox{ if } \Delta > 0.
+	\end{cases}
+\end{align*}
 
+\noindent
+An ideal $\mathfrak a$ is reduced when $\mathfrak a$ is primitive and $N(\mathfrak a) < \sqrt{|\Delta|}/2$ \cite[Theorem 5.6 p.99, and Theorem 5.9 p.101]{Jac09}.  
+
+The algorithm in \cite[pp.104-105]{Jac09} to produce a reduced ideal given $\mathfrak a = [a, (b+\sqrt\Delta)/2]$ is to compute the simple continued fraction expansion of $b/|a|$ by the Euclidean algorithm.  If $|a| < \sqrt{|\Delta|}/2$ then $\mathfrak a$ is reduced, so suppose $|a| > \sqrt{|\Delta|}/2$.  Let $R_{-2}=b$, $R_{-1}=|a|$, $C_{-2}=-1$, and $C_{-1} = 0$, then $b/|a| = \langle q_0, q_1, \dots, q_i, R_i/R_{i+1} \rangle$ is given by
+\begin{align}
+	q_i &= \floor{ R_{i-2}/R_{i-1} } \label{eq:cf1} \\
+	R_i &= R_{i-2} - q_i R_{i-1} \label{eq:cf2} \\
+	C_i &= C_{i-2} - q_i C_{i-1}. \label{eq:cf3}
+\end{align}
+Steps \eqref{eq:cf1} through \eqref{eq:cf3} are the Euclidean algorithm; as such, this terminates with $R_n = 0$ for some $n$.  Since $R_{-1} = |a| > \sqrt{|\Delta|}/2$ and $R_n = 0$, there must exist some integer $i$ such that $0 \le i \le n$ and 
+\[
+	R_i < \left(|a|\sqrt{|\Delta|}/2\right)^{1/2} = \sqrt{|a|} ~ {|\Delta/4|}^{1/4} < R_{i-1}.
+\]
+In the case of $\Delta>0$, the reduced form is given by
+\[
+	{\mathfrak a}_{i+2} = \left[ a_{i+1}, \frac{b_{i+1} + \sqrt\Delta}{2} \right]
+\]
+where
+\begin{align*}
+	a_{i+1} &= (-1)^{i+1} r\frac{ 4{R_i}^2 -\Delta{C_i}^2 }{|4a|}, &
+	b_{i+1} &= r\frac{R_i + a_{i+1}C_{i-1}}{C_i}
+\end{align*}
+for
+\[
+	r = \begin{cases}
+		1 & \mbox{ when } \Delta \equiv 0 \pmod 4 \\
+		2 & \mbox{ when } \Delta \equiv 1 \pmod 4.
+	\end{cases}
+\]
+
+\noindent
+When $\Delta<0$, either ${\mathfrak a}_{i+2}$ is reduced or $\rho({\mathfrak a}_{i+2})$ is reduced.  See \cite[pp.~104-106]{Jac09} for additional details.  This use of a continued fraction expansion to reduce an ideal will be seen again in subsection \ref{subsec:nucomp} when we discuss Shanks' NUCOMP algorithm for computing the reduced or almost reduced product of two ideal class representatives.
+\end{comment}
+
+
+
+\end{document}
