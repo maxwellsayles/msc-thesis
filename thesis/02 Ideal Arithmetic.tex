@@ -89,7 +89,7 @@ Let $\Delta = b^2 -4ac$ such that $\Delta \in \ZZ$ is the discriminant of $f(x)$
 When $\Delta$ is positive, $\KK$ is a \emph{real} quadratic number field, and when $\Delta$ is negative, $\KK$ is an \emph{imaginary} quadratic number field.  This thesis will deal strictly with the imaginary case.  Notice that
 \begin{eqnarray*}
 \begin{array}{l l l l}
-	\Delta & \equiv & b^2-4ac & \pmod 4 \\
+	\Delta & = & b^2-4ac & \\
 	& \equiv & b^2 & \pmod 4 \\
 	& \equiv & 0,1 & \pmod 4.
 \end{array}
@@ -245,18 +245,14 @@ To see that we can represent an ideal in the form of \eqref{eq:idealZModule}, we
 \label{eq:cLinear}
 	c = xb_1 + yb_2.
 \end{equation}
-The linear combination of $\xi_1$ and $\xi_2$ is represented by the matrix
-\[
-	M = \matrixtt{b_2/c}{x}{b_1/c}{y}
-\]
-We get
+Compute the first generator of the submodule, $a'$, as
 \begin{align*}
 	a' &= (b_2/c) \xi_1 - (b_1/c) \xi_2  \\
 	&= (b_2/c) (a_1+b_1\omega) - (b_1/c) (a_2+b_2\omega)  \\
 	&= a_1b_2/c -a_2b_1/c + b_1b_2\omega/c -b_1b_2\omega/c \\
 	&= a_1b_2/c - a_2b_1/c
 \end{align*}
-and
+and the second generator, $b'+c'\omega$, as
 \begin{align*}
 	b'+c'\omega &= x\xi_1 + y\xi_2 \\
 	&= x(a_1+b_1\omega) + y(a_2+b_2\omega) \\
@@ -267,7 +263,7 @@ As such,
 \[
 	\mathfrak a = [\xi_1,\xi_2] = [(a_1b_2-b_1a_2)/c, xa_1+ya_2+c\omega] = [a',b'+c'\omega].
 \]
-Now, since $\omega\mathfrak a \subseteq \mathfrak a$ and $\omega a' \in \mathfrak a$, we have $\omega a' = ua' + v(b'+c'\omega)$ for some $u,v \in \ZZ$. Equating irrational parts, we get $a' = vc'$ and so $c'~|~a'$.  Equating rational parts, we get $ua'+vb' = uvc'+vb' = 0$ which implies $b' = -uc'$ and hence $c'~|~b'$.  Letting $s=c'$, $a=a'/c$, and $b = b'/c$ if $\Delta \equiv 1 \pmod 4$ and $b = 2b'/c$ otherwise, we have
+Now, since $\omega\mathfrak a \subseteq \mathfrak a$ and $\omega a' \in \mathfrak a$, we have $\omega a' = ua' + v(b'+c'\omega)$ for some $u,v \in \ZZ$. Equating irrational parts, we get $a' = vc'$ and so $c'~|~a'$.  Equating rational parts, we have $ua'+vb' = uvc'+vb' = 0$ which implies $b' = -uc'$ and hence $c'~|~b'$.  Letting $s=c'$, $a=a'/c$, and $b = b'/c$ if $\Delta \equiv 1 \pmod 4$ and $b = 2b'/c$ otherwise, we have
 \[
 	\MM = [a', b'+c'\omega] = \left[sa, s\frac{b+ \sqrt{\Delta}}{2} \right]
 \]
@@ -305,13 +301,11 @@ We compute a reduced representative as follows:  Suppose $\mathfrak a = [a, (b +
 Having defined the class group as equivalence classes of ideals, we briefly define the identity ideal class, and what it means for a given class to be invertible or to be prime.
 
 \begin{defn}
-The \emph{identity ideal} is defined as $\OO_\Delta$ since for some ideal $\mathfrak a$, we have $\mathfrak a = \mathfrak a \OO_\Delta = \OO_\Delta \mathfrak a$.  The identity element in the ideal class group is defined as $[\OO_\Delta]$.  This is the class of principal ideals, since the identity ideal $\OO_\Delta$ is a principal ideal.  It has the property that for an ideal class $[\mathfrak a]$, that $[\mathfrak a] = [\mathfrak a \OO_\Delta] = [\OO_\Delta \mathfrak a]$. Furthermore, since the ideal class group $Cl_\Delta$ is finite, for a given ideal class $[\mathfrak a]$ there exists a non-zero integer $n$ such that $[{\mathfrak a}^n] = [\OO_\Delta]$.  Here, $n$ is known as the \emph{order} of $[\mathfrak a]$.  If the order of an ideal class is 2, i.e. $[\mathfrak a^2] = [\OO_\Delta]$, then the ideal is said to be \emph{ambiguous}.
+The \emph{identity ideal} is defined as $\OO_\Delta$ since for some ideal $\mathfrak a$, we have $\mathfrak a = \mathfrak a \OO_\Delta = \OO_\Delta \mathfrak a$.  The identity element in the ideal class group is defined as $[\OO_\Delta]$.  This is the class of principal ideals, since the identity ideal $\OO_\Delta$ is a principal ideal.  It has the property that for an ideal class $[\mathfrak a]$, that $[\mathfrak a] = [\mathfrak a \OO_\Delta] = [\OO_\Delta \mathfrak a]$. 
 \end{defn}
 
-
-\begin{defn}
-An ideal $\mathfrak a \neq (0)$ is \emph{invertible} if there exists an ideal $\mathfrak b$ such that $\mathfrak a \mathfrak b$ is principal, in other words $\mathfrak a \mathfrak b \in [\OO_\Delta]$ \cite[Definition 4.29]{Jac09}. Similarly, the ideal class $[\mathfrak a]$ is invertible if $[\mathfrak a \mathfrak b] = [\OO_\Delta]$.  Furthermore, if $\mathfrak a = (\alpha)$ is a principal ideal, then let $\mathfrak b = (\overline{\alpha})$ and $\mathfrak b$ is also principal.  Hence, the product $\mathfrak a \mathfrak b$ is principal and as such, any principal ideal is invertible.
-\end{defn}
+\noindent
+Since the ideal class group $Cl_\Delta$ is finite, for a given ideal class $[\mathfrak a]$ there exists a non-zero integer $n$ such that $[{\mathfrak a}^n] = [\OO_\Delta]$.  Here, $n$ is known as the \emph{order} of $[\mathfrak a]$.  If the order of an ideal class is 2, i.e. $[\mathfrak a^2] = [\OO_\Delta]$, then the ideal is said to be \emph{ambiguous}. We say that an ideal $\mathfrak a \neq (0)$ is \emph{invertible} if there exists an ideal $\mathfrak b$ such that $\mathfrak a \mathfrak b$ is principal, in other words $\mathfrak a \mathfrak b \in [\OO_\Delta]$ \cite[Definition 4.29]{Jac09}. Similarly, the ideal class $[\mathfrak a]$ is invertible if $[\mathfrak a \mathfrak b] = [\OO_\Delta]$.  Furthermore, if $\mathfrak a = (\alpha)$ is a principal ideal, then let $\mathfrak b = (\overline{\alpha})$ and $\mathfrak b$ is also principal.  Hence, the product $\mathfrak a \mathfrak b$ is principal and as such, any principal ideal is invertible.
 
 \begin{defn}
 An invertible ideal $\mathfrak p$ is \emph{prime} if for any two ideals $\mathfrak a$ and $\mathfrak b$ such that $\mathfrak p ~|~ \mathfrak a \mathfrak b$ then either $\mathfrak p ~|~ \mathfrak a$ or $\mathfrak p ~|~ \mathfrak b$ \cite[Definition 4.40]{Jac09}.  Furthermore, if $\mathfrak p$ is a prime ideal, then there exists a unique rational prime $p$ such that $\mathfrak p ~|~ (p)$ \cite[Theorem 4.41]{Jac09}.
@@ -354,13 +348,11 @@ Now, by the second term of equation \eqref{eq:composeExpanded} we know that $(a_
 	\frac{a_1b_2 + a_1\sqrt{\Delta}}{2} = xsa + ys\left(\frac{b+\sqrt{\Delta}}{2}\right).
 \]
 Equating irrational parts we have
-\begin{gather*}
-	\frac{a_1\sqrt{\Delta}}{2} = \frac{ys\sqrt{\Delta}}{2} \\
-	a_1 = ys \\
-	\Rightarrow~ s~|~a_1.
-\end{gather*}
+\begin{equation*}
+	\frac{a_1\sqrt{\Delta}}{2} = \frac{ys\sqrt{\Delta}}{2}
+\end{equation*}
 \noindent
-Similarly, by the third and fourth terms of equation \eqref{eq:composeExpanded} we have $(a_2b_1+a_2\sqrt{\Delta})/2 \in \mathfrak{a}\mathfrak{b}$ which implies that $s~|~a_2$ and $(b_1b_2 + (b_1+b_2)\sqrt{\Delta} + \Delta)/4 \in \mathfrak{a}\mathfrak{b}$ which implies that \break $s~|~(b_1+b_2)/2$. 
+Hence, $s ~|~ a_1$.  Similarly, by the third and fourth terms of equation \eqref{eq:composeExpanded} we have $(a_2b_1+a_2\sqrt{\Delta})/2 \in \mathfrak{a}\mathfrak{b}$ which implies that $s~|~a_2$ and $(b_1b_2 + (b_1+b_2)\sqrt{\Delta} + \Delta)/4 \in \mathfrak{a}\mathfrak{b}$ which implies that $s~|~(b_1+b_2)/2$. 
 
 By the second generator $s(b+\sqrt\Delta)/2$ of $\mathfrak{a}\mathfrak{b}$ and the entire right hand side of equation \eqref{eq:composeExpanded} there exists $X, Y, V, W \in \ZZ$ such that
 \begin{equation}
@@ -408,24 +400,20 @@ Let $c_2 = ({b_2}^2 - \Delta)/4a_2$ and $U = V(b_1-b_2)/2 - Wc_2$ and we have
 	b \equiv b_2 + \frac{2a_2}{s} U \pmod{2a}.
 \]
 
-\begin{algorithm}[b]
-\caption{Ideal Class Composition}
-\label{alg:idealCompose}
-\begin{algorithmic}[1]
-\REQUIRE Reduced ideal class representatives $\mathfrak a = \left[a_1, \frac{b_1 + \sqrt\Delta}{2}\right]$ and $\mathfrak b = \left[a_2, \frac{b_2 + \sqrt\Delta}{2}\right]$ and ${c_2}^2 = ({b_2}^2-\Delta)/4a_2$.
-\ENSURE Non-reduced ideal class representative $\mathfrak a \cdot \mathfrak b$.
-\STATE Compute $s \leftarrow Ya_1 + Va_2 + W\frac{b_1+b_2}{2}$ for $Y, V, W \in \ZZ$ using the extended Euclidean algorithm.
-\STATE Compute $a \leftarrow (a_1a_2)/s$.
-\STATE Compute $U \leftarrow V(b_1-b_2)/2 - Wc_2$.
-\STATE Compute $b \leftarrow (b_2 + 2Ua_2/s) \bmod{2a}$.
-\RETURN $[a, (b + \sqrt\Delta)/2]$.
-\end{algorithmic}
-\end{algorithm}
-
-
-
 \noindent
-Hence, given two representative ideals $\mathfrak a$ and $\mathfrak b$ in reduced form as $\ZZ$-modules, we can compute their (non-reduced) product using algorithm \ref{alg:idealCompose}.
+Hence, given two representative ideals $\mathfrak a$ and $\mathfrak b$ in reduced form as $\ZZ$-modules, we can compute their (non-reduced) product using the following steps: Let $\mathfrak a = \left[a_1, \frac{b_1 + \sqrt\Delta}{2}\right]$ and $\mathfrak b = \left[a_2, \frac{b_2 + \sqrt\Delta}{2}\right]$ and $c_2 = ({b_2}^2-\Delta)/4a_2$.  Compute 
+\begin{equation*}
+s = Ya_1 + Va_2 + W\frac{b_1+b_2}{2}
+\end{equation*}
+for $Y, V, W \in \ZZ$ using the extended Euclidean algorithm. Then compute
+\begin{align*} 
+	a &= (a_1a_2)/s \\ 
+	b &= (b_2 + 2Ua_2/s) \bmod{2a}
+\end{align*}
+where
+\begin{equation*}
+	U = V(b_1-b_2)/2 - Wc_2.
+\end{equation*}
 
 
 
