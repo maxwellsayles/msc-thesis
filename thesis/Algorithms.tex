@@ -55,5 +55,286 @@
 
 \chapter*{Appendix A - Algorithms}
 
+\begin{algorithm}[h]
+\caption{Ideal Class Cubing (Non-Reduced)}
+\label{alg:idealCube}
+\begin{algorithmic}[1]
+\REQUIRE Reduced ideal class representative $\mathfrak a = \left[a_1, (b_1 + \sqrt\Delta)/2\right]$ and $c_1 = ({b_1}^2-\Delta)/4a_1$.
+\ENSURE Non-reduced ideal class representative ${\mathfrak a}^3$.
+\STATE Compute $s_1 \leftarrow U_1a_1 + V_1b_1$ for $U_1,V_1 \in \ZZ$ \COMMENT{using the extended Euclidean algorithm (only compute $s_1$ and $V_1$)}.
+\IF{$s_1 = 1$}
+	\STATE Let $s_2 \leftarrow 1$.
+	\STATE Let $N \leftarrow a_1$.
+	\STATE Let $L \leftarrow {a_1}^2$.
+	\STATE Let $K \leftarrow c_1V_1(2-V_1(b_1-V_1a_1c_1)) \pmod L$.
+\ELSE
+	\STATE Compute $s_2 \leftarrow U_2(s_1a_1) + V_2({b_1}^2-a_1c_1)$ for $U_2, V_2 \in \ZZ$.
+	\STATE Let $N \leftarrow a_1/s_2$.
+	\STATE Let $L \leftarrow Na_1$.
+	\STATE Let $K \leftarrow c_1(U_2V_1a_1+V_2b_1) \pmod L$.
+\ENDIF
+\STATE Let $T \leftarrow NK$.
+\STATE Let $a \leftarrow NL$.
+\STATE Let $b \leftarrow b_1 - 2T$.
+\STATE (optional) Let $c \leftarrow (s_2c_1+K(T-b))/L$.
+\RETURN $[a, (b+\sqrt\Delta)/2]$ (optionally $c$).
+\end{algorithmic}
+\end{algorithm}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% COMPUTER REPRESENTATION %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bigbreak
+\section{Computer Representation}
+\label{section:computerRepresentation}
+
+Here we provide pseudo-code for operations in the ideal class group of imaginary quadratic number fields.  When algorithms \ref{alg:nucomp}, \ref{alg:nudupl}, and \ref{alg:nucube} specify to compute $s \leftarrow Va + Wb$ for some $V,W \in \ZZ$, the details of the computation are intentionally left out.  A sufficient method is to use the extended Euclidean algorithm.  Similarly, when these algorithms specify to compute $R_i$ to some bound using the recurrences in \eqref{eq:cf1} through \eqref{eq:cf3}, a bounded extended Euclidean algorithm for only one extended attribute suffices. In chapter 5 we discuss several variations of the extended Euclidean algorithm suitable to these computations and provide an empirical analysis of their performance on various bit sizes.
+
+\bigbreak
+\bigbreak
+
+
+%%%%%%%%%%%%
+% IDENTITY %
+%%%%%%%%%%%%
+\begin{comment}
+\begin{algorithm}[h]
+\caption{Identity}
+\label{alg:identity}
+\begin{algorithmic}[1]
+\ENSURE A reduced representative for the class of principal ideals.
+\IF {$\Delta \equiv 1 \pmod 4$}
+	\STATE Let $b = 1$.
+\ELSE
+	\STATE Let $b = 0$.
+\ENDIF
+\RETURN $[1, (b+\sqrt\Delta)/2]$.
+\end{algorithmic}
+\end{algorithm}
+\end{comment}
+
+%%%%%%%%%%%
+% INVERSE %
+%%%%%%%%%%%
+\begin{comment}
+\begin{algorithm}[h]
+\caption{Iverse}
+\label{alg:inverse}
+\begin{algorithmic}[1]
+\REQUIRE A reduced representative $\mathfrak a = [a, (b+\sqrt\Delta)/2]$.
+\ENSURE A reduced representative $\mathfrak a^{-1}$ such that $\mathfrak a \mathfrak a^{-1}$ is principal.
+\RETURN $[a, (-b+\sqrt\Delta)/2]$.
+\end{algorithmic}
+\end{algorithm}
+\end{comment}
+
+
+%%%%%%%%%
+% PRIME %
+%%%%%%%%%
+\begin{algorithm}[h]
+\caption{Prime Ideal}
+\label{alg:prime}
+\begin{algorithmic}[1]
+\REQUIRE A prime integer $p \in \ZZ$.
+\ENSURE A reduced representative $\mathfrak p = [p, (b+\sqrt\Delta)/2]$ such that $\mathfrak p$ is a prime ideal if one exists.
+\STATE Compute $b \leftarrow \sqrt\Delta \pmod p$ \COMMENT{using Tonelli and Shanks or a lookup table}.
+\IF {$4p ~|~ b^2-\Delta$}
+	\RETURN $[p, (b+\sqrt\Delta)/2]$.	
+\ENDIF
+\STATE Let $b \leftarrow p-b$.
+\IF {$4p ~|~ b^2-\Delta$}
+	\RETURN $[p, (b+\sqrt\Delta)/2]$.	
+\ENDIF
+\RETURN None exists.
+\end{algorithmic}
+\end{algorithm}
+
+
+%%%%%%%%%%
+% REDUCE %
+%%%%%%%%%%
+\begin{algorithm}[h]
+\caption{Reduce}
+\label{alg:reduce}
+\begin{algorithmic}[1]
+\REQUIRE An ideal class representative $\mathfrak a_1 = [a_1, (b_1+\sqrt\Delta)/2]$ for an imaginary quadratic order, and $c_1 = ({b_1}^2 - \Delta)/4a_1$.
+\ENSURE A reduced representative $\mathfrak a = [a, (b+\sqrt\Delta)/2]$.
+\STATE Let $a \leftarrow a_1, b \leftarrow b_1, c \leftarrow c_1$.
+\WHILE {$a > c$ or $b > a$ or $b \le -a$}
+	\IF {$a > c$}
+		\STATE Swap $a$ with $c$ and let $b \leftarrow -b$.
+	\ENDIF
+	\IF {$b > a$ or $b \le -a$}
+		\STATE Compute $b'$ such that $-a < b' \le a$ and $b' \equiv b \pmod{2a}$.
+		\STATE Let $b \leftarrow b'$.
+		\STATE Compute $c \leftarrow (b^2-\Delta)/4a$.
+	\ENDIF
+\ENDWHILE
+\IF {$a=c$ and $b < 0$}
+	\STATE Let $b \leftarrow -b$.
+\ENDIF
+\RETURN $[a, (b+\sqrt\Delta)/2]$.
+\end{algorithmic}
+\end{algorithm}
+
+
+
+%%%%%%%%%%%%%
+% AMBIGUOUS %
+%%%%%%%%%%%%%
+\begin{comment}
+\begin{algorithm}[h]
+\caption{Is Ambiguous?}
+\label{alg:ambiguous}
+\begin{algorithmic}[1]
+\REQUIRE A reduced representative $\mathfrak a = [a, (b+\sqrt\Delta)/2]$.
+\ENSURE True if $\mathfrak a$ is ambiguous, False otherwise.
+\IF {$a > 1$}
+	\IF {$b = 0$ or $a = b$ or $a = c$}
+		\RETURN True.
+	\ENDIF
+\ENDIF
+\RETURN False.
+\end{algorithmic}
+\end{algorithm}
+\end{comment}
+
+%%%%%%%%%%
+% NUCOMP %
+%%%%%%%%%%
+\begin{algorithm}[h]
+\caption{NUCOMP}
+\label{alg:nucomp}
+\begin{algorithmic}[1]
+\REQUIRE Reduced representatives $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$, $\mathfrak b = [a_2, (b_2+\sqrt\Delta)/2]$ with \break $c_1 = ({b_1}^2-\Delta)/4a_1$, $c_2 = ({b_2}^2-\Delta)/4a_2$, and discriminant $\Delta$.
+\ENSURE A reduced or almost reduced representative $\mathfrak a \mathfrak b$.
+\STATE Compute $s \leftarrow Ya_1 + Va_2 + W (b_1+b_2)/2$ for $Y, V, W \in \ZZ$.
+\STATE Compute $U \leftarrow V(b_1-b_2)/2 + Wc_2$.
+\STATE Let $R_{-2} \leftarrow sU, R_{-1} \leftarrow a_1, C_{-2} \leftarrow -1, C_{-1} \leftarrow 0$.
+\STATE Find $i$ such that $R_i < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4} < R_{i-1}$ using the recurrences \break $q_i = \floor{R_{i-2}/R_{i-1}}, R_i = R_{i-2}-q_i R_{i-1}, C_i=C_{i-2}-q_i C_{i-1}$.
+\STATE Compute $M_1 \leftarrow (R_i a_2 + sC_i(b_1-b_2)/2)/a_1$.
+\STATE Compute $M_2 \leftarrow (R_i (b_1+b_2)/2 -sC_i c_2)/a_1$.
+\STATE Compute $a \leftarrow (-1)^{i+1}(R_i M_1 - C_i M_2)$.
+\STATE Compute $b \leftarrow ((R_i a_2/s + C_{i-1} a)/C_i) \bmod{2a}$.
+\RETURN $[a, (b+\sqrt\Delta)/2]$.
+\end{algorithmic}
+\end{algorithm}
+
+%%%%%%%%%%%
+% NUDUPL %
+%%%%%%%%%%%
+\begin{algorithm}[h]
+\caption{NUDUPL}
+\label{alg:nudupl}
+\begin{algorithmic}[1]
+\REQUIRE Reduced representative $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$ with $c_1 = ({b_1}^2-\Delta)/4a_1$ and discriminant $\Delta$.
+\ENSURE A reduced or almost reduced representative $\mathfrak a^2$.
+\STATE Compute $s \leftarrow Xa_1 + Yb_1$ for $X,Y \in \ZZ$.
+\STATE Compute $U \leftarrow Yc_1$.
+\STATE Let $R_{-2} \leftarrow sU, R_{-1} \leftarrow a_1, C_{-2} \leftarrow -1, C_{-1} \leftarrow 0$.
+\STATE Find $i$ such that $R_i < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4} < R_{i-1}$ using the recurrences \break $q_i = \floor{R_{i-2}/R_{i-1}}, R_i = R_{i-2}-q_i R_{i-1}, C_i=C_{i-2}-q_i C_{i-1}$.
+\STATE Compute $M_2 \leftarrow (R_i b_1 -sC_i c_1)/a_1$.
+\STATE Compute $a \leftarrow (-1)^{i+1}({R_i}^2 - C_i M_2)$.
+\STATE Compute $b \leftarrow ((R_i a_2/s + C_{i-1} a)/C_i) \bmod{2a}$.
+\RETURN $[a, (b+\sqrt\Delta)/2]$.
+\end{algorithmic}
+\end{algorithm}
+
+%%%%%%%%%%
+% NUCUBE %
+%%%%%%%%%%
+\begin{algorithm}[h]
+\caption{NUCUBE}
+\label{alg:nucube}
+\begin{algorithmic}[1]
+\REQUIRE A reduced representative $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$.
+\ENSURE A reduced or almost reduced representative $\mathfrak a^3$.
+\STATE Compute $s_1 \leftarrow U_1a_1 + V_1b_1$ for $U_1,V_1 \in \ZZ$.
+\IF{$s_1 = 1$}
+	\STATE Let $s_2 \leftarrow 1$.
+	\STATE Let $N \leftarrow a_1$.
+	\STATE Let $L \leftarrow {a_1}^2$.
+	\STATE Let $K \leftarrow c_1V_1(2-V_1(b_1-V_1a_1c_1)) \pmod L$.
+\ELSE
+	\STATE Compute $s_2 \leftarrow U_2(s_1a_1) + V_2({b_1}^2-a_1c_1)$ for $U_2, V_2 \in \ZZ$.
+	\STATE Let $N \leftarrow a_1/s_2$.
+	\STATE Let $L \leftarrow Na_1$.
+	\STATE Let $K \leftarrow c_1(U_2V_1a_1+V_2b_1) \pmod L$.
+\ENDIF
+\IF {$L < \sqrt{a_1} ~ |\Delta/4|^{1/4}$}
+	\STATE Let $T \leftarrow NK$.
+	\STATE Let $a \leftarrow NL$.
+	\STATE Let $b \leftarrow b_1 - 2T$.
+\ELSE
+	\STATE Let $R_{-1} \leftarrow L, R_0 \leftarrow K, C_{-1} \leftarrow 0, C_0 \leftarrow -1$.
+	\STATE Find $i$ such that $R_i < \sqrt{a_1} ~ |\Delta/4|^{1/4} < R_{i-1}$ using recurrences \eqref{eq:cf1}, \eqref{eq:cf2}, and \eqref{eq:cf3} \break $q_i = \floor{R_{i-2}/R_{i-1}}, R_i = R_{i-2}-q_i R_{i-1}, C_i=C_{i-2}-q_i C_{i-1}$.
+	\STATE Compute $b_2 \leftarrow b_1 -2NK \pmod L$.
+	\STATE Compute $M_1 \leftarrow (NR_i + (b_2-b_1)C_i)/L$.
+	\STATE Compute $M_2 \leftarrow (R_i(b_1+b_2)+c_1s_2)/L$.
+	\STATE Compute $a \leftarrow (-1)^{i-1}(R_iM_1-C_iM_2)$.
+	\STATE Compute $b \leftarrow (NR_i + aC_{i-1})/C_i-b_1$.
+\ENDIF
+\STATE Let $b \leftarrow b \bmod 2a$.
+\STATE (optional) Let $c \leftarrow (b^2-\Delta)/4a$.
+\RETURN $[a, (b+\sqrt\Delta)/2]$ (and optionally $c$).
+\end{algorithmic}
+\end{algorithm}
+
+
+
+
+\begin{comment}
+Given an ideal $\mathfrak a = [a, (b+\sqrt\Delta)/2]$, reduction is performed by repeated application of the reduction operator $\rho$ \cite[Lecture 2, Slide 5/21]{JacLecture} where
+\[
+	\rho(\mathfrak a) = \left[-\frac{N(\beta)}{a}, -\overline{\beta}\right]
+\]
+for
+\begin{align*}
+	\beta &= (b+\sqrt\Delta)/2 -qa \\
+	q &= \begin{cases}
+		\floor{\frac{b}{2a}} & \mbox{ if } \Delta < 0 \\
+		\floor{\frac{b+\sqrt\Delta}{2a}} & \mbox{ if } \Delta > 0.
+	\end{cases}
+\end{align*}
+
+\noindent
+An ideal $\mathfrak a$ is reduced when $\mathfrak a$ is primitive and $N(\mathfrak a) < \sqrt{|\Delta|}/2$ \cite[Theorem 5.6 p.99, and Theorem 5.9 p.101]{Jac09}.  
+
+The algorithm in \cite[pp.104-105]{Jac09} to produce a reduced ideal given $\mathfrak a = [a, (b+\sqrt\Delta)/2]$ is to compute the simple continued fraction expansion of $b/|a|$ by the Euclidean algorithm.  If $|a| < \sqrt{|\Delta|}/2$ then $\mathfrak a$ is reduced, so suppose $|a| > \sqrt{|\Delta|}/2$.  Let $R_{-2}=b$, $R_{-1}=|a|$, $C_{-2}=-1$, and $C_{-1} = 0$, then $b/|a| = \langle q_0, q_1, \dots, q_i, R_i/R_{i+1} \rangle$ is given by
+\begin{align}
+	q_i &= \floor{ R_{i-2}/R_{i-1} } \label{eq:cf1} \\
+	R_i &= R_{i-2} - q_i R_{i-1} \label{eq:cf2} \\
+	C_i &= C_{i-2} - q_i C_{i-1}. \label{eq:cf3}
+\end{align}
+Steps \eqref{eq:cf1} through \eqref{eq:cf3} are the Euclidean algorithm; as such, this terminates with $R_n = 0$ for some $n$.  Since $R_{-1} = |a| > \sqrt{|\Delta|}/2$ and $R_n = 0$, there must exist some integer $i$ such that $0 \le i \le n$ and 
+\[
+	R_i < \left(|a|\sqrt{|\Delta|}/2\right)^{1/2} = \sqrt{|a|} ~ {|\Delta/4|}^{1/4} < R_{i-1}.
+\]
+In the case of $\Delta>0$, the reduced form is given by
+\[
+	{\mathfrak a}_{i+2} = \left[ a_{i+1}, \frac{b_{i+1} + \sqrt\Delta}{2} \right]
+\]
+where
+\begin{align*}
+	a_{i+1} &= (-1)^{i+1} r\frac{ 4{R_i}^2 -\Delta{C_i}^2 }{|4a|}, &
+	b_{i+1} &= r\frac{R_i + a_{i+1}C_{i-1}}{C_i}
+\end{align*}
+for
+\[
+	r = \begin{cases}
+		1 & \mbox{ when } \Delta \equiv 0 \pmod 4 \\
+		2 & \mbox{ when } \Delta \equiv 1 \pmod 4.
+	\end{cases}
+\]
+
+\noindent
+When $\Delta<0$, either ${\mathfrak a}_{i+2}$ is reduced or $\rho({\mathfrak a}_{i+2})$ is reduced.  See \cite[pp.~104-106]{Jac09} for additional details.  This use of a continued fraction expansion to reduce an ideal will be seen again in subsection \ref{subsec:nucomp} when we discuss Shanks' NUCOMP algorithm for computing the reduced or almost reduced product of two ideal class representatives.
+\end{comment}
+
+
 
 \end{document}
