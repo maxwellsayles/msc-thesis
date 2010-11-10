@@ -59,7 +59,7 @@
 
 Exponentiation, i.e. computing $g^n$ for some $g$ in a group $G$ and an integer $n$, is useful in many contexts.  Diffie-Hellman key exchange is an example where two parties can jointly establish a shared secret key over an insecure channel. The fundamental operation of Diffie-Hellman key exchange is group exponentiation. Another application discussed in more detail in this thesis is that of computing the order of a group element.  Our approach in this case is to exponentiate a group element to the product, $P$, of several small prime powers.  The result is an element whose order is known to not contain any of these small prime powers. The order of this new element is then computed using a variant of Shanks' baby-step giant-step algorithm where only powers relatively prime to $P$ need to be computed.  Determining the order of an element can be useful in computing the structure of a group, or in factoring an integer that is associated with the group.  In these examples, being able to perform group exponentiation faster means that we can perform a Diffie-Hellman key exchange faster, or that we can compute the order of a group element more quickly.
 
-In Sections \ref{section:binary} and \ref{section:naf} we discuss standard exponentiation techniques that rely on a base 2 representation of the exponent.  The method using non-adjacent form described in Section \ref{section:naf} also benefits when the cost of computing the inverse of a group element is inexpensive or relatively free.  In Section \ref{section:dbns} we introduce double-base number systems, which, as the name implies, are number systems that make use of multiple bases in the representation of a number. These methods benefit when the cost of squaring a group element is less than the cost of composing two elements. In Section \ref{section:dbnsMethods} we discuss some methods to compute double-base representations found in the literature.  In this thesis, we pay particular attention to representations that use bases 2 and 3, since a representation using base 3 can benefit when the cost of cubing an element is less than the cost of multiplying an element with its square.
+In Sections \ref{section:binary} and \ref{section:naf} we discuss standard exponentiation techniques that rely on a base 2 representation of the exponent.  The method using non-adjacent form described in Section \ref{section:naf} also benefits when the cost of computing the inverse of a group element is inexpensive or relatively free.  In Section \ref{section:dbns} we introduce double-base number systems, which, as the name implies, are number systems that make use of multiple bases in the representation of a number. In Section \ref{section:dbnsMethods} we discuss some methods to compute double-base representations found in the literature.  In this thesis, we pay particular attention to representations that use bases 2 and 3, since a representation using base 3 can benefit when the cost of cubing an element is less than the cost of multiplying an element with its square.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -67,7 +67,7 @@ In Sections \ref{section:binary} and \ref{section:naf} we discuss standard expon
 %%%%%%%%%%%%%%%%%%%%%%%%%
 \bigbreak
 \section{Binary Exponentiation}\label{section:binary}
-The most common and well known method of exponentiation is that of binary exponentation.  This method is often used in Computer Science as an exercise to teach algorithms.  Let $g$ be an element in the group $\mathcal G$ and $n$ be an integer.  We want to compute $g^n \in \mathcal G$.  We first represent $n$ in binary as
+The most common and well known method of exponentiation is that of binary exponentation.  This method is often used in Computer Science as an exercise to teach algorithms.  Let $g$ be an element in the group $G$ and $n$ be an integer.  We want to compute $g^n \in G$.  We first represent $n$ in binary as
 \[
 	n = \sum_{i=0}^{\floor{log_2 n}} b_i 2^i
 \]
@@ -87,7 +87,7 @@ Binary exponentiation algorithms require on average $\floor{log_2 n}$ squarings 
 
 Non-Adjacent Form (NAF) refers to the representation of a number given a \emph{signed} base two representation.  That is, a number $n$ is represented such that
 \[
-	n = \sum_{i=0}^{\ceil{log_2 n}} s_i 2^i
+	n = \sum_{i=0}^{\floor{log_2 n}+1} s_i 2^i
 \]
 where $s_i \in \{0, 1, -1\}$.  As the name suggests, for a number to be in non-adjacent form, there cannot be two non-zero terms adjacent in the representation.  For example, suppose $n = 23814216$.  In a binary representation we have
 \begin{equation}\label{eq:binaryEg}
@@ -99,64 +99,19 @@ and in non-adjacent form we have
 \end{equation}
 Similar to the binary case, we compute $g^n$ using
 \[
-	g^n = \prod _{i=0}^{\ceil{log_2 n}} g^{s_i 2^i}.
+	g^n = \prod _{i=0}^{\floor{log_2 n}+1} g^{s_i 2^i}.
 \]
-Since $s_i$ may be 0, 1, or -1, non-adjacent form is particularly useful when the cost of computing $g^{-1}$ is relatively inexpensive (or essentially free as in the case of the ideal class group).  However, as we shall see below, we can minimize the number of inversions required to at most 1.
+Since $s_i$ may be 0, 1, or -1, non-adjacent form is particularly useful when the cost of computing $g^{-1}$ is relatively inexpensive (or essentially free as in the case of the ideal class group).  However, by computing the product as
+\[
+	g^n = \left( \prod_{i : s_i=1} g^{2^i} \right) \cdot \left( \prod_{i : s_i=-1} g^{2^i} \right)^{-1}
+\]
+we can minimize the number of inversions required to at most 1.
 
-\begin{algorithm}[htb!]
-\caption{Computes $g^n$ using a right-to-left NAF}\label{alg:nafr2l}
-\begin{algorithmic}[1]
-\REQUIRE $g \in \mathcal G, n \in \ZZgez$
-\ENSURE $g^n \in \mathcal G$
-\STATE $i \gets 0$
-\STATE $T \gets g$ \COMMENT{invariant: $T = g^{2^i}$}
-\STATE $R \gets 1_{\mathcal G}$
-\WHILE {$n \ge 2^i$}
-	\IF {$\floor{n/2^i} \equiv 1 \pmod 4$}
-		\STATE $R \gets R \cdot T$
-		\STATE $n \gets n-2^i$
-	\ELSIF {$\floor{n/2^i} \equiv 3 \pmod 4$}
-		\STATE $R \gets R \cdot T^{-1}$
-		\STATE $n \gets n+2^i$
-	\ENDIF
-	\STATE $T \gets T^2$
-	\STATE $i \gets i + 1$
-\ENDWHILE
-\RETURN $R$
-\end{algorithmic}
-\end{algorithm}
+There are various methods for evaluating $g^n$ when $n$ is given in non-adjacent form.  As in the binary case, we can compute the evaluation left-to-right, right-to-left, and we can use windowing techniques.  A standard technique is to inspect $n$ from right-to-left two bits at a time.  If the bit pattern at index $i$ is 01, let $s_i = 1$ and subtract $2^i$ from $n$.  If the bit pattern is 11, let $s_i = -1$ and add $2^i$ to $n$.  When the bit pattern is 00 or 10, let $s_i =0$. 
 
-There are various methods for evaluating $g^n$ when $n$ is given in non-adjacent form.  As in the binary case, we can compute the evaluation left-to-right, right-to-left, and we can use windowing techniques.  A standard technique is to inspect $n$ from right-to-left two bits at a time.  If the bit pattern at index $i$ is 01, let $s_i = 1$ and subtract $2^i$ from $n$.  If the bit pattern is 11, let $s_i = -1$ and add $2^i$ to $n$.  When the bit pattern is 00 or 10, let $s_i =0$.  Algorithm \ref{alg:nafr2l} captures this idea while evaluating $g^n$ at the same time.
+This method can be improved by maintaining a carry flag $c$ \cite[p.4]{Joye2000}.  It works as above, but instead of adding $2^i$ to $n$, we set $c = 1$, and instead of subtracting $2^i$ from $n$, we set $c = 0$.  When inspecting $n$ two bits at a time, we consider the bit pattern $(m+c) \bmod 4$ where $m$ is the two bits of $n$ at index $i$.  The benefit of this method is noticable for \emph{very} large $n$, since the cost of addition and subtraction is reduced from $O(\log n)$ to $O(1)$.  This technique is given in Algorithm \ref{alg:nafR2LImmutable}.  Note that integer computations such as ``$\floor{n/2^i} \bmod 4$'' can be performed by sliding a window of 2 bits size across the binary representation of $n$.
 
-This method can be improved by maintaining a carry flag $c$ \cite[p.4]{Joye2000}; instead of adding $2^i$ to $n$, we instead let $c = 1$; instead of subtracting $2^i$ from $n$, we instead let $c = 0$.  The benefit is noticable for \emph{very} large $n$, since the cost of addition and subtraction is reduced from $O(\log n)$ to $O(1)$.  Furthermore, we can compute $g^n$ using at most one inversion by computing the product $Q = g^{s_i2^i}$ for all $s_i = -1$ separate from the product $R = g^{s_j2^j}$ for all $s_j = 1$.  The result is $g^n = R \cdot Q^{-1}$.  In general, this technique can be used to exponentiate with any signed representation using only one inverse.  These improvements are given in algorithm \ref{alg:nafR2LImmutable}.  Note that integer computations such as ``$\floor{n/2^i} \bmod 4$'' can be performed by sliding a window of size 2 bits across the binary representation of $n$.
-
-\begin{algorithm}[htb!]
-\caption{Computes $g^n$ for immutable $n$ using only one inverse and a R2L NAF.}\label{alg:nafR2LImmutable}
-\begin{algorithmic}[1]
-\REQUIRE $g \in \mathcal G, n \in \ZZgez$
-\ENSURE $g^n \in \mathcal G$
-\STATE $c \gets 0$ \COMMENT{carry flag}
-\STATE $i \gets 0$
-\STATE $R \gets 1_{\mathcal G}$ \COMMENT{product of positive exponents}
-\STATE $Q \gets 1_{\mathcal G}$ \COMMENT{product of negative exponents}
-\STATE $T \gets g$ \COMMENT{invariant: $T = g^{2^i}$}
-\WHILE {$n \ge 2^i$}
-	\IF {$\floor{n/2^i}+c \equiv 1 \pmod 4$}
-		\STATE $R \gets R \cdot T$
-		\STATE $c \gets 0$
-	\ELSIF {$\floor{n/2^i}+c \equiv 3 \pmod 4$}
-		\STATE $Q \gets Q \cdot T$ \\
-		\STATE $c \gets 1$
-	\ENDIF
-	\STATE $T \gets T^2$ \\
-	\STATE $i \gets i+1$
-\ENDWHILE
-\IF {$c=1$} \STATE $R \gets R \cdot T$ \ENDIF
-\RETURN $R \cdot Q^{-1}$
-\end{algorithmic}
-\end{algorithm}
-
-The particular advantage of a non-adjacent form exponentiation over a binary exponentiation is in regards to the number of operations required.  While the binary method required $\floor{\log_2 n}$ squares and on average $\floor{\log_2 n}/2$ multiplications, a non-adjacent form exponentiation requires at most $\floor{\log_2 n}+1$ squares and on average $\floor{\log_2 n}/3$ multiplications.  To see this, recall that non-adjacent form requires that no two non-zero terms be adjacent.  Consider any two adjacent terms.  With probability 2/3 the first term is non-zero, in which case, the second term must be zero.  With probability 1/3 the first term is zero, in which case, the probability is 2/3 that the second term is non-zero.  This means that 2/3 of the time, 1 of 2 terms will be non-zero, and $1/3 \times 2/3$ of the time, 1 of 2 terms will be non-zero; so the probability of a given term being non zero is 1/3.
+The particular advantage of a non-adjacent form exponentiation over a binary exponentiation is in regards to the number of operations required.  While the binary method required $\floor{\log_2 n}$ squares and on average $\floor{\log_2 n}/2$ multiplications, a non-adjacent form exponentiation requires at most $\floor{\log_2 n}+1$ squares and on average $(\floor{\log_2 n}+1)/3$ multiplications.  To see this, recall that non-adjacent form requires that no two non-zero terms be adjacent.  Consider any two adjacent terms.  With probability 2/3 the first term is non-zero, in which case, the second term must be zero.  With probability 1/3 the first term is zero, in which case, the probability is 2/3 that the second term is non-zero.  This means that 2/3 of the time, 1 of 2 terms will be non-zero, and $1/3 \times 2/3$ of the time, 1 of 2 terms will be non-zero; so the probability of a given term being non zero is 1/3.
 
 
 %%%%%%%%

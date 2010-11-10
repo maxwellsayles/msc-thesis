@@ -285,6 +285,34 @@ Here we provide pseudo-code for operations in the ideal class group of imaginary
 \end{algorithm}
 
 
+\begin{algorithm}[htb!]
+\caption{Computes $g^n$ for immutable $n$ using only one inverse and a R2L NAF.}\label{alg:nafR2LImmutable}
+\begin{algorithmic}[1]
+\REQUIRE $g \in \mathcal G, n \in \ZZgez$
+\ENSURE $g^n \in \mathcal G$
+\STATE $c \gets 0$ \COMMENT{carry flag}
+\STATE $i \gets 0$
+\STATE $R \gets 1_{\mathcal G}$ \COMMENT{product of positive exponents}
+\STATE $Q \gets 1_{\mathcal G}$ \COMMENT{product of negative exponents}
+\STATE $T \gets g$ \COMMENT{invariant: $T = g^{2^i}$}
+\WHILE {$n \ge 2^i$}
+	\IF {$\floor{n/2^i}+c \equiv 1 \pmod 4$}
+		\STATE $R \gets R \cdot T$
+		\STATE $c \gets 0$
+	\ELSIF {$\floor{n/2^i}+c \equiv 3 \pmod 4$}
+		\STATE $Q \gets Q \cdot T$ \\
+		\STATE $c \gets 1$
+	\ENDIF
+	\STATE $T \gets T^2$ \\
+	\STATE $i \gets i+1$
+\ENDWHILE
+\IF {$c=1$} \STATE $R \gets R \cdot T$ \ENDIF
+\RETURN $R \cdot Q^{-1}$
+\end{algorithmic}
+\end{algorithm}
+
+
+
 
 
 \begin{comment}
