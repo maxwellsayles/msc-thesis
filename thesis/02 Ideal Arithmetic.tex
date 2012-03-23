@@ -56,7 +56,7 @@
 \setcounter{chapter}{1}
 \chapter{Ideal Arithmetic}
 
-In this thesis, we focus on fast arithmetic and fast exponentiation in the ideal class group of imaginary quadratic number fields.  The ideal class group is the group of equivalence classes of ideals in the maximal order of a quadratic number field.   We begin with the relevant theory of quadratic number fields, then discuss quadratic orders and ideals of quadratic orders.  Finally, we discuss arithmetic in the ideal class group.  The theory presented here is available in detail in reference texts on algebraic number theory such as \cite{IR90}, \cite{Hua82}, or \cite{Coh80}. 
+The focus of this thesis is fast arithmetic and fast exponentiation in the ideal class group of imaginary quadratic number fields.  The ideal class group is the group of equivalence classes of ideals in the maximal order of a quadratic number field.   We begin with the relevant theory of quadratic number fields, then discuss quadratic orders and ideals of quadratic orders.  Finally, we discuss arithmetic in the ideal class group.  The theory presented here is available in detail in reference texts on algebraic number theory such as \cite{IR90}, \cite{Hua82}, or \cite{Coh80}. 
 
 
 
@@ -86,7 +86,7 @@ Let $\Delta = b^2 -4ac$ such that $\Delta \in \ZZ$ is the discriminant of $f(x)$
 \[
 	\KK = \QQ(\alpha) = \QQ(\sqrt{\Delta}) = \{u + v\sqrt{\Delta} : u,v \in \QQ\}.
 \]
-When $\Delta$ is positive, $\KK$ is a \emph{real} quadratic number field, and when $\Delta$ is negative, $\KK$ is an \emph{imaginary} quadratic number field.  This thesis will deal strictly with the imaginary case.  Notice that
+When $\Delta$ is positive, $\KK$ is a \emph{real} quadratic number field, and when $\Delta$ is negative, $\KK$ is an \emph{imaginary} quadratic number field.  Here we deal only with the imaginary case.  Notice that
 \begin{eqnarray*}
 \begin{array}{l l l l}
 	\Delta & = & b^2-4ac & \\
@@ -96,7 +96,7 @@ When $\Delta$ is positive, $\KK$ is a \emph{real} quadratic number field, and wh
 \end{eqnarray*}
 Also, if $\Delta = f^2 \Delta_0$ for some $f \in \ZZ$ where $\Delta_0$ is squarefree, then $\KK = \QQ(\Delta_0)$.
 
-Notice that if we are given a polynomial $f(x)$ with rational coefficients, we can compute a polynomial $g(x)$ with equal roots and integer coefficients by multiplying the coefficients of $f(x)$ by $c \in \ZZ$ where $c$ is an integer multiple of the lowest common multiple of the denominators of each coefficient in $f(x)$.  We obtain a polynomial $g(x) = cf(x)$ with integer coefficients such that $g(x)$ has the same roots as $f(x)$.  When $g(x)$ is a monic polynomial with integer coefficients, we say that a root $\alpha$ of $g(x)$ is an \emph{algebraic integer}.
+If we are given a polynomial $f(x)$ with rational coefficients, we can compute a polynomial $g(x)$ with the same roots but integer coefficients by multiplying $f(x)$ by the lowest common multiple of the denominators.  This gives a polynomial $g(x) = cf(x)$ with integer coefficients and the same roots as $f(x)$.  When $g(x)$ is a monic polynomial, we say that a root $\alpha$ is an \emph{algebraic integer}.
 
 
 %%%%%%%%%%%%%%%%%%%%%%
@@ -105,11 +105,11 @@ Notice that if we are given a polynomial $f(x)$ with rational coefficients, we c
 \bigbreak
 \section{Quadratic Integers}
 
-We mentioned above that the ideal class group is the group of equivalence classes of ideals of the maximal order of a quadratic number field.  The maximal order is the largest subring of quadratic integers in a quadratic number field.  A quadratic integer is a degree two algebraic integer.
+Here we introduce quadratic integers.
 
 \begin{defn}
 \label{defn:quadraticInteger}
-A \emph{quadratic integer} $\beta$ is an algebraic integer of $\QQ(\sqrt{\Delta_0})$ such that $\beta = i + j \omega_0$ for some $i,j \in \ZZ$ where
+A \emph{quadratic integer} $\beta$ is an algebraic integer of $\QQ(\sqrt{\Delta_0})$ where $\beta$ can be written as $\beta = i + j \omega_0$ for some $i,j \in \ZZ$ and
 \begin{equation*}
 	\omega_0 = \begin{cases}
 		\sqrt{\Delta_0} & \textrm{ when } \Delta_0 \not \equiv 1 \pmod 4 \\
@@ -121,9 +121,9 @@ A \emph{quadratic integer} $\beta$ is an algebraic integer of $\QQ(\sqrt{\Delta_
 \noindent
 To see this, recall that an algebraic number $\beta$ of $\QQ(\sqrt\Delta_0)$ is $\beta = u+v\sqrt\Delta_0$ for some $u,v \in \QQ$.  For $\beta$ to be an  algebraic integer it must be a root of a monic quadratic polynomial $f(x) = x^2+bx+c \in \ZZ[x]$ for some $b,c \in \ZZ$.  The root is given by
 \begin{equation*}
-	\beta = \frac{-b \pm \sqrt{b^2-4c}}{2} \\
+	\beta = u + v\sqrt{\Delta_0} = \frac{-b \pm \sqrt{b^2-4c}}{2} \\
 \end{equation*}
-for $b,c \in \ZZ$. Equating rational and irrational parts we have
+for $b,c \in \ZZ$ (note that $a=1$). Equating rational and irrational parts we have
 \begin{equation*}
 	u = -\frac{b}{2}
 \end{equation*}
@@ -132,17 +132,18 @@ and
 	v \sqrt{\Delta_0} = \frac{\sqrt{b^2 -4c}}{2}
 \end{equation*}
 and so
-\begin{equation*}
+\begin{equation}
+\label{eq:v2}
 	v^2 \Delta_0 = \frac{b^2}{4} - c.
-\end{equation*}
+\end{equation}
 
 
-There are two cases: when $b$ is even, and when $b$ is odd.  First, suppose $b$ is even.  Then $b=2b'$ for some $b' \in \ZZ$.  This implies that $u = -b'$ and $u \in \ZZ$.  Since $b', c, \Delta_0 \in \ZZ$ we have
+There are two cases: when $b$ is even, and when $b$ is odd.  First, suppose $b$ is even.  Then $b=2b'$ for some $b' \in \ZZ$.  This implies that $u = -b'$ and $u \in \ZZ$.  By \eqref{eq:v2} we have
 \begin{eqnarray*}
 	v^2 \Delta_0 & = & \frac{(2b')^2}{4} - c \\
 	& = & b'^2 - c
 \end{eqnarray*}
-and $v \in \ZZ$.  Therefore, when $b$ is even, i.e. $\Delta \equiv 0 \pmod 4$ it follows that $\beta = u + v \sqrt{\Delta_0}$ is a quadratic integer.
+and $v \in \ZZ$, since $b', c, \Delta_0 \in \ZZ$.  Therefore, when $b$ is even, it follows that $\beta = u + v \sqrt{\Delta_0}$ is a quadratic integer.
 
 \bigbreak
 Now suppose $b$ is odd; then $b=2b' + 1$ for some $b' \in \ZZ$.  Again, equating rational and irrational parts we have
@@ -326,7 +327,7 @@ There is no $s$ term in the above, as reduced representatives are primitive.  Co
 \end{equation}
 
 \noindent
-However, we want to reformulate this given the representation in equation \eqref{eq:idealZModule} as
+The goal is to reformulate this given the representation in equation \eqref{eq:idealZModule} as
 \[
 	\mathfrak{a} \mathfrak{b} = sa \ZZ + s \left(\frac{b + \sqrt{\Delta}}{2}\right) \ZZ
 \]
