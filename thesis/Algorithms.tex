@@ -55,6 +55,48 @@
 
 \chapter*{Appendix A - Algorithms}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% EXPONENTIATE USING CHAIN %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{algorithm}[h]
+\caption{Computes $g^n$ given $n$ as a chained 2,3 representation}
+\label{alg:expWithChain}
+\begin{algorithmic}[1]
+\REQUIRE $g \in \mathcal G,$ \\
+$n = \sum_{i=1}^k s_i2^{a_i}3^{b_i},$ \\
+$s_1,...,s_k \in \{-1, 1\},$ \\
+$0 \le a_1 \le ...\le a_k \in \ZZ,$ \\
+$0 \le b_1 \le ... \le b_k \in \ZZ.$
+\ENSURE $g^n \in \mathcal G$
+\STATE $i \gets 1$
+\STATE $a \gets 0$ \COMMENT{current power of 2}
+\STATE $b \gets 0$ \COMMENT{current power of 3}
+\STATE $T \gets g$ \COMMENT{loop invariant: $T = g^{2^a 3^b}$}
+\STATE $R \gets 1_{\mathcal G}$ \COMMENT{product of positive exponents}
+\STATE $Q \gets 1_{\mathcal G}$ \COMMENT{product of negative exponents}
+\WHILE {$i \le k$}
+	\WHILE {$a < a_i$}
+		\STATE $T \gets T^2$
+		\STATE $a \gets a + 1$
+	\ENDWHILE
+	\WHILE {$b < b_i$}
+		\STATE $T \gets T^3$
+		\STATE $b \gets b + 1$
+	\ENDWHILE
+	\IF {$s_i = 1$}
+		\STATE $R \gets R \cdot T$
+	\ELSE
+		\STATE $Q \gets Q \cdot T$
+	\ENDIF
+	\STATE $i \gets i + 1$
+\ENDWHILE
+\RETURN $R \cdot Q^{-1}$
+\end{algorithmic}
+\end{algorithm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% IDEAL CLASS CUBING (NON-REDUCED) %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{algorithm}[h]
 \caption{Ideal Class Cubing (Non-Reduced)}
 \label{alg:idealCube}
@@ -286,7 +328,7 @@ Here we provide pseudo-code for operations in the ideal class group of imaginary
 
 
 \begin{algorithm}[htb!]
-\caption{Computes $g^n$ for immutable $n$ using only one inverse and a R2L NAF.}\label{alg:nafR2LImmutable}
+\caption{Computes $g^n$ for immutable $n$ using only one inverse and a R2L NAF. Concept from \cite[p.4]{Joye2000}}\label{alg:nafR2LImmutable}
 \begin{algorithmic}[1]
 \REQUIRE $g \in \mathcal G, n \in \ZZgez$
 \ENSURE $g^n \in \mathcal G$
