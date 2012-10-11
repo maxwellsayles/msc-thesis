@@ -48,16 +48,45 @@
 \newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
 \newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
 
-%\setlength{\parindent}{0pt}
-%\setlength{\parskip}{2ex} 
-
 \begin{document}
 
 \chapter*{Appendix A - Algorithms}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% EXPONENTIATE USING CHAIN %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% R2L NAF EXPONENTIATION %
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{algorithm}[h]
+\caption{Computes $g^n$ for immutable $n$ using only one inverse and a R2L NAF. Concept from \cite[p.4]{Joye2000}}
+\label{alg:nafR2LImmutable}
+\begin{algorithmic}[1]
+\REQUIRE $g \in \mathcal G, n \in \ZZgez$
+\ENSURE $g^n \in \mathcal G$
+\STATE $c \gets 0$ \COMMENT{carry flag}
+\STATE $i \gets 0$
+\STATE $R \gets 1_{\mathcal G}$ \COMMENT{product of positive exponents}
+\STATE $Q \gets 1_{\mathcal G}$ \COMMENT{product of negative exponents}
+\STATE $T \gets g$ \COMMENT{invariant: $T = g^{2^i}$}
+\WHILE {$n \ge 2^i$}
+	\IF {$\floor{n/2^i}+c \equiv 1 \pmod 4$}
+		\STATE $R \gets R \cdot T$
+		\STATE $c \gets 0$
+	\ELSIF {$\floor{n/2^i}+c \equiv 3 \pmod 4$}
+		\STATE $Q \gets Q \cdot T$ \\
+		\STATE $c \gets 1$
+	\ENDIF
+	\STATE $T \gets T^2$ \\
+	\STATE $i \gets i+1$
+\ENDWHILE
+\IF {$c=1$} \STATE $R \gets R \cdot T$ \ENDIF
+\RETURN $R \cdot Q^{-1}$
+\end{algorithmic}
+\end{algorithm}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% EXPONENTIATE USING A CHAIN %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{algorithm}[h]
 \caption{Computes $g^n$ given $n$ as a chained 2,3 representation}
 \label{alg:expWithChain}
@@ -93,6 +122,40 @@ $0 \le b_1 \le ... \le b_k \in \ZZ.$
 \RETURN $R \cdot Q^{-1}$
 \end{algorithmic}
 \end{algorithm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% EXPONENTIATE USING YAO'S %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{algorithm}[h]
+\caption{Computes $g^n$ given $n$ in 2,3 representation. Concept from \cite[Section 3.2]{Meloni2009}.}
+\label{alg:yaos}
+\begin{algorithmic}[1]
+\REQUIRE $g \in G,$ \\
+$n = \sum_{i=1}^k s_i2^{a_i}3^{b_i},$ \\
+$s_1,...,s_k \in \{-1, 1\},$ \\
+$a_1 \ge ... \ge a_k \in \ZZgez,$ \\
+$b_1,...,b_k \in \ZZgez.$
+\ENSURE $g^n \in G$
+\IF {k = 1}
+	\RETURN $g^{2^{a_1} 3^{b_1}}$
+\ENDIF
+\STATE $max_b \gets \max \{ b_1, ..., b_k \}$.
+\STATE $T_b \gets g^{3^b}$ for $0 \le b \le max_b$ \COMMENT{by cubing $max_b$ number of times}
+\STATE $a_\Delta \gets a_1-a_2$
+\STATE $R \gets \left( T_{b_1} \right)^{2^{a_\Delta}}$ \COMMENT{by squaring $a_1-a_2$ number of times}
+\STATE $i \gets 2$
+\WHILE {$i < k$}
+	\STATE $R \gets R \cdot {T_{b_i}}^{s_i}$
+	\STATE $a_\Delta \gets a_i - a_{i+1}$
+	\STATE $R \gets R ^ {2^{a_\Delta}}$ \COMMENT{by squaring $a_i - a_{i+1}$ number of times}
+	\STATE $i \gets i + 1$
+\ENDWHILE
+\STATE $R \gets R \cdot {T_{b_k}}^{s_k}$
+\STATE $R \gets R ^ {2^{a_k}}$ \COMMENT{by squaring $a_k$ number of times}
+\RETURN $R$
+\end{algorithmic}
+\end{algorithm}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % IDEAL CLASS CUBING (NON-REDUCED) %
@@ -323,33 +386,6 @@ Here we provide pseudo-code for operations in the ideal class group of imaginary
 \STATE Let $b \leftarrow b \bmod 2a$.
 \STATE (optional) Let $c \leftarrow (b^2-\Delta)/4a$.
 \RETURN $[a, (b+\sqrt\Delta)/2]$ (and optionally $c$).
-\end{algorithmic}
-\end{algorithm}
-
-
-\begin{algorithm}[htb!]
-\caption{Computes $g^n$ for immutable $n$ using only one inverse and a R2L NAF. Concept from \cite[p.4]{Joye2000}}\label{alg:nafR2LImmutable}
-\begin{algorithmic}[1]
-\REQUIRE $g \in \mathcal G, n \in \ZZgez$
-\ENSURE $g^n \in \mathcal G$
-\STATE $c \gets 0$ \COMMENT{carry flag}
-\STATE $i \gets 0$
-\STATE $R \gets 1_{\mathcal G}$ \COMMENT{product of positive exponents}
-\STATE $Q \gets 1_{\mathcal G}$ \COMMENT{product of negative exponents}
-\STATE $T \gets g$ \COMMENT{invariant: $T = g^{2^i}$}
-\WHILE {$n \ge 2^i$}
-	\IF {$\floor{n/2^i}+c \equiv 1 \pmod 4$}
-		\STATE $R \gets R \cdot T$
-		\STATE $c \gets 0$
-	\ELSIF {$\floor{n/2^i}+c \equiv 3 \pmod 4$}
-		\STATE $Q \gets Q \cdot T$ \\
-		\STATE $c \gets 1$
-	\ENDIF
-	\STATE $T \gets T^2$ \\
-	\STATE $i \gets i+1$
-\ENDWHILE
-\IF {$c=1$} \STATE $R \gets R \cdot T$ \ENDIF
-\RETURN $R \cdot Q^{-1}$
 \end{algorithmic}
 \end{algorithm}
 

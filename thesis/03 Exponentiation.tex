@@ -108,7 +108,7 @@ A typical method to compute the non-adjacent form of an integer $n$ is to inspec
 
 In our experiments, we use a variation of the above, given in \cite[p.4]{Joye2000}, that maintains a carry flag $c$.  Instead of adding $2^i$ to $n$, we set $c = 1$, and instead of subtracting $2^i$ from $n$, we set $c = 0$.  When inspecting $n$ two bits at a time, we consider the bit pattern $(m+c) \bmod 4$ where $m = 2 b_{i+1} + b_i$.  For large enough $n$, the cost of addition and subtraction is reduced from $O(\log n)$ to $O(1)$.  This technique is given in Algorithm \ref{alg:nafR2LImmutable}.
 
-The particular advantage of a non-adjacent form exponentiation over a binary exponentiation is in regards to the number of operations required.  While the binary method required $\floor{\log_2 n}$ squares and on average $\floor{\log_2 n}/2$ multiplications, a non-adjacent form exponentiation requires at most $\floor{\log_2 n}+1$ squares and on average $(\floor{\log_2 n}+1)/3$ multiplications.  To see this, recall that non-adjacent form requires that no two non-zero terms be adjacent.  Consider any two adjacent terms.  The possible outcomes are $(0,0)$, $(s, 0)$, or $(0, s$) where $s \in \{-1, 1\}$. This means that 2/3 of the time, 1/2 of the terms will be non-zero, and so the probability of any given term being non-zero is 1/3.
+A particular advantage of a non-adjacent form exponentiation over a binary exponentiation is the number of operations required.  While the binary method requires $\floor{\log_2 n}$ squares and on average $\floor{\log_2 n}/2$ multiplications, a non-adjacent form exponentiation requires at most $\floor{\log_2 n}+1$ squares and on average $(\floor{\log_2 n}+1)/3$ multiplications.  To see this, recall that non-adjacent form requires that no two non-zero terms be adjacent.  Consider any two adjacent terms.  The possible outcomes are $(0,0)$, $(s, 0)$, or $(0, s$) where $s \in \{-1, 1\}$. This means that 2/3 of the time, 1/2 of the terms will be non-zero, and so the probability of any given term being non-zero is 1/3.
 
 
 %%%%%%%%
@@ -117,27 +117,23 @@ The particular advantage of a non-adjacent form exponentiation over a binary exp
 \bigbreak
 \section{Double-Base Number Systems}\label{section:dbns}
 
-A significant advantage of non-adjacent form over a binary representation is that on average the number of non-zero terms (the density of the representation) is lower.  This advantage is improved when we extend the representation to a signed double-base number system (DBNS).  Binary and non-adjacent form are both a base 2 number system.  In the case of a double base number system, as the name suggests, twe use two bases.  This system was first introduced by Dimitrov and Cooklev \cite{Dimitrov1995}.  Given two coprime integers $p$ and $q$ and some integer $n$, we represent $n$ as the sum and difference of the product of powers of $p$ and $q$,
+A significant advantage of non-adjacent form over a binary representation is that on average the number of non-zero terms (the density of the representation) is lower.  This can be even better when we extend the representation to a signed double-base number system (DBNS).  Binary and non-adjacent form are both a base 2 number system.  In the case of a double base number system, as the name suggests, we use two bases.  This system was first introduced by Dimitrov and Cooklev \cite{Dimitrov1995}.  Given two coprime integers $p$ and $q$ and some integer $n$, we represent $n$ as the sum and difference of the product of powers of $p$ and $q$,
 \begin{equation}\label{eq:generalDbnsForm}
 	n = \sum_{i=1}^k s_i p^{a_i} q^{b_i}
 \end{equation}
 where $s_i \in \{-1, 1\}$ and $a_i, b_i, k \in \ZZgez$.
 
-Since this thesis focuses on exponentiation in the ideal class group, and since we can compute the square of an element faster than multiplying it with itself, and we can compute the cube of an element faster than multiplying its square with itself, we will be particularly interested in bases $p=2$ and $q=3$.
+Since this thesis focuses on exponentiation in the ideal class group, and since we can compute the square of an element faster than multiplying it with itself, and we can compute the cube of an element faster than multiplying its square with itself, we will be particularly interested in bases $p=2$ and $q=3$.  In other words, we will focus on representations of $n$ such that $n = \sum_{i=1}^k s_i 2^{a_i} 3^{b_i}$.
 
 As an example of a 2,3 double-base representation, consider the number $n=23814216$ again.  Given the bases $p=2$ and $q=3$, \emph{one} possible representation of $n$ is
+\begin{equation}\label{eq:unchainedEg}
+	23814216 = 2^3 3^3 - 2^4 3^6 - 2^8 3^5 + 2^{15} 3^6.
+\end{equation}
+Another possible representation is
 \begin{equation}\label{eq:chainedEg}
 	23814216 = 2^3 3^2 -2^{13} 3^2 +2^{15} 3^6.
 \end{equation}
-The exponentiation of $g^n$ for some $g \in G$ is then given by
-\[
-	g^{23814216} = g^{2^3 3^2 -2^{13} 3^2 +2^{15} 3^6}.
-\]
-This is just one possible 2,3 representation of the number 23814216 -- there are many.  For example,
-\begin{equation}\label{eq:unchainedEg}
-	23814216 = 2^3 3^3 - 2^4 3^6 - 2^8 3^5 + 2^{15} 3^6
-\end{equation}
-is another valid 2,3 representation.  Different representations will trade off cubings for squarings and the best representation for exponentiation will depend on the actual cost of the individual operations.  Later, we shall see some algorithms that take this into account, but many are designed to either find representations quickly, representations of a special form, or representations with few terms.
+Different representations will trade off cubings for squarings and the best representation will depend on the needs of the application.  Later, we shall see some algorithms that take this into account, but many are designed to either find representations quickly, representations of a special form, or representations with few terms.
 
 Recall, the binary representation \eqref{eq:binaryEg}, non-adjacent form \eqref{eq:nafEg}, and a 2,3 double-base representation \eqref{eq:chainedEg} of 23814216 were
 \begin{align*}
@@ -145,60 +141,31 @@ Recall, the binary representation \eqref{eq:binaryEg}, non-adjacent form \eqref{
 	23814216 &= 2^3+2^6-2^{13}-2^{15}-2^{18}-2^{20}-2^{23}+2^{25}, & \mbox{\{using NAF\}} \\
 	23814216 &= 2^3 3^2 -2^{13} 3^2 +2^{15} 3^6. & \mbox{\{using 2,3 DBNS\}}
 \end{align*}
-The binary representation has 10 terms, while the non-adjacent form has only 8 terms.  The 2,3 representation given above contains only three terms.  While a non-adjacent form has in expectation $\floor{\log_2 n}/3$ terms and a binary representation has in expectation $\floor{\log_2 n}/2$ terms, both are bound by $O(\log n)$ in the number of terms.  In the case of 2,3 double-base representations, it was proved in \cite{Ciet2005} that the number of terms is bound by $O(\log n / \log \log n)$.  Therefore, even when the best way to compute $g^2$ or $g^3$ is through straight forward multiplication, if we are given a large enough exponent, the total number of operations will be fewer than either a non-adjacent form exponentiation or a binary exponentiation.  Many algorithms focus on reducing the number of terms in a 2,3 representation for this reason.   Naturally, the cost of a 2,3 double-base exponentiation is further reduced if the corresponding cost to compute $g^2$ is less than the cost to compute $g \cdot g$, or the cost to compute $g^3$ is less than the cost to compute $g^2 \cdot g$. 
+The binary representation has 10 terms, while the non-adjacent form has only 8 terms.  The 2,3 representation given above contains only three terms.  While a non-adjacent form has in expectation $\floor{\log_2 n}/3$ terms and a binary representation has in expectation $\floor{\log_2 n}/2$ terms, both are bounded by $O(\log n)$ in the number of terms.  Ciet and Sica \cite{Ciet2005} give an algorithm for 2,3 double-base representations, where they prove that the number of terms is bounded by $O(\log n / \log \log n)$.  For this reason, many algorithms focus on reducing the number of terms in a 2,3 representation.   Naturally, the time to compute a 2,3 double-base exponentiation is further reduced if the corresponding cost to compute $g^2$ is less than the cost to compute $g \cdot g$, or the cost to compute $g^3$ is less than the cost to compute $g^2 \cdot g$. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \bigbreak
 \subsection{Chains vs. Representations}
 
-One way to classify algorithms that compute 2,3 representations is by the constraints they place on the \emph{partition} of an integer $n$.  For an example of a partition, consider the 2,3 representation of $23814216 = 2^3 3^2 -2^{13} 3^2 +2^{15} 3^6$.  The terms $2^3 3^2$, $2^{13} 3^2$, and $2^{15} 3^6$ when monotonically increasing by absolute value is a partition of the integer $23814216$.  
+One way to classify algorithms that compute 2,3 representations is by the constraints placed on the \emph{partition} of an integer $n$.  For an example of a partition, consider the 2,3 representation of $23814216 = 2^3 3^2 -2^{13} 3^2 +2^{15} 3^6$.  The terms $2^3 3^2$, $2^{13} 3^2$, and $2^{15} 3^6$ when monotonically increasing by absolute value is a partition of the integer $23814216$.  
 
 \begin{defn}
-A partition of an integer $n$ is $\emph{chained}$ if every term $x_i$ divides every term $x_j$ for $i < j$ and $x_i \le x_j$.  For example, a partition of the form $n = x_1 \pm x_2 \pm \cdots \pm x_k$ is such that $x_1 ~|~ x_2 ~|~ \cdots ~|~ x_k$. In other words, $x_1$ divides each of $x_2$ through $x_k$, and $x_2$ divides each of $x_3$ through $x_k$, and so on. A partition is said to be \emph{strictly chained} if it is chained and $x_i < x_j$ for each $i < j$.
+A partition of an integer $n = x_1 \pm x_2 \pm \cdots \pm x_k$ is \emph{chained} if every term $x_i$ divides every term $x_j$ for $i < j$ and $x_i \le x_j$. A partition is said to be \emph{strictly chained} if it is chained and $x_i$ is \emph{stricly} less than $x_j$ for each $i < j$.
 \end{defn}
 
 \noindent
-Binary and non-adjacent form are special types of strictly chained partitions, since for any two non-zero terms $s_i$ and $s_j$ where $i < j$ we have $s_i2^i ~|~ s_j2^j$ and $s_i2^i < s_j2^j$.  The 2,3 representation of $23814216 = 2^3 3^2 - 2^{13} 3^2 + 2^{15} 3^6$ is an example of a chained partition, since $2^3 3^2 ~|~ 2^{13} 3^2 ~|~ 2^{15} 3^6$.  Using the constaint that a representation be chained or unchained, we can classify algorithms into those that compute chained representations and those that do not.
+Binary and non-adjacent form are special types of strictly chained partitions, since for any two non-zero terms $x_i = |s_i2^i|$ and $x_j = |s_j2^j|$ where $i < j$ we have $x_i ~|~ x_j$ and $x_i < x_j$.  The 2,3 representation of $23814216 = 2^3 3^2 - 2^{13} 3^2 + 2^{15} 3^6$ is an example of a chained partition, since $2^3 3^2 ~|~ 2^{13} 3^2 ~|~ 2^{15} 3^6$.
 
-The benefit of restricting 2,3 representations to chained representations is the ease with which one can compute $g^n$ when $n$ is given as a chain.  For example $g^{23814216} = g^{2^3 3^2 - 2^{13} 3^2 + 2^{15} 3^6}$ can be computed by first computing $x_1 = g^{2^3 3^2}$, $x_2 = {x_1}^{2^{10}}$, $x_3 = {x_2}^{2^2 3^4}$, and finally $g^{23814216} = \left(x_1 \cdot x_3\right) \cdot \left(x_2\right)^{-1}$.  Algorithm \ref{alg:expWithChain} can be used to compute $g^n$ for $g \in G$ and $n$ given as a chained 2,3 representation.  The cost of algorithm \ref{alg:expWithChain} is as follows: Let $n$ be defined as $\sum_{i=1}^k s_i p^{a_i}q^{b_i}$, let $max_a = \max \{a_1,...,a_k\}$, and $max_b = \max \{b_1,...,b_k\}$.  Then we require $max_a$ squares, $max_b$ cubes, $k-1$ multiplications, and at most one inverse.  Since $x_i ~|~ x_{i+1}$, we need only retain $x_i$ in order to compute $x_{i+1}$. For this reason, many algorithms that find 2,3 representations constrain these representations to be chains.
+The benefit of restricting 2,3 representations to chained representations is the ease with which one can compute $g^n$ when $n$ is given as a chain.  For example $g^{23814216} = g^{2^3 3^2 - 2^{13} 3^2 + 2^{15} 3^6}$ can be computed by first computing $x_1 = g^{2^3 3^2}$, $x_2 = {x_1}^{2^{10}}$, $x_3 = {x_2}^{2^2 3^4}$, and finally $g^{23814216} = \left(x_1 \cdot x_3\right) \cdot \left(x_2\right)^{-1}$.  Algorithm \ref{alg:expWithChain} can be used to compute $g^n$ for $g \in G$ and $n$ given as a chained 2,3 representation.  The cost of algorithm \ref{alg:expWithChain} is as follows: Let $n$ be defined as $\sum_{i=1}^k s_i p^{a_i}q^{b_i}$, let $max_a = \max \{a_1,...,a_k\}$, and let $max_b = \max \{b_1,...,b_k\}$.  Then we require $max_a$ squares, $max_b$ cubes, $k-1$ multiplications, and at most one inverse.  Since $x_i ~|~ x_{i+1}$, we need only retain $x_i$ in order to compute $x_{i+1}$. For this reason, many algorithms that find 2,3 representations constrain these representations to be chains.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \bigbreak
 \subsection{Exponentiating general 2,3 representations}
 
-Another class of algorithms compute representations without the constraint that larger terms be divisible by smaller terms.  Here, we consider the restricted bases of $p=2$ and $q=3$.  Given a general 2,3 representation for an integer $n$, M\'{e}loni and Hasan use a modification of Yao's Algorithm \cite[Section 3.2]{Meloni2009} to achieve the same bound on the number of operations as in algorithm \ref{alg:expWithChain}, but with a bound of $O(\min \{max_a, max_b\})$ on the memory used.  Suppose $max_b < max_a$.  We require the terms to be labelled and sorted such that $a_k \ge ... \ge a_1$.  The algorithm works by precomputing a table of $T_b = g^{3^b}$ for $0 \le b \le max_b$.  Let $i=k$ and begin with the first term $s_i2^{a_i}3^{b_i}$.  We look up $T_{b_i} = g^{3^{b_i}}$ and multiply ${T_{b_i}}^{s_i}$ with the running result.  Let $a' = a_i - a_{i-1}$ where $a_{i-1} = 0$ if $i == 0$.  It then squares the running result $a'$ times.  The algorithm removes the term $s_i2^{a_i}3^{b_i}$ from the list of terms, and continues in this way with the term with now largest $a_i$.  The algorithm terminates when there are no more terms in the list.  Algorithm  \ref{alg:yaos} gives pseudo-code for this approach and requires $O(max_b)$ memory.  When $max_a < max_b$, we use a related algorithm that requires the terms to be sorted such that $b_k \ge ... \ge b_1$; it precomputes $T_a = g^{2^a}$ for $0 \le a \le max_a$ and works similar to Algorithm \ref{alg:yaos} but with cubing and squaring appropriately swapped.
+Another class of algorithms compute representations without the constraint that larger terms be divisible by smaller terms.  Given a general 2,3 representation for an integer $n = \sum_{i=1}^k s_i 2^{a_i} 3^{b_i}$, M\'{e}loni and Hasan \cite[Section 3.2]{Meloni2009} use a modification of Yao's Algorithm to achieve the same bound on the number of operations as in algorithm \ref{alg:expWithChain}, but with a bound of $O(\min \{max_a, max_b\})$ on the memory used.  Suppose $max_b < max_a$.  We require the terms to be labelled and sorted such that $a_1 \ge ... \ge a_k$.  The algorithm works by precomputing a table of $T_b = g^{3^b}$ for $0 \le b \le max_b$.  Let $i=1$ and begin with the first term $s_i2^{a_i}3^{b_i}$.  We look up $T_{b_i} = g^{3^{b_i}}$ and, after applying the sign $s_i$, we multiply ${T_{b_i}}^{s_i}$ with the running result.  Let $a_\Delta = a_i - a_{i+1}$ when $i < k$ and $a_\Delta = a_k$ when $i = k$.  It then squares the running result $a_\Delta$ times.  The algorithm removes the term $s_i2^{a_i}3^{b_i}$ from the list of terms, and continues in this way with the term with the next largest $a_i$.  The algorithm terminates when there are no more terms in the list.  Algorithm  \ref{alg:yaos} gives pseudo-code for this approach and requires $O(max_b)$ memory.  When $max_a < max_b$, we use a related algorithm that requires the terms to be sorted such that $b_1 \ge ... \ge b_k$; it precomputes $T_a = g^{2^a}$ for $0 \le a \le max_a$ and works similar to Algorithm \ref{alg:yaos} but with cubing and squaring appropriately swapped.
 
-\begin{algorithm}[htb!]
-\caption{Computes $g^n$ given $n$ in 2,3 representation.}\label{alg:yaos}
-\begin{algorithmic}[1]
-\REQUIRE $g \in G,$ \\
-$n = \sum_{i=1}^k s_i2^{a_i}3^{b_i},$ \\
-$s_1,...,s_k \in \{-1, 1\},$ \\
-$a_1 \ge ... \ge a_k \in \ZZgez,$ \\
-$b_1,...,b_k \in \ZZgez.$
-\ENSURE $g^n \in G$
-\IF {k = 1}
-	\RETURN $g^{2^{a_1} 3^{b_1}}$
-\ENDIF
-\STATE $max_b \gets \max \{ b_1, ..., b_k \}$.
-\STATE $T_b \gets g^{3^b}$ for $0 \le b \le max_b$ \COMMENT{by cubing $max_b$ number of times}
-\STATE $a' \gets a_1-a_2$
-\STATE $R \gets \left( T_{b_1} \right)^{2^{a'}}$ \COMMENT{by squaring $a_1-a_2$ number of times}
-\STATE $i \gets 2$
-\WHILE {$i < k$}
-	\STATE $R \gets R \cdot {T_{b_i}}^{s_i}$
-	\STATE $a' \gets a_i - a_{i+1}$
-	\STATE $R \gets R ^ {2^{a'}}$ \COMMENT{by squaring $a_i - a_{i+1}$ number of times}
-	\STATE $i \gets i + 1$
-\ENDWHILE
-\STATE $R \gets R \cdot {T_{b_k}}^{s_k}$
-\STATE $R \gets R ^ {2^{a_k}}$ \COMMENT{by squaring $a_k$ number of times}
-\RETURN $R$
-\end{algorithmic}
-\end{algorithm}
-
-As an example, consider \eqref{eq:unchainedEg}, the 2,3 representation $23814216 = 2^3 3^3 - 2^4 3^6 - 2^8 3^5 + 2^{15} 3^6$.  The algorithm first computes $T_b = g^{3^b}$ for $0 \le b \le 6$.  Note that it is sufficient to store only the values of $g^{3^{b_i}}$ that actually occur in terms (in this example, we need only store $T_3$, $T_5$, and $T_6$).  Let $R_j$ represent the partial exponentiation of the $j$ terms with the largest $b_i$ with $g^{2^{a_{j-1}}}$ is factored out.  Let $R_0 = 1_G$.  In this example, we compute 
+For example, the 2,3 representation $23814216 = 2^{15} 3^6 - 2^8 3^5 - 2^4 3^6 + 2^3 3^3$ is sorted by decreasing $a_i$.  The algorithm first computes $T_b = g^{3^b}$ for $0 \le b \le 6$.  Note that it is sufficient to store only the values of $g^{3^{b_i}}$ that actually occur in terms (in this example, we need only store $T_3$, $T_5$, and $T_6$).  Let $R_j$ represent the partial exponentiation of the first $j$ terms with the largest $a_i$ such that $g^{2^{a_{j+1}}}$ is factored out.  Let $R_0 = 1_G$.  In this example, we compute 
 \begin{align*}
 	R_1 &= \left( T_6 \right)^{2^7} &&\Rightarrow g^{2^7 3^6}, \\
 	R_2 &= \left( R_1 {T_5}^{-1} \right)^{2^4} &&\Rightarrow g^{-2^4 3^5 + 2^{11} 3^6}, \\
@@ -209,16 +176,13 @@ As an example, consider \eqref{eq:unchainedEg}, the 2,3 representation $23814216
 \begin{figure}[H]
 \centering
 \includegraphics{yao1}
-\caption{The construction of $2^3 3^3 - 2^4 3^6 - 2^8 3^5 + 2^{15} 3^6$ using algorithm \ref{alg:yaos}.  Steps are executed from left-to-right, top-to-bottom.}
+\caption{The construction of $2^{15} 3^6 - 2^8 3^5 - 2^4 3^6 + 2^3 3^3$ using algorithm \ref{alg:yaos}.  Steps are executed from left-to-right, top-to-bottom.}
 \label{fig:yao1}
 \end{figure}
-as depicted by figure \ref{fig:yao1}.  The result of the computation is $g^{23814216} = R_4$.  
+as depicted by figure \ref{fig:yao1}.  The result of the computation is $R_4 = g^{23814216}$.  
 
 
-
-
-
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \bigbreak
 \subsection{Encoding of chains/representations}
 
@@ -227,7 +191,6 @@ Chains are often on the fly, no encoding, or delta.
 Representations using Yao's....
 
 
-\pagebreak
 \bigbreak
 \section{Methods for computing 2,3 Chains/Representations}\label{section:dbnsMethods}
 
