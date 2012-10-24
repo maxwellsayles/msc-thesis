@@ -141,11 +141,11 @@ Recall, the binary representation \eqref{eq:binaryEg}, non-adjacent form \eqref{
 	23814216 &= 2^3+2^6-2^{13}-2^{15}-2^{18}-2^{20}-2^{23}+2^{25}, & \mbox{\{using NAF\}} \\
 	23814216 &= 2^3 3^2 -2^{13} 3^2 +2^{15} 3^6. & \mbox{\{using 2,3 DBNS\}}
 \end{align*}
-The binary representation has 10 terms, while the non-adjacent form has only 8 terms.  The 2,3 representation given above contains only three terms.  While a non-adjacent form has in expectation $\floor{\log_2 n}/3$ terms and a binary representation has in expectation $\floor{\log_2 n}/2$ terms, both are bounded by $O(\log n)$ in the number of terms.  Ciet and Sica \cite{Ciet2005} give an algorithm for 2,3 double-base representations, where they prove that the number of terms is bounded by $O(\log n / \log \log n)$.  For this reason, many algorithms focus on reducing the number of terms in a 2,3 representation.   Naturally, the time to compute a 2,3 double-base exponentiation is further reduced if the corresponding cost to compute $g^2$ is less than the cost to compute $g \cdot g$, or the cost to compute $g^3$ is less than the cost to compute $g^2 \cdot g$. 
+The binary representation has 10 terms, while the non-adjacent form has only 8 terms.  The 2,3 representation given above contains only three terms.  While a non-adjacent form has in expectation $\floor{\log_2 n}/3$ terms and a binary representation has in expectation $\floor{\log_2 n}/2$ terms, both are bounded by $O(\log n)$ in the number of terms.  Both \cite{Dimitrov2008} and \cite{Ciet2005} give algorithms for 2,3 double-base representations, where they prove that the number of terms is bounded by $O(\log n / \log \log n)$.  For this reason, many algorithms focus on reducing the number of terms in a 2,3 representation.   Naturally, the time to compute a 2,3 double-base exponentiation is further reduced if the corresponding cost to compute $g^2$ is less than the cost to compute $g \cdot g$, or the cost to compute $g^3$ is less than the cost to compute $g^2 \cdot g$. 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%
 \bigbreak
-\subsection{Chains vs. Representations}
+\subsection{Chains}
 
 One way to classify algorithms that compute 2,3 representations is by the constraints placed on the \emph{partition} of an integer $n$.  For an example of a partition, consider the 2,3 representation of $23814216 = 2^3 3^2 -2^{13} 3^2 +2^{15} 3^6$.  The terms $2^3 3^2$, $2^{13} 3^2$, and $2^{15} 3^6$ when monotonically increasing by absolute value is a partition of the integer $23814216$.  
 
@@ -154,9 +154,9 @@ A partition of an integer $n = x_1 \pm x_2 \pm \cdots \pm x_k$ is \emph{chained}
 \end{defn}
 
 \noindent
-Binary and non-adjacent form are special types of strictly chained partitions, since for any two non-zero terms $x_i = |s_i2^i|$ and $x_j = |s_j2^j|$ where $i < j$ we have $x_i ~|~ x_j$ and $x_i < x_j$.  The 2,3 representation of $23814216 = 2^3 3^2 - 2^{13} 3^2 + 2^{15} 3^6$ is an example of a chained partition, since $2^3 3^2 ~|~ 2^{13} 3^2 ~|~ 2^{15} 3^6$.
+Binary and non-adjacent form are special types of strictly chained partitions, since for any two non-zero terms where $i < j$, we have $x_i = 2^i$, $x_j = 2^j$, $ x_i ~|~ x_j$, and $x_i < x_j$.  The 2,3 representation of $23814216 = 2^3 3^2 - 2^{13} 3^2 + 2^{15} 3^6$ is another example of a strictly chained partition, since $2^3 3^2 ~|~ 2^{13} 3^2 ~|~ 2^{15} 3^6$.
 
-The benefit of restricting 2,3 representations to chained representations is the ease with which one can compute $g^n$ when $n$ is given as a chain.  For example $g^{23814216} = g^{2^3 3^2 - 2^{13} 3^2 + 2^{15} 3^6}$ can be computed by first computing $x_1 = g^{2^3 3^2}$, $x_2 = {x_1}^{2^{10}}$, $x_3 = {x_2}^{2^2 3^4}$, and finally $g^{23814216} = \left(x_1 \cdot x_3\right) \cdot \left(x_2\right)^{-1}$.  Algorithm \ref{alg:expWithChain} can be used to compute $g^n$ for $g \in G$ and $n$ given as a chained 2,3 representation.  The cost of algorithm \ref{alg:expWithChain} is as follows: Let $n$ be defined as $\sum_{i=1}^k s_i p^{a_i}q^{b_i}$, let $max_a = \max \{a_1,...,a_k\}$, and let $max_b = \max \{b_1,...,b_k\}$.  Then we require $max_a$ squares, $max_b$ cubes, $k-1$ multiplications, and at most one inverse.  Since $x_i ~|~ x_{i+1}$, we need only retain $x_i$ in order to compute $x_{i+1}$. For this reason, many algorithms that find 2,3 representations constrain these representations to be chains.
+The benefit of restricting 2,3 representations to chained representations is the ease with which one can compute $g^n$ when $n$ is given as a chain.  For example $g^{23814216} = g^{2^3 3^2 - 2^{13} 3^2 + 2^{15} 3^6}$ can be computed by first computing $x_1 = g^{2^3 3^2}$, $x_2 = {x_1}^{2^{10}}$, $x_3 = {x_2}^{2^2 3^4}$, and finally $g^{23814216} = \left(x_1 \cdot x_3\right) \cdot \left(x_2\right)^{-1}$.  Algorithm \ref{alg:expWithChain} can be used to compute $g^n$ for $g \in G$ and $n$ given as a chained 2,3 representation.  The cost of algorithm \ref{alg:expWithChain} is as follows: Let $n$ be defined as $\sum_{i=1}^k s_i p^{a_i}q^{b_i}$, let $max_a = \max \{a_1,...,a_k\}$, and let $max_b = \max \{b_1,...,b_k\}$.  Then we require $max_a$ squares, $max_b$ cubes, $k-1$ multiplications, and at most one inverse.  Since $x_i ~|~ x_{i+1}$, we need only retain $x_i$ in order to compute $x_{i+1}$, and so exponentiation and chain generation can easily be interleaved. For this reason, many algorithms that find 2,3 representations constrain these representations to be chains.  Section \ref{section:dbnsMethods} discusses some algorithms for simultaneously generating and exponentiating with such chains.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -165,13 +165,6 @@ The benefit of restricting 2,3 representations to chained representations is the
 
 Another class of algorithms compute representations without the constraint that larger terms be divisible by smaller terms.  Given a general 2,3 representation for an integer $n = \sum_{i=1}^k s_i 2^{a_i} 3^{b_i}$, M\'{e}loni and Hasan \cite[Section 3.2]{Meloni2009} use a modification of Yao's Algorithm to achieve the same bound on the number of operations as in algorithm \ref{alg:expWithChain}, but with a bound of $O(\min \{max_a, max_b\})$ on the memory used.  Suppose $max_b < max_a$.  We require the terms to be labelled and sorted such that $a_1 \ge ... \ge a_k$.  The algorithm works by precomputing a table of $T_b = g^{3^b}$ for $0 \le b \le max_b$.  Let $i=1$ and begin with the first term $s_i2^{a_i}3^{b_i}$.  We look up $T_{b_i} = g^{3^{b_i}}$ and, after applying the sign $s_i$, we multiply ${T_{b_i}}^{s_i}$ with the running result.  Let $a_\Delta = a_i - a_{i+1}$ when $i < k$ and $a_\Delta = a_k$ when $i = k$.  It then squares the running result $a_\Delta$ times.  The algorithm removes the term $s_i2^{a_i}3^{b_i}$ from the list of terms, and continues in this way with the term with the next largest $a_i$.  The algorithm terminates when there are no more terms in the list.  Algorithm  \ref{alg:yaos} gives pseudo-code for this approach and requires $O(max_b)$ memory.  When $max_a < max_b$, we use a related algorithm that requires the terms to be sorted such that $b_1 \ge ... \ge b_k$; it precomputes $T_a = g^{2^a}$ for $0 \le a \le max_a$ and works similar to Algorithm \ref{alg:yaos} but with cubing and squaring appropriately swapped.
 
-For example, the 2,3 representation $23814216 = 2^{15} 3^6 - 2^8 3^5 - 2^4 3^6 + 2^3 3^3$ is sorted by decreasing $a_i$.  The algorithm first computes $T_b = g^{3^b}$ for $0 \le b \le 6$.  Note that it is sufficient to store only the values of $g^{3^{b_i}}$ that actually occur in terms (in this example, we need only store $T_3$, $T_5$, and $T_6$).  Let $R_j$ represent the partial exponentiation of the first $j$ terms with the largest $a_i$ such that $g^{2^{a_{j+1}}}$ is factored out.  Let $R_0 = 1_G$.  In this example, we compute 
-\begin{align*}
-	R_1 &= \left( T_6 \right)^{2^7} &&\Rightarrow g^{2^7 3^6}, \\
-	R_2 &= \left( R_1 {T_5}^{-1} \right)^{2^4} &&\Rightarrow g^{-2^4 3^5 + 2^{11} 3^6}, \\
-	R_3 &= \left( R_2 {T_6}^{-1} \right)^{2^1} &&\Rightarrow g^{-2^1 3^6 -2^5 3^5 + 2^{12} 3^6}, \\
-	R_4 &= \left( R_3 T_3 \right) ^ {2^3} &&\Rightarrow g^{2^3 3^3 -2^4 3^6 -2^8 3^5 + 2^{15} 3^6},
-\end{align*}
 % figure of exponentiating 23814216 with unchained representation
 \begin{figure}[H]
 \centering
@@ -179,25 +172,57 @@ For example, the 2,3 representation $23814216 = 2^{15} 3^6 - 2^8 3^5 - 2^4 3^6 +
 \caption{The construction of $2^{15} 3^6 - 2^8 3^5 - 2^4 3^6 + 2^3 3^3$ using algorithm \ref{alg:yaos}.  Steps are executed from left-to-right, top-to-bottom.}
 \label{fig:yao1}
 \end{figure}
+
+For example, the 2,3 representation $23814216 = 2^{15} 3^6 - 2^8 3^5 - 2^4 3^6 + 2^3 3^3$ is sorted by decreasing $a_i$.  The algorithm first computes $T_b = g^{3^b}$ for $0 \le b \le 6$.  Note that it is sufficient to store only the values of $g^{3^{b_i}}$ that actually occur in terms (in this example, we need only store $T_3$, $T_5$, and $T_6$).  Let $R_j$ represent the partial exponentiation of the first $j$ terms with the largest $a_i$ such that $g^{2^{a_{j+1}}}$ is factored out.  Let $R_0 = 1_G$.  In this example, we compute 
+\begin{align*}
+	R_1 &= \left( T_6 \right)^{2^7} &&\Rightarrow g^{2^7 3^6}, \\
+	R_2 &= \left( R_1 {T_5}^{-1} \right)^{2^4} &&\Rightarrow g^{-2^4 3^5 + 2^{11} 3^6}, \\
+	R_3 &= \left( R_2 {T_6}^{-1} \right)^{2^1} &&\Rightarrow g^{-2^1 3^6 -2^5 3^5 + 2^{12} 3^6}, \\
+	R_4 &= \left( R_3 T_3 \right) ^ {2^3} &&\Rightarrow g^{2^3 3^3 -2^4 3^6 -2^8 3^5 + 2^{15} 3^6},
+\end{align*}
 as depicted by figure \ref{fig:yao1}.  The result of the computation is $R_4 = g^{23814216}$.  
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bigbreak
-\subsection{Encoding of chains/representations}
-
-Chains are often on the fly, no encoding, or delta.
-
-Representations using Yao's....
-
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% METHODS FOR COMPUTING 2,3 CHAINS/REPRESENTATIONS %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \bigbreak
 \section{Methods for computing 2,3 Chains/Representations}
 \label{section:dbnsMethods}
 
+Factors influencing the speed of a 2,3 exponentiation are the time to generate the 2,3 chain or representation, and the cost of group operations such as compose, square, and cube. If the exponent is a constant, then we can precompute the chain or representation. Here we discuss some methods from the literature: the first generates strict chains from low order to high order (right-to-left), the second generates strict chains from high order to low order (left-to-right), and the last generates non-chained representations using a tree-based approach.  For an integer $n$, each successive method introduced below typically requires more time to generate a 2,3 representation, but the representation typically has fewer terms.  As such, these methods show a trade off between the time spent computing a representation and the time spent exponentiating with the representation.  When the exponent is a constant, we can precompute the representation and so the density of the representation or the time to exponentiate dominates.
+
+%%%%%%%%%%%%%%%%%%%%%%%
 \bigbreak
 \subsection{R2L Chains}
 
+The first method we present computes a strictly chained 2,3 partition that is generated from low order to high order and is based on \cite{Ciet2006}.  Consider the technique for binary exponentiation that computes from low order to high order.  We can give a recursive algorithm by defining a function $f_1$ such that given an element $g \in G$ and an integer $n$:
+\begin{align*}
+f_1(g, n) &= \begin{cases}
+               1 & \textrm{if $n = 0$} \\
+               {f_1(g, n/2)}^2 & \textrm{if $n \equiv 0 \pmod 2$} \\
+               g \cdot f_1(g, n-1) & \textrm{if $n \equiv 1 \pmod 2$}. \\
+	       \end{cases}
+\end{align*}
+
+\noindent
+This algorithm will repeatedly remove factors of 2 from $n$.  When $n$ is not divisible by 2, it subtracts 1 such that the input to the recursive call will be divisible by 2.  The recursion terminates with the base case of $n=0$.
+
+We can extend this concept to a 2,3 number system.  We will repeatedly remove factors of 2 from $n$, then repeatedly remove factors of 3 from $n$.  At this point, either $n \equiv 1 \pmod 6$ or $n \equiv 5 \pmod 6$.  When $n \equiv 1 \pmod 6$, we recurse on $n-1$ and the input will be divisible by both 2 and 3.  When $n \equiv 5 \pmod 6$, we recurse on $n+1$.  Again, the input to the recursive call will be divisible by both 2 and by 3.  The function $f_2$ performs a 2,3 exponentiation recursively:
+\begin{align*}
+f_2(g, n) &= \begin{cases}
+               1 & \textrm{if $n = 0$} \\
+               {f_2(g, n/2)}^2 & \textrm{if $n \equiv 0 \pmod 2$} \\
+               {f_2(g, n/3)}^3 & \textrm{if $n \equiv 0 \pmod 3$} \\
+               f_2(g, n-1) \cdot g & \textrm{if $n \equiv 1 \pmod 3$} \\
+               f_2(g, n+1) \cdot g^{-1} & \textrm{if $n \equiv 2 \pmod 3$} \\
+	       \end{cases}
+\end{align*}
+
+Using this recursive function, we can devise a strictly chained 2,3 partition of $n$ that corresponds to the group operations generated here. This is useful when recursion isn't possible, or when the exponent $n$ is a constant (since we can use precomputation to save time). Algorithm \ref{alg:r2lDbnsChain} computes the corresponding strictly chained 2,3 partition.  Let $a = 0$, $b=0$, and $i=1$.  While $n > 0$, we repeatedly remove factors of 2 from $n$ and increment $a$ for each factor of 2 removed. Then we repeatedly remove factors of 3 from $n$ and increment $b$ for each factor of 3 removed. At this point, either $n \equiv 1 \pmod 6$ or $n \equiv 5 \pmod 6$ and so we continue on $n-1$ or $n+1$ respectively.  When we continue on $n-1$, this corresponds to adding the current term, so we set $s_i=1$, and when we continue on $n+1$, this corresponds to subtracting the current term, so we set $s_i=-1$. Let $a_i = a$ and $b_i = b$ and then increment $i$ and we repeat this process while $n > 0$.  We can then use Algorithm \ref{alg:expWithChain} to compute the exponentiation. Since the terms $s_i2^{a_i}3^{b_i}$ are computed in increasing order for $i=1..k$, it is relatively straightforword to interleave the computation of the partition with the computation of the exponentiation for additional speed and memory savings.
+
+To see the correctness of the above description, consider a modification to the recursive function $f_2$ such that it returns a partition of the input $n$ as a list of terms $s_i2^{a_i}3^{b_i}$. When the result of the recursive call is squared, this corresponds to incrementing $a_i$ in each term of the list.  Similarly, when the result is cubed, this corresponds to incrementing $b_i$ in each term of the list. When the result is composed with $g$, we would add 1 to the partition, and when the result is composed with $g^{-1}$, we would subtract 1 from the partition. Note that since either $n \equiv 0 \pmod 2$ or $n \equiv 0 \pmod 3$ on each iteration of the loop, either $a$ will increase or $b$ will increase. Since every term $2^{a_i}3^{b_i}$ is strictly less than $2^{a_j}3^{b_j}$ when $i < j$, the partition generated is strictly chained.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \bigbreak
 \subsection{L2R Chains (Ostrowski approximation)}
 

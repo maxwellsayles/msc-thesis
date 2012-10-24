@@ -60,12 +60,12 @@
 \caption{Computes $g^n$ for immutable $n$ using only one inverse and a R2L NAF. Concept from \cite[p.4]{Joye2000}}
 \label{alg:nafR2LImmutable}
 \begin{algorithmic}[1]
-\REQUIRE $g \in \mathcal G, n \in \ZZgez$
-\ENSURE $g^n \in \mathcal G$
+\REQUIRE $g \in G, n \in \ZZgez$
+\ENSURE $g^n \in G$
 \STATE $c \gets 0$ \COMMENT{carry flag}
 \STATE $i \gets 0$
-\STATE $R \gets 1_{\mathcal G}$ \COMMENT{product of positive exponents}
-\STATE $Q \gets 1_{\mathcal G}$ \COMMENT{product of negative exponents}
+\STATE $R \gets 1_G$ \COMMENT{product of positive exponents}
+\STATE $Q \gets 1_G$ \COMMENT{product of negative exponents}
 \STATE $T \gets g$ \COMMENT{invariant: $T = g^{2^i}$}
 \WHILE {$n \ge 2^i$}
 	\IF {$\floor{n/2^i}+c \equiv 1 \pmod 4$}
@@ -88,21 +88,21 @@
 % EXPONENTIATE USING A CHAIN %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{algorithm}[h]
-\caption{Computes $g^n$ given $n$ as a chained 2,3 representation}
+\caption{Computes $g^n$ given $n$ as a chained 2,3 partition.}
 \label{alg:expWithChain}
 \begin{algorithmic}[1]
-\REQUIRE $g \in \mathcal G,$ \\
+\REQUIRE $g \in G,$ \\
 $n = \sum_{i=1}^k s_i2^{a_i}3^{b_i},$ \\
 $s_1,...,s_k \in \{-1, 1\},$ \\
 $0 \le a_1 \le ...\le a_k \in \ZZ,$ \\
 $0 \le b_1 \le ... \le b_k \in \ZZ.$
-\ENSURE $g^n \in \mathcal G$
+\ENSURE $g^n \in G$
 \STATE $i \gets 1$
 \STATE $a \gets 0$ \COMMENT{current power of 2}
 \STATE $b \gets 0$ \COMMENT{current power of 3}
 \STATE $T \gets g$ \COMMENT{loop invariant: $T = g^{2^a 3^b}$}
-\STATE $R \gets 1_{\mathcal G}$ \COMMENT{product of positive exponents}
-\STATE $Q \gets 1_{\mathcal G}$ \COMMENT{product of negative exponents}
+\STATE $R \gets 1_G$ \COMMENT{product of positive exponents}
+\STATE $Q \gets 1_G$ \COMMENT{product of negative exponents}
 \WHILE {$i \le k$}
 	\WHILE {$a < a_i$}
 		\STATE $T \gets T^2$
@@ -153,6 +153,47 @@ $b_1,...,b_k \in \ZZgez.$
 \STATE $R \gets R \cdot {T_{b_k}}^{s_k}$
 \STATE $R \gets R ^ {2^{a_k}}$ \COMMENT{by squaring $a_k$ number of times}
 \RETURN $R$
+\end{algorithmic}
+\end{algorithm}
+
+%%%%%%%%%%%%%%%%%
+% R2L 2,3 CHAIN %
+%%%%%%%%%%%%%%%%%
+\begin{algorithm}[h]
+\caption{Computes a 2,3 strictly chained representation from low order to high order. Adapted from \cite{Ciet2006}.}
+\label{alg:r2lDbnsChain}
+\begin{algorithmic}[1]
+\REQUIRE $n \in \ZZgez$
+\ENSURE $n=\sum_{i=1}^k s_i2^{a_i}3^{b_i}$ where \\
+   $0 \le a_1 \le ... \le a_k \in \ZZ$ \\
+   $0 \le b_1 \le ... \le b_k \in \ZZ$ \\
+   $s_1, ..., s_k \in \{-1, 1\}$
+\STATE $a \gets 0$
+\STATE $b \gets 0$
+\STATE $i \gets 1$
+\WHILE {$n > 0$}
+	\WHILE {$n \equiv 0 \pmod 2$} 
+		\STATE $n \gets n / 2$
+		\STATE $a \gets a + 1$
+	\ENDWHILE
+	\WHILE {$n \equiv 0 \pmod 3$}
+		\STATE $n \gets n / 3$
+		\STATE $b \gets b + 1$
+	\ENDWHILE
+	\IF {$n \equiv 1 \pmod 3$}
+		\STATE $n \gets n - 1$
+		\STATE $s \gets 1$
+	\ELSIF {$n \equiv 2 \pmod 3$}
+		\STATE $n \gets n + 1$
+		\STATE $s \gets -1$
+	\ENDIF
+	\STATE $a_i \gets a$
+	\STATE $b_i \gets b$
+	\STATE $s_i \gets s$
+	\STATE $i \gets i + 1$
+\ENDWHILE
+\STATE $k \gets i$
+\RETURN $(a_1, b_1, s_1), ..., (a_k, b_k, s_k)$
 \end{algorithmic}
 \end{algorithm}
 
