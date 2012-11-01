@@ -27,6 +27,8 @@
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
 
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
 \newcommand{\CC}{\mathbb{C}}
 \newcommand{\NN}{\mathbb{N}}
 \newcommand{\RR}{\mathbb{R}}
@@ -41,12 +43,15 @@
 \newcommand{\ZZgez}{\mathbb{Z}_{\ge 0}}
 \newcommand{\QQgtz}{\mathbb{Q}_{>0}}
 \newcommand{\QQgez}{\mathbb{Q}_{\ge 0}}
-\newcommand{\matrixto}[2]{\left( \begin{array}{rr} #1 & #2 \end{array} \right)}
-\newcommand{\matrixot}[2]{\left( \begin{array}{r} #1 \\ #2 \end{array} \right)}
-\newcommand{\matrixtt}[4]{\left( \begin{array}{rr} #1 & #2 \\ #3 & #4 \end{array} \right)}
+\newcommand{\matrixto}[2]{\left[ \begin{array}{rr} #1 & #2 \end{array} \right]}
+\newcommand{\matrixot}[2]{\left[ \begin{array}{r} #1 \\ #2 \end{array} \right]}
+\newcommand{\matrixtt}[4]{\left[ \begin{array}{rr} #1 & #2 \\ #3 & #4 \end{array} \right]}
 \newcommand{\ntoinfty}{\lim_{n \rightarrow \infty}}
 \newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
 \newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+
+\newcommand{\amax}{a_\textrm{max}}
+\newcommand{\bmax}{b_\textrm{max}}
 
 \begin{document}
 
@@ -161,15 +166,11 @@ $b_1,...,b_k \in \ZZgez.$
 %%%%%%%%%%%%%%%%%
 \begin{algorithm}[h]
 \caption{Computes a 2,3 strictly chained representation from low order to high order. Adapted from \cite{Ciet2006}.}
-\label{alg:r2lDbnsChain}
+\label{alg:rtolDbnsChain}
 \begin{algorithmic}[1]
 \REQUIRE $n \in \ZZgez$
-\ENSURE $n=\sum_{i=1}^k s_i2^{a_i}3^{b_i}$ where \\
-   $0 \le a_1 \le ... \le a_k \in \ZZ$ \\
-   $0 \le b_1 \le ... \le b_k \in \ZZ$ \\
-   $s_1, ..., s_k \in \{-1, 1\}$
-\STATE $a \gets 0$
-\STATE $b \gets 0$
+\ENSURE $n=\sum_{i=1}^k s_i2^{a_i}3^{b_i}$ as a strictly chained partition.
+\STATE $(a, b) \gets (0, 0)$
 \STATE $i \gets 1$
 \WHILE {$n > 0$}
 	\WHILE {$n \equiv 0 \pmod 2$} 
@@ -187,9 +188,7 @@ $b_1,...,b_k \in \ZZgez.$
 		\STATE $n \gets n + 1$
 		\STATE $s \gets -1$
 	\ENDIF
-	\STATE $a_i \gets a$
-	\STATE $b_i \gets b$
-	\STATE $s_i \gets s$
+	\STATE $(s_i, a_i, b_i) \gets (s, a, b)$
 	\STATE $i \gets i + 1$
 \ENDWHILE
 \STATE $k \gets i$
@@ -205,25 +204,25 @@ $b_1,...,b_k \in \ZZgez.$
 \caption{Ideal Class Cubing (Non-Reduced)}
 \label{alg:idealCube}
 \begin{algorithmic}[1]
-\REQUIRE Reduced ideal class representative $\mathfrak a = \left[a_1, (b_1 + \sqrt\Delta)/2\right]$ and $c_1 = ({b_1}^2-\Delta)/4a_1$.
-\ENSURE Non-reduced ideal class representative ${\mathfrak a}^3$.
-\STATE Compute $s_1 \leftarrow U_1a_1 + V_1b_1$ for $U_1,V_1 \in \ZZ$ \COMMENT{using the extended Euclidean algorithm (only compute $s_1$ and $V_1$)}.
+\REQUIRE Reduced ideal class representative $\mathfrak a = \left[a_1, (b_1 + \sqrt\Delta)/2\right]$ and $c_1 = ({b_1}^2-\Delta)/4a_1$
+\ENSURE Non-reduced ideal class representative ${\mathfrak a}^3$
+\STATE $s_1 \gets U_1a_1 + V_1b_1$ for $U_1,V_1 \in \ZZ$
 \IF{$s_1 = 1$}
-	\STATE Let $s_2 \leftarrow 1$.
-	\STATE Let $N \leftarrow a_1$.
-	\STATE Let $L \leftarrow {a_1}^2$.
-	\STATE Let $K \leftarrow c_1V_1(2-V_1(b_1-V_1a_1c_1)) \pmod L$.
+	\STATE $s_2 \gets 1$
+	\STATE $N \gets a_1$
+	\STATE $L \gets {a_1}^2$
+	\STATE $K \gets c_1V_1(2-V_1(b_1-V_1a_1c_1)) \pmod L$
 \ELSE
-	\STATE Compute $s_2 \leftarrow U_2(s_1a_1) + V_2({b_1}^2-a_1c_1)$ for $U_2, V_2 \in \ZZ$.
-	\STATE Let $N \leftarrow a_1/s_2$.
-	\STATE Let $L \leftarrow Na_1$.
-	\STATE Let $K \leftarrow c_1(U_2V_1a_1+V_2b_1) \pmod L$.
+	\STATE $s_2 \gets U_2(s_1a_1) + V_2({b_1}^2-a_1c_1)$ for $U_2, V_2 \in \ZZ$
+	\STATE $N \gets a_1/s_2$
+	\STATE $L \gets Na_1$
+	\STATE $K \gets c_1(U_2V_1a_1+V_2b_1) \pmod L$
 \ENDIF
-\STATE Let $T \leftarrow NK$.
-\STATE Let $a \leftarrow NL$.
-\STATE Let $b \leftarrow b_1 - 2T$.
-\STATE (optional) Let $c \leftarrow (s_2c_1+K(T-b))/L$.
-\RETURN $[a, (b+\sqrt\Delta)/2]$ (optionally $c$).
+\STATE $T \gets NK$
+\STATE $a \gets NL$
+\STATE $b \gets b_1 - 2T$
+\STATE $c \gets (s_2c_1+K(T-b))/L$ \COMMENT{Optional}
+\RETURN $[a, (b+\sqrt\Delta)/2]$ \COMMENT{Optionally $c$}
 \end{algorithmic}
 \end{algorithm}
 
@@ -287,15 +286,15 @@ Here we provide pseudo-code for operations in the ideal class group of imaginary
 \begin{algorithmic}[1]
 \REQUIRE A prime integer $p \in \ZZ$.
 \ENSURE A reduced representative $\mathfrak p = [p, (b+\sqrt\Delta)/2]$ such that $\mathfrak p$ is a prime ideal if one exists.
-\STATE Compute $b \leftarrow \sqrt\Delta \pmod p$ \COMMENT{using Tonelli and Shanks or a lookup table}.
-\IF {$4p ~|~ b^2-\Delta$}
+\STATE $b \gets \sqrt\Delta \pmod p$
+\IF {$4p | b^2-\Delta$}
 	\RETURN $[p, (b+\sqrt\Delta)/2]$.	
 \ENDIF
-\STATE Let $b \leftarrow p-b$.
-\IF {$4p ~|~ b^2-\Delta$}
+\STATE Let $b \gets p-b$.
+\IF {$4p | b^2-\Delta$}
 	\RETURN $[p, (b+\sqrt\Delta)/2]$.	
 \ENDIF
-\RETURN None exists.
+\RETURN none
 \end{algorithmic}
 \end{algorithm}
 
@@ -309,19 +308,18 @@ Here we provide pseudo-code for operations in the ideal class group of imaginary
 \begin{algorithmic}[1]
 \REQUIRE An ideal class representative $\mathfrak a_1 = [a_1, (b_1+\sqrt\Delta)/2]$ for an imaginary quadratic order, and $c_1 = ({b_1}^2 - \Delta)/4a_1$.
 \ENSURE A reduced representative $\mathfrak a = [a, (b+\sqrt\Delta)/2]$.
-\STATE Let $a \leftarrow a_1, b \leftarrow b_1, c \leftarrow c_1$.
+\STATE $a \gets a_1, b \gets b_1, c \gets c_1$.
 \WHILE {$a > c$ or $b > a$ or $b \le -a$}
 	\IF {$a > c$}
-		\STATE Swap $a$ with $c$ and let $b \leftarrow -b$.
+		\STATE Swap $a$ with $c$ and let $b \gets -b$.
 	\ENDIF
 	\IF {$b > a$ or $b \le -a$}
-		\STATE Compute $b'$ such that $-a < b' \le a$ and $b' \equiv b \pmod{2a}$.
-		\STATE Let $b \leftarrow b'$.
-		\STATE Compute $c \leftarrow (b^2-\Delta)/4a$.
+		\STATE $b \gets b'$ such that $-a < b' \le a$ and $b' \equiv b \pmod{2a}$.
+		\STATE $c \gets (b^2-\Delta)/4a$.
 	\ENDIF
 \ENDWHILE
 \IF {$a=c$ and $b < 0$}
-	\STATE Let $b \leftarrow -b$.
+	\STATE $b \gets -b$.
 \ENDIF
 \RETURN $[a, (b+\sqrt\Delta)/2]$.
 \end{algorithmic}
@@ -358,15 +356,18 @@ Here we provide pseudo-code for operations in the ideal class group of imaginary
 \begin{algorithmic}[1]
 \REQUIRE Reduced representatives $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$, $\mathfrak b = [a_2, (b_2+\sqrt\Delta)/2]$ with \break $c_1 = ({b_1}^2-\Delta)/4a_1$, $c_2 = ({b_2}^2-\Delta)/4a_2$, and discriminant $\Delta$.
 \ENSURE A reduced or almost reduced representative $\mathfrak a \mathfrak b$.
-\STATE Compute $s \leftarrow Ya_1 + Va_2 + W (b_1+b_2)/2$ for $Y, V, W \in \ZZ$.
-\STATE Compute $U \leftarrow V(b_1-b_2)/2 + Wc_2$.
-\STATE Let $R_{-2} \leftarrow sU, R_{-1} \leftarrow a_1, C_{-2} \leftarrow -1, C_{-1} \leftarrow 0$.
-\STATE Find $i$ such that $R_i < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4} < R_{i-1}$ using the recurrences \break $q_i = \floor{R_{i-2}/R_{i-1}}, R_i = R_{i-2}-q_i R_{i-1}, C_i=C_{i-2}-q_i C_{i-1}$.
-\STATE Compute $M_1 \leftarrow (R_i a_2 + sC_i(b_1-b_2)/2)/a_1$.
-\STATE Compute $M_2 \leftarrow (R_i (b_1+b_2)/2 -sC_i c_2)/a_1$.
-\STATE Compute $a \leftarrow (-1)^{i+1}(R_i M_1 - C_i M_2)$.
-\STATE Compute $b \leftarrow ((R_i a_2/s + C_{i-1} a)/C_i) \bmod{2a}$.
-\RETURN $[a, (b+\sqrt\Delta)/2]$.
+\STATE $s \gets Ya_1 + Va_2 + W (b_1+b_2)/2$ for $Y, V, W \in \ZZ$
+\STATE $U \gets V(b_1-b_2)/2 + Wc_2$
+\STATE $\matrixtt{R_{-2}}{R_{-1}}{C_{-2}}{C_{-1}} \gets \matrixtt{sU}{a_1}{-1}{0}$
+\STATE Find $i$ such that $R_i < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4} < R_{i-1}$ using the recurrences: \\
+$q_i = \floor{R_{i-2}/R_{i-1}}$ \\
+$R_i = R_{i-2}-q_i R_{i-1}$ \\
+$C_i=C_{i-2}-q_i C_{i-1}$
+\STATE $M_1 \gets (R_i a_2 + sC_i(b_1-b_2)/2)/a_1$
+\STATE $M_2 \gets (R_i (b_1+b_2)/2 -sC_i c_2)/a_1$
+\STATE $a \gets (-1)^{i+1}(R_i M_1 - C_i M_2)$
+\STATE $b \gets ((R_i a_2/s + C_{i-1} a)/C_i) \bmod{2a}$
+\RETURN $[a, (b+\sqrt\Delta)/2]$
 \end{algorithmic}
 \end{algorithm}
 
@@ -379,14 +380,17 @@ Here we provide pseudo-code for operations in the ideal class group of imaginary
 \begin{algorithmic}[1]
 \REQUIRE Reduced representative $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$ with $c_1 = ({b_1}^2-\Delta)/4a_1$ and discriminant $\Delta$.
 \ENSURE A reduced or almost reduced representative $\mathfrak a^2$.
-\STATE Compute $s \leftarrow Xa_1 + Yb_1$ for $X,Y \in \ZZ$.
-\STATE Compute $U \leftarrow Yc_1$.
-\STATE Let $R_{-2} \leftarrow sU, R_{-1} \leftarrow a_1, C_{-2} \leftarrow -1, C_{-1} \leftarrow 0$.
-\STATE Find $i$ such that $R_i < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4} < R_{i-1}$ using the recurrences \break $q_i = \floor{R_{i-2}/R_{i-1}}, R_i = R_{i-2}-q_i R_{i-1}, C_i=C_{i-2}-q_i C_{i-1}$.
-\STATE Compute $M_2 \leftarrow (R_i b_1 -sC_i c_1)/a_1$.
-\STATE Compute $a \leftarrow (-1)^{i+1}({R_i}^2 - C_i M_2)$.
-\STATE Compute $b \leftarrow ((R_i a_2/s + C_{i-1} a)/C_i) \bmod{2a}$.
-\RETURN $[a, (b+\sqrt\Delta)/2]$.
+\STATE $s \gets Xa_1 + Yb_1$ for $X,Y \in \ZZ$
+\STATE $U \gets Yc_1$
+\STATE $\matrixtt{R_{-2}}{R_{-1}}{C_{-2}}{C_{-1}} \gets \matrixtt{sU}{a_1}{-1}{0}$
+\STATE Find $i$ such that $R_i < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4} < R_{i-1}$ using the recurrences: \\
+$q_i = \floor{R_{i-2}/R_{i-1}}$ \\
+$R_i = R_{i-2}-q_i R_{i-1}$ \\
+$C_i=C_{i-2}-q_i C_{i-1}$
+\STATE $M_2 \gets (R_i b_1 -sC_i c_1)/a_1$
+\STATE $a \gets (-1)^{i+1}({R_i}^2 - C_i M_2)$
+\STATE $b \gets ((R_i a_2/s + C_{i-1} a)/C_i) \bmod{2a}$
+\RETURN $[a, (b+\sqrt\Delta)/2]$
 \end{algorithmic}
 \end{algorithm}
 
@@ -399,34 +403,36 @@ Here we provide pseudo-code for operations in the ideal class group of imaginary
 \begin{algorithmic}[1]
 \REQUIRE A reduced representative $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$.
 \ENSURE A reduced or almost reduced representative $\mathfrak a^3$.
-\STATE Compute $s_1 \leftarrow U_1a_1 + V_1b_1$ for $U_1,V_1 \in \ZZ$.
+\STATE $s_1 \gets U_1a_1 + V_1b_1$ for $U_1,V_1 \in \ZZ$
 \IF{$s_1 = 1$}
-	\STATE Let $s_2 \leftarrow 1$.
-	\STATE Let $N \leftarrow a_1$.
-	\STATE Let $L \leftarrow {a_1}^2$.
-	\STATE Let $K \leftarrow c_1V_1(2-V_1(b_1-V_1a_1c_1)) \pmod L$.
+	\STATE $s_2 \gets 1$
+	\STATE $N \gets a_1$
+	\STATE $L \gets {a_1}^2$
+	\STATE $K \gets c_1V_1(2-V_1(b_1-V_1a_1c_1)) \bmod L$
 \ELSE
-	\STATE Compute $s_2 \leftarrow U_2(s_1a_1) + V_2({b_1}^2-a_1c_1)$ for $U_2, V_2 \in \ZZ$.
-	\STATE Let $N \leftarrow a_1/s_2$.
-	\STATE Let $L \leftarrow Na_1$.
-	\STATE Let $K \leftarrow c_1(U_2V_1a_1+V_2b_1) \pmod L$.
+	\STATE $s_2 \gets U_2(s_1a_1) + V_2({b_1}^2-a_1c_1)$ for $U_2, V_2 \in \ZZ$
+	\STATE $N \gets a_1/s_2$
+	\STATE $L \gets Na_1$
+	\STATE $K \gets c_1(U_2V_1a_1+V_2b_1) \bmod L$
 \ENDIF
 \IF {$L < \sqrt{a_1} ~ |\Delta/4|^{1/4}$}
-	\STATE Let $T \leftarrow NK$.
-	\STATE Let $a \leftarrow NL$.
-	\STATE Let $b \leftarrow b_1 - 2T$.
+	\STATE $a \gets NL$
+	\STATE $b \gets b_1 - 2NK$
 \ELSE
-	\STATE Let $R_{-1} \leftarrow L, R_0 \leftarrow K, C_{-1} \leftarrow 0, C_0 \leftarrow -1$.
-	\STATE Find $i$ such that $R_i < \sqrt{a_1} ~ |\Delta/4|^{1/4} < R_{i-1}$ using recurrences \eqref{eq:cf1}, \eqref{eq:cf2}, and \eqref{eq:cf3} \break $q_i = \floor{R_{i-2}/R_{i-1}}, R_i = R_{i-2}-q_i R_{i-1}, C_i=C_{i-2}-q_i C_{i-1}$.
-	\STATE Compute $b_2 \leftarrow b_1 -2NK \pmod L$.
-	\STATE Compute $M_1 \leftarrow (NR_i + (b_2-b_1)C_i)/L$.
-	\STATE Compute $M_2 \leftarrow (R_i(b_1+b_2)+c_1s_2)/L$.
-	\STATE Compute $a \leftarrow (-1)^{i-1}(R_iM_1-C_iM_2)$.
-	\STATE Compute $b \leftarrow (NR_i + aC_{i-1})/C_i-b_1$.
+	\STATE $\matrixtt{R_{-1}}{R_0}{C_{-1}}{C_0} \gets \matrixtt{L}{K}{0}{-1}$
+	\STATE Find $i$ such that $R_i < \sqrt{a_1} ~ |\Delta/4|^{1/4} < R_{i-1}$ using the recurrences:\\
+	$q_i = \floor{R_{i-2}/R_{i-1}}$ \\
+	$R_i = R_{i-2}-q_i R_{i-1}$ \\
+	$C_i=C_{i-2}-q_i C_{i-1}$
+	\STATE $b_2 \gets b_1 -2NK \pmod L$
+	\STATE $M_1 \gets (NR_i + (b_2-b_1)C_i)/L$
+	\STATE $M_2 \gets (R_i(b_1+b_2)+c_1s_2)/L$
+	\STATE $a \gets (-1)^{i-1}(R_iM_1-C_iM_2)$
+	\STATE $b \gets (NR_i + aC_{i-1})/C_i-b_1$
 \ENDIF
-\STATE Let $b \leftarrow b \bmod 2a$.
-\STATE (optional) Let $c \leftarrow (b^2-\Delta)/4a$.
-\RETURN $[a, (b+\sqrt\Delta)/2]$ (and optionally $c$).
+\STATE $b \gets b \bmod 2a$
+\STATE $c \gets (b^2-\Delta)/4a$ \COMMENT{Optional}
+\RETURN $[a, (b+\sqrt\Delta)/2]$ \COMMENT{Optionally $c$}
 \end{algorithmic}
 \end{algorithm}
 

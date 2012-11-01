@@ -486,7 +486,6 @@ As before, the representative $[a, (b+\sqrt\Delta)/2]$ is either reduced or almo
 
 Common exponentiation methods using binary representations of exponents make use of squaring and multiplication operations.  If we consider binary-ternary representations of exponents, cubing becomes practical.  In general, if we want to compute ${\mathfrak a}^3$ for an ideal class representative $\mathfrak a = [a, (b+\sqrt\Delta)/2]$, we can take advantage of the simplification that happens when expanding the computation of ${\mathfrak a}^2 \mathfrak a$.  Here we provide a high level description of a technique for cubing based on similar ideas to NUCOMP and NUDUPL, namely that of computing the quotients of a continued fraction expansion useful to computing a reduced ideal representative.  A detailed description and analysis of this technique can be found in \cite{Ijs2010}.
 
-
 An algorithm for ideal cubing in quadratic number fields is given as algorithm \ref{alg:idealCube} and is modified from \cite[Appendix A, Algorithm 5]{Ijs2010} so as to conform to the conventions used in this thesis. To modify this algorithm to compute an almost reduced ideal, as in NUCOMP, we check before step 13 if $L < \sqrt{|a_1|} ~ |\Delta/4|^{1/4}$.  If so, we complete the cube as in algorithm \ref{alg:idealCube}.  Otherwise, as in NUCOMP and NUCUBE, we compute the continued fraction expansion of $L/K = \langle q_0, q_1, \dots, q_i, \phi_{i+1}\rangle$ for $i$ such that
 \[
 	R_i < \sqrt{|a_1|} ~ |\Delta/4|^{1/4} < R_{i-1}.

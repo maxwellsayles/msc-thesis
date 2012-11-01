@@ -28,6 +28,8 @@
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
 
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
 \newcommand{\CC}{\mathbb{C}}
 \newcommand{\NN}{\mathbb{N}}
 \newcommand{\RR}{\mathbb{R}}
@@ -42,17 +44,20 @@
 \newcommand{\ZZgez}{\mathbb{Z}_{\ge 0}}
 \newcommand{\QQgtz}{\mathbb{Q}_{>0}}
 \newcommand{\QQgez}{\mathbb{Q}_{\ge 0}}
-\newcommand{\matrixto}[2]{\left( \begin{array}{rr} #1 & #2 \end{array} \right)}
-\newcommand{\matrixot}[2]{\left( \begin{array}{r} #1 \\ #2 \end{array} \right)}
-\newcommand{\matrixtt}[4]{\left( \begin{array}{rr} #1 & #2 \\ #3 & #4 \end{array} \right)}
+\newcommand{\matrixto}[2]{\left[ \begin{array}{rr} #1 & #2 \end{array} \right]}
+\newcommand{\matrixot}[2]{\left[ \begin{array}{r} #1 \\ #2 \end{array} \right]}
+\newcommand{\matrixtt}[4]{\left[ \begin{array}{rr} #1 & #2 \\ #3 & #4 \end{array} \right]}
 \newcommand{\ntoinfty}{\lim_{n \rightarrow \infty}}
 \newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
 \newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+\newcommand{\amax}{a_\textrm{max}}
+\newcommand{\bmax}{b_\textrm{max}}
 
 \begin{document}
 
 \setcounter{chapter}{2}
 \chapter{Exponentiation}
+\label{chap:exponentiation}
 
 Given a group $G$, an element $g \in G$, and an integer $n$, computing $g^n$ is a common operation and is known as exponentiation.  Diffie-Hellman key exchange is an example that uses exponentiation whereby two parties can jointly establish a shared secret key over an insecure channel.  Another application discussed in more detail in this thesis is that of computing the order of a group element.  Our approach, in this case, is to exponentiate a group element to the product, $P$, of several small prime powers.  The result is an element whose order is likely to not by divisible by any of these primes. The order of this new element is then computed using a variant of Shanks' baby-step giant-step algorithm where only powers relatively prime to $P$ need to be computed.  Determining the order of an element can be useful in computing the structure of a group, or in factoring an integer associated with a group.  In these examples, being able to exponentiate faster means that the complete program can run more quickly.
 
@@ -191,45 +196,133 @@ as depicted by figure \ref{fig:yao1}.  The result of the computation is $R_4 = g
 
 Factors influencing the speed of a 2,3 exponentiation are the time to generate the 2,3 chain or representation, and the cost of group operations such as compose, square, and cube. If the exponent is a constant, then we can precompute the chain or representation. Here we discuss some methods from the literature: the first generates strict chains from low order to high order (right-to-left), the second generates strict chains from high order to low order (left-to-right), and the last generates non-chained representations using a tree-based approach.  For an integer $n$, each successive method introduced below typically requires more time to generate a 2,3 representation, but the representation typically has fewer terms.  As such, these methods show a trade off between the time spent computing a representation and the time spent exponentiating with the representation.  When the exponent is a constant, we can precompute the representation and so the density of the representation or the time to exponentiate dominates.
 
-%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \bigbreak
-\subsection{R2L Chains}
+\subsection{Right-to-Left Chains (from low-order to high-order)}
+\label{subsec:rtolchains}
 
-The first method we present computes a strictly chained 2,3 partition that is generated from low order to high order and is based on \cite{Ciet2006}.  Consider the technique for binary exponentiation that computes from low order to high order.  We can give a recursive algorithm by defining a function $f_1$ such that given an element $g \in G$ and an integer $n$:
+The first method we present computes a strictly chained 2,3 partition that is generated from low order to high order and is based on \cite{Ciet2006}.  Consider the technique for binary exponentiation that computes from low order to high order.  We can give a recursive algorithm by defining a function such that given an element $g \in G$ and an integer $n$:
 \begin{align*}
-f_1(g, n) &= \begin{cases}
+\textrm{bin}(g, n) &= \begin{cases}
                1 & \textrm{if $n = 0$} \\
-               {f_1(g, n/2)}^2 & \textrm{if $n \equiv 0 \pmod 2$} \\
-               g \cdot f_1(g, n-1) & \textrm{if $n \equiv 1 \pmod 2$}. \\
+               {\textrm{bin}(g, n/2)}^2 & \textrm{if $n \equiv 0 \pmod 2$} \\
+               \textrm{bin}(g, n-1) \cdot g & \textrm{if $n \equiv 1 \pmod 2$}. \\
 	       \end{cases}
 \end{align*}
 
 \noindent
 This algorithm will repeatedly remove factors of 2 from $n$.  When $n$ is not divisible by 2, it subtracts 1 such that the input to the recursive call will be divisible by 2.  The recursion terminates with the base case of $n=0$.
 
-We can extend this concept to a 2,3 number system.  We will repeatedly remove factors of 2 from $n$, then repeatedly remove factors of 3 from $n$.  At this point, either $n \equiv 1 \pmod 6$ or $n \equiv 5 \pmod 6$.  When $n \equiv 1 \pmod 6$, we recurse on $n-1$ and the input will be divisible by both 2 and 3.  When $n \equiv 5 \pmod 6$, we recurse on $n+1$.  Again, the input to the recursive call will be divisible by both 2 and by 3.  The function $f_2$ performs a 2,3 exponentiation recursively:
+We can extend this concept to a 2,3 number system.  We will repeatedly remove factors of 2 from $n$, then repeatedly remove factors of 3 from $n$.  At this point, either $n \equiv 1 \pmod 6$ or $n \equiv 5 \pmod 6$.  When $n \equiv 1 \pmod 6$, we recurse on $n-1$ and the input will be divisible by both 2 and 3.  When $n \equiv 5 \pmod 6$, we recurse on $n+1$.  Again, the input to the recursive call will be divisible by both 2 and by 3.  The function below performs a 2,3 exponentiation recursively:
+\newcommand{\rtol}{\textrm{r}_2\textrm{l}}
 \begin{align*}
-f_2(g, n) &= \begin{cases}
+\rtol(g, n) &= \begin{cases}
                1 & \textrm{if $n = 0$} \\
-               {f_2(g, n/2)}^2 & \textrm{if $n \equiv 0 \pmod 2$} \\
-               {f_2(g, n/3)}^3 & \textrm{if $n \equiv 0 \pmod 3$} \\
-               f_2(g, n-1) \cdot g & \textrm{if $n \equiv 1 \pmod 3$} \\
-               f_2(g, n+1) \cdot g^{-1} & \textrm{if $n \equiv 2 \pmod 3$} \\
+               {\rtol(g, n/2)}^2 & \textrm{if $n \equiv 0 \pmod 2$} \\
+               {\rtol(g, n/3)}^3 & \textrm{if $n \equiv 0 \pmod 3$} \\
+               \rtol(g, n-1) \cdot g & \textrm{if $n \equiv 1 \pmod 3$} \\
+               \rtol(g, n+1) \cdot g^{-1} & \textrm{if $n \equiv 2 \pmod 3$} \\
 	       \end{cases}
 \end{align*}
 
-Using this recursive function, we can devise a strictly chained 2,3 partition of $n$ that corresponds to the group operations generated here. This is useful when recursion isn't possible, or when the exponent $n$ is a constant (since we can use precomputation to save time). Algorithm \ref{alg:r2lDbnsChain} computes the corresponding strictly chained 2,3 partition.  Let $a = 0$, $b=0$, and $i=1$.  While $n > 0$, we repeatedly remove factors of 2 from $n$ and increment $a$ for each factor of 2 removed. Then we repeatedly remove factors of 3 from $n$ and increment $b$ for each factor of 3 removed. At this point, either $n \equiv 1 \pmod 6$ or $n \equiv 5 \pmod 6$ and so we continue on $n-1$ or $n+1$ respectively.  When we continue on $n-1$, this corresponds to adding the current term, so we set $s_i=1$, and when we continue on $n+1$, this corresponds to subtracting the current term, so we set $s_i=-1$. Let $a_i = a$ and $b_i = b$ and then increment $i$ and we repeat this process while $n > 0$.  We can then use Algorithm \ref{alg:expWithChain} to compute the exponentiation. Since the terms $s_i2^{a_i}3^{b_i}$ are computed in increasing order for $i=1..k$, it is relatively straightforword to interleave the computation of the partition with the computation of the exponentiation for additional speed and memory savings.
+Using this technique, we can devise a function to compute a strictly chained 2,3 partition of $n$ that corresponds to the group operations generated by $\rtol$. This is useful when recursion isn't possible, or when the exponent $n$ is a constant (since we can use precomputation to save time). Algorithm \ref{alg:r2lDbnsChain} computes the corresponding strictly chained 2,3 partition.  The idea is as follows: let $a = 0$, $b=0$, and $i=1$.  While $n > 0$, repeatedly remove factors of 2 from $n$ and increment $a$ for each factor of 2 removed. Then repeatedly remove factors of 3 from $n$ and increment $b$ for each factor of 3 removed. At this point, either $n \equiv 1 \pmod 6$ or $n \equiv 5 \pmod 6$ and so continue on $n-1$ or $n+1$ respectively.  When we continue on $n-1$, this corresponds to adding the current term, so we set $s_i=1$, and when we continue on $n+1$, this corresponds to subtracting the current term, so we set $s_i=-1$. Let $a_i = a$ and $b_i = b$ and then increment $i$ and then repeat this process while $n > 0$.  We can then use Algorithm \ref{alg:expWithChain} to compute the exponentiation given a strictly chained 2,3 partition. Additionally, since the terms $s_i2^{a_i}3^{b_i}$ are computed in increasing order for $i=1..k$, it is relatively straightforword to interleave the computation of the partition with the computation of the exponentiation for additional speed and memory savings.
 
-To see the correctness of the above description, consider a modification to the recursive function $f_2$ such that it returns a partition of the input $n$ as a list of terms $s_i2^{a_i}3^{b_i}$. When the result of the recursive call is squared, this corresponds to incrementing $a_i$ in each term of the list.  Similarly, when the result is cubed, this corresponds to incrementing $b_i$ in each term of the list. When the result is composed with $g$, we would add 1 to the partition, and when the result is composed with $g^{-1}$, we would subtract 1 from the partition. Note that since either $n \equiv 0 \pmod 2$ or $n \equiv 0 \pmod 3$ on each iteration of the loop, either $a$ will increase or $b$ will increase. Since every term $2^{a_i}3^{b_i}$ is strictly less than $2^{a_j}3^{b_j}$ when $i < j$, the partition generated is strictly chained.
+To see the correctness of the above procedure, consider a modification to the recursive function $\rtol$ such that it returns a partition of the input $n$ as a list of terms $s_i2^{a_i}3^{b_i}$. When the result of the recursive call is squared, this corresponds to incrementing $a_i$ in each term of the list.  Similarly, when the result is cubed, this corresponds to incrementing $b_i$ in each term of the list. When the result is composed with $g$, we prepend a term of $+1$ to the partition, and when the result is composed with $g^{-1}$, we prepend a term of $-1$ to the partition. Note that since either $n \equiv 0 \pmod 2$ or $n \equiv 0 \pmod 3$ on each iteration of the loop, either $a$ will increase or $b$ will increase. Since every term $|s_i2^{a_i}3^{b_i}|$ is strictly less than $|s_j2^{a_j}3^{b_j}|$ when $i < j$, the partition is strictly chained.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \bigbreak
-\subsection{L2R Chains (Ostrowski approximation)}
+\subsection{Left-to-Right Chains (from high-order to low-order)}
 
+\newcommand{\greedyltor}{\textrm{greedy}}
+\newcommand{\greedychain}{\textrm{greedy}'}
+\newcommand{\greedybound}{\textrm{greedy}''}
+\newcommand{\closest}{\textrm{closest}}
+
+The previous section gave a procedure for generating a strictly chained 2,3 partition for an integer $n$ such that the terms were ordered from smallest absolute value to largest.  Here we present a greedy approach that generates the terms in order of the largest absolute value to the smallest. The general idea is to find a term, $s2^a3^b$, that is closest to the absolute value of the remaining target integer $n$ and then repeat on $n - s2^a3^b$.  Let $\closest(n) = s2^a3^b$ such that $(a,b) = \argmin_{(c,d)} \{ \left| |n| - 2^c3^d \right| : c,d \in \ZZgez \}$ and where $s = -1$ when $n < 0$ and $s = 1$ otherwise. Note that $n$ may be negative. A recursive function to greedily compute a 2,3 representation is given as:
+\begin{align*}
+\greedyltor(n) &= \begin{cases}
+              1 & \textrm{if $n = 1$} \\
+              \closest(n) + \greedyltor(n - \closest(n)) & \textrm{if $n > 1$}
+          \end{cases}
+\end{align*}
+
+\noindent
+The representation generated above can be used to exponentiate a group element $g \in G$ using Algorithm \ref{alg:yaos}.
+
+This approach can also be used to generate a chained partition by restricting the maximum powers of 2 and 3 generated by the function $\closest$.  We bound $\closest$, such that it returns a triple as follows:
+\[
+\closest'(n, \amax, \bmax) = (s2^a3^b, a, b)
+\]
+where
+\[
+(a, b) =
+\argmin_{(c,d)} \left\{\left| |n| - 2^c3^d \right| : c, d \in \ZZgez, c \le \amax, d \le \bmax \right\}
+\]
+and $s=-1$ when $n < 0$ and $s=1$ when $n > 0$. Our recursive function is then:
+\begin{align*}
+\greedychain(n, \amax, \bmax) &= \begin{cases}
+        1 & \textrm{if $n = 1$} \\
+        v + \greedychain(n - v, a, b) & \textrm{where $(v, a, b) = \closest'(n, \amax, \bmax)$}
+    \end{cases}
+\end{align*}
+
+\noindent
+Note that on successive invocations of $\greedychain$, the absolute value of $v=|s2^a3^b|$ returned by $\closest'$ is monotonically decreasing.  Reversing the terms of the partition gives a chained 2,3 partition of $n$ that we can use to perform exponentiation using Algorithm \ref{alg:expWithChain}.
+
+To compute the 2,3 term closest to $n$, a straightforward approach is to compute the set 
+\[
+V = \{2^a3^b, 2^{a+1}3^b : 0 \le b \le \ceil{log_3|n|}, a=\floor{|n/(3^b)|} \},
+\]
+take the element $v \in V$ that is closest to $|n|$, and take $s \in \{-1, 1\}$ based on the sign of $n$, constraining $a$ and $b$ appropriately based on maximal values permitted. Since the set $V$ contains $O(\log |n|)$ elements, computing the term closest to $n$ by this method takes $\Omega(\log |n|)$ steps.  When $a$ and $b$ are not constrained, and we simply want to compute the 2,3 term closest to $n$, Berth\'{e} and Imbert \cite{Berthe2009} present a method that requires at most $O(\log \log |n|)$ steps. 
+
+Naturally though, non-chained representations tend to have a lower density than chained representations but at the expense of requiring more memory to perform exponentiation.  Surprisingly though, since Algorithm \ref{alg:yaos} takes time and memory proportional to the largest values of $a$ and $b$ in the representation, constraining $a$ and $b$ globally over the complete representation can result in representations that exponentiate more quickly in practice. In this case, recursive calls to $\greedychain$ use the original values of $\amax$ and $\bmax$ rather than further constraining $a$ and $b$ based on the values generated by the $\closest'$.  Finding the best greedy representation is then a matter of iterating of values of $\amax$ and $\bmax$ and computing 2,3 representations costrained appropriately.  We will discuss approaches and results of this in Chapter \ref{chap:idealExponentiationExperiments}.
+
+%%%%%%%%%%%%%%
+% GREEDY L2R %
+%%%%%%%%%%%%%%
+\begin{algorithm}[h]
+\caption{Greedy left to right representation. Berth\'{e} and Imbert \cite{Berthe2009}.}
+\label{alg:greedyltor}
+\begin{algorithmic}[1]
+\REQUIRE $n, \amax, \bmax \in \ZZgez$ \COMMENT{$\amax$ and $\bmax$ may be $+\infty$}
+\STATE $L \gets \textrm{empty list}$
+\WHILE {$n \ne 0$}
+	\STATE $(a, b) \gets \argmin_{(c, d)} \left\{\left||n| - 2^c3^d \right| : 0 \le c \le \amax, 0 \le d \le \bmax \right\}$
+	\STATE $s \gets -1 \textrm{ when } n < 0 \textrm{ and } 1 \textrm{ otherwise}$
+	\STATE $\textrm{push }(s, a, b) \textrm{ onto the front of } L$
+	\STATE $\textrm{optionally } (\amax, \bmax) \gets (a, b) \textrm{ when a chain is desired}$
+	\STATE $n \gets n - s2^a3^b$
+\ENDWHILE
+\RETURN $L$
+\end{algorithmic}
+\end{algorithm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
 \bigbreak
 \subsection{Pruned Trees}
 
+The next technique for finding stricly chained 2,3 partitions was suggested by Doche and Habsieger \cite{Doche2008}. The idea is similar to the method for generating chains from right to left as described in Subsection \ref{subsec:rtolchains} above, but this technique differs by generating several possible values that may be further reduced by powers of 2 and 3. The procedure is given in Algorithm \ref{alg:dbnsTree}.  The idea is to maintain a tree, $T$, with at most $B$ leaf nodes for some bound $B$. At each iteration, each leaf node $v \in T$ generates two new leaves, $v-1$ and $v+1$, which are then reduced as much as possible by removing factors of 2 and 3.  We then discard any duplicate nodes and all but the smallest $B$ elements generated. The path from the root to the first leaf with a value of 1 represents a chained 2,3 partition of the number $n$.
 
+% DBNS TREE
+\begin{algorithm}[h]
+\caption{Tree-Based Chained 2,3 Partitions. Doche and Habsieger \cite{Doche2008}.}
+\label{alg:dbnsTree}
+\begin{algorithmic}[1]
+\REQUIRE $n \in \ZZgtz$
+\STATE $T \gets$ a binary tree on the node $n$
+\WHILE {no leaf is 1}
+	\FORALL {leaf nodes $v \in T$}
+		\STATE insert as a left child $(v - 1)$ with all factors of 2 and 3 removed
+		\STATE insert as a right child $(v + 1)$ with all factors of 2 and 3 removed
+	\ENDFOR
+	\STATE discard any duplicate leaves
+	\STATE discard all but the smallest $B$ leaves
+\ENDWHILE
+\RETURN the chained 2,3 partition generated by the path from the root to the leaf node containing 1
+\end{algorithmic}
+\end{algorithm}
+
+Empirically they found that $B=4$ was a good compromise between the length of the chain generated and the time to compute the chain. Larger values of $B$ often produced chains with fewer terms, but took longer to compute. When the number for the target chain is known in advance and precomputation is permitted, this can be advantage since fewer terms can lead to a cheaper exponentiation so long as the time to compute the chain isn't prohibitively long.  We will take advantage of this later in this thesis
 
 
 
