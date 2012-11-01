@@ -24,6 +24,8 @@
 \theoremstyle{definition}
 \newtheorem{defn}[thm]{Definition}
 
+\usepackage{eqparbox}
+\renewcommand{\algorithmiccomment}[1]{\hfill\eqparbox{COMMENT}{#1}}
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
 
@@ -56,146 +58,6 @@
 \begin{document}
 
 \chapter*{Appendix A - Algorithms}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%
-% R2L NAF EXPONENTIATION %
-%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{algorithm}[h]
-\caption{Computes $g^n$ for immutable $n$ using only one inverse and a R2L NAF. Concept from \cite[p.4]{Joye2000}}
-\label{alg:nafR2LImmutable}
-\begin{algorithmic}[1]
-\REQUIRE $g \in G, n \in \ZZgez$
-\ENSURE $g^n \in G$
-\STATE $c \gets 0$ \COMMENT{carry flag}
-\STATE $i \gets 0$
-\STATE $R \gets 1_G$ \COMMENT{product of positive exponents}
-\STATE $Q \gets 1_G$ \COMMENT{product of negative exponents}
-\STATE $T \gets g$ \COMMENT{invariant: $T = g^{2^i}$}
-\WHILE {$n \ge 2^i$}
-	\IF {$\floor{n/2^i}+c \equiv 1 \pmod 4$}
-		\STATE $R \gets R \cdot T$
-		\STATE $c \gets 0$
-	\ELSIF {$\floor{n/2^i}+c \equiv 3 \pmod 4$}
-		\STATE $Q \gets Q \cdot T$ \\
-		\STATE $c \gets 1$
-	\ENDIF
-	\STATE $T \gets T^2$ \\
-	\STATE $i \gets i+1$
-\ENDWHILE
-\IF {$c=1$} \STATE $R \gets R \cdot T$ \ENDIF
-\RETURN $R \cdot Q^{-1}$
-\end{algorithmic}
-\end{algorithm}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% EXPONENTIATE USING A CHAIN %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{algorithm}[h]
-\caption{Computes $g^n$ given $n$ as a chained 2,3 partition.}
-\label{alg:expWithChain}
-\begin{algorithmic}[1]
-\REQUIRE $g \in G,$ \\
-$n = \sum_{i=1}^k s_i2^{a_i}3^{b_i},$ \\
-$s_1,...,s_k \in \{-1, 1\},$ \\
-$0 \le a_1 \le ...\le a_k \in \ZZ,$ \\
-$0 \le b_1 \le ... \le b_k \in \ZZ.$
-\ENSURE $g^n \in G$
-\STATE $i \gets 1$
-\STATE $a \gets 0$ \COMMENT{current power of 2}
-\STATE $b \gets 0$ \COMMENT{current power of 3}
-\STATE $T \gets g$ \COMMENT{loop invariant: $T = g^{2^a 3^b}$}
-\STATE $R \gets 1_G$ \COMMENT{product of positive exponents}
-\STATE $Q \gets 1_G$ \COMMENT{product of negative exponents}
-\WHILE {$i \le k$}
-	\WHILE {$a < a_i$}
-		\STATE $T \gets T^2$
-		\STATE $a \gets a + 1$
-	\ENDWHILE
-	\WHILE {$b < b_i$}
-		\STATE $T \gets T^3$
-		\STATE $b \gets b + 1$
-	\ENDWHILE
-	\IF {$s_i = 1$}
-		\STATE $R \gets R \cdot T$
-	\ELSE
-		\STATE $Q \gets Q \cdot T$
-	\ENDIF
-	\STATE $i \gets i + 1$
-\ENDWHILE
-\RETURN $R \cdot Q^{-1}$
-\end{algorithmic}
-\end{algorithm}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% EXPONENTIATE USING YAO'S %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{algorithm}[h]
-\caption{Computes $g^n$ given $n$ in 2,3 representation. Concept from \cite[Section 3.2]{Meloni2009}.}
-\label{alg:yaos}
-\begin{algorithmic}[1]
-\REQUIRE $g \in G,$ \\
-$n = \sum_{i=1}^k s_i2^{a_i}3^{b_i},$ \\
-$s_1,...,s_k \in \{-1, 1\},$ \\
-$a_1 \ge ... \ge a_k \in \ZZgez,$ \\
-$b_1,...,b_k \in \ZZgez.$
-\ENSURE $g^n \in G$
-\IF {k = 1}
-	\RETURN $g^{2^{a_1} 3^{b_1}}$
-\ENDIF
-\STATE $max_b \gets \max \{ b_1, ..., b_k \}$.
-\STATE $T_b \gets g^{3^b}$ for $0 \le b \le max_b$ \COMMENT{by cubing $max_b$ number of times}
-\STATE $a_\Delta \gets a_1-a_2$
-\STATE $R \gets \left( T_{b_1} \right)^{2^{a_\Delta}}$ \COMMENT{by squaring $a_1-a_2$ number of times}
-\STATE $i \gets 2$
-\WHILE {$i < k$}
-	\STATE $R \gets R \cdot {T_{b_i}}^{s_i}$
-	\STATE $a_\Delta \gets a_i - a_{i+1}$
-	\STATE $R \gets R ^ {2^{a_\Delta}}$ \COMMENT{by squaring $a_i - a_{i+1}$ number of times}
-	\STATE $i \gets i + 1$
-\ENDWHILE
-\STATE $R \gets R \cdot {T_{b_k}}^{s_k}$
-\STATE $R \gets R ^ {2^{a_k}}$ \COMMENT{by squaring $a_k$ number of times}
-\RETURN $R$
-\end{algorithmic}
-\end{algorithm}
-
-%%%%%%%%%%%%%%%%%
-% R2L 2,3 CHAIN %
-%%%%%%%%%%%%%%%%%
-\begin{algorithm}[h]
-\caption{Computes a 2,3 strictly chained representation from low order to high order. Adapted from \cite{Ciet2006}.}
-\label{alg:rtolDbnsChain}
-\begin{algorithmic}[1]
-\REQUIRE $n \in \ZZgez$
-\ENSURE $n=\sum_{i=1}^k s_i2^{a_i}3^{b_i}$ as a strictly chained partition.
-\STATE $(a, b) \gets (0, 0)$
-\STATE $i \gets 1$
-\WHILE {$n > 0$}
-	\WHILE {$n \equiv 0 \pmod 2$} 
-		\STATE $n \gets n / 2$
-		\STATE $a \gets a + 1$
-	\ENDWHILE
-	\WHILE {$n \equiv 0 \pmod 3$}
-		\STATE $n \gets n / 3$
-		\STATE $b \gets b + 1$
-	\ENDWHILE
-	\IF {$n \equiv 1 \pmod 3$}
-		\STATE $n \gets n - 1$
-		\STATE $s \gets 1$
-	\ELSIF {$n \equiv 2 \pmod 3$}
-		\STATE $n \gets n + 1$
-		\STATE $s \gets -1$
-	\ENDIF
-	\STATE $(s_i, a_i, b_i) \gets (s, a, b)$
-	\STATE $i \gets i + 1$
-\ENDWHILE
-\STATE $k \gets i$
-\RETURN $(a_1, b_1, s_1), ..., (a_k, b_k, s_k)$
-\end{algorithmic}
-\end{algorithm}
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % IDEAL CLASS CUBING (NON-REDUCED) %
@@ -487,6 +349,166 @@ for
 \noindent
 When $\Delta<0$, either ${\mathfrak a}_{i+2}$ is reduced or $\rho({\mathfrak a}_{i+2})$ is reduced.  See \cite[pp.~104-106]{Jac09} for additional details.  This use of a continued fraction expansion to reduce an ideal will be seen again in subsection \ref{subsec:nucomp} when we discuss Shanks' NUCOMP algorithm for computing the reduced or almost reduced product of two ideal class representatives.
 \end{comment}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% R2L NAF EXPONENTIATION %
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{algorithm}[h]
+\caption{Computes $g^n$ using right-to-left non-adjacent form. Joye \cite{Joye2000}}
+\label{alg:nafR2LImmutable}
+\begin{algorithmic}[1]
+\REQUIRE $g \in G, n \in \ZZgez$
+\STATE $c \gets 0$ \COMMENT{carry flag}
+\STATE $T \gets g$ \COMMENT{invariant: $T = g^{2^i}$}
+\STATE $R \gets 1_G$
+\STATE $i \gets 0$
+\WHILE {$n \ge 2^i$}
+	\IF {$\floor{n/2^i}+c \equiv 1 \pmod 4$}
+		\STATE $R \gets R \cdot T$
+		\STATE $c \gets 0$
+	\ELSIF {$\floor{n/2^i}+c \equiv 3 \pmod 4$}
+		\STATE $R \gets R \cdot T^{-1}$
+		\STATE $c \gets 1$
+	\ENDIF
+	\STATE $T \gets T^2$
+	\STATE $i \gets i+1$
+\ENDWHILE
+\IF {$c=1$} \STATE $R \gets R \cdot T$ \ENDIF
+\RETURN $R$
+\end{algorithmic}
+\end{algorithm}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% EXPONENTIATE USING A CHAIN %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{algorithm}[h]
+\caption{Computes $g^n$ given $n$ as a chained 2,3 partition. TODO: Cite something.}
+\label{alg:expWithChain}
+\begin{algorithmic}[1]
+\REQUIRE $g \in G,$ 
+$n = \sum_{i=1}^k s_i2^{a_i}3^{b_i},$ \\
+$s_1,...,s_k \in \{-1, 1\},$ 
+$0 \le a_1 \le ...\le a_k \in \ZZ,$ 
+$0 \le b_1 \le ... \le b_k \in \ZZ.$
+\STATE $i \gets 1$
+\STATE $a \gets 0$ \COMMENT{current power of 2}
+\STATE $b \gets 0$ \COMMENT{current power of 3}
+\STATE $T \gets g$ \COMMENT{loop invariant: $T = g^{2^a 3^b}$}
+\STATE $R \gets 1_G$
+\WHILE {$i \le k$}
+	\WHILE {$a < a_i$}
+		\STATE $T \gets T^2, a \gets a + 1$
+	\ENDWHILE
+	\WHILE {$b < b_i$}
+		\STATE $T \gets T^3, b \gets b + 1$
+	\ENDWHILE
+	\STATE $R \gets R \cdot T^{s_i}$ \COMMENT{compose with $T$ or $T^{-1}$}
+	\STATE $i \gets i + 1$
+\ENDWHILE
+\RETURN $R$
+\end{algorithmic}
+\end{algorithm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% EXPONENTIATE USING YAO'S %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{algorithm}[h]
+\caption{Computes $g^n$ given $n$ in 2,3 representation. M\'{e}loni \cite[Section 3.2]{Meloni2009}.}
+\label{alg:yaos}
+\begin{algorithmic}[1]
+\REQUIRE $g \in G,$ 
+$n = \sum_{i=1}^k s_i2^{a_i}3^{b_i},$ \\
+$s_1,...,s_k \in \{-1, 1\},$ 
+$a_1 \ge ... \ge a_k \in \ZZgez,$ 
+$b_1,...,b_k \in \ZZgez.$
+\STATE $T_b \gets g^{3^b}$ for $0 \le b \le \max \{ b_1, ..., b_k \}$ \COMMENT{by repeated cubing}
+\STATE $R \gets 1_G$
+\STATE $i \gets 1$
+\WHILE {$i < k$}
+	\STATE $R \gets R \cdot {T_{b_i}}^{s_i}$ \COMMENT{compose with $T_{b_i}$ or ${T_{b_i}}^{-1}$}
+	\STATE $a_\Delta \gets a_i - a_{i+1}$
+	\STATE $R \gets R ^ {2^{a_\Delta}}$ \COMMENT{by squaring $a_\Delta$ number of times}
+	\STATE $i \gets i + 1$
+\ENDWHILE
+\STATE $R \gets R \cdot {T_{b_k}}^{s_k}$
+\STATE $R \gets R ^ {2^{a_k}}$ \COMMENT{by squaring $a_k$ number of times}
+\RETURN $R$
+\end{algorithmic}
+\end{algorithm}
+
+%%%%%%%%%%%%%%%%%
+% R2L 2,3 CHAIN %
+%%%%%%%%%%%%%%%%%
+\begin{algorithm}[h]
+\caption{Computes a 2,3 strictly chained representation from low order to high order. Ciet \cite{Ciet2006}.}
+\label{alg:rtolDbnsChain}
+\begin{algorithmic}[1]
+\REQUIRE $n \in \ZZgez$
+%\ENSURE $n=\sum_{i=1}^k s_i2^{a_i}3^{b_i}$ as a strictly chained partition.
+\STATE $(a, b) \gets (0, 0)$
+\STATE $i \gets 1$
+\WHILE {$n > 0$}
+	\WHILE {$n \equiv 0 \pmod 2$} 
+		\STATE $n \gets n / 2, a \gets a + 1$
+	\ENDWHILE
+	\WHILE {$n \equiv 0 \pmod 3$}
+		\STATE $n \gets n / 3, b \gets b + 1$
+	\ENDWHILE
+	\IF {$n \equiv 1 \pmod 3$}
+		\STATE $n \gets n - 1, s \gets 1$
+	\ELSIF {$n \equiv 2 \pmod 3$}
+		\STATE $n \gets n + 1, s \gets -1$
+	\ENDIF
+	\STATE $(s_i, a_i, b_i) \gets (s, a, b)$
+	\STATE $i \gets i + 1$
+\ENDWHILE
+\STATE $k \gets i$
+\RETURN $(a_1, b_1, s_1), ..., (a_k, b_k, s_k)$
+\end{algorithmic}
+\end{algorithm}
+
+%%%%%%%%%%%%%%
+% GREEDY L2R %
+%%%%%%%%%%%%%%
+\begin{algorithm}[h]
+\caption{Greedy left to right representation. Berth\'{e} and Imbert \cite{Berthe2009}.}
+\label{alg:greedyltor}
+\begin{algorithmic}[1]
+\REQUIRE $n, \amax, \bmax \in \{\ZZgez, +\infty\}$ \COMMENT{$+\infty$ for unbounded $a$ or $b$}
+\STATE $L \gets \textrm{empty list}$
+\WHILE {$n \ne 0$}
+	\STATE $(a, b) \gets \argmin_{(c, d)} \left\{\left||n| - 2^c3^d \right| : 0 \le c \le \amax, 0 \le d \le \bmax \right\}$
+	\STATE $s \gets -1 \textrm{ when } n < 0 \textrm{ and } 1 \textrm{ otherwise}$
+	\STATE $\textrm{push }(s, a, b) \textrm{ onto the front of } L$
+	\STATE $\textrm{optionally set } (\amax, \bmax) \gets (a, b) \textrm{ when a chain is desired}$
+	\STATE $n \gets n - s2^a3^b$
+\ENDWHILE
+\RETURN $L$
+\end{algorithmic}
+\end{algorithm}
+
+%%%%%%%%%%%%%
+% DBNS TREE %
+%%%%%%%%%%%%%
+\begin{algorithm}[h]
+\caption{Tree-Based Chained 2,3 Partitions. Doche and Habsieger \cite{Doche2008}.}
+\label{alg:dbnsTree}
+\begin{algorithmic}[1]
+\REQUIRE $n \in \ZZgtz$
+\STATE $T \gets$ a binary tree on the node $n$
+\WHILE {no leaf is 1}
+	\FORALL {leaf nodes $v \in T$}
+		\STATE insert as a left child $(v - 1)$ with all factors of 2 and 3 removed
+		\STATE insert as a right child $(v + 1)$ with all factors of 2 and 3 removed
+	\ENDFOR
+	\STATE discard any duplicate leaves
+	\STATE discard all but the smallest $B$ leaves
+\ENDWHILE
+\RETURN the chained 2,3 partition generated by the path from the root to the leaf node containing 1
+\end{algorithmic}
+\end{algorithm}
 
 
 

@@ -25,6 +25,8 @@
 \theoremstyle{definition}
 \newtheorem{defn}[thm]{Definition}
 
+\usepackage{eqparbox}
+\renewcommand{\algorithmiccomment}[1]{\hfill\eqparbox{COMMENT}{#1}}
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
 
@@ -113,6 +115,32 @@ A typical method to compute the non-adjacent form of an integer $n$ is to inspec
 
 In our experiments, we use a variation of the above, given in \cite[p.4]{Joye2000}, that maintains a carry flag $c$.  Instead of adding $2^i$ to $n$, we set $c = 1$, and instead of subtracting $2^i$ from $n$, we set $c = 0$.  When inspecting $n$ two bits at a time, we consider the bit pattern $(m+c) \bmod 4$ where $m = 2 b_{i+1} + b_i$.  For large enough $n$, the cost of addition and subtraction is reduced from $O(\log n)$ to $O(1)$.  This technique is given in Algorithm \ref{alg:nafR2LImmutable}.
 
+% R2L NAF EXPONENTIATION
+\begin{algorithm}[h]
+\caption{Computes $g^n$ using right-to-left non-adjacent form. Joye \cite{Joye2000}}
+\label{alg:nafR2LImmutable}
+\begin{algorithmic}[1]
+\REQUIRE $g \in G, n \in \ZZgez$
+\STATE $c \gets 0$ \COMMENT{carry flag}
+\STATE $T \gets g$ \COMMENT{invariant: $T = g^{2^i}$}
+\STATE $R \gets 1_G$
+\STATE $i \gets 0$
+\WHILE {$n \ge 2^i$}
+	\IF {$\floor{n/2^i}+c \equiv 1 \pmod 4$}
+		\STATE $R \gets R \cdot T$
+		\STATE $c \gets 0$
+	\ELSIF {$\floor{n/2^i}+c \equiv 3 \pmod 4$}
+		\STATE $R \gets R \cdot T^{-1}$
+		\STATE $c \gets 1$
+	\ENDIF
+	\STATE $T \gets T^2$
+	\STATE $i \gets i+1$
+\ENDWHILE
+\IF {$c=1$} \STATE $R \gets R \cdot T$ \ENDIF
+\RETURN $R$
+\end{algorithmic}
+\end{algorithm}
+
 A particular advantage of a non-adjacent form exponentiation over a binary exponentiation is the number of operations required.  While the binary method requires $\floor{\log_2 n}$ squares and on average $\floor{\log_2 n}/2$ multiplications, a non-adjacent form exponentiation requires at most $\floor{\log_2 n}+1$ squares and on average $(\floor{\log_2 n}+1)/3$ multiplications.  To see this, recall that non-adjacent form requires that no two non-zero terms be adjacent.  Consider any two adjacent terms.  The possible outcomes are $(0,0)$, $(s, 0)$, or $(0, s$) where $s \in \{-1, 1\}$. This means that 2/3 of the time, 1/2 of the terms will be non-zero, and so the probability of any given term being non-zero is 1/3.
 
 
@@ -161,7 +189,37 @@ A partition of an integer $n = x_1 \pm x_2 \pm \cdots \pm x_k$ is \emph{chained}
 \noindent
 Binary and non-adjacent form are special types of strictly chained partitions, since for any two non-zero terms where $i < j$, we have $x_i = 2^i$, $x_j = 2^j$, $ x_i ~|~ x_j$, and $x_i < x_j$.  The 2,3 representation of $23814216 = 2^3 3^2 - 2^{13} 3^2 + 2^{15} 3^6$ is another example of a strictly chained partition, since $2^3 3^2 ~|~ 2^{13} 3^2 ~|~ 2^{15} 3^6$.
 
+% EXPONENTIATE USING A CHAIN
+\begin{algorithm}[h]
+\caption{Computes $g^n$ given $n$ as a chained 2,3 partition. TODO: Cite something.}
+\label{alg:expWithChain}
+\begin{algorithmic}[1]
+\REQUIRE $g \in G,$ 
+$n = \sum_{i=1}^k s_i2^{a_i}3^{b_i},$ \\
+$s_1,...,s_k \in \{-1, 1\},$ 
+$0 \le a_1 \le ...\le a_k \in \ZZ,$ 
+$0 \le b_1 \le ... \le b_k \in \ZZ.$
+\STATE $i \gets 1$
+\STATE $a \gets 0$ \COMMENT{current power of 2}
+\STATE $b \gets 0$ \COMMENT{current power of 3}
+\STATE $T \gets g$ \COMMENT{loop invariant: $T = g^{2^a 3^b}$}
+\STATE $R \gets 1_G$
+\WHILE {$i \le k$}
+	\WHILE {$a < a_i$}
+		\STATE $T \gets T^2, a \gets a + 1$
+	\ENDWHILE
+	\WHILE {$b < b_i$}
+		\STATE $T \gets T^3, b \gets b + 1$
+	\ENDWHILE
+	\STATE $R \gets R \cdot T^{s_i}$ \COMMENT{compose with $T$ or $T^{-1}$}
+	\STATE $i \gets i + 1$
+\ENDWHILE
+\RETURN $R$
+\end{algorithmic}
+\end{algorithm}
+
 The benefit of restricting 2,3 representations to chained representations is the ease with which one can compute $g^n$ when $n$ is given as a chain.  For example $g^{23814216} = g^{2^3 3^2 - 2^{13} 3^2 + 2^{15} 3^6}$ can be computed by first computing $x_1 = g^{2^3 3^2}$, $x_2 = {x_1}^{2^{10}}$, $x_3 = {x_2}^{2^2 3^4}$, and finally $g^{23814216} = \left(x_1 \cdot x_3\right) \cdot \left(x_2\right)^{-1}$.  Algorithm \ref{alg:expWithChain} can be used to compute $g^n$ for $g \in G$ and $n$ given as a chained 2,3 representation.  The cost of algorithm \ref{alg:expWithChain} is as follows: Let $n$ be defined as $\sum_{i=1}^k s_i p^{a_i}q^{b_i}$, let $max_a = \max \{a_1,...,a_k\}$, and let $max_b = \max \{b_1,...,b_k\}$.  Then we require $max_a$ squares, $max_b$ cubes, $k-1$ multiplications, and at most one inverse.  Since $x_i ~|~ x_{i+1}$, we need only retain $x_i$ in order to compute $x_{i+1}$, and so exponentiation and chain generation can easily be interleaved. For this reason, many algorithms that find 2,3 representations constrain these representations to be chains.  Section \ref{section:dbnsMethods} discusses some algorithms for simultaneously generating and exponentiating with such chains.
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -170,13 +228,30 @@ The benefit of restricting 2,3 representations to chained representations is the
 
 Another class of algorithms compute representations without the constraint that larger terms be divisible by smaller terms.  Given a general 2,3 representation for an integer $n = \sum_{i=1}^k s_i 2^{a_i} 3^{b_i}$, M\'{e}loni and Hasan \cite[Section 3.2]{Meloni2009} use a modification of Yao's Algorithm to achieve the same bound on the number of operations as in algorithm \ref{alg:expWithChain}, but with a bound of $O(\min \{max_a, max_b\})$ on the memory used.  Suppose $max_b < max_a$.  We require the terms to be labelled and sorted such that $a_1 \ge ... \ge a_k$.  The algorithm works by precomputing a table of $T_b = g^{3^b}$ for $0 \le b \le max_b$.  Let $i=1$ and begin with the first term $s_i2^{a_i}3^{b_i}$.  We look up $T_{b_i} = g^{3^{b_i}}$ and, after applying the sign $s_i$, we multiply ${T_{b_i}}^{s_i}$ with the running result.  Let $a_\Delta = a_i - a_{i+1}$ when $i < k$ and $a_\Delta = a_k$ when $i = k$.  It then squares the running result $a_\Delta$ times.  The algorithm removes the term $s_i2^{a_i}3^{b_i}$ from the list of terms, and continues in this way with the term with the next largest $a_i$.  The algorithm terminates when there are no more terms in the list.  Algorithm  \ref{alg:yaos} gives pseudo-code for this approach and requires $O(max_b)$ memory.  When $max_a < max_b$, we use a related algorithm that requires the terms to be sorted such that $b_1 \ge ... \ge b_k$; it precomputes $T_a = g^{2^a}$ for $0 \le a \le max_a$ and works similar to Algorithm \ref{alg:yaos} but with cubing and squaring appropriately swapped.
 
-% figure of exponentiating 23814216 with unchained representation
-\begin{figure}[H]
-\centering
-\includegraphics{yao1}
-\caption{The construction of $2^{15} 3^6 - 2^8 3^5 - 2^4 3^6 + 2^3 3^3$ using algorithm \ref{alg:yaos}.  Steps are executed from left-to-right, top-to-bottom.}
-\label{fig:yao1}
-\end{figure}
+% EXPONENTIATE USING YAO'S
+\begin{algorithm}[h]
+\caption{Computes $g^n$ given $n$ in 2,3 representation. M\'{e}loni \cite[Section 3.2]{Meloni2009}.}
+\label{alg:yaos}
+\begin{algorithmic}[1]
+\REQUIRE $g \in G,$ 
+$n = \sum_{i=1}^k s_i2^{a_i}3^{b_i},$ \\
+$s_1,...,s_k \in \{-1, 1\},$ 
+$a_1 \ge ... \ge a_k \in \ZZgez,$ 
+$b_1,...,b_k \in \ZZgez.$
+\STATE $T_b \gets g^{3^b}$ for $0 \le b \le \max \{ b_1, ..., b_k \}$ \COMMENT{by repeated cubing}
+\STATE $R \gets 1_G$
+\STATE $i \gets 1$
+\WHILE {$i < k$}
+	\STATE $R \gets R \cdot {T_{b_i}}^{s_i}$ \COMMENT{compose with $T_{b_i}$ or ${T_{b_i}}^{-1}$}
+	\STATE $a_\Delta \gets a_i - a_{i+1}$
+	\STATE $R \gets R ^ {2^{a_\Delta}}$ \COMMENT{by squaring $a_\Delta$ number of times}
+	\STATE $i \gets i + 1$
+\ENDWHILE
+\STATE $R \gets R \cdot {T_{b_k}}^{s_k}$
+\STATE $R \gets R ^ {2^{a_k}}$ \COMMENT{by squaring $a_k$ number of times}
+\RETURN $R$
+\end{algorithmic}
+\end{algorithm}
 
 For example, the 2,3 representation $23814216 = 2^{15} 3^6 - 2^8 3^5 - 2^4 3^6 + 2^3 3^3$ is sorted by decreasing $a_i$.  The algorithm first computes $T_b = g^{3^b}$ for $0 \le b \le 6$.  Note that it is sufficient to store only the values of $g^{3^{b_i}}$ that actually occur in terms (in this example, we need only store $T_3$, $T_5$, and $T_6$).  Let $R_j$ represent the partial exponentiation of the first $j$ terms with the largest $a_i$ such that $g^{2^{a_{j+1}}}$ is factored out.  Let $R_0 = 1_G$.  In this example, we compute 
 \begin{align*}
@@ -186,6 +261,15 @@ For example, the 2,3 representation $23814216 = 2^{15} 3^6 - 2^8 3^5 - 2^4 3^6 +
 	R_4 &= \left( R_3 T_3 \right) ^ {2^3} &&\Rightarrow g^{2^3 3^3 -2^4 3^6 -2^8 3^5 + 2^{15} 3^6},
 \end{align*}
 as depicted by figure \ref{fig:yao1}.  The result of the computation is $R_4 = g^{23814216}$.  
+
+% figure of exponentiating 23814216 with unchained representation
+\begin{figure}[H]
+\centering
+\includegraphics{yao1}
+\caption{The construction of $2^{15} 3^6 - 2^8 3^5 - 2^4 3^6 + 2^3 3^3$ using algorithm \ref{alg:yaos}.  Steps are executed from left-to-right, top-to-bottom.}
+\label{fig:yao1}
+\end{figure}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % METHODS FOR COMPUTING 2,3 CHAINS/REPRESENTATIONS %
@@ -225,7 +309,36 @@ We can extend this concept to a 2,3 number system.  We will repeatedly remove fa
 	       \end{cases}
 \end{align*}
 
-Using this technique, we can devise a function to compute a strictly chained 2,3 partition of $n$ that corresponds to the group operations generated by $\rtol$. This is useful when recursion isn't possible, or when the exponent $n$ is a constant (since we can use precomputation to save time). Algorithm \ref{alg:r2lDbnsChain} computes the corresponding strictly chained 2,3 partition.  The idea is as follows: let $a = 0$, $b=0$, and $i=1$.  While $n > 0$, repeatedly remove factors of 2 from $n$ and increment $a$ for each factor of 2 removed. Then repeatedly remove factors of 3 from $n$ and increment $b$ for each factor of 3 removed. At this point, either $n \equiv 1 \pmod 6$ or $n \equiv 5 \pmod 6$ and so continue on $n-1$ or $n+1$ respectively.  When we continue on $n-1$, this corresponds to adding the current term, so we set $s_i=1$, and when we continue on $n+1$, this corresponds to subtracting the current term, so we set $s_i=-1$. Let $a_i = a$ and $b_i = b$ and then increment $i$ and then repeat this process while $n > 0$.  We can then use Algorithm \ref{alg:expWithChain} to compute the exponentiation given a strictly chained 2,3 partition. Additionally, since the terms $s_i2^{a_i}3^{b_i}$ are computed in increasing order for $i=1..k$, it is relatively straightforword to interleave the computation of the partition with the computation of the exponentiation for additional speed and memory savings.
+Using this technique, we can devise a function to compute a strictly chained 2,3 partition of $n$ that corresponds to the group operations generated by $\rtol$. This is useful when recursion isn't possible, or when the exponent $n$ is a constant (since we can use precomputation to save time). Algorithm \ref{alg:rtolDbnsChain} computes the corresponding strictly chained 2,3 partition.  The idea is as follows: let $a = 0$, $b=0$, and $i=1$.  While $n > 0$, repeatedly remove factors of 2 from $n$ and increment $a$ for each factor of 2 removed. Then repeatedly remove factors of 3 from $n$ and increment $b$ for each factor of 3 removed. At this point, either $n \equiv 1 \pmod 6$ or $n \equiv 5 \pmod 6$ and so continue on $n-1$ or $n+1$ respectively.  When we continue on $n-1$, this corresponds to adding the current term, so we set $s_i=1$, and when we continue on $n+1$, this corresponds to subtracting the current term, so we set $s_i=-1$. Let $a_i = a$ and $b_i = b$ and then increment $i$ and then repeat this process while $n > 0$.  We can then use Algorithm \ref{alg:expWithChain} to compute the exponentiation given a strictly chained 2,3 partition. Additionally, since the terms $s_i2^{a_i}3^{b_i}$ are computed in increasing order for $i=1..k$, it is relatively straightforword to interleave the computation of the partition with the computation of the exponentiation for additional speed and memory savings.
+
+% R2L 2,3 CHAIN
+\begin{algorithm}[h]
+\caption{Computes a 2,3 strictly chained representation from low order to high order. Ciet \cite{Ciet2006}.}
+\label{alg:rtolDbnsChain}
+\begin{algorithmic}[1]
+\REQUIRE $n \in \ZZgez$
+%\ENSURE $n=\sum_{i=1}^k s_i2^{a_i}3^{b_i}$ as a strictly chained partition.
+\STATE $(a, b) \gets (0, 0)$
+\STATE $i \gets 1$
+\WHILE {$n > 0$}
+	\WHILE {$n \equiv 0 \pmod 2$} 
+		\STATE $n \gets n / 2, a \gets a + 1$
+	\ENDWHILE
+	\WHILE {$n \equiv 0 \pmod 3$}
+		\STATE $n \gets n / 3, b \gets b + 1$
+	\ENDWHILE
+	\IF {$n \equiv 1 \pmod 3$}
+		\STATE $n \gets n - 1, s \gets 1$
+	\ELSIF {$n \equiv 2 \pmod 3$}
+		\STATE $n \gets n + 1, s \gets -1$
+	\ENDIF
+	\STATE $(s_i, a_i, b_i) \gets (s, a, b)$
+	\STATE $i \gets i + 1$
+\ENDWHILE
+\STATE $k \gets i$
+\RETURN $(a_1, b_1, s_1), ..., (a_k, b_k, s_k)$
+\end{algorithmic}
+\end{algorithm}
 
 To see the correctness of the above procedure, consider a modification to the recursive function $\rtol$ such that it returns a partition of the input $n$ as a list of terms $s_i2^{a_i}3^{b_i}$. When the result of the recursive call is squared, this corresponds to incrementing $a_i$ in each term of the list.  Similarly, when the result is cubed, this corresponds to incrementing $b_i$ in each term of the list. When the result is composed with $g$, we prepend a term of $+1$ to the partition, and when the result is composed with $g^{-1}$, we prepend a term of $-1$ to the partition. Note that since either $n \equiv 0 \pmod 2$ or $n \equiv 0 \pmod 3$ on each iteration of the loop, either $a$ will increase or $b$ will increase. Since every term $|s_i2^{a_i}3^{b_i}|$ is strictly less than $|s_j2^{a_j}3^{b_j}|$ when $i < j$, the partition is strictly chained.
 
@@ -277,20 +390,18 @@ take the element $v \in V$ that is closest to $|n|$, and take $s \in \{-1, 1\}$ 
 
 Naturally though, non-chained representations tend to have a lower density than chained representations but at the expense of requiring more memory to perform exponentiation.  Surprisingly though, since Algorithm \ref{alg:yaos} takes time and memory proportional to the largest values of $a$ and $b$ in the representation, constraining $a$ and $b$ globally over the complete representation can result in representations that exponentiate more quickly in practice. In this case, recursive calls to $\greedychain$ use the original values of $\amax$ and $\bmax$ rather than further constraining $a$ and $b$ based on the values generated by the $\closest'$.  Finding the best greedy representation is then a matter of iterating of values of $\amax$ and $\bmax$ and computing 2,3 representations costrained appropriately.  We will discuss approaches and results of this in Chapter \ref{chap:idealExponentiationExperiments}.
 
-%%%%%%%%%%%%%%
-% GREEDY L2R %
-%%%%%%%%%%%%%%
+% GREEDY L2R
 \begin{algorithm}[h]
 \caption{Greedy left to right representation. Berth\'{e} and Imbert \cite{Berthe2009}.}
 \label{alg:greedyltor}
 \begin{algorithmic}[1]
-\REQUIRE $n, \amax, \bmax \in \ZZgez$ \COMMENT{$\amax$ and $\bmax$ may be $+\infty$}
+\REQUIRE $n, \amax, \bmax \in \{\ZZgez, +\infty\}$ \COMMENT{$+\infty$ for unbounded $a$ or $b$}
 \STATE $L \gets \textrm{empty list}$
 \WHILE {$n \ne 0$}
 	\STATE $(a, b) \gets \argmin_{(c, d)} \left\{\left||n| - 2^c3^d \right| : 0 \le c \le \amax, 0 \le d \le \bmax \right\}$
 	\STATE $s \gets -1 \textrm{ when } n < 0 \textrm{ and } 1 \textrm{ otherwise}$
 	\STATE $\textrm{push }(s, a, b) \textrm{ onto the front of } L$
-	\STATE $\textrm{optionally } (\amax, \bmax) \gets (a, b) \textrm{ when a chain is desired}$
+	\STATE $\textrm{optionally set } (\amax, \bmax) \gets (a, b) \textrm{ when a chain is desired}$
 	\STATE $n \gets n - s2^a3^b$
 \ENDWHILE
 \RETURN $L$
@@ -301,9 +412,11 @@ Naturally though, non-chained representations tend to have a lower density than 
 \bigbreak
 \subsection{Pruned Trees}
 
-The next technique for finding stricly chained 2,3 partitions was suggested by Doche and Habsieger \cite{Doche2008}. The idea is similar to the method for generating chains from right to left as described in Subsection \ref{subsec:rtolchains} above, but this technique differs by generating several possible values that may be further reduced by powers of 2 and 3. The procedure is given in Algorithm \ref{alg:dbnsTree}.  The idea is to maintain a tree, $T$, with at most $B$ leaf nodes for some bound $B$. At each iteration, each leaf node $v \in T$ generates two new leaves, $v-1$ and $v+1$, which are then reduced as much as possible by removing factors of 2 and 3.  We then discard any duplicate nodes and all but the smallest $B$ elements generated. The path from the root to the first leaf with a value of 1 represents a chained 2,3 partition of the number $n$.
+The next technique for finding stricly chained 2,3 partitions was suggested by Doche and Habsieger \cite{Doche2008}. The idea is similar to the method for generating chains from right to left as described in Subsection \ref{subsec:rtolchains} above, but this technique differs by generating several possible values that may be further reduced by powers of 2 and 3. The procedure is given in Algorithm \ref{alg:dbnsTree}.  The idea is to maintain a tree, $T$, with at most $B$ leaf nodes. At each iteration, each leaf node $v \in T$ generates two new leaves, $v-1$ and $v+1$, which are then reduced as much as possible by removing factors of 2 and 3.  We then discard any duplicate nodes and all but the smallest $B$ elements generated. The path from the root to the first leaf with a value of 1 represents a chained 2,3 partition of the number $n$.
 
-% DBNS TREE
+%%%%%%%%%%%%%
+% DBNS TREE %
+%%%%%%%%%%%%%
 \begin{algorithm}[h]
 \caption{Tree-Based Chained 2,3 Partitions. Doche and Habsieger \cite{Doche2008}.}
 \label{alg:dbnsTree}
@@ -322,7 +435,7 @@ The next technique for finding stricly chained 2,3 partitions was suggested by D
 \end{algorithmic}
 \end{algorithm}
 
-Empirically they found that $B=4$ was a good compromise between the length of the chain generated and the time to compute the chain. Larger values of $B$ often produced chains with fewer terms, but took longer to compute. When the number for the target chain is known in advance and precomputation is permitted, this can be advantage since fewer terms can lead to a cheaper exponentiation so long as the time to compute the chain isn't prohibitively long.  We will take advantage of this later in this thesis
+Empirically they found that $B=4$ was a good compromise between the length of the chain generated and the time to compute the chain. Larger values of $B$ sometimes produce chains with fewer terms, but take longer to compute. When the number for the target chain is known in advance and precomputation is permitted, a larger value of $B$ can be advantageous since this can lead to fewer terms, which can lead to a cheaper exponentiation.  The downside is that large values of $B$ can be prohibitively expensive even for precomputation when the integer $n$ is quite large.
 
 
 
