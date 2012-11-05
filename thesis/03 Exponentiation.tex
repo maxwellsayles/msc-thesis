@@ -71,7 +71,7 @@ In Sections \ref{section:binary} and \ref{section:naf} we discuss standard expon
 %%%%%%%%%%%%%%%%%%%%%%%%%
 \bigbreak
 \section{Binary Exponentiation}\label{section:binary}
-Perhaps the simplest method of exponentiation is that of binary exponentation.  Let $g$ be an element in the group $G$ and $n$ be a positive integer.  We want to compute $g^n \in G$.  We first represent $n$ in binary as
+The simplest method of exponentiation is binary exponentation.  Let $g$ be an element in the group $G$ and $n$ be a positive integer.  We want to compute $g^n \in G$.  We first represent $n$ in binary as
 \[
 	n = \sum_{i=0}^{\floor{log_2 n}} b_i 2^i
 \]
@@ -166,7 +166,7 @@ Another possible representation is
 \begin{equation}\label{eq:chainedEg2}
 	23814216 = 2^3 3^2 -2^{13} 3^2 +2^{15} 3^6.
 \end{equation}
-Double-base number systems are highly redudant, and different representations will trade off between cubings, squarings, and the number of terms.  The best representation, in some sense, will depend on the needs of the application.  Later, we shall see some algorithms that take this into account, but many are designed to either find representations quickly, of a special form, or with few terms.
+Double-base number systems are highly redundant, and different representations will trade off between cubings, squarings, and the number of terms.  The best representation, in some sense, will depend on the needs of the application.  Later, we shall see some algorithms that take this into account, but many are designed to either find representations quickly, of a special form, or with few terms.
 
 Recall, the binary representation \eqref{eq:binaryEg}, non-adjacent form \eqref{eq:nafEg}, and a 2,3 double-base representation \eqref{eq:chainedEg2} of 23814216 were
 \begin{align*}
