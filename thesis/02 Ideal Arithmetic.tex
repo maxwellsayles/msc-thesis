@@ -279,7 +279,7 @@ Using the above notions of ideals in $\OO_\Delta$, we define the \emph{ideal cla
 \subsection{Reduced Representatives}
 \label{subsec:reduction}
 \begin{defn}
-Let $\mathfrak{a}$ be an $\OO$-ideal. Then $\mathfrak{a}$ is said to be \emph{reduced} if $\mathfrak{a}$ is primitive, and there does not exist a non-zero element $\beta \in \mathfrak{a}$ such that $|\beta| < N(\mathfrak{a})$ and $|\overline{\beta}| < N(\mathfrak{a})$.  In otherwords, $\mathfrak a$ is reduced if $N(\mathfrak{a})$ is a minimum element in $\mathfrak{a}$ \cite[p.~98]{Jac09}.
+Let $\mathfrak{a}$ be an $\OO$-ideal. Then $\mathfrak{a}$ is said to be \emph{reduced} if $\mathfrak{a}$ is primitive, and there does not exist a non-zero element $\beta \in \mathfrak{a}$ such that $|\beta| < N(\mathfrak{a})$ and $|\overline{\beta}| < N(\mathfrak{a})$.  In other words, $\mathfrak a$ is reduced if $N(\mathfrak{a})$ is a minimum element in $\mathfrak{a}$ \cite[p.~98]{Jac09}.
 \end{defn}
 
 We compute a reduced representative as follows:  Suppose $\mathfrak a = [a, (b + \sqrt\Delta)/2]$.  Let $c = (b^2 - \Delta)/4a$.  If $a > c$ compute ${\mathfrak a}^{-1}$ by swapping $a$ and $c$ and letting $b = -b$.  Since $b$ is unique $\bmod{~2a}$, we reduce $b \bmod{2a}$ and repeat while $\mathfrak a$ is not reduced.  Pseudo-code is given in Algorithm \ref{alg:reduce}.
@@ -415,7 +415,7 @@ where
 %%%%%%%%%%
 \subsection{Fast Ideal Composition (NUCOMP)}\label{subsec:nucomp}
 
-Shanks gives an algorithm for composing two ideal class representatives such that their product is reduced or almost reduced.  The algorithm is known as NUCOMP and stands for ``New CoMPosition''.  This algorithm is often faster in practice as the intermediate numbers are smaller and the final product requires fewer (often no) applications of the reduction operator to be converted to reduced form.  The two main steps to computing a reduced product using NUCOMP is first, to compute the partial quotients $q_i$ that lead to a reduced ideal without explicitely computing the product form $[a,(b+\sqrt\Delta)/2]$, while the second component is to derive formulas for $a_i$ and $b_i$ using the partial quotients $q_i$.  The description of NUCOMP provided here is a high level description of the algorithm based on \cite[pp.119-123]{Jac09}.
+Shanks gives an algorithm for composing two ideal class representatives such that their product is reduced or almost reduced.  The algorithm is known as NUCOMP and stands for ``New CoMPosition''.  This algorithm is often faster in practice as the intermediate numbers are smaller and the final product requires fewer (often no) applications of the reduction operator to be converted to reduced form.  The two main steps to computing a reduced product using NUCOMP is first, to compute the partial quotients $q_i$ that lead to a reduced ideal without explicitly computing the product form $[a,(b+\sqrt\Delta)/2]$, while the second component is to derive formulas for $a_i$ and $b_i$ using the partial quotients $q_i$.  The description of NUCOMP provided here is a high level description of the algorithm based on \cite[pp.119-123]{Jac09}.
 
 The basic idea is that rather than computing the product form
 \[
