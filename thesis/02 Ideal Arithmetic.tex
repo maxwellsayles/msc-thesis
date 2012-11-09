@@ -87,7 +87,7 @@ Let $\Delta = b^2 -4ac$ such that $\Delta \in \ZZ$ is the discriminant of $f(x)$
 \[
 	\KK = \QQ(\alpha) = \QQ(\sqrt{\Delta}) = \{u + v\sqrt{\Delta} : u,v \in \QQ\}.
 \]
-When $\Delta$ is positive, $\KK$ is a \emph{real} quadratic number field, and when $\Delta$ is negative, $\KK$ is an \emph{imaginary} quadratic number field.  Here we deal only with the imaginary case.  Notice that $\Delta \equiv 0,1 \pmod 4$.  Also, if $\Delta = f^2 \Delta_0$ for some $f \in \ZZ$ where $\Delta_0$ is squarefree, then $\KK = \QQ(\Delta_0)$.
+When $\Delta$ is positive, $\KK$ is a \emph{real} quadratic number field, and when $\Delta$ is negative, $\KK$ is an \emph{imaginary} quadratic number field.  In this thesis we are concerned only with the imaginary case.  Notice that $\Delta \equiv 0,1 \pmod 4$, and that if $\Delta = f^2 \Delta_0$ for some $f \in \ZZ$ where $\Delta_0$ is squarefree, then $\KK = \QQ(\Delta_0)$.
 
 
 %%%%%%%%%%%%%%%%%%%%%%
@@ -96,71 +96,24 @@ When $\Delta$ is positive, $\KK$ is a \emph{real} quadratic number field, and wh
 \bigbreak
 \section{Quadratic Integers}
 
-When $g(x)$ is a monic polynomial with integer coefficients, we say that a root $\alpha$ is an \emph{algebraic integer}.
+A polynomial with a leading coefficient of 1 is a \emph{monic} polynomial. We say that the root $\alpha$ of a monic polynomial $f(x)$ with integer coefficients is an \emph{algebraic integer}, and that the root $\beta$ of a monic quadratic polynomial $g(x)$ with integer coefficients is a \emph{quadratic integer}.
+
+Let $g(x) = x^2 + bx + c$ for $b, c \in \ZZ$.  Note the leading coefficient is 1.  The roots are given by $-b/2 \pm \sqrt{b^2-4c}/2$. When $b$ is even, we can express the root $\beta$ as $\beta = i + j \sqrt{\Delta_0}$ for $i,j \in \ZZ$.  When $b$ is odd, we have $b = 2b' + 1$ for some $b' \in \ZZ$ and
+\begin{eqnarray*}
+\frac{-b \pm \sqrt{b^2-4c}}{2} & = & \frac{-(2b'+1) \pm \sqrt{(2b'+1)^2 - 4c}}{2}.
+\end{eqnarray*}
+So we can express the root $\beta$ as $\beta = i + j(1 + \sqrt{\Delta_0})/2$.  This leads to the following definition of a quadratic integer:
 
 \begin{defn}
 \label{defn:quadraticInteger}
-A \emph{quadratic integer} $\beta$ is an algebraic integer of $\QQ(\sqrt{\Delta_0})$ where $\beta$ can be written as $\beta = i + j \omega_0$ for some $i,j \in \ZZ$ and
+A \emph{quadratic integer} $\beta$ is an algebraic integer of $\QQ(\sqrt{\Delta_0})$ where $\beta$ can be written as $\beta = i + j \omega_0$ for $i,j \in \ZZ$ and
 \begin{equation*}
 	\omega_0 = \begin{cases}
-		\sqrt{\Delta_0} & \textrm{ when } \Delta_0 \not \equiv 1 \pmod 4 \\
+		\sqrt{\Delta_0} & \textrm{ when } \Delta_0 \equiv 0 \pmod 4 \\
 		\frac{1+\sqrt{\Delta_0}}{2} & \textrm{ when } \Delta_0 \equiv 1 \pmod 4.
 	\end{cases}
 \end{equation*}
 \end{defn}
-
-Recall that an algebraic number $\beta$ of $\QQ(\sqrt\Delta_0)$ is $\beta = u+v\sqrt\Delta_0$ for some $u,v \in \QQ$.  For $\beta$ to be an  algebraic integer it must be a root of a monic quadratic polynomial $f(x) = x^2+bx+c$ for some $b,c \in \ZZ$ (note the coefficient of $x^2$ is 1).  The roots are given by
-\begin{equation*}
-	\beta = u + v\sqrt{\Delta_0} = \frac{-b \pm \sqrt{b^2-4c}}{2}.
-\end{equation*}
-Equating rational and irrational parts we have
-\begin{equation*}
-	u = -\frac{b}{2}
-\end{equation*}
-and
-\begin{equation*}
-	v \sqrt{\Delta_0} = \frac{\sqrt{b^2 -4c}}{2}
-\end{equation*}
-and so
-\begin{equation}
-\label{eq:v2}
-	v^2 \Delta_0 = \frac{b^2}{4} - c.
-\end{equation}
-
-
-There are two cases: $b$ is even or odd. Suppose $b$ is even.  Then $b=2b'$ for some $b' \in \ZZ$.  This implies that $u = -b'$ and $u \in \ZZ$.  By \eqref{eq:v2} we have
-\begin{eqnarray*}
-	v^2 \Delta_0 & = & \frac{(2b')^2}{4} - c \\
-	& = & b'^2 - c
-\end{eqnarray*}
-and $v \in \ZZ$, since $b', c, \Delta_0 \in \ZZ$.  Therefore, when $b$ is even, it follows that $\beta = u + v \sqrt{\Delta_0}$ is a quadratic integer.
-
-\bigbreak
-Now suppose $b$ is odd; then $b=2b' + 1$ for some $b' \in \ZZ$.  Again, equating rational and irrational parts we have
-\[
-	u = - \frac{b}{2} = -b' - \frac{1}{2}
-\]
-and
-\begin{eqnarray*}
-	v^2 \Delta_0 & = & \frac{(2b'+1)^2}{4} - c \\
-	& = & b'^2 + b' + \frac{1}{4} -c.
-\end{eqnarray*}
-Let $v = \frac{j}{2}$ for some $j \in \ZZ$.  Then
-\begin{equation*}
-	\frac{j^2}{4} \Delta_0 = b'^2 + b' + \frac{1}{4} -c,
-\end{equation*}
-and as such
-\begin{equation*}
-	j^2 \Delta_0 \equiv 1 \pmod 4.
-\end{equation*}
-
-\noindent
-This is only possible when $j \equiv 1,3 \pmod 4$ and $\Delta_0 \equiv 1 \pmod 4$.  Let $v = j/2$ and $u = i + j/2$ for some $i, j \in \ZZ$.  Then
-\begin{eqnarray*}
-	\beta & = & u + v \sqrt{\Delta_0} \\
-	& = & i + \frac{j}{2} + \frac{j \sqrt{\Delta_0}}{2} \\
-	& = & i + j \left( \frac{1 + \sqrt{\Delta_0}}{2} \right).
-\end{eqnarray*}
 
 
 %%%%%%%%%%%%%%%%%
@@ -168,14 +121,14 @@ This is only possible when $j \equiv 1,3 \pmod 4$ and $\Delta_0 \equiv 1 \pmod 4
 %%%%%%%%%%%%%%%%%
 \bigbreak
 \section{Maximal Order of Algebraic Integers}
-The ring of all algebraic integers of a number field $\KK$ is the \emph{maximal order} of $\KK$.  To describe the \emph{maximal order} of $\KK$, we begin by defining a \emph{$\ZZ$-module}.  
+The ring of all algebraic integers of a number field $\KK$ is the \emph{maximal order} of $\KK$.  To describe the maximal order of $\KK$, we begin by defining a \emph{$\ZZ$-module}.  
 
 \begin{defn}
 Given a subset of a number field $X = \{ \xi_1, \xi_2, \xi_3, ..., \xi_n \} \subseteq \KK$, the \emph{$\ZZ$-module} $\MM$ is generated as the set of all linear combinations of the elements of $X$ with integer coefficients:
 \[
-	\MM = \left \{ \sum_{i}^n x_i \xi_i : x_i \in \ZZ, \xi_i \in X \right \}.
+	\MM = \left \{ \sum_{i}^n x_i \xi_i : x_i \in \ZZ, \xi_i \in X \right \},
 \]
-We denote this as
+and is denoted as
 \[
 	\MM = [ \xi_1, \xi_2, ..., \xi_n ].
 \]
@@ -186,11 +139,7 @@ An \emph{order} $\OO$ of $\KK$ is a $\ZZ$-module of $\KK$ such that $\OO$ is a s
 \end{defn}
 
 \noindent
-Orders of quadratic fields can be written as  $\OO_\Delta = [1, f\omega_0]$ where $\Delta = f^2\Delta_0$ for some $f \in \ZZ$.  We call $f$ the \emph{conductor} of $\OO_\Delta$.  Note that by Definition \ref{defn:quadraticInteger} quadratic orders $\OO_\Delta$ can also be written as  the $\ZZ$-module  \cite[p.~81]{Jac09}:
-\begin{equation*}
-	\OO_\Delta = \left[1, \frac{\Delta + \sqrt{\Delta}}{2} \right].
-\end{equation*}
-The maximal order of algebraic integers in the quadratic number field $\KK=\QQ(\sqrt{\Delta_0})$ is $[1, \omega_0]$.  We denote this as $\OO_{\KK}$.  The order $\OO_\KK$ is maximal since any order $\OO_\Delta = [1,f\omega_0]$ is a subring of $\OO_\KK$. 
+Orders of quadratic fields can be written as  $\OO_\Delta = [1, f\omega_0]$ where $\Delta = f^2\Delta_0$ for  some integer $f$ that is the \emph{conductor} of $\OO_\Delta$.  When $\OO_\KK = [1, \omega_0]$, the order is maximal since any order $\OO_\Delta = [1, f\omega_0]$ is a subring of $\OO_\KK$. 
 
 
 %%%%%%%%%%
