@@ -147,14 +147,14 @@ Here we provide pseudo-code for operations in the ideal class group of imaginary
 \label{alg:prime}
 \begin{algorithmic}[1]
 \REQUIRE A prime integer $p \in \ZZ$.
-\ENSURE A reduced representative $\mathfrak p = [p, (b+\sqrt\Delta)/2]$ such that $\mathfrak p$ is a prime ideal if one exists.
-\STATE $b \gets \sqrt\Delta \pmod p$
-\IF {$4p | b^2-\Delta$}
-	\RETURN $[p, (b+\sqrt\Delta)/2]$.	
+\ENSURE A representative $\mathfrak p = [p, (b+\sqrt\Delta)/2]$ such that $\mathfrak p$ is a prime ideal if one exists.
+\STATE $b \gets \textrm{the positive } \sqrt\Delta \pmod p$
+\IF {$4p ~|~ b^2-\Delta$}
+	\RETURN $[p, (b+\sqrt\Delta)/2]$
 \ENDIF
-\STATE Let $b \gets p-b$.
-\IF {$4p | b^2-\Delta$}
-	\RETURN $[p, (b+\sqrt\Delta)/2]$.	
+\STATE $b \gets p-b$
+\IF {$4p ~|~ b^2-\Delta$}
+	\RETURN $[p, (b+\sqrt\Delta)/2]$
 \ENDIF
 \RETURN none
 \end{algorithmic}
@@ -168,22 +168,22 @@ Here we provide pseudo-code for operations in the ideal class group of imaginary
 \caption{Reduce}
 \label{alg:reduce}
 \begin{algorithmic}[1]
-\REQUIRE An ideal class representative $\mathfrak a_1 = [a_1, (b_1+\sqrt\Delta)/2]$ for an imaginary quadratic order, and $c_1 = ({b_1}^2 - \Delta)/4a_1$.
+\REQUIRE An ideal class representative $\mathfrak a_1 = [a_1, (b_1+\sqrt\Delta)/2]$ and $c_1 = ({b_1}^2 - \Delta)/4a_1$.
 \ENSURE A reduced representative $\mathfrak a = [a, (b+\sqrt\Delta)/2]$.
-\STATE $a \gets a_1, b \gets b_1, c \gets c_1$.
+\STATE $(a, b, c) \gets (a_1, b_1, c_1)$
 \WHILE {$a > c$ or $b > a$ or $b \le -a$}
 	\IF {$a > c$}
-		\STATE Swap $a$ with $c$ and let $b \gets -b$.
+		\STATE swap $a$ with $c$ and let $b \gets -b$
 	\ENDIF
 	\IF {$b > a$ or $b \le -a$}
-		\STATE $b \gets b'$ such that $-a < b' \le a$ and $b' \equiv b \pmod{2a}$.
-		\STATE $c \gets (b^2-\Delta)/4a$.
+		\STATE $b \gets b'$ such that $-a < b' \le a$ and $b' \equiv b \pmod{2a}$
+		\STATE $c \gets (b^2-\Delta)/4a$
 	\ENDIF
 \ENDWHILE
 \IF {$a=c$ and $b < 0$}
-	\STATE $b \gets -b$.
+	\STATE $b \gets -b$
 \ENDIF
-\RETURN $[a, (b+\sqrt\Delta)/2]$.
+\RETURN $[a, (b+\sqrt\Delta)/2]$
 \end{algorithmic}
 \end{algorithm}
 
