@@ -83,8 +83,8 @@
 \STATE $T \gets NK$
 \STATE $a \gets NL$
 \STATE $b \gets b_1 - 2T$
-\STATE $c \gets (s_2c_1+K(T-b))/L$ \COMMENT{Optional}
-\RETURN $[a, (b+\sqrt\Delta)/2]$ \COMMENT{Optionally $c$}
+\STATE $c \gets (s_2c_1+K(T-b))/L$ \COMMENT{optional}
+\RETURN $[a, (b+\sqrt\Delta)/2]$ \COMMENT{optionally $c$}
 \end{algorithmic}
 \end{algorithm}
 
@@ -404,7 +404,7 @@ $0 \le b_1 \le ... \le b_k \in \ZZ.$
 	\WHILE {$b < b_i$}
 		\STATE $T \gets T^3, b \gets b + 1$
 	\ENDWHILE
-	\STATE $R \gets R \cdot T^{s_i}$ \COMMENT{compose with $T$ or $T^{-1}$}
+	\STATE $R \gets R \cdot T^{s_i}$ \COMMENT{multiply with $T$ or $T^{-1}$}
 	\STATE $i \gets i + 1$
 \ENDWHILE
 \RETURN $R$
@@ -427,7 +427,7 @@ $b_1,...,b_k \in \ZZgez.$
 \STATE $R \gets 1_G$
 \STATE $i \gets 1$
 \WHILE {$i < k$}
-	\STATE $R \gets R \cdot {T_{b_i}}^{s_i}$ \COMMENT{compose with $T_{b_i}$ or ${T_{b_i}}^{-1}$}
+	\STATE $R \gets R \cdot {T_{b_i}}^{s_i}$ \COMMENT{multiply with $T_{b_i}$ or ${T_{b_i}}^{-1}$}
 	\STATE $a_\Delta \gets a_i - a_{i+1}$
 	\STATE $R \gets R ^ {2^{a_\Delta}}$ \COMMENT{by squaring $a_\Delta$ number of times}
 	\STATE $i \gets i + 1$
