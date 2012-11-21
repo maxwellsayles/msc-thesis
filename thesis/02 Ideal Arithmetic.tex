@@ -57,7 +57,7 @@
 \chapter{Ideal Arithmetic}
 \label{chap:idealArithmetic}
 
-A focus of this thesis is arithmetic and exponentiation in the ideal class group of imaginary quadratic number fields.  We begin with the relevant theory of quadratic number fields, then discuss quadratic orders and ideals of quadratic orders.  Finally, we discuss arithmetic in the ideal class group.  The theory presented here is available in detail in reference texts on algebraic number theory such as \cite{IR90}, \cite{Hua82}, or \cite{Coh80}. 
+A focus of this thesis is arithmetic and exponentiation in the ideal class group of imaginary quadratic number fields.  We begin with the relevant theory of quadratic number fields, then discuss quadratic orders and ideals of quadratic orders.  Finally, we discuss arithmetic in the ideal class group.  The theory presented here is available in detail in reference texts on algebraic number theory such as \cite{Ireland1990}, \cite{Hua82}, or \cite{Cohn1980}. 
 
 
 
@@ -73,7 +73,7 @@ An \emph{algebraic number} is a root $\alpha$ of a polynomial $f(x) \in \QQ[x]$ 
 \end{defn}
 
 \noindent
-Given an algebraic number $\alpha$, we can create an algebraic number field $\KK$ as the extension field of $\QQ$ obtained by adjoining $\alpha$, denoted $\QQ(\alpha)$. Following \cite[p.76]{Jacobson2009}, we write $\KK$ as 
+Given an algebraic number $\alpha$, we can create an algebraic number field $\KK$ by adjoining $\alpha$ to the field of rationals.  We denote this $\QQ(\alpha)$. Following \cite[p.76]{Jacobson2009}, we write $\KK$ as 
 \[
 	\KK = \QQ(\alpha) = \left\{ \frac{f(\alpha)}{g(\alpha)} : f(x), g(x) \in \QQ[x]; g(\alpha) \ne 0 \right\}.
 \]
@@ -96,7 +96,7 @@ When $\Delta$ is positive, $\KK$ is a subset of the real numbers, $\RR$, and is 
 \bigbreak
 \section{Quadratic Integers}
 
-A polynomial with a leading coefficient of 1 is a \emph{monic} polynomial. The root $\alpha$ of a monic polynomial $f(x)$ with integer coefficients is an \emph{algebraic integer}, and when $f(x)$ is a monic quadratic polynomial with integer coefficients, the root $\alpha$ is a \emph{quadratic integer}. By \cite[p.77]{Jacobson2009} we have the following theorem:
+A polynomial with a leading coefficient of 1 is a \emph{monic} polynomial, and the root $\alpha$ of a monic polynomial $f(x)$ with integer coefficients is an \emph{algebraic integer}. The rational numbers are degree 1 algebraic numbers since they are roots of degree 1 polynomials $bx-a$.  The roots of monic degree 1 polynomials $x-a$ are the integers, $\ZZ$.  When $f(x)$ is a monic quadratic polynomial with integer coefficients, the root $\alpha$ is a \emph{quadratic integer}. By \cite[p.77]{Jacobson2009} we have the following theorem:
 
 \begin{thm}
 A quadratic integer $\alpha$ is an algebraic integer of $\QQ(\sqrt{\Delta_0})$ where $\alpha$ can be written as $\alpha = x + y \omega_0$ for $x, y \in \ZZ$ where
@@ -115,8 +115,11 @@ A quadratic integer $\alpha$ is an algebraic integer of $\QQ(\sqrt{\Delta_0})$ w
 \bigbreak
 \section{Maximal Order of Algebraic Integers}
 
+The \emph{maximal order} of a field $\KK$ is the set of all algebraic integers contained within $\KK$.  We use the notation of $\ZZ$-modules to characterize the maximal order of quadratic integers.
+
+
 \begin{defn}
-Let $X = \{ \xi_1, \xi_2, \xi_3, ..., \xi_n \}$ be a subset of a number field $\KK$.  A \emph{$\ZZ$\mbox{-}module}, $\MM$, is a finitely generated additive abelian group:
+Let $X = \{ \xi_1, \xi_2, \xi_3, ..., \xi_n \}$ be a subset of a number field $\KK$.  A \emph{$\ZZ$\mbox{-}module}, $\MM$, is a finitely generated additive abelian group such that
 \begin{align*}
 	\MM &= [ \xi_1, \xi_2, ..., \xi_n ] \\
 	& =  \xi_1 \ZZ + \xi_2 \ZZ + \cdots + \xi_n \ZZ \\
@@ -129,7 +132,7 @@ A \emph{quadratic order} $\OO_\Delta$ of $\QQ(\sqrt\Delta)$ is a sub-ring of the
 \[
 	\left[ 1, \frac{\Delta + \sqrt{\Delta}}{2} \right] = [1, f\omega_0].
 \]
-The \emph{maximal order} $\OO_\Delta = [1, \omega_0]$ of $\QQ(\sqrt\Delta_0)$ is the ring of all quadratic integers in $\QQ(\sqrt\Delta_0)$ and is maximal since any order $\OO = [1, f\omega_0]$ is a sub-ring of $\OO_\Delta$. 
+The maximal order $\OO_\Delta = [1, \omega_0]$ of $\QQ(\sqrt\Delta_0)$ is the ring of all quadratic integers in $\QQ(\sqrt\Delta_0)$ and is maximal since any order $\OO = [1, f\omega_0]$ is a sub-ring of $\OO_\Delta$. 
 \end{thm}
 
 
@@ -140,8 +143,10 @@ The \emph{maximal order} $\OO_\Delta = [1, \omega_0]$ of $\QQ(\sqrt\Delta_0)$ is
 \section{Ideals of $\OO_\Delta$}
 
 \begin{defn}
-Let $\mathfrak a$ be an additive subgroup of the order $\OO$.  For any $\xi \in \OO$, define $\xi \mathfrak a$ to be the set $\{\xi a : a \in \mathfrak a\}$.  When $\xi \mathfrak a \subseteq \mathfrak a$, then $\mathfrak a$ is an \emph{ideal} of the order $\OO$, also called an \emph{$\OO$-ideal}.
+Let $\mathfrak a$ be an additive subgroup of an order $\OO$.  For any $\xi \in \OO$, define $\xi \mathfrak a$ to be the set $\{\xi a : a \in \mathfrak a\}$.  When $\xi \mathfrak a \subseteq \mathfrak a$ for any $\xi \in \OO$, then $\mathfrak a$ is an \emph{ideal} of the order $\OO$, also called an \emph{$\OO$-ideal}.
 \end{defn}
+
+For any $\alpha, \beta \in \OO_\Delta$, the set $\{x \alpha + y \beta : x, y \in \OO_\Delta\}$ is an ideal $\mathfrak a$ in the order $\OO_\Delta$.  We say that $\mathfrak a$ is generated by $\alpha$ and $\beta$ and denote it $(\alpha, \beta)$.  Every ideal $\mathfrak a$ of a quadratic order $\OO_\Delta$ can be represented by at most two generators \cite{Cohn1980}, but some can be represented by only a single generator. An ideal represented by a single generator, $\alpha \in \OO_\Delta$, is denoted $(\alpha)$ and is called \emph{principal} \cite[p.87]{Jacobson2009}.
 
 \begin{thm}
 \label{thm:idealZModule}
@@ -152,13 +157,14 @@ When $\OO_\Delta = [1, f\omega_0]$ is the order of a quadratic field, a non-zero
 for $s, a, b \in \ZZ, s > 0, a > 0$, and $b$ is unique $\bmod ~2a$ \cite[p.86]{Jacobson2009}. When $s = 1$ the ideal $\mathfrak a$ is \emph{primitive}.
 \end{thm}
 
-Prime ideals allow us to easily create an ideal.  For a prime ideal $\mathfrak p \in \OO_\Delta$ it can be shown (\cite[p.19]{Jacobson1999}) that $\mathfrak p \cap \ZZ = p\ZZ$ for some prime integer $p \in \ZZ$. Let
+Two ideals $\mathfrak a$ and $\mathfrak b$ are \emph{equivalent} if there exists $\alpha, \beta \in \OO_\Delta$ such that $\alpha \beta \neq 0$ and $(\alpha)\mathfrak a = (\beta) \mathfrak b$ \cite[p.88]{Jacobson2009}. Following \cite[p.88]{Jacobson2009}, we denote by $[\mathfrak a]$ the \emph{ideal class} of all ideals equivalent to $\mathfrak a$. The \emph{identity} ideal is $\OO_\Delta = [1, f\omega_0]$ since $\mathfrak a = \mathfrak a \OO_\Delta = \OO_\Delta \mathfrak a$ \cite{Cohn1980}.  An ideal $\mathfrak a = s[a, (b+\sqrt{\Delta})/2]$ is \emph{invertible} if there exists an ideal $\mathfrak b$ such that $\mathfrak a \mathfrak b = [\OO_\Delta]$, and an ideal $\mathfrak b$ exists when $\gcd(a, b, (b^2-\Delta)/(4a)) = 1$ \cite[p.14]{Jacobson1999}. The inverse is given by \cite[pp.14,15]{Jacobson1999}
 \[
-	\mathfrak p = s\left[a, \frac{b + \sqrt{\Delta}}{2}\right]
+	{\mathfrak a}^{-1} = \frac{s}{\mathcal N(\mathfrak a)} \left[a, \frac{-b+\sqrt{\Delta}}{2} \right]
 \]
-and it follows that either $s=p$ and $a=1$, or $s=1$ and $a=p$.  In the first case $\mathfrak p = p\OO_\Delta$, while in the second case $b = \pm \sqrt{\Delta} \pmod p$ and $\mathfrak p = [p, (b + \sqrt{\delta})/2]$ when $4p ~|~ b^2 - \Delta$.  Algorithm \ref{alg:prime} gives pseudo-code.
+where $\mathcal N(\mathfrak a) = s^2a$ is the norm of $\mathfrak a$ and is multiplicative. When $\OO_\Delta$ is maximal, all ideals of $\OO_\Delta$ are invertible.
 
-% PRIME 
+% PRIME
+\bigbreak
 \begin{algorithm}[h]
 \caption{Prime Ideal}
 \label{alg:prime}
@@ -177,11 +183,11 @@ and it follows that either $s=p$ and $a=1$, or $s=1$ and $a=p$.  In the first ca
 \end{algorithmic}
 \end{algorithm}
 
-The following details of ideals are summarized from \cite[pp.14,15]{Jacobson1999} and \cite[p.88]{Jacobson2009}. An ideal $\mathfrak{a}$ generated by a single element $\alpha \in \OO$ is \emph{principal}, and is written $\mathfrak{a} = \alpha \OO_\Delta = (\alpha)$.  Two ideals $\mathfrak a$ and $\mathfrak b$ are equivalent if there exists $\alpha, \beta \in \OO_\Delta$ such that $\alpha \beta \neq 0$ and $(\alpha)\mathfrak a = (\beta) \mathfrak b$ \cite[p.88]{Jacobson2009}. We denote by $[\mathfrak a]$ the \emph{ideal class} of all ideals equivalent to $\mathfrak a$. The \emph{identity} ideal is $\OO_\Delta = [1, f\omega_0]$ since $\mathfrak a = \mathfrak a \OO_\Delta = \OO_\Delta \mathfrak a$.  An ideal $\mathfrak a = s[a, (b+\sqrt{\Delta})/2]$ is \emph{invertible} if there exists an ideal $\mathfrak b$ such that $\mathfrak a \mathfrak b = [\OO_\Delta]$, and an ideal $\mathfrak b$ exists when $\gcd(a, b, (b^2-\Delta)/(4a)) = 1$ \cite[p.14]{Jacobson1999}. The inverse is given by \cite[pp.14,15]{Jacobson1999}
+Prime ideals allow us to easily create an ideal.  For a prime ideal $\mathfrak p \in \OO_\Delta$ it can be shown (\cite[p.19]{Jacobson1999}) that $\mathfrak p \cap \ZZ = p\ZZ$ for some prime integer $p \in \ZZ$. Let
 \[
-	{\mathfrak a}^{-1} = \frac{s}{\mathcal N(\mathfrak a)} \left[a, \frac{-b+\sqrt{\Delta}}{2} \right]
+	\mathfrak p = s\left[a, \frac{b + \sqrt{\Delta}}{2}\right]
 \]
-where $\mathcal N(\mathfrak a) = s^2a$ is the norm of $\mathfrak a$ and is multiplicative. When $\OO_\Delta$ is maximal, all ideals of $\OO_\Delta$ are invertible.
+and it follows that either $s=p$ and $a=1$, or $s=1$ and $a=p$.  In the first case $\mathfrak p = p\OO_\Delta$, while in the second case $b = \pm \sqrt{\Delta} \pmod p$ and $\mathfrak p = [p, (b + \sqrt{\delta})/2]$ when $4p ~|~ b^2 - \Delta$.  Algorithm \ref{alg:prime} gives pseudo-code.
 
 
 %%%%%%%%%%%%%%%%%%%%%
@@ -190,18 +196,21 @@ where $\mathcal N(\mathfrak a) = s^2a$ is the norm of $\mathfrak a$ and is multi
 \bigbreak
 \section{Ideal Class Group}
 
-The \emph{ideal class group}, $Cl_\Delta$, is the set of all equivalence classes of invertible $\OO$-ideals.  The group operation is defined as the product of two class representatives.  In \ref{subsec:reduction}, we state what it is for an ideal to be in reduced form, and in subsection \ref{subsec:idealMultiply}, we show how to multiply two reduced class representatives, and then in \ref{subsec:nucomp} we discuss how to perform multiplication such that the result is a reduced or almost reduced representative.  We then extend this to the case of computing the square (\ref{subsec:nudupl}) and cube (\ref{subsec:nucube}) of an ideal class.  Finally, in section \ref{section:computerRepresentation} (TODO) we give a concrete representation of the ideal class group of imaginary quadratic fields and the operations on the elements of this group. 
+The \emph{ideal class group}, $Cl_\Delta$, is the set of all equivalence classes of invertible $\OO$-ideals, with the group operation defined as the product of class representatives.  In \ref{subsec:reduction}, we state what it is for an ideal to be in reduced form, and in subsection \ref{subsec:idealMultiply}, we show how to multiply two reduced class representatives, and then in \ref{subsec:nucomp} we discuss how to perform multiplication such that the result is a reduced or almost reduced representative.  We then extend this to the case of computing the square (\ref{subsec:nudupl}) and cube (\ref{subsec:nucube}) of an ideal class.  Finally, in section \ref{section:computerRepresentation} (TODO) we give a concrete representation of the ideal class group of imaginary quadratic fields and the operations on the elements of this group. 
 
 %%%%%%%%%%%%%
 % REDUCTION %
 %%%%%%%%%%%%%
 \subsection{Reduced Representatives}
 \label{subsec:reduction}
+
+Recall that two ideals $\mathfrak a$ and $\mathfrak b$ are said to be equivalent if there exists principal ideals $(\alpha)$ and $(\beta)$ such that $(\alpha)\mathfrak a = (\beta)\mathfrak b$.  An ideal class $[\mathfrak a]$ is the set of all ideals that are equivalent to $\mathfrak a$.  Here, an identity $\mathfrak a$ is said to be a \emph{representative} for the ideal class $[\mathfrak a]$. Typically we work with reduced representatives, since the size of the generators are smaller, which makes arithmetic faster.
+
 \begin{defn}
-Let $\mathfrak{a} = [a, (b+\sqrt{\Delta})/2]$ be a primitive $\OO$-ideal. Then $\mathfrak{a}$ is \emph{reduced} when $-a < b \le a$ \cite[p.13]{Jacobson1999}.
+Let $\Delta < 0$, let $\mathfrak{a} = [a, (b+\sqrt{\Delta})/2]$ be a primitive $\OO$-ideal, and let $c=(b^2 - \Delta)/4a$. The ideal $\mathfrak{a}$ is said to be \emph{reduced} when $-a < b \le a < c$ or when $0 \le b \le a = c$ \cite[p.241]{Crandall2000}.
 \end{defn}
 
-Suppose $\mathfrak a = [a, (b + \sqrt\Delta)/2]$. The following will compute a reduced representative of the ideal class $[\mathfrak a]$.  Let $c = (b^2 - \Delta)/4a$.  If $a > c$ compute ${\mathfrak a}^{-1}$ by swapping $a$ and $c$ and letting $b = -b$.  Since $b$ is unique $\bmod{~2a}$, we reduce $b \bmod{2a}$ and repeat while $\mathfrak a$ is not reduced.  Pseudo-code is given in Algorithm \ref{alg:reduce}. (TODO: Justify that this is correct, and cite the routine).
+Suppose $\mathfrak a = [a, (b + \sqrt\Delta)/2]$. We use the following method to compute a reduced representative of the ideal class $[\mathfrak a]$.  Let $c = (b^2 - \Delta)/4a$.  If $a > c$ compute ${\mathfrak a}^{-1}$ by swapping $a$ and $c$ and letting $b = -b$.  Since $b$ is unique $\bmod{~2a}$, we reduce $b \bmod{2a}$ and repeat while $\mathfrak a$ is not reduced.  Pseudo-code is given in Algorithm \ref{alg:reduce}. (TODO: Justify that this is correct, and cite the routine).
 
 % REDUCE
 \begin{algorithm}[h]
