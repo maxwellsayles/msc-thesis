@@ -383,9 +383,11 @@ We then compute
 	M_1 &= \frac{R_i a_2 + sC_i(b_1-b_2)/2}{a_1}  \in \ZZ, &
 	M_2 &= \frac{R_i (b_1+b_2)/2 - s C_i c_2}{a_1} \in \ZZ, \\
 	a &= (-1)^{i+1} (R_i M_1  - C_i M_2), &
-	b &\equiv \frac{R_i a_2 /s + C_{i-1} a}{C_i} - b_2 \pmod{2a}
+	b &\equiv \frac{2(R_i a_2 /s - C_{i-1} a)}{C_i} - b_2 \pmod{2a}
 \end{align*}
-for the reduced or almost reduced product $\mathfrak a \mathfrak b = [a, (b + \sqrt\Delta)/2]$.  Note that this procedure assumes that $\mathcal N(\mathfrak a) \ge \mathcal N(\mathfrak b)$ and that if $a_1 < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4}$ then $R_{-1}$ and $R_{-2}$ satisfy Equation \ref{eq:nucompBound} and we compute the product $\mathfrak a \mathfrak b$ as in the previous subsection without expanding the simple continued fraction $sU/a_1$.  We give pseudocode for the complete product in Algorithm \ref{alg:nucomp}. Some optimizations include reducing both $a_1$ and $a_2$ by $s$ throughout, and since the $\gcd(a_1, a_2)$ is often equal to 1, we only need compute the three part $\gcd$ when $\gcd(a_1, a_2) \neq 1$.
+for the reduced or almost reduced product $\mathfrak a \mathfrak b = [a, (b + \sqrt\Delta)/2]$.  Note that this procedure assumes that $\mathcal N(\mathfrak a) \ge \mathcal N(\mathfrak b)$ and that if $a_1 < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4}$ then $R_{-1}$ and $R_{-2}$ satisfy Equation \ref{eq:nucompBound} and we compute the product $\mathfrak a \mathfrak b$ as in the previous subsection without expanding the simple continued fraction $sU/a_1$.
+
+Our implementation of fast ideal multiplication includes some optimizations on the above technique.  Equation \ref{eq:idealProductS} requires that we compute $\gcd(a_1, a_2, (b_1 + b_2)/2)$. Since $\gcd(a_1, a_2)$ is often equal to 1, we only need to compute $\gcd(a_1, a_2, (b_1 + b_2)/2)$ when $\gcd(a_1, a_2) \neq 1$. Also, by Equation \ref{eq:idealProductS}, we have that $s ~|~ a_1$ and $s ~|~ a_2$, so we reduce both $a_1$ and $a_2$ by $s$ throughout. We give pseudocode in Algorithm \ref{alg:nucomp}. 
 
 % NUCOMP
 \begin{algorithm}[h]
@@ -394,11 +396,15 @@ for the reduced or almost reduced product $\mathfrak a \mathfrak b = [a, (b + \s
 \begin{algorithmic}[1]
 \REQUIRE Reduced representatives $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$, $\mathfrak b = [a_2, (b_2+\sqrt\Delta)/2]$ with \break $c_1 = ({b_1}^2-\Delta)/4a_1$, $c_2 = ({b_2}^2-\Delta)/4a_2$, and discriminant $\Delta$.
 \ENSURE A reduced or almost reduced representative $\mathfrak a \mathfrak b$.
-\STATE compute $s, Y, V, W \in \ZZ$ \\
-       such that $s = \gcd(a_1, a_2, (b_1+b_2)/2)$ \\
-       and $s = Ya_1 + Va_2 + W (b_1+b_2)/2$
-\STATE $(a_1, a_2) \gets (a_1/s, a_2/s)$
-\STATE $U \gets (V(b_1-b_2)/2 + Wc_2) \bmod{a_1}$
+\STATE ensure $\mathcal N(\mathfrak a) < \mathcal N(\mathfrak b)$ by swapping $\mathfrak a$ with $\mathfrak b$ if $a_1 < a_2$
+\STATE $g \gets \gcd(a_1, a_2)$ such that $g = Ya_1 + Va_2$ for $Y, V \in \ZZ$
+\STATE $s \gets 1$
+\STATE $U \gets V(b_1 - b_2)/2 \bmod a_1$
+\IF {$g \neq 1$}
+	\STATE $s \gets \gcd(g, (b_1 + b_2)/2)$ such that $s = V'g + W(b_1 + b_2)/2$ for $V', W \in \ZZ$
+	\STATE $(a_1, a_2) \gets (a_1/s, a_2/s)$
+	\STATE $U \gets (V'U - Wc_2) \bmod a_1$
+\ENDIF
 \IF {$a_1 < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4}$}
 	\STATE $a \gets a_1a_2$
 	\STATE $b \gets (2a_2U + b_2) \bmod{2a}$
@@ -412,7 +418,7 @@ $C_i=C_{i-2}-q_i C_{i-1}$
 \STATE $M_1 \gets (R_i a_2 + C_i(b_1-b_2)/2)/a_1$
 \STATE $M_2 \gets (R_i (b_1+b_2)/2 -sC_i c_2)/a_1$
 \STATE $a \gets (-1)^{i+1}(R_i M_1 - C_i M_2)$
-\STATE $b \gets (((R_i a_2 + C_{i-1} a)/C_i) - b_2) \bmod{2a}$
+\STATE $b \gets ((2(R_i a_2 - C_{i-1} a)/C_i) - b_2) \bmod{2a}$
 \RETURN $[a, (b+\sqrt\Delta)/2]$
 \end{algorithmic}
 \end{algorithm}
@@ -426,7 +432,7 @@ $C_i=C_{i-2}-q_i C_{i-1}$
 When the two input ideals for multiplication are the same, as is the case when squaring, much of the arithmetic simplifies.  For reduced ideals $\mathfrak a = [a_1, (b_1 + \sqrt\Delta)/2]$ and $\mathfrak b = [a_2, (b_2 + \sqrt\Delta)/2]$, we have $a_1=a_2$ and $b_1=b_2$.  Equations \ref{eq:idealProductS} and \ref{eq:idealProductU} simplify to
 \begin{align*}
 	s &= \gcd(a_1, b_1) = Xa_1 + Yb_1 \\
-	U &= Yc_1.
+	U &= -Yc_1 \bmod (a_1/s).
 \end{align*}
 We then compute the continued fraction expansion of $sU/a_1$, but on the bound
 \[
@@ -437,9 +443,31 @@ Computing the ideal class representative simplifies as well -- we have
 	M_1 &= R_i, & 
 	M_2 &= \frac{R_i b_1 - sC_i c_1}{a_1}, \\
 	a &= (-1)^{i+1}({R_i}^2 - C_i M_2), &
-	b &\equiv \frac{R_i a_1/s  + C_{i-1} a}{C_i} \pmod{2a}.
+	b &\equiv \frac{2(R_i a_1/s  - C_{i-1} a)}{C_i} - b_1 \pmod{2a}.
 \end{align*}
 As before, the representative $[a, (b+\sqrt\Delta)/2]$ is either reduced or almost reduced.  \break Pseudocode for our implementation is given in algorithm \ref{alg:nudupl}.
+
+\begin{algorithm}[h]
+\caption{NUDUPL. Simplified from NUCOMP \ref{alg:nucomp}.}
+\label{alg:nudupl}
+\begin{algorithmic}[1]
+\REQUIRE Reduced representative $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$ \\
+         with $c_1 = ({b_1}^2-\Delta)/4a_1$ and discriminant $\Delta$.
+\ENSURE A reduced or almost reduced representative $\mathfrak a^2$.
+\STATE $s \gets \gcd(a_1, b_1)$ such that $g = Xa_1 + Yb_1$ for $X,Y \in \ZZ$
+\STATE $a_1 \gets a_1/s$
+\STATE $U \gets -Yc_1 \bmod a_1$
+\STATE $\matrixtt{R_{-2}}{R_{-1}}{C_{-2}}{C_{-1}} \gets \matrixtt{U}{a_1}{-1}{0}$
+\STATE Find $i$ such that $R_i < |\Delta/4|^{1/4} < R_{i-1}$ using the recurrences: \\
+$q_i = \floor{R_{i-2}/R_{i-1}}$ \\
+$R_i = R_{i-2}-q_i R_{i-1}$ \\
+$C_i=C_{i-2}-q_i C_{i-1}$
+\STATE $M_2 \gets (R_i b_1 -sC_i c_1)/a_1$
+\STATE $a \gets (-1)^{i+1}({R_i}^2 - C_i M_2)$
+\STATE $b \gets (2(R_i a_1 + C_{i-1} a)/C_i) \bmod{2a}$
+\RETURN $[a, (b+\sqrt\Delta)/2]$
+\end{algorithmic}
+\end{algorithm}
 
 
 %%%%%%%%%%
@@ -447,7 +475,7 @@ As before, the representative $[a, (b+\sqrt\Delta)/2]$ is either reduced or almo
 %%%%%%%%%%
 \subsection{Fast Ideal Cubing (NUCUBE)}\label{subsec:nucube}
 
-When we consider binary-ternary representations of exponents, cubing becomes essential.  In general, if we want to compute ${\mathfrak a}^3$ for an ideal class representative $\mathfrak a = [a, (b+\sqrt\Delta)/2]$, we can take advantage of the simplification that happens when expanding the computation of ${\mathfrak a}^2 \mathfrak a$.  Here we provide a high level description of a technique for cubing based on similar ideas to NUCOMP and NUDUPL, namely that of computing the quotients of a continued fraction expansion useful to computing a reduced ideal representative.  A detailed description and analysis of this technique can be found in \cite{Ijs2010}.
+When we consider binary-ternary representations of exponents, cubing is required.  In general, if we want to compute ${\mathfrak a}^3$ for an ideal class representative $\mathfrak a = [a, (b+\sqrt\Delta)/2]$, we can take advantage of the simplification that happens when expanding the computation of ${\mathfrak a}^2 \mathfrak a$.  Here we provide a high level description of a technique for cubing based on similar ideas to NUCOMP and NUDUPL, namely that of computing the quotients of a continued fraction expansion useful to computing a reduced ideal representative.  A detailed description and analysis of this technique can be found in \cite{Ijs2010}.
 
 An algorithm for ideal cubing in quadratic number fields is given as algorithm \ref{alg:idealCube} and is modified from \cite[Appendix A, Algorithm 5]{Ijs2010} so as to conform to the conventions used in this thesis. To modify this algorithm to compute an almost reduced ideal, as in NUCOMP, we check before step 13 if $L < \sqrt{|a_1|} ~ |\Delta/4|^{1/4}$.  If so, we complete the cube as in algorithm \ref{alg:idealCube}.  Otherwise, as in NUCOMP and NUCUBE, we compute the continued fraction expansion of $L/K = \langle q_0, q_1, \dots, q_i, \phi_{i+1}\rangle$ for $i$ such that
 \[
