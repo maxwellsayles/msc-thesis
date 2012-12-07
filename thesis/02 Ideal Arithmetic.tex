@@ -239,7 +239,7 @@ A primitive ideal $\mathfrak{a} = [a, (b+\sqrt{\Delta})/2]$ with $\Delta < 0$ is
 \end{algorithmic}
 \end{algorithm}
 
-In an imaginary quadratic field, every ideal class contains exactly one reduced ideal \cite[p.20]{Ramachandran2006}.  There are several algorithms to compute a reduced ideal, many of which are listed in \cite{Jacobson2006}.  Here we present the algorithm we used in our experiments.  We adapt the work presented on \cite[p.90]{Jacobson2006} and \cite[p.99]{Jacobson2009}. If $\mathfrak a = [a, (b + \sqrt\Delta)/2]$ is a primitive ideal then 
+In an imaginary quadratic field, every ideal class contains exactly one reduced ideal \cite[p.20]{Ramachandran2006}.  There are several algorithms to compute a reduced ideal, many of which are listed in \cite{Jacobson2006}.  Here we present the algorithm we use.  We adapt the work presented on \cite[p.90]{Jacobson2006} and \cite[p.99]{Jacobson2009}. If $\mathfrak a = [a, (b + \sqrt\Delta)/2]$ is a primitive ideal then 
 \begin{equation}
 \label{eq:idealInverse}
 	\mathfrak b = \left[ -\mathcal N((b + \sqrt\Delta)/2)/a, -(b - \sqrt\Delta)/2 \right]
@@ -461,9 +461,9 @@ As before, the representative $[a, (b+\sqrt\Delta)/2]$ is either reduced or almo
 \STATE $U \gets -Yc_1 \bmod a_1$
 \STATE $\matrixtt{R_{-2}}{R_{-1}}{C_{-2}}{C_{-1}} \gets \matrixtt{U}{a_1}{-1}{0}$
 \STATE Find $i$ such that $R_i < |\Delta/4|^{1/4} < R_{i-1}$ using the recurrences: \\
-$q_i = \floor{R_{i-2}/R_{i-1}}$ \\
-$R_i = R_{i-2}-q_i R_{i-1}$ \\
-$C_i=C_{i-2}-q_i C_{i-1}$
+       $q_i = \floor{R_{i-2}/R_{i-1}}$ \\
+       $R_i = R_{i-2}-q_i R_{i-1}$ \\
+       $C_i=C_{i-2}-q_i C_{i-1}$
 \STATE $M_2 \gets (R_i b_1 -sC_i c_1)/a_1$
 \STATE $a \gets (-1)^{i+1}({R_i}^2 - C_i M_2)$
 \STATE $b \gets (2(R_i a_1 + C_{i-1} a)/C_i) \bmod{2a}$
@@ -501,7 +501,7 @@ We then develop the simple continued fraction expansion of $sU/{a_1}^2$ until
 Finally, we can compute the reduced or almost reduced representative $\mathfrak a^3 = [a, (b + \sqrt\Delta)/2]$ using the equations
 \begin{align*}
 	M_1 &= \frac{(R_ia_1 + C_iUa_1)}{{a_1}^2}, \\
-	M_2 &= \frac{R_i(b_1 + Ua_1) - sC_ic_1)}{{a_1}^2}, \\
+	M_2 &= \frac{R_i(b_1 + Ua_1) - sC_ic_1}{{a_1}^2}, \\
 	a &= (-1)^{i+1} R_i M_1 - C_i M_2, \\
 	b &= \left( \frac{2(R_ia_1/s - C_{i-1}a)}{C_i} - b_1 \right) \bmod 2a.
 \end{align*}
@@ -523,10 +523,20 @@ As always, the ideal $[a, (b + \sqrt\Delta)/2]$ is reduced or almost reduced. Ps
 	\STATE compute $s, X$, and $Y$ such that $s = \gcd(s'a_1, {b_1}^2 - a_1c_1) = Xs'a_1 + Y({b_1}^2 - a_1c_1)$ for $s, X, Y \in \ZZ$
 	\STATE $U \gets -c_1(XY'a_1+Yb_1) \bmod {a_1}^2/s$
 \ENDIF
-\STATE $\matrixtt{R_{-2}}{R_{-1}}{C_{-2}}{C_{-1}} \gets \matrixtt{U}{{a_1}^2/s}{-1}{0}$
-\IF {$R_{-1} < \sqrt{a_1} ~ |\Delta/4|^{1/4}$}
-	\
-\STATE $b \gets b \bmod 2a$
+\IF {${a_1}^2/s < \sqrt{a_1} ~ |\Delta/4|^{1/4}$}
+	\STATE $a \gets {a_1}^3/s^2$
+	\STATE $b \gets (b_1 + 2Ua_1/s) \bmod 2a$
+	\RETURN $[a, (b+\sqrt\Delta)/2]$
+\ENDIF
+\STATE $\matrixtt{R_{-2}}{R_{-1}}{C_{-2}}{C_{-1}} \gets \matrixtt{U}{({a_1}^2/s)}{-1}{0}$
+\STATE Find $i$ such that $R_i < \sqrt{a_1} |\Delta/4|^{1/4} < R_{i-1}$ using the recurrences: \\
+       $q_i = \floor{R_{i-2}/R_{i-1}}$ \\
+       $R_i = R_{i-2}-q_i R_{i-1}$ \\
+       $C_i=C_{i-2}-q_i C_{i-1}$
+\STATE $M_1 \gets (R_ia_1 + C_iUa_1) / {a_1}^2$
+\STATE $M_2 \gets (R_i(b_1 + Ua_1) - sC_ic_1) / {a_1}^2$
+\STATE $a \gets (-1)^{i+1} R_i M_1 - C_i M_2$
+\STATE $b \gets (2(R_ia_1/s - C_{i-1}a)/C_i - b_1) \bmod 2a$
 \RETURN $[a, (b+\sqrt\Delta)/2]$
 \end{algorithmic}
 \end{algorithm}
