@@ -249,24 +249,27 @@ $C_i=C_{i-2}-q_i C_{i-1}$
 % NUDUPL %
 %%%%%%%%%%
 \begin{algorithm}[h]
-\caption{NUDUPL}
+\caption{NUDUPL. Simplified from NUCOMP (\ref{alg:nucomp}).}
 \label{alg:nudupl}
 \begin{algorithmic}[1]
-\REQUIRE Reduced representative $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$ with $c_1 = ({b_1}^2-\Delta)/4a_1$ and discriminant $\Delta$.
+\REQUIRE Reduced representative $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$ \\
+         with $c_1 = ({b_1}^2-\Delta)/4a_1$ and discriminant $\Delta$.
 \ENSURE A reduced or almost reduced representative $\mathfrak a^2$.
-\STATE $s \gets Xa_1 + Yb_1$ for $X,Y \in \ZZ$
-\STATE $U \gets Yc_1$
-\STATE $\matrixtt{R_{-2}}{R_{-1}}{C_{-2}}{C_{-1}} \gets \matrixtt{sU}{a_1}{-1}{0}$
-\STATE Find $i$ such that $R_i < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4} < R_{i-1}$ using the recurrences: \\
+\STATE $s \gets \gcd(a_1, b_1)$ such that $g = Xa_1 + Yb_1$ for $X,Y \in \ZZ$
+\STATE $a_1 \gets a_1/s$
+\STATE $U \gets -Yc_1 \bmod a_1$
+\STATE $\matrixtt{R_{-2}}{R_{-1}}{C_{-2}}{C_{-1}} \gets \matrixtt{U}{a_1}{-1}{0}$
+\STATE Find $i$ such that $R_i < |\Delta/4|^{1/4} < R_{i-1}$ using the recurrences: \\
 $q_i = \floor{R_{i-2}/R_{i-1}}$ \\
 $R_i = R_{i-2}-q_i R_{i-1}$ \\
 $C_i=C_{i-2}-q_i C_{i-1}$
 \STATE $M_2 \gets (R_i b_1 -sC_i c_1)/a_1$
 \STATE $a \gets (-1)^{i+1}({R_i}^2 - C_i M_2)$
-\STATE $b \gets ((R_i a_2/s + C_{i-1} a)/C_i) \bmod{2a}$
+\STATE $b \gets (2(R_i a_1 + C_{i-1} a)/C_i) \bmod{2a}$
 \RETURN $[a, (b+\sqrt\Delta)/2]$
 \end{algorithmic}
 \end{algorithm}
+
 
 %%%%%%%%%%
 % NUCUBE %
