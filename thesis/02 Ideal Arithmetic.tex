@@ -228,22 +228,23 @@ A primitive ideal $\mathfrak{a} = [a, (b+\sqrt{\Delta})/2]$ with $\Delta < 0$ is
 
 In an imaginary quadratic field, every ideal class contains exactly one reduced ideal \cite[p.20]{Ramachandran2006}.  There are several algorithms to compute a reduced ideal, many of which are listed in \cite{Jacobson2006}.  Here we present the algorithm we use.  We adapt the work presented on \cite[p.90]{Jacobson2006} and \cite[p.99]{Jacobson2009}. If $\mathfrak a = [a, (b + \sqrt\Delta)/2]$ is a primitive ideal then 
 \begin{equation}
-\label{eq:idealInverse}
+\label{eq:idealSwapNorm}
 	\mathfrak b = \left[ -\mathcal N((b + \sqrt\Delta)/2)/a, -(b - \sqrt\Delta)/2 \right]
 \end{equation}
 is also a primitive ideal, since it is easy to verify that
 \[
 	\left(-(b - \sqrt\Delta)/2 \right) \mathfrak a = (a) \mathfrak b.
 \]
-Simplifying Equation \ref{eq:idealInverse} we get
+Simplifying Equation \ref{eq:idealSwapNorm} we get
 \[
 	\mathfrak b = \left[ \frac{b^2-\Delta}{4a}, \frac{-b + \sqrt\Delta}{2} \right].
 \]
 Since $c = (b^2 - \Delta)/4a$ we have
-\[
+\begin{equation}
+\label{eq:idealSwapAC}
 	\mathfrak b = \left[ c, \frac{-b + \sqrt\Delta}{2} \right].
-\]
-As such, the first step is if $a > c$, we can reduce $a$ by setting $\mathfrak a = [c, (-b + \sqrt\Delta)/2]$.  Since $b$ is unique $\bmod{~2a}$, we can also reduce $b \bmod{2a}$.  We repeat these steps while $\mathfrak a$ is not reduced.  In the case that $a = c$, we use the absolute value of $b$.  Pseudo-code is given in Algorithm \ref{alg:reduce}.
+\end{equation}
+As such, the first step is if $a > c$, we can reduce $a$ by setting $\mathfrak a = [c, (-b + \sqrt\Delta)/2]$.  Since $b$ is unique $\bmod{~2a}$, we can also reduce $b \bmod{2a}$.  We repeat these steps while $\mathfrak a$ is not reduced.  In the case that $a = c$, we use the absolute value of $b$, since by Equation \ref{eq:idealSwapAC} the ideals $[a, (b + \sqrt\Delta)/2]$ and $[c, (-b+\sqrt\Delta)/2]$ are equivalent.  Pseudo-code is given in Algorithm \ref{alg:reduce}.
 
 
 %%%%%%%%%%%%%%%%%%
