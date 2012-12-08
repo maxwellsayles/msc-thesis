@@ -66,24 +66,11 @@ A focus of this thesis is arithmetic and exponentiation in the ideal class group
 %%%%%%%%%%%%%%%%%%%%%
 \section{Quadratic Numbers}
 
-Quadratic numbers are a type of algebraic number.
-
-\begin{defn}
-An \emph{algebraic number} is a root $\alpha$ of a polynomial $f(x) \in \QQ[x]$ with rational coefficients.
-\end{defn}
-
-\noindent
-Given an algebraic number $\alpha$, we can create an algebraic number field $\KK$ by adjoining $\alpha$ to the field of rationals.  We denote this $\QQ(\alpha)$. Following \cite[p.76]{Jacobson2009}, we write $\KK$ as 
-\[
-	\KK = \QQ(\alpha) = \left\{ \frac{f(\alpha)}{g(\alpha)} : f(x), g(x) \in \QQ[x]; g(\alpha) \ne 0 \right\}.
-\]
-
-\noindent
-A rational number $a/b$ for integers $a$ and $b$ is the root of a polynomial $bx-a$ where the highest degree of its terms is 1.  As such, rational numbers are degree 1 algebraic numbers. A quadratic polynomial $f(x) = ax^2 + bx + c$ with integer coefficients, is a degree 2 polynomial since the highest degree of its terms is 2.  A root $\alpha$ of $f(x)$ is a degree 2 algebraic number and is called a \emph{quadratic number}.  The roots of $f(x)$ are given by the quadratic formula
+A \emph{quadratic number} is a root $\alpha$ of a quadratic polynomial $f(x) = ax^2 + bx + c$ with integer coefficients. The roots of $f(x)$ are given by the quadratic formula
 \[
 	\alpha = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a} ~.
 \]
-The \emph{discriminant} of $f(x)$ is $\Delta = b^2 - 4ac$, and our quadratic number field $\KK$ is 
+The \emph{discriminant} of $f(x)$ is $\Delta = b^2 - 4ac$, and we can construct a quadratic number field $\KK$ as an extension field of the rational numbers $\QQ$ as
 \[
 	\KK = \QQ(\alpha) = \QQ(\sqrt{\Delta}) = \{u + v\sqrt{\Delta} : u,v \in \QQ\}.
 \]
@@ -132,7 +119,7 @@ A \emph{quadratic order} $\OO_\Delta$ of $\QQ(\sqrt\Delta)$ is a sub-ring of the
 \[
 	\left[ 1, \frac{\Delta + \sqrt{\Delta}}{2} \right] = [1, f\omega_0].
 \]
-The maximal order $\OO_\Delta = [1, \omega_0]$ of $\QQ(\sqrt\Delta_0)$ is the ring of all quadratic integers in $\QQ(\sqrt\Delta_0)$ and is maximal since any order $\OO = [1, f\omega_0]$ is a sub-ring of $\OO_\Delta$. 
+The maximal order $\OO_\Delta = [1, \omega_0]$ of $\QQ(\sqrt\Delta_0)$ is the ring of all quadratic integers in $\QQ(\sqrt\Delta_0)$.  This order is maximal since any other order $\OO = [1, f\omega_0]$ is a sub-ring of $\OO_\Delta$. 
 \end{thm}
 
 
@@ -154,7 +141,7 @@ When $\OO_\Delta = [1, f\omega_0]$ is the order of a quadratic field, a non-zero
 \[
 	\mathfrak a = s\left[a, \frac{b+\sqrt{\Delta}}{2} \right]
 \]
-for $s, a, b \in \ZZ, s > 0, a > 0$, and $b$ is unique $\bmod ~2a$ \cite[p.86]{Jacobson2009}. When $s = 1$ the ideal $\mathfrak a$ is \emph{primitive}.
+for $s, a, b \in \ZZ, s > 0, a > 0$, and $b$ is unique $\bmod ~2a$ \cite[p.86]{Jacobson2009}. When $s = 1$, the ideal $\mathfrak a$ is \emph{primitive}.
 \end{thm}
 
 The \emph{identity} ideal is $\OO_\Delta = [1, f\omega_0]$ since $\mathfrak a = \mathfrak a \OO_\Delta = \OO_\Delta \mathfrak a$ \cite{Cohn1980}. An ideal $\mathfrak a = s[a, (b+\sqrt{\Delta})/2]$ is \emph{invertible} if there exists an ideal $\mathfrak b$ such that $\mathfrak a \mathfrak b = \OO_\Delta$, and an ideal $\mathfrak b$ exists when $\gcd(a, b, (b^2-\Delta)/(4a)) = 1$ \cite[p.14]{Jacobson1999}. The inverse is given by \cite[pp.14,15]{Jacobson1999}
@@ -167,7 +154,7 @@ Prime ideals allow us to easily create an ideal.  For a prime ideal $\mathfrak p
 \[
 	\mathfrak p = s\left[a, \frac{b + \sqrt{\Delta}}{2}\right]
 \]
-and it follows that either $s=p$ and $a=1$, or $s=1$ and $a=p$.  In the first case $\mathfrak p = p\OO_\Delta$, while in the second case $b = \pm \sqrt{\Delta} \pmod p$ and $\mathfrak p = [p, (b + \sqrt{\delta})/2]$ when $4p ~|~ b^2 - \Delta$.  Algorithm \ref{alg:prime} gives pseudo-code.
+and it follows that either $s=p$ and $a=1$, or $s=1$ and $a=p$.  In the first case $\mathfrak p = p\OO_\Delta$, while in the second case $b = \pm \sqrt{\Delta} \pmod p$ and $\mathfrak p = [p, (b + \sqrt{\Delta})/2]$ when $4p ~|~ b^2 - \Delta$.  Algorithm \ref{alg:prime} gives pseudo-code.
 
 % PRIME
 \bigbreak
@@ -200,9 +187,9 @@ Two ideals $\mathfrak a$ and $\mathfrak b$ are \emph{equivalent} if there exists
 
 Recall that two ideals $\mathfrak a$ and $\mathfrak b$ are equivalent if there exists principal ideals $(\alpha)$ and $(\beta)$ such that $(\alpha)\mathfrak a = (\beta)\mathfrak b$.  An ideal class $[\mathfrak a]$ is the set of all ideals that are equivalent to $\mathfrak a$. As such, an ideal $\mathfrak a$ is a \emph{representative} for the ideal class $[\mathfrak a]$. The \emph{ideal class group}, $Cl_\Delta$, is the set of all equivalence classes of invertible $\OO$-ideals, with the group operation defined as the product of class representatives.
 
-Our implementation of ideal arithmetic represents an ideal as $\mathfrak a = [a, (b + \sqrt\Delta)/2]$ where $\mathfrak a$ is primitive.  Additionally, we carry around the value $c = (b^2 - \Delta)/4a$.  Specifically, we represent an ideal class as the triple $(a, b, c)$ and we represent the class group by the discriminant $\Delta$. Since an ideal class contains an infinitude of ideals, we work with reduced representatives.  This also makes arithmetic faster, since the size of generators are typically smaller.
+Our implementation of ideal arithmetic represents an ideal as $\mathfrak a = [a, (b + \sqrt\Delta)/2]$ where $\mathfrak a$ is primitive.  Additionally, we carry around the value $c = (b^2 - \Delta)/4a$.  We represent the class group by the discriminant $\Delta$. Since an ideal class contains an infinitude of ideals, we work with reduced representatives.  This also makes arithmetic faster, since the size of generators are typically smaller.
 
-In Subsection \ref{subsec:reduction}, we state what it is for an ideal to be in reduced form, and in subsection \ref{subsec:idealMultiply}, we show how to multiply two reduced class representatives. In Subsection \ref{subsec:nucomp} we discuss how to perform multiplication such that the result is a reduced or almost reduced representative, and we then extend this to the case of computing the square (\ref{subsec:nudupl}) and cube (\ref{subsec:nucube}) of an ideal class.  
+In Subsection \ref{subsec:reduction}, we state what it is for an ideal to be in reduced form, and in subsection \ref{subsec:idealMultiply}, we show how to multiply two reduced class representatives. In Subsection \ref{subsec:nucomp} we discuss how to perform multiplication such that the result is a reduced or almost reduced representative, and then extend this to the case of computing the square (\ref{subsec:nudupl}) and cube (\ref{subsec:nucube}) of an ideal class.  
 
 
 %%%%%%%%%%%%%
@@ -248,15 +235,15 @@ is also a primitive ideal, since it is easy to verify that
 \[
 	\left(-(b - \sqrt\Delta)/2 \right) \mathfrak a = (a) \mathfrak b.
 \]
-Simplifying Equation \ref{eq:idealInverse} we get:
+Simplifying Equation \ref{eq:idealInverse} we get
 \[
 	\mathfrak b = \left[ \frac{b^2-\Delta}{4a}, \frac{-b + \sqrt\Delta}{2} \right].
 \]
-Since $c = (b^2 - \Delta)/4a$ we have:
+Since $c = (b^2 - \Delta)/4a$ we have
 \[
 	\mathfrak b = \left[ c, \frac{-b + \sqrt\Delta}{2} \right].
 \]
-Since $b$ is unique $\bmod{~2c}$, we reduce $b \bmod{2c}$ and repeat while $\mathfrak a$ is not reduced.  Pseudo-code is given in Algorithm \ref{alg:reduce}.
+As such, the first step is if $a > c$, we can reduce $a$ by setting $\mathfrak a = [c, (-b + \sqrt\Delta)/2]$.  Since $b$ is unique $\bmod{~2a}$, we can also reduce $b \bmod{2a}$.  We repeat these steps while $\mathfrak a$ is not reduced.  In the case that $a = c$, we use the absolute value of $b$.  Pseudo-code is given in Algorithm \ref{alg:reduce}.
 
 
 %%%%%%%%%%%%%%%%%%
@@ -265,48 +252,48 @@ Since $b$ is unique $\bmod{~2c}$, we reduce $b \bmod{2c}$ and repeat while $\mat
 \subsection{Multiplication of Ideal Classes}
 \label{subsec:idealMultiply}
 
-The ideal class group operation is multiplication of ideal class representatives. Given two representative ideals $\mathfrak a = [a_1, (b_1 + \sqrt{\Delta})/2]$ and $\mathfrak b = [a_2, (b_2 + \sqrt{\Delta})/2]$ in reduced form, the (non-reduced) product $\mathfrak a \mathfrak b$ can computed using:
+The ideal class group operation is multiplication of ideal class representatives. Given two representative ideals $\mathfrak a = [a_1, (b_1 + \sqrt{\Delta})/2]$ and $\mathfrak b = [a_2, (b_2 + \sqrt{\Delta})/2]$ in reduced form, the (non-reduced) product $\mathfrak a \mathfrak b$ can computed using
 \begin{align}
-	c_2 & = ({b_2}^2-\Delta)/4a_2 \\
-	s & = \gcd(a_1, a_2, (b_1+b_2)/2) = Ya_1 + Va_2 + W(b_1+b_2)/2    \label{eq:idealProductS} \\
-	U & = (V(b_1-b_2)/2 - Wc_2) \bmod{(a_2/s)}                        \label{eq:idealProductU} \\
-	a & = (a_1a_2)/s^2                                                \label{eq:idealProductA} \\
-	b & = (b_2 + 2Ua_2/s) \bmod{2a}                                   \label{eq:idealProductB} \\
+	c_2 & = ({b_2}^2-\Delta)/4a_2, \\
+	s & = \gcd(a_1, a_2, (b_1+b_2)/2) = Ya_1 + Va_2 + W(b_1+b_2)/2,    \label{eq:idealProductS} \\
+	U & = (V(b_1-b_2)/2 - Wc_2) \bmod{(a_1/s)},                        \label{eq:idealProductU} \\
+	a & = (a_1a_2)/s^2,                                                \label{eq:idealProductA} \\
+	b & = (b_2 + 2Ua_2/s) \bmod{2a},                                   \label{eq:idealProductB} \\
 	\mathfrak a \mathfrak b & = s\left[a, \frac{b + \sqrt{\Delta}}{2}\right].
 \end{align}
 
 The remainder of this subsection is used to derive the above equations.  We adapt much of the presentation given in \cite[pp.117,118]{Jacobson2009}. Component-wise multiplication of $\mathfrak a$ and $\mathfrak b$ give us
 \begin{equation}
-\begin{split}
-	\mathfrak{a} \mathfrak{b} & = \left[ a_1a_2, a_1 \frac{b_2 + \sqrt{\Delta}}{2}, a_2 \frac{b_1 + \sqrt{\Delta}}{2}, \frac{b_1 + \sqrt{\Delta}}{2} \times \frac{b_2 + \sqrt{\Delta}}{2} \right] \\
-	& = \left[ a_1a_2, \frac{a_1b_2 + a_1\sqrt{\Delta}}{2}, \frac{a_2b_1 + a_2\sqrt{\Delta}}{2}, \frac{b_1b_2 + (b_1+b_2)\sqrt{\Delta} + \Delta}{4} \right] \label{eq:productExpanded}
-\end{split}
+\label{eq:productExpanded}
+\mathfrak{a} \mathfrak{b} =
+\left[ a_1a_2, \frac{a_1b_2 + a_1\sqrt{\Delta}}{2}, \frac{a_2b_1 + a_2\sqrt{\Delta}}{2}, \frac{b_1b_2 + (b_1+b_2)\sqrt{\Delta} + \Delta}{4} \right].
 \end{equation}
 
 \noindent
 By the multiplicative property of the norm we have
-\begin{eqnarray*}
-	&& s^2a = N(\mathfrak{a}\mathfrak{b}) = N(\mathfrak{a})N(\mathfrak{b}) = a_1 a_2 \\
-	& \Rightarrow & a = \frac{a_1a_2}{s^2},
-\end{eqnarray*}
+\begin{align*}
+	& N(\mathfrak{a}\mathfrak{b}) = s^2a = N(\mathfrak{a})N(\mathfrak{b}) = a_1 a_2 \\
+	\Rightarrow~ & a = \frac{a_1a_2}{s^2},
+\end{align*}
 which gives us Equation \ref{eq:idealProductA}. Now, by the second term of equation \eqref{eq:productExpanded} we know that $(a_1b_2 + a_1\sqrt{\Delta})/2 \in \mathfrak{a}\mathfrak{b}$.  It follows that there is some $x,y \in \ZZ$ such that
 \[
 	\frac{a_1b_2 + a_1\sqrt{\Delta}}{2} = xsa + ys\left(\frac{b+\sqrt{\Delta}}{2}\right).
 \]
 Equating irrational parts we have
 \begin{equation*}
-	\frac{a_1\sqrt{\Delta}}{2} = \frac{ys\sqrt{\Delta}}{2}
+	\frac{a_1\sqrt{\Delta}}{2} = \frac{ys\sqrt{\Delta}}{2}.
 \end{equation*}
 \noindent
-Hence, $s ~|~ a_1$.  Similarly, by the third and fourth terms of equation \eqref{eq:productExpanded} we have $(a_2b_1+a_2\sqrt{\Delta})/2 \in \mathfrak{a}\mathfrak{b}$ which implies that $s~|~a_2$ and $(b_1b_2 + (b_1+b_2)\sqrt{\Delta} + \Delta)/4 \in \mathfrak{a}\mathfrak{b}$ which implies that $s~|~(b_1+b_2)/2$. 
+Hence, $s ~|~ a_1$.  Similarly, by the third and fourth terms of equation \eqref{eq:productExpanded} we have $(a_2b_1+a_2\sqrt{\Delta})/2 \in \mathfrak{a}\mathfrak{b}$, which implies that $s~|~a_2$, and $(b_1b_2 + (b_1+b_2)\sqrt{\Delta} + \Delta)/4 \in \mathfrak{a}\mathfrak{b}$, which implies that $s~|~(b_1+b_2)/2$. 
 
-By the second generator $s(b+\sqrt\Delta)/2$ of $\mathfrak{a}\mathfrak{b}$ and the entire right hand side of equation \eqref{eq:productExpanded} there exists $X, Y, V, W \in \ZZ$ such that
+By the second generator, $s(b+\sqrt\Delta)/2$, of $\mathfrak{a}\mathfrak{b}$ and the entire right hand side of equation \eqref{eq:productExpanded} there exists $X, Y, V, W \in \ZZ$ such that
+\[
+\frac{sb+s\sqrt\Delta}{2} = Xa_1a_2 + Y\frac{a_1b_2+a_1\sqrt\Delta}{2} + V\frac{a_2b_1 + a_2\sqrt{\Delta}}{2} + W\frac{b_1b_2 + (b_1+b_2)\sqrt{\Delta} + \Delta}{4}.
+\]
+Grouping rational and irrational parts, we have
 \begin{equation}
 \label{eq:productSecond}
-\begin{split}
-	\frac{sb+s\sqrt\Delta}{2} & = Xa_1a_2 + Y\frac{a_1b_2+a_1\sqrt\Delta}{2} + V\frac{a_2b_1 + a_2\sqrt{\Delta}}{2} + W\frac{b_1b_2 + (b_1+b_2)\sqrt{\Delta} + \Delta}{4} \\
-	& = Xa_1a_2 + Y\frac{a_1b_2}{2} + V\frac{a_2b_1}{2} + W\frac{b_1b_2 + \Delta}{4} + \left(Y\frac{a_1}{2} + V\frac{a_2}{2} + W\frac{b_1+b_2}{4}\right)\sqrt\Delta. 
-\end{split}
+\frac{sb+s\sqrt\Delta}{2} = \left( Xa_1a_2 + Y\frac{a_1b_2}{2} + V\frac{a_2b_1}{2} + W\frac{b_1b_2 + \Delta}{4} \right) + \left(Y\frac{a_1}{2} + V\frac{a_2}{2} + W\frac{b_1+b_2}{4}\right)\sqrt\Delta. 
 \end{equation}
 
 \noindent
@@ -341,11 +328,11 @@ Substituting into equation \eqref{eq:bMod2a} we get
 	& \equiv b_2 + V\frac{2a_2(b_1-b_2)}{2s} + W\frac{2a_2(\Delta - {b_2}^2)}{2a_2 \cdot 2s} && \pmod{2a} \\
 	& \equiv b_2 + \frac{2a_2}{s} \left( V\frac{b_1-b_2}{2} + W\frac{\Delta - {b_2}^2}{4a_2} \right) && \pmod{2a}.
 \end{alignat*}
-Let $c_2 = ({b_2}^2 - \Delta)/4a_2$ and $U = (V(b_1-b_2)/2 - Wc_2) \bmod{(a_2/s)}$ and we have
+Let $c_2 = ({b_2}^2 - \Delta)/4a_2$ and $U = (V(b_1-b_2)/2 - Wc_2) \bmod{(a_1/s)}$ and we have
 \[
 	b \equiv b_2 + \frac{2a_2}{s} U \pmod{2a},
 \]
-which completes the derivation of Equation \ref{eq:idealProductB}.
+which completes the derivation of Equation \ref{eq:idealProductB}.  Note that the product ideal $\mathfrak a \mathfrak b$ is not a reduced representative and that the storage needed can be as much as twice that of the ideal factors $\mathfrak a$ and $\mathfrak b$.
 
 
 %%%%%%%%%%
@@ -374,7 +361,7 @@ until we have $R_i$ and $R_{i-1}$ such that
 \label{eq:nucompBound}
 	R_i < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4} < R_{i-1}.
 \end{equation}
-Initial values for the recurrence are given by:
+Initial values for the recurrence are given by
 \[
 	\matrixtt{R_{-2}}{R_{-1}}{C_{-2}}{C_{-1}} = \matrixtt{sU}{a_1}{-1}{0}.
 \]
@@ -387,7 +374,7 @@ We then compute
 \end{align*}
 for the reduced or almost reduced product $\mathfrak a \mathfrak b = [a, (b + \sqrt\Delta)/2]$.  Note that this procedure assumes that $\mathcal N(\mathfrak a) \ge \mathcal N(\mathfrak b)$ and that if $a_1 < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4}$ then $R_{-1}$ and $R_{-2}$ satisfy Equation \ref{eq:nucompBound} and we compute the product $\mathfrak a \mathfrak b$ as in the previous subsection without expanding the simple continued fraction $sU/a_1$.
 
-Our implementation of fast ideal multiplication includes some optimizations on the above technique.  Equation \ref{eq:idealProductS} requires that we compute $\gcd(a_1, a_2, (b_1 + b_2)/2)$. Since $\gcd(a_1, a_2)$ is often equal to 1, we only need to compute $\gcd(a_1, a_2, (b_1 + b_2)/2)$ when $\gcd(a_1, a_2) \neq 1$. Also, by Equation \ref{eq:idealProductS}, we have that $s ~|~ a_1$ and $s ~|~ a_2$, so we reduce both $a_1$ and $a_2$ by $s$ throughout. We give pseudo-code in Algorithm \ref{alg:nucomp}. 
+Our implementation of fast ideal multiplication includes some optimizations on the above technique.  Equation \ref{eq:idealProductS} requires that we compute $\gcd(a_1, a_2, (b_1 + b_2)/2)$. Since $\gcd(a_1, a_2)$ is often equal to 1, we only need compute $\gcd(a_1, a_2, (b_1 + b_2)/2)$ when $\gcd(a_1, a_2) \neq 1$. Also, by Equation \ref{eq:idealProductS}, we have that $s ~|~ a_1$ and $s ~|~ a_2$, so we reduce both $a_1$ and $a_2$ by $s$ throughout. Finally, the first coefficient, $Y$, from Equation \ref{eq:idealProductS} is never used, and so we do not compute it. We give pseudo-code in Algorithm \ref{alg:nucomp}. 
 
 % NUCOMP
 \begin{algorithm}[h]
@@ -424,6 +411,7 @@ $C_i=C_{i-2}-q_i C_{i-1}$
 \end{algorithmic}
 \end{algorithm}
 
+
 %%%%%%%%%%
 % NUDUPL %
 %%%%%%%%%%
@@ -459,6 +447,11 @@ As before, the representative $[a, (b+\sqrt\Delta)/2]$ is either reduced or almo
 \STATE compute $s$ and $Y$ such that $s = \gcd(a_1, b_1) = Xa_1 + Yb_1$ for $s,X,Y \in \ZZ$
 \STATE $a_1 \gets a_1/s$
 \STATE $U \gets -Yc_1 \bmod a_1$
+\IF {$a_1 < |\Delta/4|^{1/4}$}
+	\STATE $a \gets {a_1}^2$
+	\STATE $b \gets (2Ua_1 + b_1) \bmod 2a$
+	\RETURN $[a, (b + \sqrt\Delta)/2]$
+\ENDIF
 \STATE $\matrixtt{R_{-2}}{R_{-1}}{C_{-2}}{C_{-1}} \gets \matrixtt{U}{a_1}{-1}{0}$
 \STATE Find $i$ such that $R_i < |\Delta/4|^{1/4} < R_{i-1}$ using the recurrences: \\
        $q_i = \floor{R_{i-2}/R_{i-1}}$ \\
@@ -541,5 +534,6 @@ As always, the ideal $[a, (b + \sqrt\Delta)/2]$ is reduced or almost reduced. Ps
 \end{algorithmic}
 \end{algorithm}
 
+In the next chapter, we'll discuss some exponentiation techniques that make use of the ideal arithmetic presented in this chapter, namely fast multiplication, squaring, and cubing.
 
 \end{document}
