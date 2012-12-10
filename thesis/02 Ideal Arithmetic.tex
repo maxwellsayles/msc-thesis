@@ -141,7 +141,7 @@ When $\OO_\Delta = [1, f\omega_0]$ is the order of a quadratic field, a non-zero
 \[
 	\mathfrak a = s\left[a, \frac{b+\sqrt{\Delta}}{2} \right]
 \]
-for $s, a, b \in \ZZ, s > 0, a > 0$, and $b$ is unique $\bmod ~2a$ \cite[p.86]{Jacobson2009}. When $s = 1$, the ideal $\mathfrak a$ is \emph{primitive}.
+for $s, a, b \in \ZZ, s > 0, a > 0$, $\gcd(a, b, (b^2-\Delta)/4a)=1$, $b^2 \equiv \Delta \pmod{4a}$, and $b$ is unique $\bmod ~2a$ \cite[p.13]{Jacobson1999}. When $s = 1$, the ideal $\mathfrak a$ is \emph{primitive}.
 \end{thm}
 
 The \emph{identity} ideal is $\OO_\Delta = [1, f\omega_0]$ since $\mathfrak a = \mathfrak a \OO_\Delta = \OO_\Delta \mathfrak a$ \cite{Cohn1980}. An ideal $\mathfrak a = s[a, (b+\sqrt{\Delta})/2]$ is \emph{invertible} if there exists an ideal $\mathfrak b$ such that $\mathfrak a \mathfrak b = \OO_\Delta$, and an ideal $\mathfrak b$ exists when $\gcd(a, b, (b^2-\Delta)/(4a)) = 1$ \cite[p.14]{Jacobson1999}. The inverse is given by \cite[pp.14,15]{Jacobson1999}
@@ -439,7 +439,7 @@ As before, the representative $[a, (b+\sqrt\Delta)/2]$ is either reduced or almo
 
 % NUDUPL.
 \begin{algorithm}[h]
-\caption{NUDUPL -- Fast Ideal Squaring. TODO: There's a branch for non-nudupl.}
+\caption{NUDUPL -- Fast Ideal Squaring.}
 \label{alg:nudupl}
 \begin{algorithmic}[1]
 \REQUIRE Reduced representative $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$ \\
