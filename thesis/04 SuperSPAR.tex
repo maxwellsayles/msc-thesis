@@ -32,6 +32,7 @@
 
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator{\ord}{ord}
 \newcommand{\CC}{\mathbb{C}}
 \newcommand{\NN}{\mathbb{N}}
 \newcommand{\RR}{\mathbb{R}}
@@ -68,6 +69,8 @@ A contribution of this thesis is to improve the speed of arithmetic in the ideal
 %%%%%%%%
 \section{SPAR}
 
+SPAR is an integer factoring algorithm based on the idea of finding a reduced ambiguous class representative with a discriminant $\Delta$ associated with the integer to be factored.  The algorithm was published by Schnorr and Lenstra in \cite{Schnorr1984}, but was independently discovered by Atkin and Rickert who named it SPAR after Shanks, Pollard, Atkin, and Rickert \cite[p.182]{Jacobson1999}.
+
 \subsection{Ambiguous Forms and the Factorization of the Discriminant}
 
 Following \ref{Jacobson1999} we choose to represent ideals as the $\ZZ$-module
@@ -76,14 +79,14 @@ Following \ref{Jacobson1999} we choose to represent ideals as the $\ZZ$-module
 \]
 In our implementation we also carry around a third term $c = {b^2 - \Delta}{4a}$.  We can also write the discriminant $\Delta$ in terms of $a$, $b$, and $c$ as $\Delta = b^2 - 4ac$. 
 
-A binary quadratic form is a quadratic form in two variables
+The description of SPAR uses binary quadratic forms. A binary quadratic form is a quadratic form in two variables
 \[
 	f(x, y) = ax^2 + bxy + cy^2
 \]
-where $a$, $b$, and $c$ are integer coefficients.  For a given form there is a set of integers represented by $f(x, y)$ for integers $x$ and $y$. Two forms are equivalent if the sets of integers they represent are equivalent (TODO: Cite), and these sets are equivalent if and only if there exists an invertible integral linear change of variables that transforms the first form into the second form. Necessarily, two equivalent forms have the same discriminant, which is given as $\Delta = b^2 - 4ac$ and corresponds to the discriminant of our ideal.  Furthermore, as Fr\"{o}lich and Taylor \cite{Frolich1993} show, the form $ax^2 + bxy + cy^2$ is isomorphic to the primitive ideal $[a, (b + \sqrt\Delta)/2]$.  The set of all equivalent forms for a given discriminant form an equivalence class, and as shown by Gau\ss \cite{Gauss1801}, representatives of equivalence classes of forms can be composed together to form a group.  In the case of a negative discriminant, each form is equivalent to a unique reduced form \cite{Guass1801}.
+where $a$, $b$, and $c$ are integer coefficients.  For a given form there is a set of integers represented by $f(x, y)$ for integers $x$ and $y$. Two forms are equivalent if the sets of integers they represent are equivalent (TODO: cite crandall + pomerance), and these sets are equivalent if and only if there exists an invertible integral linear change of variables that transforms the first form into the second form. Necessarily, two equivalent forms have the same discriminant, which is given as $\Delta = b^2 - 4ac$ and corresponds to the discriminant of our ideal.  Furthermore, as Fr\"{o}lich and Taylor \cite{Frolich1993} show, the form $ax^2 + bxy + cy^2$ is isomorphic to the primitive ideal $[a, (b + \sqrt\Delta)/2]$.  The set of all equivalent forms for a given discriminant form an equivalence class, and as shown by Gau\ss \cite{Gauss1801}, representatives of equivalence classes of forms can be composed together to form a group, $G(\Delta)$.  In the case of a negative discriminant, each form is equivalent to a unique reduced form \cite{Guass1801}.  Since forms are isomorphic to ideals, the class group of binary quadratic forms with negative discriminant, $G(\Delta)$, is also isomorphic to the ideal class group of imaginary quadratic number fields, $Cl_\Delta$. As such, we adapt our discussion of the SPAR factoring algorithm to use the language ideal classes.
 
 \begin{defn}
-The \emph{ambiguous classes} are the classes $H$ such that $H^2$ is the identity class \cite{Schnorr1984}.  This holds for both the equivalence class of forms and the equivalence class of ideals, since these class groups are isomorphic to each other.
+The \emph{ambiguous classes} are the classes $g$ such that $g^2$ is the identity class \cite{Schnorr1984}.  This holds for both the equivalence class of forms and the equivalence class of ideals.
 \end{defn}
 
 According to \cite{Schnorr1984}, every reduced representative of an ambiguous class with negative discriminant has either $b = 0$, $a = b$, or $a = c$.  Since the discriminant is defined as $\Delta = b^2 - 4ac$, these reduced representatives correspond to a factorization of the discriminant.  We have either
@@ -92,11 +95,17 @@ According to \cite{Schnorr1984}, every reduced representative of an ambiguous cl
 \item $\Delta = b(b - 4c)$ when $a = b$, or
 \item $\Delta = (b - 2a)(b + 2a)$ when $a = c$.
 \end{itemize}
-Suppose we wish to find a factor of an odd integer $N$. Since $\Delta = b^2 - 4ac \equiv 0, 1 \pmod 4$, we set $\Delta = -N$ when $-N \equiv 1 \pmod 4$ and $\Delta = -4N$ otherwise.  This way, $\Delta \equiv 0, 1 \pmod 4$ and $\Delta < 0$. Now all we need to find a factor of $N$ is to find a reduced ambiguous class representative for the discriminant $\Delta$.
+Now suppose we wish to find a factor of an odd integer $N$. Since $\Delta = b^2 - 4ac \equiv 0, 1 \pmod 4$, we set $\Delta = -N$ when $-N \equiv 1 \pmod 4$ and $\Delta = -4N$ otherwise.  This way, $\Delta \equiv 0, 1 \pmod 4$ and $\Delta < 0$. Now all we need to find a factor of $N$ is to find a reduced ambiguous class representative for the discriminant $\Delta$.
 
-\subsection{SPAR}
+\subsection{Algorithm}
 
-Published by Schnorr and Lenstra \cite{Schnorr1984} was independently discovered by Atkin and Rickert who called it SPAR after Shanks, Pollard, Atkin, and Rickert \cite[p.182]{Jacobson1999}.
+In Chapter \ref{chap:idealArithmetic}, we show that for negative discriminant $\Delta < 0$, the ideal class group $Cl_\Delta$ has a finite number of elements.  This means that for a random element $g$ in the ideal class group, there exists an integer $m$ such that $g^m = 1$. We say that $m$ is the \emph{order} of the element $g$ and denote this $m = \ord(g)$.  When the order is even, then $h = g^{m/2}$ is an ambiguous ideal.  This follows from the fact that $h^2 = 1$.  Therefore, factoring an integer $N$ reduces to the problem of determining the order of a random element $g \in Cl_\Delta$.
+
+The SPAR algorithm works in two stages. The first stage is to pick a random element $g_0 \in Cl_\Delta$ and then exponentiate it to the product of many small prime powers.  Given the first $t$ primes $p_1 = 2, p_2 = 3, ..., p_t = m^{1/2r}$ (for $t$ and $r$ described later) and for $e_i = \max \{ v : {p_i}^v \le {p_t}^2 \}$, we compute
+\[
+	g = {g_0}^{\prod_{i=2}^t {p_i}^{e_i}}.
+\]
+We then compute $g^{2^k}$ for the smallest $k$ such that $g^{2^k} = 1$.  
 
 \pagebreak
 
