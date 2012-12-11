@@ -61,19 +61,44 @@
 \chapter{SuperSPAR}
 \label{chap:superspar}
 
-A goal of this thesis is to improve arithmetic in the ideal class group with an application to integer factoring.  In Chapter \ref{chap:idealArithmetic} we introduced the ideal class group, and in Chapter \ref{chap:exponentiation} we introduced some methods for exponentiation in generic groups.  In this chapter, we will make a connection between arithmetic in the ideal class and that of factoring an integer.  We will also introduce 
-
-Something about ambiguous ideals and their order.
-
-
-- An example of ideal exponentiation \\
-- Connection of Ambiguous Ideals to the Factorization of the Discriminant \\
+A contribution of this thesis is to improve the speed of arithmetic in the ideal class group of imaginary quadratic number fields with an application to integer factoring.  In Chapter \ref{chap:idealArithmetic} we introduced the ideal class group, and in Chapter \ref{chap:exponentiation} we introduced some methods for exponentiation in generic groups.  In this chapter, we make a connection between arithmetic in the ideal class group and that of integer factoring.  In Section \ref{sec:spar} we introduce an algorithm, called SPAR, that uses a group isomorphic to the ideal class group to factor an integer associated with the discriminant.  In Section \ref{sec:primorial}, we discuss the primorial steps algorithm for order finding in generic groups that is asymptotically faster than both Pollard's rho method and Shank's baby-steps giant-steps technique.  Finally, in Section \ref{sec:superspar} we reconsider the factoring algorithm SPAR in the context of primorial steps for order finding.
 
 %%%%%%%%
 % SPAR %
 %%%%%%%%
-%\bigbreak
 \section{SPAR}
+
+\subsection{Ambiguous Forms and the Factorization of the Discriminant}
+
+Following \ref{Jacobson1999} we choose to represent ideals as the $\ZZ$-module
+\[
+	\mathfrak a = s \left[a, \frac{b + \sqrt\Delta}{2} \right].
+\]
+In our implementation we also carry around a third term $c = {b^2 - \Delta}{4a}$.  We can also write the discriminant $\Delta$ in terms of $a$, $b$, and $c$ as $\Delta = b^2 - 4ac$. 
+
+A binary quadratic form is a quadratic form in two variables
+\[
+	f(x, y) = ax^2 + bxy + cy^2
+\]
+where $a$, $b$, and $c$ are integer coefficients.  For a given form there is a set of integers represented by $f(x, y)$ for integers $x$ and $y$. Two forms are equivalent if the sets of integers they represent are equivalent (TODO: Cite), and these sets are equivalent if and only if there exists an invertible integral linear change of variables that transforms the first form into the second form. Necessarily, two equivalent forms have the same discriminant, which is given as $\Delta = b^2 - 4ac$ and corresponds to the discriminant of our ideal.  Furthermore, as Fr\"{o}lich and Taylor \cite{Frolich1993} show, the form $ax^2 + bxy + cy^2$ is isomorphic to the primitive ideal $[a, (b + \sqrt\Delta)/2]$.  The set of all equivalent forms for a given discriminant form an equivalence class, and as shown by Gau\ss \cite{Gauss1801}, representatives of equivalence classes of forms can be composed together to form a group.  In the case of a negative discriminant, each form is equivalent to a unique reduced form \cite{Guass1801}.
+
+\begin{defn}
+The \emph{ambiguous classes} are the classes $H$ such that $H^2$ is the identity class \cite{Schnorr1984}.  This holds for both the equivalence class of forms and the equivalence class of ideals, since these class groups are isomorphic to each other.
+\end{defn}
+
+According to \cite{Schnorr1984}, every reduced representative of an ambiguous class with negative discriminant has either $b = 0$, $a = b$, or $a = c$.  Since the discriminant is defined as $\Delta = b^2 - 4ac$, these reduced representatives correspond to a factorization of the discriminant.  We have either
+\begin{itemize}
+\item $\Delta = 4ac$ when $b = 0$,
+\item $\Delta = b(b - 4c)$ when $a = b$, or
+\item $\Delta = (b - 2a)(b + 2a)$ when $a = c$.
+\end{itemize}
+Suppose we wish to find a factor of an odd integer $N$. Since $\Delta = b^2 - 4ac \equiv 0, 1 \pmod 4$, we set $\Delta = -N$ when $-N \equiv 1 \pmod 4$ and $\Delta = -4N$ otherwise.  This way, $\Delta \equiv 0, 1 \pmod 4$ and $\Delta < 0$. Now all we need to find a factor of $N$ is to find a reduced ambiguous class representative for the discriminant $\Delta$.
+
+\subsection{SPAR}
+
+Published by Schnorr and Lenstra \cite{Schnorr1984} was independently discovered by Atkin and Rickert who called it SPAR after Shanks, Pollard, Atkin, and Rickert \cite[p.182]{Jacobson1999}.
+
+\pagebreak
 
 \subsection{Complexity}
 
