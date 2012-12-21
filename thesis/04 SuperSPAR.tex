@@ -133,14 +133,16 @@ until there is some $j < k$ such that $\mathfrak a_j = \mathfrak a_k$.  The orde
 %%%%%%%%%%%%%%
 \subsection{Complexity}
 
-The complete analysis of the run time SPAR and justification for the selection of $r = \sqrt{\ln N \ln \ln N}$ and $t$ such that $p_t = N^{1/2r}$ is given in \cite{Schnorr1984}.  By selecting $r$ and $t$ as such, 
+The complete analysis of the running time of SPAR and the justification for the selection of $r = \sqrt{\ln N / \ln \ln N}$ and $t$ such that $p_t = N^{1/2r}$ is given in \cite{Schnorr1984}.  In stage one of the algorithm, we exponentiate $\mathfrak a_0$ to the product of primes $\prod_{i=2}^t {p_i}^{e_i}$.  Using binary exponentiation, this will take $O(p_t)$ group operations \cite[p.290]{Schnorr1984}.  Since $p_t = N^{1/2r}$, we let $m = \ln N$ and this expression simplifies
+\begin{align*}
+	N^\frac{1}{2r} &= N^\frac{1}{2\sqrt{\ln N / \ln \ln N}} \\
+	&= {\left(e^m\right)}^\frac{1}{2\sqrt{m / \ln m}} \\
+	&= {\left(e^m\right)}^{\frac{1}{2} \sqrt{\frac{\ln m}{m}}} \\
+	&= e^{\frac{\sqrt{m \ln m}}{2}} \\
+	&\in o(exp(\sqrt{\ln N \ln \ln N}))
+\end{align*}
 
-
-Somehow show that
-\[
-	N ^ { \frac{1}{2 \sqrt{ \ln N / \ln \ln N }} } = \exp\left({\sqrt{\ln N \ln \ln N}}\right)
-\]
-
+Analysis of stage 2.
 
 %%%%%%%%%%%%%%%%%%%
 % PRIMORIAL STEPS %
