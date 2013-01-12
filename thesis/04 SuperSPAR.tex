@@ -62,81 +62,80 @@
 \chapter{SuperSPAR}
 \label{chap:superspar}
 
-A contribution of this thesis is to improve the speed of arithmetic in the ideal class group of imaginary quadratic number fields with an application to integer factoring.  In Chapter \ref{chap:idealArithmetic} we introduced the ideal class group, and in Chapter \ref{chap:exponentiation} we introduced some methods for exponentiation in generic groups.  In this chapter, we make a connection between arithmetic in the ideal class group and that of integer factoring.  In Section \ref{sec:spar} we introduce an algorithm, called SPAR, that uses a group isomorphic to the ideal class group to factor an integer associated with the discriminant.  In Section \ref{sec:primorial}, we discuss the primorial steps algorithm for order finding in generic groups that is asymptotically faster than both Pollard's rho method and Shank's baby-steps giant-steps technique.  Finally, in Section \ref{sec:superspar} we reconsider the factoring algorithm SPAR in the context of primorial steps for order finding.
+A contribution of this thesis is to improve the speed of arithmetic in the ideal class group of imaginary quadratic number fields with an application to integer factoring.  In Chapter \ref{chap:idealArithmetic} we introduced the ideal class group, and in Chapter \ref{chap:exponentiation} we introduced some methods for exponentiation in generic groups.  In this chapter, we make a connection between the two and that of integer factoring.  In Section \ref{sec:spar} we introduce an algorithm, called SPAR, that uses a group isomorphic to the ideal class group to factor an integer associated with the discriminant.  In Section \ref{sec:primorial}, we discuss the primorial steps algorithm for order finding in generic groups that is asymptotically faster than both Pollard's rho method and Shank's baby-steps giant-steps technique.  Finally, in Section \ref{sec:superspar} we reconsider the factoring algorithm SPAR in the context of primorial steps for order finding.  We call this new algorithm SuperSPAR.
 
 %%%%%%%%
 % SPAR %
 %%%%%%%%
 \section{SPAR}
+\label{sec:spar}
 
 SPAR is an integer factoring algorithm based on the idea of finding a reduced ambiguous class representative with a discriminant $\Delta$ associated with the integer to be factored.  The algorithm was published by Schnorr and Lenstra in \cite{Schnorr1984}, but was independently discovered by Atkin and Rickert who named it SPAR after Shanks, Pollard, Atkin, and Rickert \cite[p.182]{Jacobson1999}.
 
 \subsection{Ambiguous Forms and the Factorization of the Discriminant}
 
-Following \ref{Jacobson1999} we choose to represent ideals as the $\ZZ$-module
-\[
-	\mathfrak a = s \left[a, \frac{b + \sqrt\Delta}{2} \right].
-\]
-In our implementation we also carry around a third term $c = {b^2 - \Delta}{4a}$.  Notice that we can also write the discriminant $\Delta$ in terms of $a$, $b$, and $c$ as $\Delta = b^2 - 4ac$. Since our implementation of ideal class arithmetic always works with reduced representative ideals, in the discussion that follows we will refer to ideal class arithmetic in terms of reduced representatives.  As such, given two reduced representatives $\mathfrak a$ and $\mathfrak b$, their product $\mathfrak a \mathfrak b$ denotes the reduced representative $\mathfrak c$ such that the ideal class $[\mathfrak c]$ equals the product of the ideal classes $[\mathfrak a][\mathfrak b]$.
+Following \ref{Jacobson1999}, we represent elements of the ideal class group using reduced representative ideals.  We denote the equivalence class $[\mathfrak a]$ for a reduced representative $\mathfrak a$ using the $\ZZ$\mbox{-}module $\mathfrak a = [a, (b + \sqrt\Delta)/2]$. In our implementation we also carry around a third term $c = (b^2 - \Delta)/4a$.
 
 The description of SPAR uses binary quadratic forms. A binary quadratic form is a quadratic form in two variables
 \[
 	f(x, y) = ax^2 + bxy + cy^2
 \]
-where $a$, $b$, and $c$ are integer coefficients.  For a given form there is a set of integers represented by $f(x, y)$ for integers $x$ and $y$. Two forms are equivalent if the sets of integers they represent are equivalent \cite[pp.239-240]{Crandall2005}, and these sets are equivalent if and only if there exists an invertible integral linear change of variables that transforms the first form into the second form. Necessarily, two equivalent forms have the same discriminant, which is given as $\Delta = b^2 - 4ac$ and corresponds to the discriminant of our ideal.  Furthermore, as Fr\"{o}lich and Taylor \cite{Frolich1993} show, the form $ax^2 + bxy + cy^2$ is isomorphic to the primitive ideal $[a, (b + \sqrt\Delta)/2]$.  The set of all equivalent forms for a given discriminant form an equivalence class, and as shown by Gau\ss \cite{Gauss1801}, representatives of equivalence classes of forms can be composed together to form a group, $G(\Delta)$.  In the case of a negative discriminant, each form is equivalent to a unique reduced form \cite{Guass1801}.  Since forms are isomorphic to ideals, the class group of binary quadratic forms with negative discriminant, $G(\Delta)$, is also isomorphic to the ideal class group of imaginary quadratic number fields, $Cl_\Delta$. As such, we adapt our discussion of the SPAR factoring algorithm to use the language ideal classes.
+where $a$, $b$, and $c$ are integer coefficients.  For a given form there is a set of integers represented by $f(x, y)$ for integers $x$ and $y$. Two forms are equivalent if the sets of integers they represent are equivalent \cite[pp.239-240]{Crandall2005}, and these sets are equivalent if and only if there exists an invertible integral linear change of variables that transforms the first form into the second form. Necessarily, two equivalent forms have the same discriminant, which is given as $\Delta = b^2 - 4ac$ and corresponds to the discriminant of our ideal.  Furthermore, as Fr\"{o}lich and Taylor \cite{Frolich1993} show, the form $ax^2 + bxy + cy^2$ is isomorphic to the primitive ideal $[a, (b + \sqrt\Delta)/2]$.  The set of all equivalent forms for a given discriminant form an equivalence class, and as shown by Gau\ss \cite{Gauss1801}, representatives of equivalence classes of forms can be composed together to form a group, $G(\Delta)$.  In the case of a negative discriminant, each form is equivalent to a unique reduced form \cite{Guass1801}.  Since forms are isomorphic to ideals, the class group of binary quadratic forms with negative discriminant, $G(\Delta)$, is also isomorphic to the ideal class group of imaginary quadratic number fields, $Cl_\Delta$. As such, we adapt our discussion of the SPAR factoring algorithm to use the language of ideal classes.
 
 \begin{defn}
 The \emph{ambiguous classes} are the classes $[\mathfrak a]$ such that ${[\mathfrak a]}^2$ is the identity class \cite{Schnorr1984}.  This holds for both the equivalence class of forms and the equivalence class of ideals.  Notice that the identity ideal class $[\mathcal O_\Delta] \in Cl_\Delta$ is an ambiguous class.
 \end{defn}
 
 According to \cite{Schnorr1984}, every reduced representative of an ambiguous class with negative discriminant has either $b = 0$, $a = b$, or $a = c$.  Since the discriminant is defined as $\Delta = b^2 - 4ac$, these reduced representatives correspond to a factorization of the discriminant.  We have either
-\begin{itemize}
-\item $\Delta = 4ac$ when $b = 0$,
-\item $\Delta = b(b - 4c)$ when $a = b$, or
-\item $\Delta = (b - 2a)(b + 2a)$ when $a = c$.
-\end{itemize}
-Now suppose we wish to find a factor of an odd integer $N$. Since $\Delta = b^2 - 4ac \equiv 0, 1 \pmod 4$, we set $\Delta = -N$ when $-N \equiv 1 \pmod 4$ and $\Delta = -4N$ otherwise.  This way, $\Delta \equiv 0, 1 \pmod 4$ and $\Delta < 0$. Now, in order to find a factor of $N$ we only need to find a reduced ambiguous class representative for the discriminant $\Delta$ that is not the identity element, since the identity element gives the trivial factorization $1N=N$.
+\begin{align*}
+\Delta &= 4ac & \textrm{ when } & b = 0, \\
+\Delta &= b(b - 4c) & \textrm{ when } & a = b, \textrm{ or} \\
+\Delta &= (b - 2a)(b + 2a) & \textrm{ when } & a = c.
+\end{align*}
+Now suppose we wish to find a factor of an odd integer $N$. Since $\Delta = b^2 - 4ac$ we must have $\Delta \equiv 0, 1 \pmod 4$.  Therefore, set $\Delta = -N$ when $-N \equiv 1 \pmod 4$ and $\Delta = -4N$ otherwise.  This way, $\Delta \equiv 0, 1 \pmod 4$ and $\Delta < 0$. Now, in order to find a factor of $N$ we only need to find a reduced ambiguous class representative for the discriminant $\Delta$ that is not the identity element, since the identity element gives the trivial factorization $1N=N$.
 
 \subsection{Algorithm}
+\newcommand{\aclass}{[\mathfrak a]}
+\newcommand{\bclass}{[\mathfrak b]}
+\newcommand{\cclass}{[\mathfrak c]}
+\newcommand{\dclass}{[\mathfrak d]}
+\newcommand{\idclass}{[\mathcal O_\Delta]}
 
-In Chapter \ref{chap:idealArithmetic}, we mentioned that for a negative discriminant $\Delta < 0$, the ideal class group $Cl_\Delta$ has a finite number of elements.  This means that for a random ideal class $[\mathfrak a]$, there exists an integer $m$ such that ${[\mathfrak a]}^m = [\mathcal O_\Delta]$. We say that $m$ is the \emph{order} of the element $[\mathfrak a]$ and denote this $m = \ord([\mathfrak a])$.  When the order is even, then $[\mathfrak b] = {[\mathfrak a]}^{m/2}$ is an ambiguous ideal class.  This follows from the fact that ${[\mathfrak b]}^2 = [\mathcal O_\Delta]$.  Therefore, factoring an integer $N$ reduces to the problem of determining the order of a random ideal class $[\mathfrak a] \in Cl_\Delta$.
+In Chapter \ref{chap:idealArithmetic}, we mentioned that for a negative discriminant $\Delta < 0$, the ideal class group $Cl_\Delta$ has a finite number of elements.  This means that for a random ideal class $\aclass$, there exists an integer $m$ such that $\aclass^m = \idclass$. We say that $m$ is the \emph{order} of the element $\aclass$ and denote this $m = \ord(\aclass)$.  When the order is even, then $\bclass = \aclass^{m/2}$ is an ambiguous ideal class.  This follows from the fact that $\bclass^2 = \idclass$.  Therefore, factoring an integer $N$ reduces to the problem of determining the order of a random ideal class $\aclass \in Cl_\Delta$.
 
-The SPAR algorithm works in two stages. The first stage is to pick a random element $\mathfrak a_0 \in Cl_\Delta$ and then exponentiate it to the product of many small odd prime powers.  If the order of $\mathfrak a_0$ divides this odd product, then we can easily compute an ambiguous ideal by repeated squaring.
+The SPAR algorithm works in two stages. The first stage is to pick a random element $\aclass \in Cl_\Delta$ and then exponentiate it to the product of many small odd prime powers $P$, such that $\bclass = \aclass^P$.  If the order of $\aclass$ divides this odd product, then we can compute an ambiguous ideal by repeated squaring of $\bclass$.  If the order of $\aclass$ does not divide $P$, then we perform a random walk on the group generated by the ideal class $\bclass = \aclass^P$.
 
 \begin{defn}
 An integer, $x$, is \emph{smooth} with respect to a factor base $B$, if $x$ is the product of elements from the factor base $B$.
 \end{defn}
 
-\newcommand{\abar}{\overline{\mathfrak a}}
-\newcommand{\ahat}{\hat{\mathfrak a}}
-
-Following {Schnorr1984}, we take the first $t$ primes $p_1 = 2, p_2 = 3, ..., p_t = N^{1/2r}$ for $r = \sqrt{\ln N / \ln \ln N}$.  Let $e_i = \max \{ v : {p_i}^v \le {p_t}^2 \}$, and compute
+Following Schnorr and Lenstra \cite{Schnorr1984}, we take the first $t$ primes $p_1 = 2, p_2 = 3, ..., p_t = N^{1/2r}$ for $r = \sqrt{\ln N / \ln \ln N}$.  Let $e_i = \max \{ v : {p_i}^v \le {p_t}^2 \}$ and compute
 \[
-	\abar = {\mathfrak a_0}^{\prod_{i=2}^t {p_i}^{e_i}},
+	\bclass = \aclass^{\prod_{i=2}^t {p_i}^{e_i}},
 \]
-where $\abar$ is a reduced representative. Notice that we exponentiate $\mathfrak a_0$ to the product of only \emph{odd} prime powers.  The reason for this is that if $\ord(\abar)$ is smooth with respect to the factor base $B = \{{p_i}^{e_i} : 1 \le i \le t\}$, then we can compute $\mathfrak a = {\abar}^{\left(2^k\right)}$ for the smallest $k$ such that $\mathfrak a = 1$.  It follows that ${\abar}^{\left(2^{k-1}\right)}$ is an ambiguous ideal and we can attempt to factor $N$.
+where $\bclass$ is a reduced representative. Notice that we exponentiate $\aclass$ to the product of only \emph{odd} prime powers.  The reason for this is that if $\ord(\aclass)$ is smooth with respect to the factor base $B = \{{p_i}^{e_i} : 1 \le i \le t\}$, then we can compute $\bclass^{\left(2^k\right)}$ for the smallest $k$ such that $\bclass^{\left(2^k\right)} = \idclass$.  It follows that $\bclass^{\left(2^{k-1}\right)}$ is an ambiguous ideal class and we can attempt to factor $N$.
 
-Since we do not know if $\ord(\mathfrak a)$ is smooth, we instead bound $k$ such that $2^k$ is no larger than the number of elements in the class group $Cl_\Delta$.  According to \cite[p.155]{Jacobson2009}, the number of elements in the class group $Cl_\Delta$ is bound by
+Since we do not know if $\ord(\aclass)$ is smooth, we instead bound $k$ such that $2^k$ is no larger than the number of elements in the class group $Cl_\Delta$.  According to \cite[p.155]{Jacobson2009}, the number of elements, $h_\Delta$, in the class group $Cl_\Delta$ is bound by
 \[
-	h_\Delta < \frac{1}{\pi} \sqrt{|\Delta|}\log{|\Delta|} \textrm{ if } \Delta < -4.
+	h_\Delta < \frac{1}{\pi} \sqrt{|\Delta|}\log{|\Delta|} \textrm{ when } \Delta < -4.
 \]
-Therefore, we only need compute $\mathfrak a = \abar^{\left(2^k\right)}$ for the smallest $k \le h_\Delta$ such that $\mathfrak a = 1$ if such a $k$ exists. If such a $k$ does not exist, then the algorithm continues with the second stage.
+Therefore, we only need compute $\bclass^{\left(2^k\right)}$ for the smallest $k \le h_\Delta$ such that $\bclass^{\left(2^k\right)} = \idclass$ if such a $k$ exists. If such a $k$ does not exist, then the algorithm continues with the second stage.
 
-In the first stage, we compute $\abar$ and $\mathfrak a$.  The second stage is a random walk through the cyclic group generated by the reduced representative $\mathfrak a$ in an attempt to find the order $h = \ord(\mathfrak a)$.  Let $\langle \mathfrak a \rangle$ be the cyclic group of ideal classes generated by the reduced representative $\mathfrak a$ and let $f : \langle \mathfrak a \rangle \rightarrow \langle \mathfrak a \rangle$ be a function from one representative in the cyclic group to another.  Let $\mathfrak a_1 = \mathfrak a$ and repeatedly compute
+In the first stage, we compute $\bclass = \aclass^{\prod_{i=2}^t {p_i}^{e_i}}$ and $\cclass = \bclass^{\left(2^k\right)}$.  The second stage is a random walk through the cyclic group generated by the ideal class $\cclass$ in an attempt to find the order $h = \ord(\cclass)$.  Let $\langle \cclass \rangle$ be the cyclic group generated by $\cclass$ and let $f : \langle \cclass \rangle \rightarrow \langle \cclass \rangle$ be a function from one representative in the cyclic group to another.  Let $[\mathfrak c_1] = \cclass$ and repeatedly compute
 \[
-	\mathfrak a_{i+1} = f(\mathfrak a_i)
+	[\mathfrak c_{i+1}] = f([\mathfrak c_i])
 \]
-until there is some $j < k$ such that $\mathfrak a_j = \mathfrak a_k$.  The order of the represenative $\mathfrak a$ is then $h = k - j$.  We can compute an ambiguous class representative by computing $\ahat = \abar^h$ and then computing ${\ahat}^{\left(2^k\right)}$ for the smallest $k \le h_\Delta$ as before.  Assuming that such a $k$ exists, then ${\ahat}^{\left(2^{k-1}\right)}$ is an ambiguous class representative and we can factor $N$.
+until there is some $j < k$ such that $[\mathfrak c_j] = [\mathfrak c_k]$.  The order of $\cclass$ is then $h = k - j$.  We can compute an ambiguous class representative by computing $\dclass = \bclass^h$ and then computing $\dclass^{\left(2^k\right)}$ for the smallest $k \le h_\Delta$ as before.  Assuming that such a $k$ exists, then $\dclass^{\left(2^{k-1}\right)}$ is an ambiguous class representative and we can factor $N$.
 
 %%%%%%%%%%%%%%
 % COMPLEXITY %
 %%%%%%%%%%%%%%
 \subsection{Complexity}
 
-The complete analysis of the running time of SPAR and the justification for the selection of $r = \sqrt{\ln N / \ln \ln N}$ and $t$ such that $p_t = N^{1/2r}$ is given in \cite{Schnorr1984}.  In stage one of the algorithm, we exponentiate $\mathfrak a_0$ to the product of primes $\prod_{i=2}^t {p_i}^{e_i}$.  Using binary exponentiation, this will take $O(p_t)$ group operations \cite[p.290]{Schnorr1984}.  Since $p_t = N^{1/2r}$, we let $m = \ln N$ and this expression simplifies
+The complete analysis of the running time of SPAR and the justification for the selection of $r = \sqrt{\ln N / \ln \ln N}$ and $t$ such that $p_t = N^{1/2r}$ is given by Schnorr and Lenstra in \cite{Schnorr1984}.  We summarize the run time complexity here. In stage one of the algorithm, we exponentiate a random ideal class $\aclass \in Cl_\Delta$ to the product of primes $\prod_{i=2}^t {p_i}^{e_i}$.  Using binary exponentiation, this will take $O(p_t)$ group operations \cite[p.290]{Schnorr1984}.  Since $p_t = N^{1/2r}$, the number of group operations for this exponentiation is
 \begin{align*}
 	N^\frac{1}{2r} &= N^\frac{1}{2\sqrt{\ln N / \ln \ln N}} \\
-	&= {\left(e^m\right)}^\frac{1}{2\sqrt{m / \ln m}} \\
+	&= {\left(e^m\right)}^\frac{1}{2\sqrt{m / \ln m}} \textrm{ (by letting $m = \ln N$)} \\
 	&= {\left(e^m\right)}^{\frac{1}{2} \sqrt{\frac{\ln m}{m}}} \\
 	&= e^{\frac{\sqrt{m \ln m}}{2}} \\
 	&\in o(exp(\sqrt{\ln N \ln \ln N}))
