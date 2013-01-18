@@ -1006,18 +1006,10 @@ until there is some $j < k$ such that $[\mathfrak c_j] = [\mathfrak c_k]$.  The 
 
 \subsection{Complexity}
 
-The original publication of SPAR by Schnorr and Lenstra \cite{Schnorr1984} made the claim that every composite integer $N$ could be factored in $o\left(\exp\left(\sqrt{\ln N \ln\ln N}\right)\right)$ bit operations.  This was the first factoring algorithm for which this runtime had been conjectured, and it was also the first for which this conjecture had to be withdrawn \cite{Lenstra1992}.
+The original publication of SPAR by Schnorr and Lenstra \cite{Schnorr1984} made the claim that every composite integer $N$ could be factored in $o\left(\exp\sqrt{\ln N \ln\ln N}\right)$ bit operations.  This was the first factoring algorithm for which this runtime had been conjectured, and it was also the first for which this conjecture had to be withdrawn \cite{Lenstra1992}.
 
-The analysis by Schnorr and Lenstra \cite{Schnorr1984} was that Stage 1 dominated the running time of the algorithm.  In the first stage of the algorithm, we exponentiate a random ideal class $\aclass \in Cl_\Delta$ to the product of primes $\prod_{i=2}^t {p_i}^{e_i}$ such that $p_t = N^{1/2r}$ where $r = \sqrt{\ln N / \ln \ln N}$.  Using binary exponentiation, this will take $O(p_t)$ group operations \cite[p.290]{Schnorr1984}.  Since $p_t = N^{1/2r}$, the number of group operations for this exponentiation is
-\begin{align*}
-	N^\frac{1}{2r} &= N^\frac{1}{2\sqrt{\ln N / \ln \ln N}} \\
-	&= {\left(e^m\right)}^\frac{1}{2\sqrt{m / \ln m}} \textrm{ (by letting $m = \ln N$)} \\
-	&= {\left(e^m\right)}^{\frac{1}{2} \sqrt{\frac{\ln m}{m}}} \\
-	&= e^{\frac{\sqrt{m \ln m}}{2}} \\
-	&\in o(exp(\sqrt{\ln N \ln \ln N}))
-\end{align*}
+The analysis by Schnorr and Lenstra \cite{Schnorr1984} is that in the first stage of the algorithm, we exponentiate a random ideal class $\aclass \in Cl_\Delta$ to the product of primes $\prod_{i=2}^t {p_i}^{e_i}$ such that $p_t = N^{1/2r}$ where $r = \sqrt{\ln N / \ln \ln N}$.  Using binary exponentiation, this will take $O(p_t)$ group operations and for a random composite $m \in [0, N]$ will factor $m$ with probability $\ge r^{-r}$ \cite[p.290]{Schnorr1984}. Stage 2 performs a random walk of at most $O(p_t)$ group operations and with probability $\ge (r-2)^{-(r-2)}$ will factor $m$.  Their claim is that if Stage 1 is run on each integer $kN$ for $k \le r^r$, then every composite integer $N$ will be factored within $o\left(\exp \sqrt{ \ln N \ln\ln N } \right)$ bit operations.
 
-Stage 2 performed a random walk of at most $O({p_t}^2)$ group operations and so the running time overall is dominated by Stage 1.  The claim was that for a given multiplier $s \le r^r$ the discriminant $\Delta = Ns$ would lead to a factorization of $N$ with probability greater than or equal to $(r-2)^{-(r-2)}$.  One could 
 
 
 %%%%%%%%%%%%%%%%%%%
