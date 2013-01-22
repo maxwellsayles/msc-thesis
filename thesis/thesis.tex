@@ -67,7 +67,7 @@
 \chapter{Ideal Arithmetic}
 \label{chap:idealArithmetic}
 
-A focus of this thesis is arithmetic and exponentiation in the ideal class group of imaginary quadratic number fields.  We begin with the relevant theory of quadratic number fields, then discuss quadratic orders and ideals of quadratic orders.  Finally, we discuss arithmetic in the ideal class group.  The theory presented here is available in detail in reference texts on algebraic number theory such as \cite{Ireland1990}, \cite{Hua82}, or \cite{Cohn1980}. 
+A focus of this thesis is arithmetic and exponentiation in the ideal class group of imaginary quadratic number fields.  We begin with the relevant theory of quadratic number fields, then discuss quadratic orders and ideals of quadratic orders.  Finally, we discuss arithmetic in the ideal class group.  The theory presented here is available in detail in reference texts on algebraic number theory such as \cite{Cohn1980}, \cite{Hua2012}, or \cite{Ireland1990}. 
 
 
 
@@ -209,7 +209,7 @@ In Subsection \ref{subsec:reduction}, we state what it is for an ideal to be in 
 \label{subsec:reduction}
 
 \begin{defn}
-A primitive ideal $\mathfrak{a} = [a, (b+\sqrt{\Delta})/2]$ with $\Delta < 0$ is \emph{reduced} when $-a < b \le a < c$ or when $0 \le b \le a = c$ for $c = (b^2 - \Delta)/4a$ \cite[p.241]{Crandall2000}.
+A primitive ideal $\mathfrak{a} = [a, (b+\sqrt{\Delta})/2]$ with $\Delta < 0$ is \emph{reduced} when $-a < b \le a < c$ or when $0 \le b \le a = c$ for $c = (b^2 - \Delta)/4a$ \cite[p.241]{Crandall2001}.
 \end{defn}
 
 % REDUCE
@@ -644,7 +644,7 @@ A particular advantage of a non-adjacent form exponentiation over a binary expon
 \bigbreak
 \section{Double-Base Number Systems}\label{section:dbns}
 
-A significant advantage of non-adjacent form over a binary representation is that on average the number of non-zero terms (the density of the representation) is lower.  We can achieve an even lower density on average when we extend the representation to a signed double-base number system (DBNS).  Binary and non-adjacent form are both base 2 number systems.  In the case of a double base number system, as the name suggests, we use two bases.  This system was first introduced by Dimitrov and Cooklev \cite{Dimitrov1995}.  Given two coprime integers $p$ and $q$ and some integer $n$, we represent $n$ as the sum and difference of the product of powers of $p$ and $q$,
+A significant advantage of non-adjacent form over a binary representation is that on average the number of non-zero terms (the density of the representation) is lower.  We can achieve an even lower density on average when we extend the representation to a signed double-base number system (DBNS).  Binary and non-adjacent form are both base 2 number systems.  In the case of a double base number system, as the name suggests, we use two bases.  This system was first introduced by Dimitrov and Cooklev \cite{Dimitrov1995a, Dimitrov1995b}.  Given two coprime integers $p$ and $q$ and some integer $n$, we represent $n$ as the sum and difference of the product of powers of $p$ and $q$,
 \begin{equation}\label{eq:generalDbnsForm}
 	n = \sum_{i=1}^k s_i p^{a_i} q^{b_i}
 \end{equation}
@@ -957,7 +957,7 @@ The description of SPAR uses binary quadratic forms. A binary quadratic form is 
 \[
 	f(x, y) = ax^2 + bxy + cy^2
 \]
-where $a$, $b$, and $c$ are integer coefficients.  For a given form there is a set of integers represented by $f(x, y)$ for integers $x$ and $y$. Two forms are equivalent if the sets of integers they represent are equivalent \cite[pp.239-240]{Crandall2005}, and these sets are equivalent if and only if there exists an invertible integral linear change of variables that transforms the first form into the second form. Necessarily, two equivalent forms have the same discriminant, which is given as $\Delta = b^2 - 4ac$ and corresponds to the discriminant of our ideal.  Furthermore, as Fr\"{o}lich and Taylor \cite{Frolich1993} show, the form $ax^2 + bxy + cy^2$ is isomorphic to the primitive ideal $[a, (b + \sqrt\Delta)/2]$.  The set of all equivalent forms for a given discriminant form an equivalence class, and as shown by Gau\ss \cite{Gauss1801}, representatives of equivalence classes of forms can be composed together to form a group, $G(\Delta)$.  In the case of a negative discriminant, each form is equivalent to a unique reduced form \cite{Guass1801}.  Since forms are isomorphic to ideals, the class group of binary quadratic forms with negative discriminant, $G(\Delta)$, is also isomorphic to the ideal class group of imaginary quadratic number fields, $Cl_\Delta$. As such, we adapt our discussion of the SPAR factoring algorithm to use the language of ideal classes.
+where $a$, $b$, and $c$ are integer coefficients.  For a given form there is a set of integers represented by $f(x, y)$ for integers $x$ and $y$. Two forms are equivalent if the sets of integers they represent are equivalent \cite[pp.239-240]{Crandall2001}, and these sets are equivalent if and only if there exists an invertible integral linear change of variables that transforms the first form into the second form. Necessarily, two equivalent forms have the same discriminant, which is given as $\Delta = b^2 - 4ac$ and corresponds to the discriminant of our ideal.  Furthermore, as Fr\"olich and Taylor \cite{Frolich1993} show, the form $ax^2 + bxy + cy^2$ is isomorphic to the primitive ideal $[a, (b + \sqrt\Delta)/2]$.  The set of all equivalent forms for a given discriminant form an equivalence class, and as shown by Gau\ss, representatives of equivalence classes of forms can be composed together to form a group, $G(\Delta)$.  In the case of a negative discriminant, each form is equivalent to a unique reduced form \cite[p.241]{Crandall2001}.  Since forms are isomorphic to ideals, the class group of binary quadratic forms with negative discriminant, $G(\Delta)$, is also isomorphic to the ideal class group of imaginary quadratic number fields, $Cl_\Delta$. As such, we adapt our discussion of the SPAR factoring algorithm to use the language of ideal classes.
 
 \begin{defn}
 The \emph{ambiguous classes} are the classes $[\mathfrak a]$ such that ${[\mathfrak a]}^2$ is the identity class \cite{Schnorr1984}.  This holds for both the equivalence class of forms and the equivalence class of ideals.  Notice that the identity ideal class $[\mathcal O_\Delta] \in Cl_\Delta$ is an ambiguous class.
@@ -1163,6 +1163,12 @@ i.e. is it faster to use the product and one exponentiation or individual primes
 \item Maple
 \end{itemize}
 
+
+%%%%%%%%%%%%%%%%
+% BIBLIOGRAPHY %
+%%%%%%%%%%%%%%%%
+\bibliographystyle{plain}
+\bibliography{Bibliography}
 
 
 \end{document}
