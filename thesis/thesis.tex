@@ -50,6 +50,7 @@
 \newcommand{\matrixto}[2]{\left[ \begin{array}{rr} #1 & #2 \end{array} \right]}
 \newcommand{\matrixot}[2]{\left[ \begin{array}{r} #1 \\ #2 \end{array} \right]}
 \newcommand{\matrixtt}[4]{\left[ \begin{array}{rr} #1 & #2 \\ #3 & #4 \end{array} \right]}
+\newcommand{\matrixThreeTwo}[6]{\left[ \begin{array}{rrr} #1 & #2 & #3 \\ #4 & #5 & #6 \end{array} \right]}
 \newcommand{\ntoinfty}{\lim_{n \rightarrow \infty}}
 \newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
 \newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
@@ -951,7 +952,7 @@ SPAR is an integer factoring algorithm based on the idea of finding a reduced am
 
 \subsection{Ambiguous Forms and the Factorization of the Discriminant}
 
-Following \ref{Jacobson1999}, we represent elements of the ideal class group using reduced representative ideals.  We denote the equivalence class $[\mathfrak a]$ for a reduced representative $\mathfrak a$ using the $\ZZ$\mbox{-}module $\mathfrak a = [a, (b + \sqrt\Delta)/2]$. In our implementation we also carry around a third term $c = (b^2 - \Delta)/4a$.
+Following Jacobson \cite{Jacobson1999}, we represent elements of the ideal class group using reduced representative ideals.  We denote the equivalence class $[\mathfrak a]$ for a reduced representative $\mathfrak a$ using the $\ZZ$\mbox{-}module $\mathfrak a = [a, (b + \sqrt\Delta)/2]$. In our implementation we also carry around a third term $c = (b^2 - \Delta)/4a$.
 
 The description of SPAR uses binary quadratic forms. A binary quadratic form is a quadratic form in two variables
 \[
@@ -1042,7 +1043,7 @@ Recall that in Stage 1 of SPAR, we compute $\bclass = \aclass^{\prod_{i=2}^t {p_
 
 \subsection{Complexity}
 \subsection{Analysis for generic groups}
-\subsection{Analysis for class gorup of imaginary quadratic number fields}
+\subsection{Analysis for class group of imaginary quadratic number fields}
 \subsection{Comparison with original SPAR}
 
 
@@ -1052,11 +1053,68 @@ Recall that in Stage 1 of SPAR, we compute $\bclass = \aclass^{\prod_{i=2}^t {p_
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Ideal Exponentiation Experiments}
 
-\section{Motivation: Best way to do ideal exponentiation.}
+A significant contribution of this thesis is to improve the performance of exponentiation in the ideal class group of imaginary quadratic number fields on present day CPUs.  Improvements to exponentiation also include improvements to arithmetic in the class group.  This chapter focuses on the different techniques we used to improve performance and the experimental data that lead us to our implementation.  In Section \ref{sec:eea}, we discuss methods to compute solutions to equations of the form $s = Ua + Vb$ useful for fast ideal multiplication. In Section \ref{sec:specializedTypes}, we discuss specialized implementations of ideal arithmetic for discriminants less than 60-bits, less than 120-bits, and for discriminants with unbounded size. In Section \ref{sec:exponentiation}, we compare various methods to exponentiate ideal representatives to large fixed exponents that are the product of many primes, including many novel approaches to computing double-base representations of numbers.
 
-\section{Extended GCD}
+\section{Extended Euclidean Algorithm}
+\label{sec:eea}
 
-\subsection{Euclidean GCD (w/ partial)}
+In the Subsection on Fast Ideal Multiplication (\ref{subsec:nucomp}) we describe an algorithm for the simultaneous multiplication and reduction of two reduced ideal class representatives.  Much of the computational effort of this algorithm is in computing solutions to Diophantine equations of the form
+\[
+	s = Ua + Vb
+\]
+where $a$ and $b$ are fixed integers, and $s$ is the largest positive integer that divides both $a$ and $b$.  We refer to this computation as the \emph{Extended Euclidean Algorithm}.
+
+\subsection{Euclidean Algorithm}
+
+The basic Euclidean Algorithm is an algorithm for computing the greatest common divisor of two integers and is due to Euclid.  We start with two positive integers $a$ and $b$.  At each iteration of the algorithm, we subtract the smaller of the two numbers from the larger one, until one them is 0. At this point, the other number is the largest divisor of the original numbers $a$ and $b$.
+
+Since the smaller number may still be smaller after a single iteration of the above algorithm, we use fewer steps by subtracting an integer multiple of one number from the other.  This idea is what is more commonly known as the Euclidean Algorithm.  We can extend this concept by using a system of equations of the form
+\begin{align}
+s &= Ua + Vb \label{eq:initialGcd1} \\
+t &= Xa + Yb. \label{eq:initialGcd2}
+\end{align}
+Initially, let
+\[
+\matrixot{s}{t} = \matrixot{a}{b}
+\]
+and
+\[
+\matrixtt{U}{V}{X}{Y} = \matrixtt{1}{0}{0}{1}
+\]
+and we can see that Equations \ref{eq:initialGcd1} and \ref{eq:initialGcd2} hold.  Using the above description of the Euclidean Algorithm, we can compute a solution of the form $s = Ua + Vb$ such that $s$ is the largest positive integer dividing both $a$ and $b$.  The algorithm is given in Algorithm \ref{alg:divRemEea}.
+
+\begin{algorithm}[h]
+\caption{Extended Euclidean Algorithm using Divide with Remainder.}
+\label{alg:divRemEea}
+\begin{algorithmic}[1]
+\REQUIRE $a,b \in \ZZ$
+\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets 
+        \matrixThreeTwo{a}{1}{0}{b}{0}{1}$
+\IF {$t > s$}
+	\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{0}{1}{1}{0}
+            \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$ \COMMENT{Swap rows. Maintain $s \ge t$.}
+\ENDIF
+\WHILE {$t \neq 0$}
+	\STATE $q \gets \floor{s / t}$
+	\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{0}{1}{1}{-q}
+		    \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$ \COMMENT{Subtract $q$ times and swap rows.}
+\ENDWHILE
+\RETURN $(s, U, V)$ \COMMENT{Such that $s = Ua + Vb$.}
+\end{algorithmic}
+\end{algorithm}
+
+To compute the partially reduced coefficients of the product ideal, we also make use of the continued fraction expansion of $U/a_1$ using the recurrences
+\begin{align*}
+	q_i &= \floor{R_{i-2} ~/~ R_{i-1}} \\
+	R_i &= R_{i-2} - q_i R_{i-1} \\
+	C_i &= C_{i-2} - q_i C_{i-1}
+\end{align*}
+until we have $R_i$ and $R_{i-1}$ such that
+\begin{equation}
+\label{eq:nucompBound}
+	R_i < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4} < R_{i-1}.
+\end{equation}
+
 
 \subsection{Lehmer GCD (w/ partial)}
 
@@ -1071,11 +1129,13 @@ Recall that in Stage 1 of SPAR, we compute $\bclass = \aclass^{\prod_{i=2}^t {p_
 \subsection{32bit, 64bit, 128bit Intel assembler}
 
 \section{Ideal Arithmetic}
+\label{sec:specializedTypes}
 \subsection{64bit, 128bit, GMP-MPZ}
 \subsection{When cubing is better than compose + square}
 \subsection{Average time for operations}
 
 \section{Exponentiation}
+\label{sec:exponentiation}
 
 \subsection{NAF-R2L}
 
