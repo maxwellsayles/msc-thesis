@@ -33,6 +33,7 @@
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator{\ord}{ord}
+\DeclareMathOperator{\sign}{sign}
 \newcommand{\CC}{\mathbb{C}}
 \newcommand{\NN}{\mathbb{N}}
 \newcommand{\RR}{\mathbb{R}}
@@ -1064,59 +1065,84 @@ In the Subsection on Fast Ideal Multiplication (\ref{subsec:nucomp}) we describe
 \]
 where $a$ and $b$ are fixed integers, and $s$ is the largest positive integer that divides both $a$ and $b$.  We refer to this computation as the \emph{Extended Euclidean Algorithm}.
 
-\subsection{Euclidean Algorithm}
+\subsection{The Euclidean Algorithm}
 
-The basic Euclidean Algorithm is an algorithm for computing the greatest common divisor of two integers and is due to Euclid.  We start with two positive integers $a$ and $b$.  At each iteration of the algorithm, we subtract the smaller of the two numbers from the larger one, until one them is 0. At this point, the other number is the largest divisor of the original numbers $a$ and $b$.
+The Euclidean Algorithm is an algorithm for computing the greatest common divisor (GCD) of two integers and is due to Euclid.  We start with two positive integers $a$ and $b$.  At each iteration of the algorithm, we subtract the smaller of the two numbers from the larger one, until one them is 0. At this point, the non-zero number is the largest divisor of $a$ and $b$.
 
-Since the smaller number may still be smaller after a single iteration of the above algorithm, we use fewer steps by subtracting an integer multiple of one number from the other.  This idea is what is more commonly known as the Euclidean Algorithm.  We can extend this concept by using a system of equations of the form
+Since the smaller number may still be smaller after a single iteration of the above algorithm, we can use fewer steps by subtracting an integer multiple. We extend this concept by using a system of equations of the form
 \begin{align}
 s &= Ua + Vb \label{eq:initialGcd1} \\
 t &= Xa + Yb. \label{eq:initialGcd2}
 \end{align}
 Initially, let
 \[
-\matrixot{s}{t} = \matrixot{a}{b}
+\matrixThreeTwo{s}{U}{V}{t}{X}{Y} = \matrixThreeTwo{a}{1}{0}{b}{0}{1}
 \]
-and
+and Equations \ref{eq:initialGcd1} and \ref{eq:initialGcd2} hold.  We maintain the invariant that $s \ge t$.  When $s < t$, simply swap rows in the matrix representation above.  At each iteration, subtract $\floor{s/t}$ times the second row from the first, and then swap rows to maintain the invariant.  When $t=0$, the first row of the matrix is a solution such that $s$ is the largest positive divisor of $a$ and $b$.  The algorithm is given in Algorithm \ref{alg:EeaDivRem}.  We can handle negative $a$ and $b$ by using $a' = |a|$ and $b' = |b|$ as inputs and modifying the output such that $U' = U \cdot \sign(a)$ and $V' = V \cdot \sign(b)$ where
 \[
-\matrixtt{U}{V}{X}{Y} = \matrixtt{1}{0}{0}{1}
+	\sign(x) = \begin{cases}
+		-1 & \textrm{ when } x < 0 \\
+		0 & \textrm{ when } x = 0 \\
+		1 & \textrm{ when } x > 0
+	\end{cases}.
 \]
-and we can see that Equations \ref{eq:initialGcd1} and \ref{eq:initialGcd2} hold.  Using the above description of the Euclidean Algorithm, we can compute a solution of the form $s = Ua + Vb$ such that $s$ is the largest positive integer dividing both $a$ and $b$.  The algorithm is given in Algorithm \ref{alg:divRemEea}.
 
 \begin{algorithm}[h]
 \caption{Extended Euclidean Algorithm using Divide with Remainder.}
-\label{alg:divRemEea}
+\label{alg:EeaDivRem}
 \begin{algorithmic}[1]
 \REQUIRE $a,b \in \ZZ$
 \STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets 
         \matrixThreeTwo{a}{1}{0}{b}{0}{1}$
 \IF {$t > s$}
-	\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{0}{1}{1}{0}
-            \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$ \COMMENT{Swap rows. Maintain $s \ge t$.}
+	\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets
+	        \matrixtt{0}{1}{1}{0} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$
+	        \COMMENT{Swap rows. Maintain $s \ge t$.}
 \ENDIF
 \WHILE {$t \neq 0$}
 	\STATE $q \gets \floor{s / t}$
-	\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{0}{1}{1}{-q}
-		    \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$ \COMMENT{Subtract $q$ times and swap rows.}
+	\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{0}{1}{1}{-q} \cdot
+		    \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$ \COMMENT{Subtract $q$ times $2^{\textrm{nd}}$ row and swap.}
 \ENDWHILE
 \RETURN $(s, U, V)$ \COMMENT{Such that $s = Ua + Vb$.}
 \end{algorithmic}
 \end{algorithm}
 
-To compute the partially reduced coefficients of the product ideal, we also make use of the continued fraction expansion of $U/a_1$ using the recurrences
+To compute the partially reduced coefficients of the product ideal from the Fast Ideal Multiplication Algorithm \ref{alg:nucomp}, we compute the continued fraction expansion of $a/b$ using the recurrences
 \begin{align*}
 	q_i &= \floor{R_{i-2} ~/~ R_{i-1}} \\
 	R_i &= R_{i-2} - q_i R_{i-1} \\
-	C_i &= C_{i-2} - q_i C_{i-1}
+	C_i &= C_{i-2} - q_i C_{i-1}.
 \end{align*}
-until we have $R_i$ and $R_{i-1}$ such that
-\begin{equation}
-\label{eq:nucompBound}
-	R_i < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4} < R_{i-1}.
-\end{equation}
+Notice that these recurrences perform the same operation as a single step in the Extended Euclidean Algorithm, as such, we call this the \emph{Partial Extended Euclidean Algorithm}.  The initial and stopping conditions are different, however.  The algorithm is listed in Algorithm \ref{alg:PartialEeaDivRem}.
 
+\begin{algorithm}[h]
+\caption{Partial Extended Euclidean Algorithm using Divide with Remainder.}
+\label{alg:PartialEeaDivRem}
+\begin{algorithmic}[1]
+\REQUIRE $a,b, \in \ZZ$ and a termination bound $B \in \ZZ$.
+\STATE $\matrixtt{R_0}{C_0}{R_1}{C_1} = \matrixtt{a}{0}{b}{-1}$
+\IF {$R_1 > R_0$}
+	\STATE $\matrixtt{R_0}{C_0}{R_1}{C_1} \gets
+	        \matrixtt{0}{1}{1}{0} \cdot \matrixtt{R_0}{C_0}{R_1}{C_1}$
+	        \COMMENT{Swap rows. Maintain $s \ge t$.}
+\ENDIF
+\WHILE {$R_1 > B$}
+	\STATE $q \gets \floor{R_0 / R_1}$
+	\STATE $\matrixtt{R_0}{C_0}{R_1}{C_1} \gets \matrixtt{0}{1}{1}{-q} \cdot
+		    \matrixtt{R_0}{C_0}{R_1}{C_1}$ \COMMENT{Subtract $q$ times $2^{\textrm{nd}}$ row and swap.}
+\ENDWHILE
+\RETURN $(R_0, R_1, C_0, C_1)$
+\end{algorithmic}
+\end{algorithm}
 
-\subsection{Lehmer GCD (w/ partial)}
+All the operations performed on the matrix
+\[
+\matrixtt{R_0}{C_0}{R_1}{C_1}
+\]
+in the Partial Extended GCD are unimodular operations in that the operation can be represented by a 2x2 matrix with determinant either $+1$ or $-1$.  This turns out to be critical as some variations of the Extended Euclidean Algorithm are represented using matrix operations that are not unimodular and so therefore do not have an extension to the Partial Extended Euclidean Algorithm.
+
+\subsection{Lehmer GCD}
 
 \subsection{Right-to-Left Binary GCD (w/o partial)}
 
