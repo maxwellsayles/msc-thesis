@@ -60,7 +60,39 @@
 
 \begin{document}
 
-\setcounter{chapter}{1}
+%%%%%%%%%%%%%%
+% CHAPTER 1  %
+% MOTIVATION %
+%%%%%%%%%%%%%%
+\chapter{Motivation}
+
+\section{Faster ideal exponentiation on imaginary quadratic fields}
+
+\section{Exponentiation with fixed exponents}
+
+\section{Faster class group computations}
+
+\section{Applications in cryptography}
+
+\section{Examples of fast ideal exponentiation in SuperSPAR}
+
+\section{Contributions}
+
+\begin{enumerate}
+\item A really fast implementation of the Extended Euclidean Algorithm for integers bound by 32, 64, and 128 bits.
+
+\item Optimized implementations of ideal class arithmetic for discriminants bound by 64 and 128 bits.
+
+\item An improvement in the wall clock running time to exponentiate when squaring and cubing is more efficient than straight multiplication (as is the case in the ideal class group) and the exponent is known in advance.
+
+\item The fastest known implementation for integer factoring in the range of 54bit integers to 62bit integers.
+\end{enumerate}
+
+Woop.
+
+\section{Overview of Thesis}
+
+
 
 %%%%%%%%%%%%%%%%%%%%
 % CHAPTER 2        %
@@ -1054,20 +1086,20 @@ Recall that in Stage 1 of SPAR, we compute $\bclass = \aclass^{\prod_{i=2}^t {p_
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Ideal Exponentiation Experiments}
 
-A significant contribution of this thesis is to improve the performance of exponentiation in the ideal class group of imaginary quadratic number fields on present day CPUs.  Improvements to exponentiation also include improvements to arithmetic in the class group.  This chapter focuses on the different techniques we used to improve performance and the experimental data that lead us to our implementation.  In Section \ref{sec:eea}, we discuss methods to compute solutions to equations of the form $s = Ua + Vb$ useful for fast ideal multiplication. In Section \ref{sec:specializedTypes}, we discuss specialized implementations of ideal arithmetic for discriminants less than 60-bits, less than 120-bits, and for discriminants with unbounded size. In Section \ref{sec:exponentiation}, we compare various methods to exponentiate ideal representatives to large fixed exponents that are the product of many primes, including many novel approaches to computing double-base representations of numbers.
+A significant contribution of this thesis is to improve the performance of exponentiation in the ideal class group of imaginary quadratic number fields on present day CPUs.  Improvements to exponentiation also include improvements to arithmetic in the class group.  This chapter focuses on the different techniques we used to improve performance and the experimental data that lead us to our implementation.  In Section \ref{sec:eea}, we discuss methods to compute solutions to equations of the form $s = Ua + Vb$ useful for fast ideal multiplication. In Section \ref{sec:specializedTypes}, we discuss specialized implementations of ideal arithmetic for discriminants less than 60-bits, less than 120-bits, and for discriminants with unbounded size. In Section \ref{sec:exponentiation}, we compare various methods to exponentiate ideal representatives to large fixed exponents that are the product of many primes, including many novel approaches to computing double-base representations of such numbers.
 
-\section{Extended Euclidean Algorithm}
+\section{Extended Greatest Common Divisor}
 \label{sec:eea}
 
 In the Subsection on Fast Ideal Multiplication (\ref{subsec:nucomp}) we describe an algorithm for the simultaneous multiplication and reduction of two reduced ideal class representatives.  Much of the computational effort of this algorithm is in computing solutions to Diophantine equations of the form
 \[
 	s = Ua + Vb
 \]
-where $a$ and $b$ are fixed integers, and $s$ is the largest positive integer that divides both $a$ and $b$.  We refer to this computation as the \emph{Extended Euclidean Algorithm}.
+where $a$ and $b$ are fixed integers, and $s$ is the greatest common divisor (GCD) of both $a$ and $b$.  We refer to this computation as the \emph{Extended GCD}.
 
 \subsection{The Euclidean Algorithm}
 
-The Euclidean Algorithm is an algorithm for computing the greatest common divisor (GCD) of two integers and is due to Euclid.  We start with two positive integers $a$ and $b$.  At each iteration of the algorithm, we subtract the smaller of the two numbers from the larger one, until one them is 0. At this point, the non-zero number is the largest divisor of $a$ and $b$.
+The Euclidean Algorithm is an algorithm for computing the greatest common divisor of two integers and is due to Euclid.  We start with two positive integers $a$ and $b$.  At each iteration of the algorithm, we subtract the smaller of the two numbers from the larger one, until one them is 0. At this point, the non-zero number is the largest divisor of $a$ and $b$.
 
 Since the smaller number may still be smaller after a single iteration of the above algorithm, we can use fewer steps by subtracting an integer multiple. We extend this concept by using a system of equations of the form
 \begin{align}
@@ -1078,17 +1110,17 @@ Initially, let
 \[
 \matrixThreeTwo{s}{U}{V}{t}{X}{Y} = \matrixThreeTwo{a}{1}{0}{b}{0}{1}
 \]
-and Equations \ref{eq:initialGcd1} and \ref{eq:initialGcd2} hold.  We maintain the invariant that $s \ge t$.  When $s < t$, simply swap rows in the matrix representation above.  At each iteration, subtract $\floor{s/t}$ times the second row from the first, and then swap rows to maintain the invariant.  When $t=0$, the first row of the matrix is a solution such that $s$ is the largest positive divisor of $a$ and $b$.  The algorithm is given in Algorithm \ref{alg:EeaDivRem}.  We can handle negative $a$ and $b$ by using $a' = |a|$ and $b' = |b|$ as inputs and modifying the output such that $U' = U \cdot \sign(a)$ and $V' = V \cdot \sign(b)$ where
+and Equations \ref{eq:initialGcd1} and \ref{eq:initialGcd2} hold.  We maintain the invariant that $s \ge t$.  When $s < t$, simply swap the rows in the matrix representation above.  At each iteration, subtract $q = \floor{s/t}$ times the second row from the first, and then swap rows to maintain the invariant.  When $t=0$, the first row of the matrix is a solution such that $s$ is the largest positive divisor of $a$ and $b$.  The algorithm is given in Algorithm \ref{alg:EeaDivRem}.  We handle negative $a$ and $b$ by using $a' = |a|$ and $b' = |b|$ as inputs and modifying the output such that $U' = U \cdot \sign(a)$ and $V' = V \cdot \sign(b)$ where
 \[
 	\sign(x) = \begin{cases}
 		-1 & \textrm{ when } x < 0 \\
 		0 & \textrm{ when } x = 0 \\
-		1 & \textrm{ when } x > 0
-	\end{cases}.
+		1 & \textrm{ when } x > 0.
+	\end{cases}
 \]
 
 \begin{algorithm}[h]
-\caption{Extended Euclidean Algorithm using Divide with Remainder.}
+\caption{Extended Euclidean Algorithm.}
 \label{alg:EeaDivRem}
 \begin{algorithmic}[1]
 \REQUIRE $a,b \in \ZZ$
@@ -1108,16 +1140,16 @@ and Equations \ref{eq:initialGcd1} and \ref{eq:initialGcd2} hold.  We maintain t
 \end{algorithmic}
 \end{algorithm}
 
-To compute the partially reduced coefficients of the product ideal from the Fast Ideal Multiplication Algorithm \ref{alg:nucomp}, we compute the continued fraction expansion of $a/b$ using the recurrences
+To compute the partially reduced coefficients of the product ideal from the Fast Ideal Multiplication Algorithm (\ref{alg:nucomp}), we compute the continued fraction expansion of $a/b$ using the recurrences
 \begin{align*}
 	q_i &= \floor{R_{i-2} ~/~ R_{i-1}} \\
 	R_i &= R_{i-2} - q_i R_{i-1} \\
 	C_i &= C_{i-2} - q_i C_{i-1}.
 \end{align*}
-Notice that these recurrences perform the same operation as a single step in the Extended Euclidean Algorithm, as such, we call this the \emph{Partial Extended Euclidean Algorithm}.  The initial and stopping conditions are different, however.  The algorithm is listed in Algorithm \ref{alg:PartialEeaDivRem}.
+Notice that these recurrences perform the same operation as a single step in the Extended Euclidean Algorithm, but that the initial and stopping conditions are different.  As such, we call this the \emph{Partial Extended Euclidean Algorithm}.    The algorithm is listed in Algorithm \ref{alg:PartialEeaDivRem}.
 
 \begin{algorithm}[h]
-\caption{Partial Extended Euclidean Algorithm using Divide with Remainder.}
+\caption{Partial Extended Euclidean Algorithm.}
 \label{alg:PartialEeaDivRem}
 \begin{algorithmic}[1]
 \REQUIRE $a,b, \in \ZZ$ and a termination bound $B \in \ZZ$.
@@ -1140,9 +1172,11 @@ All the operations performed on the matrix
 \[
 \matrixtt{R_0}{C_0}{R_1}{C_1}
 \]
-in the Partial Extended GCD are unimodular operations in that the operation can be represented by a 2x2 matrix with determinant either $+1$ or $-1$.  This turns out to be critical as some variations of the Extended Euclidean Algorithm are represented using matrix operations that are not unimodular and so therefore do not have an extension to the Partial Extended Euclidean Algorithm.
+during the Partial Extended Euclidean Algorithm are unimodular operations. By this we mean that the operation can be represented by a matrix with determinant either $+1$ or $-1$.  This turns out to be critical as some variations of the Extended Euclidean Algorithm are represented using matrix operations that are not unimodular and so therefore do not have an extension to the Partial Extended Euclidean Algorithm.
 
-\subsection{Lehmer GCD}
+\subsection{Lehmer's GCD}
+
+In the previous section, we improved upon the original GCD computation by subtracting a multiple $q = \floor{s / t}$ of the smaller number from the larger number.  Derrick Henry Lehmer noticed that for large integers, computing $q$ was expensive and that most of the time the result was small.
 
 \subsection{Right-to-Left Binary GCD (w/o partial)}
 
@@ -1248,6 +1282,27 @@ i.e. is it faster to use the product and one exponentiation or individual primes
 \item Flint
 \item Maple
 \end{itemize}
+
+\chapter{Further Research}
+
+\section{Other types of Ideal Arithmetic}
+For example, the ideal ring of algebraic integers of real quadratic fields.
+
+\section{Function Fields}
+
+For example Hyperelliptic Curves
+
+\section{DBNS with other coprime bases}
+
+\section{Number systems with three, four, or more bases.}
+
+\section{$\textrm{Super}^2\textrm{SPAR}$}
+
+SuperSPAR with other corprime bases or multiple bases.
+
+In our implementation we choose a primorial, $P$, such that baby steps are coprime to $P$ and giant steps are a multiple of $P$.  We can select a product of small primes that need not be consecutive, e.g. $P = 2 \times 3 \times 11 \times 13$ and then use baby steps coprime to this and giant steps that are a multiple of this.
+
+Also consider parallelization of SuperSPAR using multipliers.  And possibly implementing it on a GPU.
 
 
 %%%%%%%%%%%%%%%%
