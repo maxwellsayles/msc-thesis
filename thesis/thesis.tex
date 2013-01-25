@@ -1232,9 +1232,9 @@ We then continue with the outer loop of the computation until $t = 0$.  In the e
 \end{algorithmic}
 \end{algorithm}
 
-Since Lehmer's GCD performs the same operations as the Extended Euclidean Algorithm, both on the full precision values and on the single precision values, every operation is unimodular, and as such, Lehmer's GCD can be adapted in a straightforward manner to a Partial Extended GCD computation.
+Since Lehmer's GCD performs the same operations as the Extended Euclidean Algorithm, both on full precision values and on single precision values, each operation is unimodular, and as such, Lehmer's GCD can be adapted in a straightforward manner to a Partial Extended GCD computation.
 
-In our implementation and experiments, Lehmer's GCD is especially useful when the arguments to the GCD are larger than those that fit into a logical machine word (in our case,  However, when we treat the machine word as small enough, it becomes possible to precompute all possible inputs into the single precision Extended GCD computation and as such we can precompute the resulting $2 \times 2$ matrix.  We did this for machine words 8bit in size.  Since there are two inputs
+In our implementation, Lehmer's GCD is especially useful when the arguments to the GCD are larger than 128-bits.  However, when we consider artificially smaller machine words, it is possible to precompute the resulting $2 \times 2$ matrix for all possible inputs into the single precision Extended GCD computation.  We did this for 8-bit machine words.  As there are two inputs, each 8-bits in size, there are 65536 possible pairs of inputs.  The coefficients of the resulting $2 \times 2$ matrix can be bound by 8-bits each, and so the table requires 256Kb of memory. This simplifies the GCD computation dramatically since the inner loop becomes a lookup from this table.
 
 \subsection{Right-to-Left Binary GCD (w/o partial)}
 
