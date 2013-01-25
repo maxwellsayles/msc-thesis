@@ -1086,7 +1086,9 @@ Recall that in Stage 1 of SPAR, we compute $\bclass = \aclass^{\prod_{i=2}^t {p_
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Ideal Exponentiation Experiments}
 
-A significant contribution of this thesis is to improve the performance of exponentiation in the ideal class group of imaginary quadratic number fields on present day CPUs.  Improvements to exponentiation also include improvements to arithmetic in the class group.  This chapter focuses on the different techniques we used to improve performance and the experimental data that lead us to our implementation.  In Section \ref{sec:eea}, we discuss methods to compute solutions to equations of the form $s = Ua + Vb$ useful for fast ideal multiplication. In Section \ref{sec:specializedTypes}, we discuss specialized implementations of ideal arithmetic for discriminants less than 60-bits, less than 120-bits, and for discriminants with unbounded size. In Section \ref{sec:exponentiation}, we compare various methods to exponentiate ideal representatives to large fixed exponents that are the product of many primes, including many novel approaches to computing double-base representations of such numbers.
+A significant contribution of this thesis is to improve the performance of exponentiation in the ideal class group of imaginary quadratic number fields on present day CPUs.  Improvements to exponentiation also include improvements to arithmetic in the class group.  This chapter focuses on the different techniques we used to improve performance and the experimental data that lead us to our implementation.  We specialized much of our implementation for the x64 architecture.  Many of our routines benefit when the input is bounded by a single machine word, i.e.\ 64-bits, but we were also able to implement custom arithmetic to take advantage of integers that fit within two machine words, i.e.\ 128-bits. When integers are larger than 128-bits, we chose to use the GNU Multiple Precision (GMP) arithmetic library.
+
+In Section \ref{sec:eea}, we discuss methods to compute solutions to equations of the form $s = Ua + Vb$ useful for fast ideal multiplication. In Section \ref{sec:specializedTypes}, we discuss specialized implementations of ideal arithmetic for discriminants less than 60-bits, less than 120-bits, and for discriminants with unbounded size. In Section \ref{sec:exponentiation}, we compare various methods to exponentiate ideal representatives to large fixed exponents that are the product of many primes, including many novel approaches to computing double-base representations of such numbers.
 
 \section{Extended Greatest Common Divisor}
 \label{sec:eea}
@@ -1140,6 +1142,8 @@ and Equations \ref{eq:initialGcd1} and \ref{eq:initialGcd2} hold.  We maintain t
 \end{algorithmic}
 \end{algorithm}
 
+In practice, these operations are not performed using matrix operations, but by manipulating each variable directly.  Furthermore, we typically implement division with remainder, which solves $s = qt + r$ for $q,r \in \ZZ$ and $r < t$.  Notice that $q = \floor{s/t}$ and that $r = s - qt$ is the target value of $t$ for each iteration of the Euclidean Algorithm.  
+
 To compute the partially reduced coefficients of the product ideal from the Fast Ideal Multiplication Algorithm (\ref{alg:nucomp}), we compute the continued fraction expansion of $a/b$ using the recurrences
 \begin{align*}
 	q_i &= \floor{R_{i-2} ~/~ R_{i-1}} \\
@@ -1176,7 +1180,61 @@ during the Partial Extended Euclidean Algorithm are unimodular operations. By th
 
 \subsection{Lehmer's GCD}
 
-In the previous section, we improved upon the original GCD computation by subtracting a multiple $q = \floor{s / t}$ of the smaller number from the larger number.  Derrick Henry Lehmer noticed that for large integers, computing $q$ was expensive and that most of the time the result was small.
+In the previous section, we improved upon the original GCD computation by subtracting a multiple, $q = \floor{s / t}$, of the smaller number from the larger number.  Derrick Henry Lehmer noticed that most of the quotients, $q$, were small and that those small quotients could be computed from the leading digits (or machine word) of the numerator and denominator \cite{Lehmer1938}.
+
+The idea is similar to the Extended Euclidean Algorithm, only that we have an inner loop that performs an Extended GCD computation using values that fit within a single machine word.  As before, start by letting
+\[
+	\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixThreeTwo{a}{1}{0}{b}{0}{1}.
+\]
+Assume that $s \ge t$ (if this is not the case, then swap the rows of the matrix).  We treat $s$ and $t$ as the same bit length by padding $t$ with `0's for the most significant bits.  We want to shift $s$ right such that its most significant bit becomes the most significant bit of a machine word (unless $s$ already fits within a single machine word).  We shift $t$ right by the same amount. Let $s'$ and $t'$ be the single machine word values obtained from $s$ and $t$ respectively.  We then perform an Extended GCD computation on the values $s'$ and $t'$ but only so far as the quotients $q'=\floor{s'/t'}$, generated by each step of the single precision GCD computation, are equal to the quotients $q=\floor{s/t}$, generated by a full precision GCD computation.  Let
+\[
+\matrixThreeTwo{s'}{A}{B}{t'}{C}{D} \gets \matrixThreeTwo{s'}{1}{0}{t'}{0}{1}
+\]
+be our initial matrix for the single precision GCD computation.  We can determine when the quotients $q'$ differ from the quotients $q$ by computing $q_1 = \floor{(s'+A)/(t'+C)}$ and $q_2 = \floor{(s'+B)/(t'+D)}$.  Simply let $q' = q_1$ and $q'$ equals $q$ when $q_1$ equals $q_2$.
+
+Once $q_1 \neq q_2$, the matrix
+\[
+\matrixtt{A}{B}{C}{D}
+\]
+represents the concatenation of the operations performed during the single precision GCD.  If $B \neq 0$, we combine these operation to the outer loop of the larger GCD by computing
+\[
+\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{A}{B}{C}{D}
+		        \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}.
+\]
+We then continue with the outer loop of the computation until $t = 0$.  In the event that $B=0$, then $s$ and $t$ differ in length by more than a machine word, and we use a step of the full precision GCD computation to adjust their lengths.  The complete algorithm is given in Algorithm \ref{alg:lehmerGcd}.
+
+\begin{algorithm}[h]
+\caption{Lehmer's GCD (\cite{Lehmer1938}).}
+\label{alg:lehmerGcd}
+\begin{algorithmic}[1]
+\REQUIRE $a,b, \in \ZZ$ and $a \ge b > 0$. \\
+         Let $m$ be the number of bits in a machine word. \\
+\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixThreeTwo{a}{1}{0}{b}{0}{1}$
+\WHILE{$t \neq 0$}
+	\STATE $k \gets \floor{\log_2 s} + 1 - m$
+	\STATE $s' \gets \floor{s / 2^k}$ \COMMENT{Shift right for most significant word.}
+	\STATE $t' \gets \floor{t / 2^k}$
+	\STATE $\matrixtt{A}{B}{C}{D} \gets \matrixtt{1}{0}{0}{1}$
+	\WHILE{$t' \neq 0$ and $\floor{(s'+A)/(t'+C)} = \floor{(s'+B)/(t'+D)}$}
+		\STATE $q' \gets \floor{(s'+A)/(t'+C)}$ \COMMENT{Single precision step.}
+		\STATE $\matrixThreeTwo{s'}{A}{B}{t'}{C}{D} \gets \matrixtt{0}{1}{1}{-q'}
+			    \cdot \matrixThreeTwo{s'}{A}{B}{t'}{C}{D}$
+	\ENDWHILE
+	\IF{$B = 0$}
+		\STATE $q \gets \floor{s/t}$  \COMMENT{Full precision step.}
+		\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{0}{1}{1}{-q}
+		        \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$
+	\ELSE
+		\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{A}{B}{C}{D}
+		        \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$ \COMMENT{Combine single precision step.}
+	\ENDIF
+\ENDWHILE
+\end{algorithmic}
+\end{algorithm}
+
+Since Lehmer's GCD performs the same operations as the Extended Euclidean Algorithm, both on the full precision values and on the single precision values, every operation is unimodular, and as such, Lehmer's GCD can be adapted in a straightforward manner to a Partial Extended GCD computation.
+
+In our implementation and experiments, Lehmer's GCD is especially useful when the arguments to the GCD are larger than those that fit into a logical machine word (in our case,  However, when we treat the machine word as small enough, it becomes possible to precompute all possible inputs into the single precision Extended GCD computation and as such we can precompute the resulting $2 \times 2$ matrix.  We did this for machine words 8bit in size.  Since there are two inputs
 
 \subsection{Right-to-Left Binary GCD (w/o partial)}
 
@@ -1184,7 +1242,7 @@ In the previous section, we improved upon the original GCD computation by subtra
 
 \subsection{Left-to-Right Binary GCD (w/ partial)}
 \subsubsection{Compute $\min_k \{|u-2^k\}$ (in the literature)}
-\subsubsection{Compute $|u-2^k|$ where $k = \floor(\log_2u)$ (our method)}
+\subsubsection{Compute $|u-2^k|$ where $k = \floor{\log_2u}$ (our method)}
 
 \subsection{32bit, 64bit, 128bit Intel assembler}
 
