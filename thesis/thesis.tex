@@ -17,12 +17,13 @@
 \usepackage{float}
 \usepackage{graphics}
 
-\theoremstyle{plain}
+%\theoremstyle{plain}
+\theoremstyle{definition}
 \newtheorem{thm}{Theorem}[section]
 \newtheorem{lemma}[thm]{Lemma}
 \newtheorem{prop}[thm]{Proposition}
+%\renewtheorem{proof}[thm]{Proof}
 \newtheorem{cor}[thm]{Corollary}
-\theoremstyle{definition}
 \newtheorem{defn}[thm]{Definition}
 
 \usepackage{eqparbox}
@@ -51,6 +52,7 @@
 \newcommand{\matrixto}[2]{\left[ \begin{array}{rr} #1 & #2 \end{array} \right]}
 \newcommand{\matrixot}[2]{\left[ \begin{array}{r} #1 \\ #2 \end{array} \right]}
 \newcommand{\matrixtt}[4]{\left[ \begin{array}{rr} #1 & #2 \\ #3 & #4 \end{array} \right]}
+\newcommand{\matrixThreeOne}[3]{\left[ \begin{array}{rrr} #1 & #2 & #3 \end{array} \right]}
 \newcommand{\matrixThreeTwo}[6]{\left[ \begin{array}{rrr} #1 & #2 & #3 \\ #4 & #5 & #6 \end{array} \right]}
 \newcommand{\ntoinfty}{\lim_{n \rightarrow \infty}}
 \newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
@@ -1138,11 +1140,11 @@ and Equations \ref{eq:initialGcd1} and \ref{eq:initialGcd2} hold.  We maintain t
 	\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{0}{1}{1}{-q} \cdot
 		    \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$ \COMMENT{Subtract $q$ times $2^{\textrm{nd}}$ row and swap.}
 \ENDWHILE
-\RETURN $(s, U, V)$ \COMMENT{Such that $s = Ua + Vb$.}
+\RETURN $(s, U \bmod b, V \bmod a)$ \COMMENT{Such that $s = Ua + Vb$.}
 \end{algorithmic}
 \end{algorithm}
 
-In practice, these operations are not performed using matrix operations, but by manipulating each variable directly.  Furthermore, we typically implement division with remainder, which solves $s = qt + r$ for $q,r \in \ZZ$ and $r < t$.  Notice that $q = \floor{s/t}$ and that $r = s - qt$ is the target value of $t$ for each iteration of the Euclidean Algorithm.  
+In practice, these operations are not performed using matrix operations, but by manipulating each variable directly.  Furthermore, we typically implement division with remainder, which solves $s = qt + r$ for $q,r \in \ZZ$ and $r < t$.  Notice that $r = s - qt$ is the target value of $t$ for each iteration of the Euclidean Algorithm.  
 
 To compute the partially reduced coefficients of the product ideal from the Fast Ideal Multiplication Algorithm (\ref{alg:nucomp}), we compute the continued fraction expansion of $a/b$ using the recurrences
 \begin{align*}
@@ -1176,7 +1178,7 @@ All the operations performed on the matrix
 \[
 \matrixtt{R_0}{C_0}{R_1}{C_1}
 \]
-during the Partial Extended Euclidean Algorithm are unimodular operations. By this we mean that the operation can be represented by a matrix with determinant either $+1$ or $-1$.  This turns out to be critical as some variations of the Extended Euclidean Algorithm are represented using matrix operations that are not unimodular and so therefore do not have an extension to the Partial Extended Euclidean Algorithm.
+during the Partial Extended Euclidean Algorithm are unimodular operations. By this we mean that the operation can be represented by a matrix with determinant either $+1$ or $-1$.  This turns out to be critical (TODO: Why? Is there an short answer? Can I cite something?) as some variations of the Extended Euclidean Algorithm are represented using matrix operations that are not unimodular and so therefore do not have an extension to the Partial Extended Euclidean Algorithm.
 
 \subsection{Lehmer's GCD}
 
@@ -1238,6 +1240,114 @@ In our implementation, Lehmer's GCD is especially useful when the arguments to t
 
 \subsection{Right-to-Left Binary GCD (w/o partial)}
 
+The previous extended GCD algorithms made use of divide with remainder, which can be an expensive operation.  Binary GCD algorithms emphasize bit shifting over multiplication and division.  Such algorithms may out perform other GCD algorithms in practice.  Here we introduce a binary GCD algorithm that works from the least significant bit to the most significant bit.  We refer to this as right-to-left since this is the direction in which we process the written binary representation.  The concept was originally published by Stein \cite{Stein1967}.
+
+To compute the greatest common divisor of two numbers, we can repeatedly apply the following identities.
+\[
+	\gcd(a, b) = \begin{cases}
+		2 \cdot \gcd(a/2, b/2) & \textrm{ when both $a$ and $b$ are even} \\
+		\gcd(a/2, b) & \textrm{ when only $a$ is even} \\
+		\gcd(a, b/2) & \textrm{ when only $b$ is even} \\
+		\gcd(a-b, b) & \textrm{ when $a \ge b$ and both are odd} \\
+		\gcd(b-a, a) & \textrm{ when $a < b$ and both are odd}.
+	\end{cases}
+\]
+In the case that only $a$ is even, we can divide $a$ by 2 since 2 is not a common divisor of both.  The same is true when only $b$ is even.
+
+When both $a$ and $b$ are even, we have that $\gcd(a, b) = 2 \cdot \gcd(a/2, b/2)$.  So the first step of our binary GCD algorithm is to remove all common powers of two from $a$ and $b$.  Let $r$ be the number of times 2 is removed from both.  Now either $a$ or $b$ or both are odd.  If $a$ is not odd, then swap $a$ and $b$ so that $a$ is guaranteed to be odd.  We will compute the GCD of the reduced $a$ and $b$.  As such, the final solution to the original input is $s2^r = Ua2^r + Vb2^r$.
+
+As before, we begin with the system of equations
+\[
+	\matrixThreeTwo{s}{U}{V}{t}{X}{Y} = \matrixThreeTwo{a}{1}{0}{b}{0}{1}.
+\]
+Since we chose $a$ to be odd, $s$ is odd.  An invariant of our algorithm will be that $s$ is odd at the beginning of each iteration.  As previously, we iterate until $t=0$.
+
+Since $s$ is odd, we first remove any powers of 2 from $t$.  While $t$ is even, we would like to apply the operation
+\[
+(t, X, Y) \gets \left( \frac{t}{2}, \frac{X}{2}, \frac{Y}{2} \right)
+\]
+but this may result in rational values for $X$ and $Y$ if either were odd. We first point out that
+\begin{align*}
+	s &= Ua + Vb \\
+	  &= Ua + Vb + (ab - ab) \\
+	  &= (U+b)a + (V-a)b.
+\end{align*}
+As such, we can simultaneously add $b$ to $U$ and subtract $a$ from $V$ when it suits us.
+
+\begin{thm}
+\label{thm:addBSubA}
+When $t$ is even, either both $X$ and $Y$ are even, or $Y$ is odd and both $X+b$ and $Y-a$ are even.
+\end{thm}
+
+\begin{proof}
+Assume $t$ is even and that $Y$ is odd.  We have
+\[
+\begin{array}{rllr}
+	         & t \equiv Xa + Yb & \pmod 2 \\
+\Rightarrow~ & 0 \equiv X + b & \pmod 2 & \textrm{ \{Since $t$ is even and $Y$ and $a$ are odd.\}} \\
+\Rightarrow~ & 0 \equiv X + b \equiv Y - a & \pmod 2. 
+\end{array}
+\]
+Now assume $t$ is even and that $X$ is odd.  We have
+\[
+\begin{array}{rllr}
+	         & t \equiv Xa + Yb & \pmod 2 \\
+\Rightarrow~ & 0 \equiv 1 + Yb & \pmod 2 & \textrm{ \{Since $t$ is even and $X$ and $a$ are odd.\}} \\
+\Rightarrow~ & 1 \equiv Yb & \pmod 2 & \textrm{ \{Both $Y$ and $b$ are odd.\}} \\
+\Rightarrow~ & 0 \equiv X + b \equiv Y - a & \pmod 2. 
+\end{array}
+\]
+Therefore, if $t$ is even, either both $X$ and $Y$ are even, or $Y$ is odd and both $X+b$ and $Y-a$ are even.
+\end{proof}
+
+By Theorem \ref{thm:addBSubA}, we have a way to reduce $t$ by 2 and maintain integer coefficients.  While $t$ is even, if $Y$ is even, apply
+\[
+	(t, X, Y) \gets \left( \frac{t}{2}, \frac{X}{2}, \frac{Y}{2} \right)
+\]
+and if $Y$ is odd, apply
+\[
+	(t, X, Y) \gets \left( \frac{t}{2}, \frac{X+b}{2}, \frac{Y-a}{2} \right).
+\]
+At this point, both $s$ and $t$ are odd.  If $s \ge t$ then let
+\[
+	\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{0}{1}{1}{-1} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}
+\]
+otherwise let
+\[
+	\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{0}{1}{-1}{1} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}.
+\]
+At this point $t$ is certain to be even and $s$ is certain to be odd.  We repeat the steps of reducing $t$ by powers of 2 and then subtracting one row from the other until $t=0$.  The complete algorithm is given in Algorithm \ref{alg:r2lBinGcd}.  Note that in practice, integer division by 2 is performed using a bit shift right.
+
+\begin{algorithm}[h]
+\caption{Right-to-left Binary GCD (Based on \cite{Stein1967}).}
+\label{alg:r2lBinGcd}
+\begin{algorithmic}[1]
+\REQUIRE $a,b, \in \ZZ$ and $a \ge b > 0$. \\
+         Let $m$ be the number of bits in a machine word. \\
+\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixThreeTwo{a}{1}{0}{b}{0}{1}$
+\WHILE{$t \neq 0$}
+	\STATE $k \gets \floor{\log_2 s} + 1 - m$
+	\STATE $s' \gets \floor{s / 2^k}$ \COMMENT{Shift right for most significant word.}
+	\STATE $t' \gets \floor{t / 2^k}$
+	\STATE $\matrixtt{A}{B}{C}{D} \gets \matrixtt{1}{0}{0}{1}$
+	\WHILE{$t' \neq 0$ and $\floor{(s'+A)/(t'+C)} = \floor{(s'+B)/(t'+D)}$}
+		\STATE $q' \gets \floor{(s'+A)/(t'+C)}$ \COMMENT{Single precision step.}
+		\STATE $\matrixThreeTwo{s'}{A}{B}{t'}{C}{D} \gets \matrixtt{0}{1}{1}{-q'}
+			    \cdot \matrixThreeTwo{s'}{A}{B}{t'}{C}{D}$
+	\ENDWHILE
+	\IF{$B = 0$}
+		\STATE $q \gets \floor{s/t}$  \COMMENT{Full precision step.}
+		\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{0}{1}{1}{-q}
+		        \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$
+	\ELSE
+		\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{A}{B}{C}{D}
+		        \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$ \COMMENT{Combine single precision step.}
+	\ENDIF
+\ENDWHILE
+\end{algorithmic}
+\end{algorithm}
+
+
 \subsection{8-bit Windowed Right-to-Left Binary GCD (w/o partial)}
 
 \subsection{Left-to-Right Binary GCD (w/ partial)}
@@ -1245,6 +1355,8 @@ In our implementation, Lehmer's GCD is especially useful when the arguments to t
 \subsubsection{Compute $|u-2^k|$ where $k = \floor{\log_2u}$ (our method)}
 
 \subsection{32bit, 64bit, 128bit Intel assembler}
+
+\subsection{Experimental Results}
 
 \section{Ideal Arithmetic}
 \label{sec:specializedTypes}
