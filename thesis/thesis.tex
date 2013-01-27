@@ -515,7 +515,8 @@ As before, the representative $[a, (b+\sqrt\Delta)/2]$ is either reduced or almo
 %%%%%%%%%%
 % NUCUBE %
 %%%%%%%%%%
-\subsection{Fast Ideal Cubing (NUCUBE)}\label{subsec:nucube}
+\subsection{Fast Ideal Cubing (NUCUBE)}
+\label{subsec:nucube}
 
 When we consider binary-ternary representations of exponents, cubing is required.  In general, if we want to compute ${\mathfrak a}^3$ for an ideal class representative $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$, we can take advantage of the simplification that happens when expanding the computation of ${\mathfrak a}^2 \mathfrak a$.  Here we provide a high level description of a technique for cubing based on similar ideas to NUCOMP and NUDUPL, namely that of computing the quotients of a continued fraction expansion.  A detailed description and analysis of this technique can be found in \cite{Imbert2010}.
 
@@ -593,14 +594,15 @@ In the next chapter, we'll discuss some exponentiation techniques that make use 
 
 Given a group $G$, an element $g \in G$, and an integer $n$, computing $g^n$ is a common operation and is known as exponentiation.  Diffie-Hellman key exchange is an example that uses exponentiation whereby two parties can jointly establish a shared secret key over an insecure channel.  An application discussed in detail in this thesis is that of computing the order of a group element.  Our approach is to exponentiate a group element to the product, $P$, of several small primes.  The result is an element whose order is likely to not be divisible by any of these primes. The order of this new element is then computed using a variant of Shanks' baby-step giant-step algorithm where only powers relatively prime to $P$ are computed.  Determining the order of an element can be useful in computing the structure of a group, or in factoring an integer associated with a group.  Being able to exponentiate faster implies that the entire computation can complete more quickly.
 
-In Sections \ref{section:binary} and \ref{section:naf} we discuss standard exponentiation techniques that rely on a base 2 representation of the exponent.  In Section \ref{section:dbns} we introduce double-base number systems, which, as the name implies, are number systems that make use of multiple bases in the representation of a number.  We pay particular attention to double-base representations that use bases 2 and 3, since in our implementation of ideal class group arithmetic the cost of squaring is less than the cost of multiplying, and the cost of cubing is less than the cost of multiplying an element with its square. For this reason, we distinguish between the number of multiplications, squares, and cubes in an algorithm. In Section \ref{section:dbnsMethods} we discuss some methods to compute double-base representations found in the literature.  
+In Sections \ref{section:binaryExp} and \ref{section:naf} we discuss standard exponentiation techniques that rely on a base 2 representation of the exponent.  In Section \ref{section:dbns} we introduce double-base number systems, which, as the name implies, are number systems that make use of multiple bases in the representation of a number.  We pay particular attention to double-base representations that use bases 2 and 3, since in our implementation of ideal class group arithmetic the cost of squaring is less than the cost of multiplying, and the cost of cubing is less than the cost of multiplying an element with its square. For this reason, we distinguish between the number of multiplications, squares, and cubes in an algorithm. In Section \ref{section:dbnsMethods} we discuss some methods to compute double-base representations found in the literature.  
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % BINARY EXPONENTIATION %
 %%%%%%%%%%%%%%%%%%%%%%%%%
 \bigbreak
-\section{Binary Exponentiation}\label{section:binary}
+\section{Binary Exponentiation}
+\label{section:binaryExp}
 The simplest method of exponentiation is binary exponentiation.  Let $g$ be an element in the group $G$ and $n$ be a positive integer.  We want to compute $g^n \in G$.  We first represent $n$ in binary as
 \[
 	n = \sum_{i=0}^{\floor{\log_2 n}} b_i 2^i
@@ -609,7 +611,7 @@ where $b_i \in \{0, 1\}$ such that $b_i$ represents the $i^{\textrm{th}}$ bit of
 \[
 	g^n = \prod_{i=0}^{\floor{\log_2 n}} g^{b_i 2^i}.
 \]
-This description is known as right-to-left binary exponentiation because the result is computed by generating the terms of the product from low order to high order.  The left-to-right variant evaluates the bits of the exponent $n$ from high order to lower order by repeatedly squaring an accumulator and multiplying this with the base element $g$ when $b_i = 1$.  The left-to-right variant has the advantage that one of the values in the multiplication, namely $g$, remains fixed throughout the evaluation.  There also exist windowed variants where $g^w$ is precomputed for each $w$ in some window $0 \le w \le 2^k$ for some $k$ (typically chosen to be cache efficient). The exponent $n$ is then expressed in base $2^k$.  There are numerous sources discussing windowed variants such as (TODO) but we do not discuss these variants further here.
+This description is known as right-to-left binary exponentiation because the result is computed by generating the terms of the product from low order to high order.  The left-to-right variant evaluates the bits of the exponent $n$ from high order to lower order by repeatedly squaring an accumulator and multiplying this with the base element $g$ when $b_i = 1$.  The left-to-right variant has the advantage that one of the values in the multiplication, namely $g$, remains fixed throughout the evaluation.  There also exist windowed variants where $g^w$ is precomputed for each $w$ in some window $0 \le w \le 2^k$ for some $k$ (typically chosen to be cache efficient). The exponent $n$ is then expressed in base $2^k$.  For further discussion of windowed techniques, see \cite{Cohen2006}.
 
 Binary exponentiation algorithms require $\floor{\log_2 n}$ squarings and on average $\floor{\log_2 n}/2$ multiplications, since a multiplication is only necessary when $b_i = 1$ and the probability of $b_i = 1$ is 1/2.
 
@@ -617,7 +619,8 @@ Binary exponentiation algorithms require $\floor{\log_2 n}$ squarings and on ave
 % NAF EXPONENTIATION %
 %%%%%%%%%%%%%%%%%%%%%%
 \bigbreak
-\section{Non-Adjacent Form Exponentiation}\label{section:naf}
+\section{Non-Adjacent Form Exponentiation}
+\label{section:naf}
 
 The Non-Adjacent Form (NAF) of an integer is a \emph{signed} base two representation such that no two non-zero terms in the representation are adjacent. Each integer, $n$, has a unique representation in non-adjacent form. Formally, an integer $n$ is represented such that
 \[
@@ -678,7 +681,8 @@ A particular advantage of a non-adjacent form exponentiation over a binary expon
 % DBNS %
 %%%%%%%%
 \bigbreak
-\section{Double-Base Number Systems}\label{section:dbns}
+\section{Double-Base Number Systems}
+\label{section:dbns}
 
 A significant advantage of non-adjacent form over a binary representation is that on average the number of non-zero terms (the density of the representation) is lower.  We can achieve an even lower density on average when we extend the representation to a signed double-base number system (DBNS).  Binary and non-adjacent form are both base 2 number systems.  In the case of a double base number system, as the name suggests, we use two bases.  This system was first introduced by Dimitrov and Cooklev \cite{Dimitrov1995a, Dimitrov1995b}.  Given two coprime integers $p$ and $q$ and some integer $n$, we represent $n$ as the sum and difference of the product of powers of $p$ and $q$,
 \begin{equation}\label{eq:generalDbnsForm}
@@ -1344,12 +1348,19 @@ This ensures that both $s$ and $t$ are positive, that $s$ is odd, and that $t$ i
 \end{algorithmic}
 \end{algorithm}
 
-Even though this algorithm performs well in practice (Subsection \ref{subsec:gcdResults}, unfortunately the operation of dividing $t$, $X$, and $Y$ by 2 and of transforming $X+b$ and $Y-a$ to make them even cannot be expressed as unimodular matrix operations.  Therefore, we could not extend this method to a partial extended GCD computation useful for computing the partially reduced coefficients for ideal multiplication.
+Even though this algorithm performs well in practice (see Subsection \ref{subsec:gcdResults}), unfortunately the operation of dividing $t$, $X$, and $Y$ by 2 and of transforming $X+b$ and $Y-a$ to make them even cannot be expressed as unimodular matrix operations.  Therefore, we could not extend this method to a partial extended GCD computation useful for computing the partially reduced coefficients for ideal multiplication.
 
-\subsection{8-bit Windowed Right-to-Left Binary GCD (w/o partial)}
+\subsection{Windowed Right-to-Left Binary GCD}
+
+Windowing is a common technique used to extend the base of an algorithm.  We saw this earlier in our discussion of binary exponentiation in Section \ref{section:binaryExp}.  The idea there was to precompute $g^w$ for each $w$ in some window $0 \le w \le 2^k$ for some $k$ and then to iterate over the exponent $k$ bits at a time.  We can apply this technique to the right-to-left extended binary GCD.
+
+In the original algorithm, we repeatedly reduce either the equation $t=Xa+Yb$ by 2 while $t$ is even or when $Y$ is odd, we reduce the equation $t=(X+b)a+(Y-a)b$ instead. We can simultaneously add $b$ to $X$ and subtract $a$ from $Y$ in order to make both even.  Suppose that $t$ was a multiple of 4.  We could reduce it by 4 if both $X$ and $Y$ were also multiples of 4.  By adding a multiple $m$ of $b$ to $X$ and subtracting the same multiple $m$ of $a$ from $Y$, we can 
 
 \subsection{Left-to-Right Binary GCD (w/ partial)}
 \subsubsection{Compute $\min_k \{|u-2^k\}$ (in the literature)}
+
+Due to \cite{Shallit1994}.
+
 \subsubsection{Compute $|u-2^k|$ where $k = \floor{\log_2u}$ (our method)}
 
 \subsection{32bit, 64bit, 128bit Intel assembler}
