@@ -1340,7 +1340,7 @@ This ensures that both $s$ and $t$ are positive, that $s$ is odd, and that $t$ i
 		\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{0}{1}{-1}{1} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$
 	\ENDIF
 \ENDWHILE
-\RETURN $(s2^r, U, V)$
+\RETURN $(s2^r, U, V)$ if $a$ and $b$ were not swapped and $(s2^r, V, U)$ otherwise
 \end{algorithmic}
 \end{algorithm}
 
