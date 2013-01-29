@@ -1402,10 +1402,14 @@ There is still the case that $t$ may be divisible by $2^j$ for some $j < k$.  Th
 \end{algorithmic}
 \end{algorithm}
 
-In practice, we chose a value of $k=4$.  The graph below shows the timings for different values of $k$.
+A windowed right-to-left binary GCD algorithm trades off precomputation of $2^k$ multiples of $a$ and $b$ with the likelihood that $t$ will be divisible by some power of two. In practice, we chose a value of $k=3$.  Figure \ref{fig:blockbinary} shows the timings for values of $k$ between 1 and 5 inclusive.  Notice that a 3 bit window performs best in practice when each input argument is 14 bits or larger.
 
-(TODO: Come up with a graph!)
-
+\begin{figure}[H]
+\centering
+\includegraphics{blockbinary}
+\caption{Comparison of times for windowed binary GCD.}
+\label{fig:blockbinary}
+\end{figure}
 
 \subsection{Left-to-Right Binary GCD (w/ partial)}
 \subsubsection{Compute $\min_k \{|u-2^k\}$ (in the literature)}
