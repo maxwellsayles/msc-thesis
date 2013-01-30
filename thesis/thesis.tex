@@ -1124,9 +1124,9 @@ where $a$ and $b$ are fixed integers, and $s$ is the greatest common divisor (GC
 
 \subsection{The Euclidean Algorithm}
 
-The Euclidean Algorithm is an algorithm for computing the greatest common divisor of two integers and is due to Euclid.  We start with two positive integers $a$ and $b$.  At each iteration of the algorithm, we subtract the smaller of the two numbers from the larger one, until one them is 0. At this point, the non-zero number is the largest divisor of $a$ and $b$.
+The Euclidean Algorithm is an algorithm for computing the greatest common divisor of two integers and is due to Euclid.  We start with two positive integers $a$ and $b$.  At each iteration of the algorithm, we subtract the smaller of the two numbers from the larger one, until one of them is 0. At this point, the non-zero number is the largest divisor of $a$ and $b$.  Since the smaller number may still be smaller after a single iteration, we can use fewer steps by subtracting an integer multiple of the smaller number from the larger one.
 
-Since the smaller number may still be smaller after a single iteration of the above algorithm, we can use fewer steps by subtracting an integer multiple. We extend this concept by using a system of equations of the form
+We can extend the Euclidean Algorithm by using a system of equations of the form
 \begin{align}
 s &= Ua + Vb \label{eq:initialGcd1} \\
 t &= Xa + Yb. \label{eq:initialGcd2}
@@ -1161,7 +1161,7 @@ and Equations \ref{eq:initialGcd1} and \ref{eq:initialGcd2} hold.  We maintain t
 	\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{0}{1}{1}{-q} \cdot
 		    \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$ \COMMENT{Subtract $q$ times $2^{\textrm{nd}}$ row and swap.}
 \ENDWHILE
-\RETURN $(s, U \bmod b, V \bmod a)$ \COMMENT{Such that $s = Ua + Vb$.}
+\RETURN $(s, U, V)$ \COMMENT{Such that $s = Ua + Vb$.}
 \end{algorithmic}
 \end{algorithm}
 
@@ -1415,7 +1415,56 @@ A windowed right-to-left binary GCD algorithm trades off precomputation with the
 \label{fig:blockbinary}
 \end{figure}
 
-\subsection{Left-to-Right Binary GCD (w/ partial)}
+\subsection{Left-to-Right Binary GCD}
+
+Just as exponentiation can be performed from high-order to low-order, so too can an extended binary GCD computation.  We term this a left-to-right binary GCD, since it works from the left most bit to the right most bit of the written binary representation of the inputs.
+
+Recall that at each iteration of the extended Euclidean Algorithm, we subtract $q = \floor{s/t}$ times the equation $t = Xa + Yb$ from the equation $s = Ua + Vb$ and then swap $(s, U, V)$ with $(t, X, Y)$.  Computing $q=\floor{s/t}$ uses integer division, and then subtracting $q$ times one equation from the other uses multiplication.  Since it is not necessary to subtract exactly $q$ times the equation, the idea is instead to use a value $q' = 2^k$ such that $q'$ is \emph{close} in some sense to $q$.  Subtracting $q'$ times the second equation from the first can then be done by using a binary shift left by $k$ bits.
+
+Shallit and Sorenson \cite{Shallit1994} propose to select $q'=2^k$ such that $q't \le s < 2q't$.  If $s - q't < 2q't - s$, we compute
+\[
+	\matrixThreeTwo{s}{U}{V}{t}{X}{Y} =
+		\matrixtt{0}{1}{1}{-q'} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y},
+\]
+otherwise, we compute
+\[
+	\matrixThreeTwo{s}{U}{V}{t}{X}{Y} =
+		\matrixtt{0}{1}{-1}{2q'} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}.
+\]
+As with the extended Euclidean Algorithm, we maintain the invariant that $s \ge t$, so if after the above computation we have $s < t$, we swap rows of the matrix to restore the invariant.  The complete algorithm is given in Algorithm \ref{alg:shallitGcd}.
+
+\begin{algorithm}[h]
+\caption{Shallit and Sorenson Left-to-Right binary GCD \cite{Shallit1994}.}
+\label{alg:shallitGcd}
+\begin{algorithmic}[1]
+\REQUIRE $a,b \in \ZZ$
+\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets 
+        \matrixThreeTwo{a}{1}{0}{b}{0}{1}$
+\IF {$t > s$}
+	\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets
+	        \matrixtt{0}{1}{1}{0} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$
+	       	\COMMENT{Swap rows. Maintain $s \ge t$.}
+\ENDIF
+\WHILE {$t \neq 0$}
+	\STATE find $q=2^k$ such that $qt \le s < 2qt$
+	\IF {$s - qt < 2qt - s$}
+		\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} =
+		\matrixtt{0}{1}{1}{-q} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$
+	\ELSE
+		\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} =
+		\matrixtt{0}{1}{-1}{2q} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$
+	\ENDIF
+	\IF {$t > s$}
+		\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets
+	    	    \matrixtt{0}{1}{1}{0} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$
+	        	\COMMENT{Swap rows. Maintain $s \ge t$.}
+	\ENDIF
+\ENDWHILE
+\RETURN $(s, U, V)$
+\end{algorithmic}
+\end{algorithm}
+In practice, to find $q=2^k$ we compute the number of bits in both $s$ and $t$ and then use the difference as a candidate for $k$.  Let $k' = (\floor{\log_2s} + 1) - (\floor{\log_2t}+1) = \floor{\log_2s} - \floor{\log_2t}$ be our candidate.  If $t2^{k'} \le s$ then $k = k'$, otherwise $k = k'-1$.
+
 \subsubsection{Compute $\min_k \{|u-2^k\}$ (in the literature)}
 
 Due to \cite{Shallit1994}.
@@ -1423,6 +1472,17 @@ Due to \cite{Shallit1994}.
 \subsubsection{Compute $|u-2^k|$ where $k = \floor{\log_2u}$ (our method)}
 
 \subsection{32bit, 64bit, 128bit Intel assembler}
+
+In practice we choose $U$ and $V$ that is closest to zero for greater precision outside of the extended GCD.
+TODO: REDUCE U and V
+\begin{align*}
+	s &= Ua + Vb \\
+      &= Ua + Vb + qab - qab \\
+	  &= (U+qb)a + (V-qa)b
+\end{align*}
+
+It is also possible to compute $V = (s - Ua)/b$ and so sometimes we drop the $V$ and corresponding $Y$ terms in GCD computations.  Also, sometimes $V$ isn't needed.
+
 
 \subsection{Experimental Results}
 \label{subsec:gcdResults}
