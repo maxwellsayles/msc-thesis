@@ -1260,6 +1260,7 @@ Since Lehmer's GCD performs the same operations as the Extended Euclidean Algori
 In our implementation, Lehmer's GCD is especially useful when the arguments to the GCD are larger than 128-bits.  However, when we consider artificially smaller machine words, it is possible to precompute the resulting $2 \times 2$ matrix for all possible inputs into the single precision Extended GCD computation.  We did this for 8-bit machine words.  As there are two inputs, each 8-bits in size, there are 65536 possible pairs of inputs.  The coefficients of the resulting $2 \times 2$ matrix can be bound by 8-bits each, and so the table requires 256Kb of memory. This simplifies the GCD computation dramatically since the inner loop becomes a lookup from this table.
 
 \subsection{Right-to-Left Binary GCD}
+\label{subsec:r2lBinGcd}
 
 The previous extended GCD algorithms used divide with remainder, which can be an expensive operation.  Binary GCD algorithms emphasize bit shifting over multiplication and division.  Such algorithms may out perform other GCD algorithms in practice (see Subsection \ref{subsec:gcdResults} for results).  Here we introduce a binary GCD algorithm that works from the least significant bit to the most significant bit.  We refer to this as right-to-left since this is the direction in which we process the written binary representation.  The concept was originally published by Stein \cite{Stein1967}.
 
@@ -1419,7 +1420,7 @@ A windowed right-to-left binary GCD algorithm trades off precomputation with the
 
 Just as exponentiation can be performed from high-order to low-order, so too can an extended binary GCD computation.  We term this a left-to-right binary GCD, since it works from the left most bit to the right most bit of the written binary representation of the inputs.
 
-Recall that at each iteration of the extended Euclidean Algorithm, we subtract $q = \floor{s/t}$ times the equation $t = Xa + Yb$ from the equation $s = Ua + Vb$ and then swap $(s, U, V)$ with $(t, X, Y)$.  Computing $q=\floor{s/t}$ uses integer division, and then subtracting $q$ times one equation from the other uses multiplication.  Since it is not necessary to subtract exactly $q$ times the equation, the idea is instead to use a value $q' = 2^k$ such that $q'$ is \emph{close} in some sense to $q$.  Subtracting $q'$ times the second equation from the first can then be done by using a binary shift left by $k$ bits.
+Recall that at each iteration of the extended Euclidean Algorithm, we subtract $q = \floor{s/t}$ times the equation $t = Xa + Yb$ from the equation $s = Ua + Vb$ and then swap $(s, U, V)$ with $(t, X, Y)$.  Computing $q=\floor{s/t}$ uses integer division, and then subtracting $q$ times one equation from the other uses multiplication.  Since it is not necessary to subtract exactly $q$ times the equation, the idea is instead to use a value $q' = 2^k$ such that $q'$ is \emph{close} in some sense to $q$.  Subtracting $q'$ times the second equation from the first can then be done using a binary shift left by $k$ bits.
 
 Shallit and Sorenson \cite{Shallit1994} propose to select $q'=2^k$ such that $q't \le s < 2q't$.  If $s - q't < 2q't - s$, we compute
 \[
@@ -1431,7 +1432,7 @@ otherwise, we compute
 	\matrixThreeTwo{s}{U}{V}{t}{X}{Y} =
 		\matrixtt{0}{1}{-1}{2q'} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}.
 \]
-As with the extended Euclidean Algorithm, we maintain the invariant that $s \ge t$, so if after the above computation we have $s < t$, we swap rows of the matrix to restore the invariant.  The complete algorithm is given in Algorithm \ref{alg:shallitGcd}.
+Notice that a result of this step is that $s$ has the previous value of $t$ and that $t$ is a binary number that is one digit shorter than the previous value of $s$, i.e.\ the the left most set bit of the previous value of $s$ is now cleared.  As with the extended Euclidean Algorithm, we maintain the invariant that $s \ge t$, so if after the above operation we have $s < t$, we then swap the rows of the matrix to restore the invariant. The complete algorithm is given in Algorithm \ref{alg:shallitGcd}.
 
 \begin{algorithm}[h]
 \caption{Shallit and Sorenson Left-to-Right binary GCD \cite{Shallit1994}.}
@@ -1463,13 +1464,18 @@ As with the extended Euclidean Algorithm, we maintain the invariant that $s \ge 
 \RETURN $(s, U, V)$
 \end{algorithmic}
 \end{algorithm}
-In practice, to find $q=2^k$ we compute the number of bits in both $s$ and $t$ and then use the difference as a candidate for $k$.  Let $k' = (\floor{\log_2s} + 1) - (\floor{\log_2t}+1) = \floor{\log_2s} - \floor{\log_2t}$ be our candidate.  If $t2^{k'} \le s$ then $k = k'$, otherwise $k = k'-1$.
+In practice, to find $q=2^k$ we compute the number of bits in both $s$ and $t$ and then use the difference as a candidate for $k$.  Let $k' = (\floor{\log_2s} + 1) - (\floor{\log_2t}+1) = \floor{\log_2s} - \floor{\log_2t}$ be our candidate.  If $t2^{k'} \le s$ then $k = k'$, otherwise $k = k'-1$.  Notice that either $k=k'$ in which case $t2^k=t2^{k'}$, or $k=k'-1$ and then $t2^{k+1} = t2^{k'}$.  Either way $t2^{k'}$ can be reused for one half of the comparison of $s-qt < 2qt - s$.
 
-\subsubsection{Compute $\min_k \{|u-2^k\}$ (in the literature)}
+Since this approach requires us to first compare $t2^{k'}$ to $s$ and then compare one of $t2^{k'-1}$ or $t2^{k'+1}$ to $s$ in order to find which is closer, we also experimented with a simplified version of Shallit and Sorenson's algorithm.  We only compute $k = \floor{\log_2s}-\floor{\log_2t}$.  Let $q=2^k$ and we compute
+\[
+	\matrixThreeTwo{s}{U}{V}{t}{X}{Y} =
+		\matrixtt{0}{1}{1}{-q} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}.
+\]
+If $qt > s$ then the resulting value for $s-qt$ is negative, and so we negate the first row of the product matrix to ensure that the new value for $s$ is still positive.  This results in fewer comparisons for the inner loop of the GCD overall.
 
-Due to \cite{Shallit1994}.
+Unlike the right-to-left binary GCD in Subsection \ref{subsec:r2lBinGcd}, all of the operations in the left-to-right binary GCD are unimodular and so can be used to generate the partially reduced coefficients in the partial extended GCD for fast ideal multiplication.
 
-\subsubsection{Compute $|u-2^k|$ where $k = \floor{\log_2u}$ (our method)}
+
 
 \subsection{32bit, 64bit, 128bit Intel assembler}
 
