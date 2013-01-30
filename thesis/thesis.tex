@@ -16,6 +16,7 @@
 \usepackage{comment}
 \usepackage{float}
 \usepackage{graphics}
+\usepackage{hyperref}
 
 %\theoremstyle{plain}
 \theoremstyle{definition}
@@ -88,6 +89,13 @@
 \item An improvement in the wall clock running time to exponentiate when squaring and cubing is more efficient than straight multiplication (as is the case in the ideal class group) and the exponent is known in advance.
 
 \item The fastest known implementation for integer factoring in the range of 54bit integers to 62bit integers.
+
+\item A library for optimized 32-bit, 64-bit, and 128-bit arithmetic is available at \url{https://www.github.com/maxwellsayles/liboptarith}
+
+\item A library for arithmetic in the class group of imaginary quadratic number fields, specialized for 64-bit, 128-bit, and unbound discriminants is available at \url{https://www.github.com/maxwellsayles/libqform}
+
+\item A stand alone integer factoring algorithm (SuperSPAR) is available at \url{https://www.github.com/maxwellsayles/libsspar}  (COMING SOON)
+
 \end{enumerate}
 
 Woop.
@@ -1251,7 +1259,7 @@ Since Lehmer's GCD performs the same operations as the Extended Euclidean Algori
 
 In our implementation, Lehmer's GCD is especially useful when the arguments to the GCD are larger than 128-bits.  However, when we consider artificially smaller machine words, it is possible to precompute the resulting $2 \times 2$ matrix for all possible inputs into the single precision Extended GCD computation.  We did this for 8-bit machine words.  As there are two inputs, each 8-bits in size, there are 65536 possible pairs of inputs.  The coefficients of the resulting $2 \times 2$ matrix can be bound by 8-bits each, and so the table requires 256Kb of memory. This simplifies the GCD computation dramatically since the inner loop becomes a lookup from this table.
 
-\subsection{Right-to-Left Binary GCD (w/o partial)}
+\subsection{Right-to-Left Binary GCD}
 
 The previous extended GCD algorithms used divide with remainder, which can be an expensive operation.  Binary GCD algorithms emphasize bit shifting over multiplication and division.  Such algorithms may out perform other GCD algorithms in practice (see Subsection \ref{subsec:gcdResults} for results).  Here we introduce a binary GCD algorithm that works from the least significant bit to the most significant bit.  We refer to this as right-to-left since this is the direction in which we process the written binary representation.  The concept was originally published by Stein \cite{Stein1967}.
 
@@ -1528,6 +1536,9 @@ i.e. is it faster to use the product and one exponentiation or individual primes
 \end{itemize}
 
 \chapter{Further Research}
+
+Inclusion into supervisor's ANTL library and hopefully Sage or/and Pari/GP.
+
 
 \section{Other types of Ideal Arithmetic}
 For example, the ideal ring of algebraic integers of real quadratic fields.
