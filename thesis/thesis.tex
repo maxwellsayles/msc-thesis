@@ -1372,42 +1372,29 @@ Even though this algorithm performs well in practice (see Subsection \ref{subsec
 
 Windowing is a common technique used to extend the base of an algorithm.  We saw this earlier in our discussion of binary exponentiation in Section \ref{section:binaryExp}.  The idea there was to precompute $g^w$ for each $w$ in some window $0 \le w \le 2^k$ for some $k$ and then to iterate over the exponent $k$ bits at a time.  We can apply this technique to the right-to-left extended binary GCD.
 
-In the algorithm above, we repeatedly reduce either the equation $t=Xa+Yb$ or the equation $t=(X+b)a+(Y-a)b$ by 2. When $Y$ is odd, we can simultaneously add $b$ to $X$ and subtract $a$ from $Y$ in order to make both $X$ and $Y$ even.  Suppose that $t$ was a multiple of 4.  We could simultaneously add $b$ to $X$ and subtract $a$ from $Y$ multiple times until both $X$ and $Y$ were divisible by 4.  Let $m = Y \bmod 4$, and then $t = (X+mb)a + (Y-ma)b$ is evenly divisible by 4 when $t$ is divisible by 4.  This is easily extended for any $2^k$ where $k$ is a positive integer.  The algorithm first computes $x_m = \floor{mb/2^k}$ and $y_m = \floor{ma/2^k}$ for $0 \le m < 2^k$.  When $t$ is divisible by $2^k$, we look up $x_m$ and $y_m$ for $m = Y \bmod 2^k$ and compute
-\[
-	\floor{\frac{X}{2^k}} + x_m = \frac{X+mb}{2^k}
-\]
-and
-\[
-	\floor{\frac{Y}{2^k}} - y_m = \frac{Y-ma}{2^k}.
-\]
+In the algorithm in the previous section, we repeatedly reduce either the equation $t=Xa+Yb$ or the equation $t=(X+b)a+(Y-a)b$ by 2. When $Y$ is odd, we can simultaneously add $b$ to $X$ and subtract $a$ from $Y$ in order to make both $X$ and $Y$ even.  Suppose that $t$ was a multiple of 4.  We could simultaneously add $b$ to $X$ and subtract $a$ from $Y$ repeatedly until both $X$ and $Y$ were divisible by 4.  Choose $m$ such that $ma \equiv Y \pmod 4$, and then $t = (X+mb)a + (Y-ma)b$ is evenly divisible by 4 when $t$ is divisible by 4.
 
-There is still the case that $t$ may be divisible by $2^j$ for some $j < k$.  There are two ways to deal with this case.  We can loop $j$ times performing an iteration from the non-windowed right-to-left GCD, or we can also precompute the values $x_{m,j} = \floor{mb/2^j}$ and $y_{m,j} = \floor{ma/2^j}$ for $1 \le j \le k$.  We chose the latter approach since the values $x_{m,j}$ and $y_{m,j}$ are easily computed during the computation of the full $2^k$ range.  We give the complete algorithm in Algorithm \ref{alg:windowedR2lBinGcd}.
+This is easily extended for any $2^k$ where $k$ is a positive integer.  The algorithm first computes $x_j = mb$ and $y_j = ma$ for $0 \le m < 2^k$ where $j = ma \bmod 2^k$.  While $t$ is divisible by $2^h$ for some $h \le k$, we look up $x_j$ and $y_j$ for $j = Y \bmod 2^h$ and compute $(X + x_j) / 2^h$ and $(Y - y_j) / 2^h$.  We give the complete algorithm in Algorithm \ref{alg:windowedR2lBinGcd}.
 
 \begin{algorithm}[h]
 \caption{Windowed Right-to-left Binary GCD.}
 \label{alg:windowedR2lBinGcd}
 \begin{algorithmic}[1]
-\REQUIRE $a,b, \in \ZZgtz$ and let $k \in \ZZgtz$ be the window size.
+\REQUIRE $a,b, \in \ZZgtz$ and let $k \in \ZZgtz$ be the window size in bits.
 \STATE let $r$ be the largest integer such that $2^r$ divides both $a$ and $b$
 \STATE $a \gets a / 2^r, b \gets b / 2^r$
 \STATE swap $a$ and $b$ if $a$ is not odd
-\FOR{$0 \le m < 2^k$}
-	\FOR{$1 \le j \le k$}
-		\STATE $x_{m,j} = \floor{mb/2^j}$
-		\STATE $y_{m,j} = \floor{ma/2^j}$
-	\ENDFOR
+\FOR{$m$ from $2^k - 1$ downto $0$}
+	\STATE $j \gets ma \bmod 2^k$
+	\STATE $x_j \gets mb$
+	\STATE $y_j \gets ma$
 \ENDFOR
 \STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixThreeTwo{a}{1}{0}{b}{0}{1}$
 \WHILE {$t \neq 0$}
 	\WHILE {$t$ is even}
-		\STATE let $j$ be the largest integer such that $2^j$ divides $t$
-		\WHILE {$j > k$}
-			\STATE $m \gets Y \bmod 2^k$
-			\STATE $(t, X, Y) \gets \left( \frac{t}{2^k}, \frac{X+x_{m, k}}{2^k}, \frac{Y+y_{m, k}}{2^k} \right)$  \COMMENT{Reduce by $2^k$}
-			\STATE $j \gets j - k$
-		\ENDWHILE
-		\STATE $m \gets Y \bmod 2^j$
-		\STATE $(t, X, Y) \gets \left( \frac{t}{2^j}, \frac{X+x_{m, j}}{2^j}, \frac{Y+y_{m, j}}{2^j} \right)$ \COMMENT{Reduce by $2^j$}
+		\STATE let $h$ be the largest integer such that $h \le k$ and $2^h$ divides $t$
+		\STATE $j \gets Y \bmod 2^h$
+		\STATE $(t, X, Y) \gets \left( \frac{t}{2^k}, \frac{X+x_j}{2^h}, \frac{Y+y_j}{2^h} \right)$  \COMMENT{Reduce by $2^h$}
 	\ENDWHILE
 	\IF {$s \ge t$}
 		\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{0}{1}{1}{-1} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$
@@ -1446,7 +1433,7 @@ Due to \cite{Shallit1994}.
 \subsection{When cubing is better than compose + square}
 \subsection{Average time for operations}
 
-\section{Exponentiation}
+\section{Exponentiation Experiments}
 \label{sec:exponentiation}
 
 \subsection{NAF-R2L}
