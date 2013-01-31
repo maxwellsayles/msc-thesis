@@ -1109,9 +1109,9 @@ Recall that in Stage 1 of SPAR, we compute $\bclass = \aclass^{\prod_{i=2}^t {p_
 \chapter{Ideal Exponentiation Experiments}
 \label{chap:idealExpExperiments}
 
-A significant contribution of this thesis is to improve the performance of exponentiation in the ideal class group of imaginary quadratic number fields on present day CPUs.  Improvements to exponentiation also include improvements to arithmetic in the class group.  This chapter focuses on the different techniques we used to improve performance and the experimental data that lead us to our implementation.  We specialized much of our implementation for the x64 architecture.  Many of our routines benefit when the input is bounded by a single machine word, i.e.\ 64-bits, but we were also able to implement custom arithmetic to take advantage of integers that fit within two machine words, i.e.\ 128-bits. When integers are larger than 128-bits, we chose to use the GNU Multiple Precision (GMP) arithmetic library.
+A significant contribution of this thesis is to improve the performance of exponentiation in the ideal class group of imaginary quadratic number fields on present day CPUs.  This chapter focuses on the different techniques used to improve performance and the experimental data that lead us to our implementation.  We specialized much of our implementation for the x64 architecture.  Many of our routines benefit when the input is bounded by a single machine word, i.e.\ 64-bits, but we were also able to take advantage of integers that fit within two machine words by implementing a custom library for 128-bit arithmetic.  When integers are larger than 128-bits, we use the GNU Multiple Precision (GMP) arithmetic library.
 
-In Section \ref{sec:eea}, we discuss methods to compute solutions to equations of the form $s = Ua + Vb$ useful for fast ideal multiplication. In Section \ref{sec:specializedTypes}, we discuss specialized implementations of ideal arithmetic for discriminants less than 60-bits, less than 120-bits, and for discriminants with unbounded size. In Section \ref{sec:exponentiation}, we compare various methods to exponentiate ideal representatives to large fixed exponents that are the product of many primes, including many novel approaches to computing double-base representations of such numbers.
+Improvements to ideal arithmetic also lead to improvements in ideal exponentiation, and so we start there. Arithmetic in the ideal class group uses solutions to equations of the form $s = Ua + Vb$ where $s$ is the largest integer dividing both $a$ and $b$. In Section \ref{sec:eea}, we introduce several algorithms for computing such solutions and we look at their performance in practice. In order to make arithmetic in the ideal class group as efficient as possible, we specialized our implementation and discuss this specialization in Section \ref{sec:specializedTypes}. In Section \ref{sec:exponentiation}, we compare methods to exponentiate ideal representatives to large fixed exponents that are the product of many primes, including many novel approaches to computing double-base representations.
 
 \section{Extended Greatest Common Divisor}
 \label{sec:eea}
@@ -1469,9 +1469,16 @@ Unlike the right-to-left binary GCD in Subsection \ref{subsec:r2lBinGcd}, all of
 
 \subsection{Specialized Implementations}
 
+A goal of this thesis is to make arithmetic in the ideal class group as fast as we can on present day CPUs. To this end, we specialized implementations of each of the GCD algorithms discussed in this section for the x64 architecture.  All algorithms are implemented in C99 for the GNU C compiler and often benefit from hand optimized x64 assembler.  The use of assembly language is done in line and is conditionally compiled based on the target platform.  For each of the GCD algorithms presented here, we implemented 32-bit and 64-bit versions, and when arithmetic overflows did not require us to use GMP, we also implemented 128-bit versions.
+
+When possible, we exploit the fixed size of 32-bit, 64-bit, and 128-bit integer bounds, and make use of their binary representation.  Many of the techniques we use are described in the book ``Hacker's Delight'' \cite{Warren2002}.  Simple techniques involve powers of 2.  Computing $x2^k$ corresponds to shifting $x$ left by $k$ bits (denoted $x \ll k$).  When $x$ is divisible by $2^k$, computing the integer $x / 2^k$ corresponds to shifting $x$ right by $k$ bits (denoted $x \gg k$).  When we want $X \bmod 2^k$, we achieve this using a bitwise $x \texttt{ and } 2^k-1$ operation.  Assuming a two's complement representation of machine words, the most significant bit of an integer $x$ is set if $x < 0$ and clear otherwise.  We can generate a bit-mask according to this test by using an arithmetic shift right operation (in the C programming language this is a right shift on a signed integer).  Let $m$ denote the number of bits in a machine word; then by using an arithmetic shift right on $x$ by $m-1$ bits, the result is either $m$ set bits when $x < 0$ or $m$ clear bits otherwise.  We denote this operation $\texttt{signmask}(x)$.
+
+Using 
+
+Let $\oplus$ denote bitwise exclusive-or, and let $\lnot$ denote bitwise negation.  
 
 
-Substantial work of this thesis was to contribute specialized implementations of 
+
 
 
 
@@ -1491,10 +1498,16 @@ A windowed right-to-left binary GCD algorithm trades off precomputation with the
 
 \begin{figure}[H]
 \centering
-\includegraphics{blockbinary}
-\caption{Comparison of times for windowed binary GCD.}
+\includegraphics{blockbinary-32}
+\includegraphics{blockbinary-64}
+\caption{Comparison of times for windowed binary GCD. The image on top represents a 32-bit version of the algorithm, while the image on the bottom represents a 64-bit version.}
 \label{fig:blockbinary}
 \end{figure}
+
+%\begin{figure}[H]
+%\centering
+%\label{fig:blockbinary}
+%\end{figure}
 
 
 % IDEAL ARITHMETIC
@@ -1597,6 +1610,9 @@ i.e. is it faster to use the product and one exponentiation or individual primes
 
 Inclusion into supervisor's ANTL library and hopefully Sage or/and Pari/GP.
 
+Try some extremely large (1Gb+) primorials that are written to disk, powering 2,3 r2l chain of them, and then doing a pollard-rho or something with a smaller primorial for the same number of steps.  The idea being to simulate the original SPAR, but with our library and a few dbns tricks.  Then we try factoring some much larger composites.
+
+This might be interesting to try a discrete log record too.
 
 \section{Other types of Ideal Arithmetic}
 For example, the ideal ring of algebraic integers of real quadratic fields.
