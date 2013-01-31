@@ -1407,15 +1407,6 @@ This is easily extended for any $2^k$ where $k$ is a positive integer.  The algo
 \end{algorithmic}
 \end{algorithm}
 
-A windowed right-to-left binary GCD algorithm trades off precomputation with the likelihood that $t$ will be divisible by some power of two. In practice, we chose a value of $k=3$.  Figure \ref{fig:blockbinary} shows the timings for values of $k$ between 1 and 5 on sets of 1,000,000 pseudo-random pairs of positive integers.  Notice that a 3 bit window performs best in practice when each input argument is 14 bits or larger.
-
-\begin{figure}[H]
-\centering
-\includegraphics{blockbinary}
-\caption{Comparison of times for windowed binary GCD.}
-\label{fig:blockbinary}
-\end{figure}
-
 \subsection{Left-to-Right Binary GCD}
 
 Just as exponentiation can be performed from high-order to low-order, so too can an extended binary GCD computation.  We term this a left-to-right binary GCD, since it works from the left most bit to the right most bit of the written binary representation of the inputs.
@@ -1464,20 +1455,21 @@ Notice that a result of this step is that $s$ has the previous value of $t$ and 
 \RETURN $(s, U, V)$
 \end{algorithmic}
 \end{algorithm}
-In practice, to find $q=2^k$ we compute the number of bits in both $s$ and $t$ and then use the difference as a candidate for $k$.  Let $k' = (\floor{\log_2s} + 1) - (\floor{\log_2t}+1) = \floor{\log_2s} - \floor{\log_2t}$ be our candidate.  If $t2^{k'} \le s$ then $k = k'$, otherwise $k = k'-1$.  Notice that either $k=k'$ in which case $t2^k=t2^{k'}$, or $k=k'-1$ and then $t2^{k+1} = t2^{k'}$.  Either way $t2^{k'}$ can be reused for one half of the comparison of $s-qt < 2qt - s$.
+In practice, to find $q=2^k$ we compute the number of bits in both $s$ and $t$ and then use the difference as a candidate for $k$.  Let $k' = (\floor{\log_2s} + 1) - (\floor{\log_2t}+1) = \floor{\log_2s} - \floor{\log_2t}$ be our candidate.  If $t2^{k'} \le s$ then $k = k'$, otherwise $k = k'-1$.  Notice that either $k=k'$ in which case $t2^k=t2^{k'}$, or $k=k'-1$ and then $t2^{k+1} = t2^{k'}$.  Either way $t2^{k'}$ can be reused for one half of the comparison of $s-qt < 2qt - s$.  Also, if $k' = 0$ then $t \le s$ (by our invariant) and so there is no possibility of using $t2^{-1}$, since we will use $t2^{k'}$ and $t2^{k'+1}$ in the comparison.
 
-Since this approach requires us to first compare $t2^{k'}$ to $s$ and then compare one of $t2^{k'-1}$ or $t2^{k'+1}$ to $s$ in order to find which is closer, we also experimented with a simplified version of Shallit and Sorenson's algorithm.  We only compute $k = \floor{\log_2s}-\floor{\log_2t}$.  Let $q=2^k$ and we compute
+This approach requires us to first compare $t2^{k'}$ to $s$ and then compare one of $t2^{k'-1}$ or $t2^{k'+1}$ to $s$ in order to find which is closer.  Because of this, we also experimented with a simplified version of the algorithm.  We only compute $k = \floor{\log_2s}-\floor{\log_2t}$.  Let $q=2^k$ and we compute
 \[
 	\matrixThreeTwo{s}{U}{V}{t}{X}{Y} =
 		\matrixtt{0}{1}{1}{-q} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}.
 \]
-If $qt > s$ then the resulting value for $s-qt$ is negative, and so we negate the first row of the product matrix to ensure that the new value for $s$ is still positive.  This results in fewer comparisons for the inner loop of the GCD overall.
+If $qt > s$ then the resulting value for $s-qt$ is negative, and so we negate the first row of the product matrix to ensure that the new value for $s$ is positive.  The result is fewer comparisons for the inner loop of the GCD overall.
 
 Unlike the right-to-left binary GCD in Subsection \ref{subsec:r2lBinGcd}, all of the operations in the left-to-right binary GCD are unimodular and so can be used to generate the partially reduced coefficients in the partial extended GCD for fast ideal multiplication.
 
 
-
 \subsection{32bit, 64bit, 128bit Intel assembler}
+
+
 
 In practice we choose $U$ and $V$ that is closest to zero for greater precision outside of the extended GCD.
 TODO: REDUCE U and V
@@ -1493,6 +1485,17 @@ It is also possible to compute $V = (s - Ua)/b$ and so sometimes we drop the $V$
 \subsection{Experimental Results}
 \label{subsec:gcdResults}
 
+A windowed right-to-left binary GCD algorithm trades off precomputation with the likelihood that $t$ will be divisible by some power of two. In practice, we chose a value of $k=3$.  Figure \ref{fig:blockbinary} shows the timings for values of $k$ between 1 and 5 on sets of 1,000,000 pseudo-random pairs of positive integers.  Notice that a 3 bit window performs best in practice when each input argument is 14 bits or larger.
+
+\begin{figure}[H]
+\centering
+\includegraphics{blockbinary}
+\caption{Comparison of times for windowed binary GCD.}
+\label{fig:blockbinary}
+\end{figure}
+
+
+% IDEAL ARITHMETIC
 \section{Ideal Arithmetic}
 \label{sec:specializedTypes}
 \subsection{64bit, 128bit, GMP-MPZ}
