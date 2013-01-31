@@ -1467,9 +1467,16 @@ If $qt > s$ then the resulting value for $s-qt$ is negative, and so we negate th
 Unlike the right-to-left binary GCD in Subsection \ref{subsec:r2lBinGcd}, all of the operations in the left-to-right binary GCD are unimodular and so can be used to generate the partially reduced coefficients in the partial extended GCD for fast ideal multiplication.
 
 
-\subsection{32bit, 64bit, 128bit Intel assembler}
+\subsection{Specialized Implementations}
 
 
+
+Substantial work of this thesis was to contribute specialized implementations of 
+
+
+
+\subsection{Experimental Results}
+\label{subsec:gcdResults}
 
 In practice we choose $U$ and $V$ that is closest to zero for greater precision outside of the extended GCD.
 TODO: REDUCE U and V
@@ -1479,11 +1486,6 @@ TODO: REDUCE U and V
 	  &= (U+qb)a + (V-qa)b
 \end{align*}
 
-It is also possible to compute $V = (s - Ua)/b$ and so sometimes we drop the $V$ and corresponding $Y$ terms in GCD computations.  Also, sometimes $V$ isn't needed.
-
-
-\subsection{Experimental Results}
-\label{subsec:gcdResults}
 
 A windowed right-to-left binary GCD algorithm trades off precomputation with the likelihood that $t$ will be divisible by some power of two. In practice, we chose a value of $k=3$.  Figure \ref{fig:blockbinary} shows the timings for values of $k$ between 1 and 5 on sets of 1,000,000 pseudo-random pairs of positive integers.  Notice that a 3 bit window performs best in practice when each input argument is 14 bits or larger.
 
