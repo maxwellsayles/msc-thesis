@@ -27,8 +27,8 @@
 \newtheorem{cor}[thm]{Corollary}
 \newtheorem{defn}[thm]{Definition}
 
-\usepackage{eqparbox}
-\renewcommand{\algorithmiccomment}[1]{\hfill\eqparbox{COMMENT}{#1}}
+%\usepackage{eqparbox}
+\renewcommand{\algorithmiccomment}[1]{\hfill \{#1\}}
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
 
@@ -1250,7 +1250,7 @@ We then continue with the outer loop of the computation until $t = 0$.  In the e
 		        \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$
 	\ELSE
 		\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{A}{B}{C}{D}
-		        \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$ \COMMENT{Combine single precision step.}
+		        \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$ \COMMENT{Combine step.}
 	\ENDIF
 \ENDWHILE
 \end{algorithmic}
