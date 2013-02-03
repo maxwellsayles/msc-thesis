@@ -734,7 +734,7 @@ Binary and non-adjacent form are special types of strictly chained partitions, s
 
 % EXPONENTIATE USING A CHAIN
 \begin{algorithm}[h]
-\caption{Computes $g^n$ given $n$ as a chained 2,3 partition. TODO: Cite something.}
+\caption{Computes $g^n$ given $n$ as a chained 2,3 partition. Adapted from \cite{Dimitrov2005}.}
 \label{alg:expWithChain}
 \begin{algorithmic}[1]
 \REQUIRE $g \in G,$ 
@@ -1512,14 +1512,14 @@ We can conditionally swap two words, $x$ and $y$ when $x < y$ by using two addit
 \end{algorithm}
 On the x64 architecture we can optimize the computation of $d \gets s - t$ and $m \gets \texttt{sign\_mask(d)}$ since the operation $s-t$ sets the carry flag when the result is negative.  Using a subtract with borrow, we subtract $m$ from itself.  This sets $m$ to 0 when the carry is clear, and -1 when the carry is set.
 
-Often our implementation uses the number of bits in a positive integer $x$.  In the algorithm description we use $\floor{\log_2x} + 1$.  On the x64 architecture there is an instruction (\texttt{bsr}) that returns the index of the most significant set bit.  This allows us to quickly compute that value.  On a platform that does not have such an instruction, we can use a logarithmic search to find the most significant set bit.  Let $k = \floor{m/2}$ where $m$ is the number of bits in a machine word and let $i$ be the computed index (initially $i=0$).  We first check if $x \ge 2^k$.  If it is, then $i \gets i + k$ and $x$ is shifted right by $k$.  We repeat on $k \gets \floor{k/2}$ until $k=0$.  At which point, $i$ is the index of the most significant set bit (see Algorithm \ref{alg:msb}).  Notice that we could use the signed mask of $2^k - x$ instead of the conditional `if' statement.  We also mention here that this algorithm can be adapted to find the least significant set bit of a machine word (the instruction \texttt{bsl} on x64), but we do not go into further detail.
+Often our implementation uses the number of bits in a positive integer $x$.  In the algorithm description we use $\floor{\log_2x} + 1$.  On the x64 architecture there is an instruction (\texttt{bsr}) that returns the index of the most significant set bit.  This allows us to quickly compute that value.  On a platform that does not have such an instruction, we can use a logarithmic search to find the most significant set bit\footnote{There is also a similar algorithm to find the least significant set bit of a machine word (\texttt{bsl} on x64).}.  Let $k = \floor{m/2}$ where $m$ is the number of bits in a machine word and let $i$ be the computed index (initially $i=0$).  We first check if $x \ge 2^k$.  If it is, then $i \gets i + k$ and $x$ is shifted right by $k$.  We repeat on $k \gets \floor{k/2}$ until $k=0$.  At which point, $i$ is the index of the most significant set bit (see Algorithm \ref{alg:msb}).  Notice that we could use the signed mask of $2^k - x$ instead of the conditional `if' statement.
 
 \begin{algorithm}[h]
 \caption{Return the index of the most significant set bit of $x$.}
 \label{alg:msb}
 \begin{algorithmic}[1]
 \STATE $i \gets 0$
-\STATE $k \gets \floor{m/2}$ \COMMENT{Where $m$ is the number of bits in a machine word.}
+\STATE $k \gets \floor{m/2}$ \COMMENT{$m$ is the number of bits in a machine word.}
 \WHILE {$k \neq 0$}
 	\IF {$x \ge 2^k$}
 		\STATE $x \gets \floor{x / 2^k}$
