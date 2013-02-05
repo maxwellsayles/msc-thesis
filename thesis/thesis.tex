@@ -62,6 +62,8 @@
 \newcommand{\bmax}{b_\textrm{max}}
 \newcommand{\band}{~\texttt{and}_b~}
 
+\graphicspath{{./eps/}}
+
 \begin{document}
 
 %%%%%%%%%%%%%%
@@ -1468,7 +1470,7 @@ Unlike the right-to-left binary GCD in Subsection \ref{subsec:r2lBinGcd}, all of
 
 \subsection{Specialized Implementations}
 
-A goal of this thesis is to make arithmetic in the ideal class group as fast as we can on present day CPUs. To this end, we specialized implementations of each of the GCD algorithms discussed in this section for the x64 architecture.  All algorithms are implemented in C99 for the GNU C compiler and often benefit from hand optimized x64 assembler.  The use of assembly language is done in line and is conditionally compiled based on the target platform.  For each of the GCD algorithms presented here, we implemented 32-bit and 64-bit versions, and when arithmetic overflows did not require us to use GMP, we also implemented 128-bit versions.
+A goal of this thesis is to make arithmetic in the ideal class group as fast as we can on present day CPUs. To this end, we specialized implementations of each of the GCD algorithms discussed in this section for the x64 architecture.  All algorithms are implemented in C99 for the GNU C compiler and often benefit from hand optimized x64 assembler.  The use of assembly language is done in line and is conditionally compiled based on the target platform.  For each of the GCD algorithms presented here, we implemented 32-bit and 64-bit versions, and when arithmetic overflows did not require us to use GMP, we also implemented 128-bit versions.  For appropriately sized inputs, we used these specialized implementations, otherwise we use GMP for the extended GCD computation.
 
 Many of the techniques we use are described in the book ``Hacker's Delight'' \cite{Warren2002}.  Computing $x2^k$ corresponds to shifting $x$ left by $k$ bits.  When $x$ is divisible by $2^k$, computing the integer $x / 2^k$ corresponds to shifting $x$ right by $k$ bits.  When we want $X \bmod 2^k$, we achieve this using $x \band 2^k-1$ where $\band$ is the bitwise `and' operation.  
 
@@ -1534,31 +1536,159 @@ Often our implementation uses the number of bits in a positive integer $x$.  In 
 
 We use the above techniques throughout our implementation of the extended GCD algorithms described in this section.  In the case of Lehmer's GCD, this algorithm is especially useful when the arguments to the GCD are several words in size.  However, since our implementations are specialized up to 128-bit words, we consider 8-bit words for the inner extended GCD computation.  As such, it is possible to precompute the resulting $2 \times 2$ matrix for all possible inputs into the single precision extended GCD computation.  Since there are two inputs, each 8-bits in size, there are 65536 possible pairs of inputs.  The coefficients of the resulting $2 \times 2$ matrix can be bound by 8-bits each, and so the table requires 256Kb of memory. This simplifies the GCD computation dramatically since the inner loop of Lehmer's GCD becomes a lookup from this table.
 
-
 \subsection{Experimental Results}
 \label{subsec:gcdResults}
 
-In practice we choose $U$ and $V$ that is closest to zero for greater precision outside of the extended GCD.
-TODO: REDUCE U and V
-\begin{align*}
-	s &= Ua + Vb \\
-      &= Ua + Vb + qab - qab \\
-	  &= (U+qb)a + (V-qa)b
-\end{align*}
+We specialized the implementation of each of the extended GCD algorithms from the previous section for 32-bit and 64-bit words.  For each $k$ from 1 to 63, we generated 1,000,000 pairs of integers of $k$ bits each, and we measured the time to compute the extended GCD of each pair using each algorithm.
 
-
-A windowed right-to-left binary GCD algorithm trades off precomputation with the likelihood that $t$ will be divisible by some power of two. In practice, we chose a value of $k=3$.  Figure \ref{fig:blockbinary} shows the timings for values of $k$ between 1 and 5 on sets of 1,000,000 pseudo-random pairs of positive integers.  Notice that a 3 bit window performs best in practice when each input argument is 14 bits or larger.
+First, we present evidence that in each case, the 32-bit implementation is no slower than the 64-bit implementation.  Figure \ref{fig:divrem-32v64} shows that a 32-bit Extended Euclidean Algorithm using division with remainder is faster than a 64-bit one, for the same inputs.
 
 \begin{figure}[H]
 \centering
-\includegraphics{blockbinary-32}
-\includegraphics{blockbinary-64}
-\caption{Comparison of times for windowed binary GCD. The image on top represents a 32-bit version of the algorithm, while the image on the bottom represents a 64-bit version.}
-\label{fig:blockbinary}
+\includegraphics{divrem-32v64}
+\caption{Extended Euclidean Algorithm using division with remainder.}
+\label{fig:divrem-32v64}
+\end{figure}
+
+Figure \ref{fig:lehmer-32v64} shows the times for Lehmer's GCD on integers from 1 to 63 bits where we use a precomputed table of 8-bit inputs for the inner GCD computation.  In each case, the 32-bit implementation is faster than the 64-bit implementation.
+
+\begin{figure}[H]
+\centering
+\includegraphics{lehmer-32v64}
+\caption{Lehmer's GCD with 8-bit precomputed inner GCD.}
+\label{fig:lehmer-32v64}
 \end{figure}
 
 
+The following figures \ref{fig:stein1-32v64}, \ref{fig:stein2-32v64}, \ref{fig:stein3-32v64}, \ref{fig:stein4-32v64}, and \ref{fig:stein5-32v64}, show that for all window sizes from 1 to 5 bits, that the 32-bit version of the right-to-left binary GCD is faster than the 64-bit version.
+
+\begin{figure}[H]
+\centering
+\includegraphics{stein1-32v64}
+\caption{Non-Windowed Right-to-Left Binary.}
+\label{fig:stein1-32v64}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics{stein2-32v64}
+\caption{Right-to-Left 2-bit Windowed Binary.}
+\label{fig:stein2-32v64}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics{stein3-32v64}
+\caption{Right-to-Left 3-bit Windowed Binary.}
+\label{fig:stein3-32v64}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics{stein4-32v64}
+\caption{Right-to-Left 4-bit Windowed Binary.}
+\label{fig:stein4-32v64}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics{stein5-32v64}
+\caption{Right-to-Left 5-bit Windowed Binary.}
+\label{fig:stein5-32v64}
+\end{figure}
+
+The left-to-right variant of the binary GCD proposed by Shallit and Sorenson is shown in figure \ref{fig:shallit-32v64}.  Here the 32-bit implementation is slightly faster than the 64-bit implementation.
+
+\begin{figure}[H]
+\centering
+\includegraphics{shallit-32v64}
+\caption{Left-to-Right binary GCD of Shallit and Sorenson.}
+\label{fig:shallit-32v64}
+\end{figure}
+
+Lastly, our simplified version of the left-to-right binary GCD is shown in figure \ref{fig:binary_l2r-32v64}.  In this case, there is no benefit to using a 32-bit implementation over a 64-bit implementation\footnote{Nanosecond differences between the two versions could be attributed to timing inaccuracies.}.
+
+\begin{figure}[H]
+\centering
+\includegraphics{binary_l2r-32v64}
+\caption{Left-to-Right binary GCD of Shallit and Sorenson.}
+\label{fig:binary_l2r-32v64}
+\end{figure}
+
+Note that the 32-bit versions of the right-to-left binary GCD are only accurate up to 29-bits (ignoring sign), while the 64-bit versions are only accurate to 60-bits. The 32-bit version of the left-to-right binary GCD proposed by Shallit and Sorenson is accurate up to 30-bits.  All other 32-bit implementations are accurate to 31-bits\footnote{The input is less than or equal to 31-bits, since in a two's complement representation the sign of the input variable takes the most significant bit and accounts for all 32-bits.} and all 64-bit implementations are accurate to 63-bits\footnote{Similar to the 32-bit implementation, the most significant bit represents the sign of the integer.}.
+
+Since the 32-bit implementation of each algorithm is at least no slower than the 64-bit implementation, when comparing the different algorithms, we always prefer the 32-bit implementation of each when the algorithm is known to be accurate for the size of the inputs.
+
+Since both the Extended Euclidean Algorithm and Lehmer's GCD use division with remainder to compute their result, we first compare our implementations of both.  Figures \ref{fig:divrem-vs-lehmer-32} and \ref{fig:divrem-vs-lehmer-64} show that the Extended Euclidean Algorithm is always faster.
+
+\begin{figure}[H]
+\centering
+\includegraphics{divrem-vs-lehmer-32}
+\caption{Extended Euclidean Algorithm compared to Lehmer's GCD using precomputed 8-bit words.}
+\label{fig:divrem-vs-lehmer-32}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics{divrem-vs-lehmer-64}
+\caption{Extended Euclidean Algorithm compared to Lehmer's GCD using precomputed 8-bit words.}
+\label{fig:divrem-vs-lehmer-64}
+\end{figure}
+
+In figures \ref{fig:steins-32} and \ref{fig:steins-64}, we compare each of our windowed (or non-windowed) implementations of the right-to-left binary GCD.  A GCD algorithm trades off precomputation with the likelihood that a number will be divisible by some power of two. You can see that the non-windowed version is most efficient for inputs less than 16-bits in size, at which point the 3-bit windowed version is best until 30 bits.  The 4-bit windowed version out performs other window sizes in the range that we experimented with.  The slope of the 5-bit windowed version is less than the 4-bit version, so presumably it will out perform the 4-bit window once inputs are large enough.
+
+\begin{figure}[H]
+\centering
+\includegraphics{steins-32}
+\caption{Windowed right-to-left binary GCDs.}
+\label{fig:steins-32}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics{steins-64}
+\caption{Windowed right-to-left binary GCDs.}
+\label{fig:steins-64}
+\end{figure}
+
+Figures \ref{fig:shallit-vs-binary_l2r-32} and \ref{fig:shallit-vs-binary_l2r-64} compare the left-to-right binary GCD proposed by Shallit and Sorenson to our own simplified version.  
+
+\begin{figure}[H]
+\centering
+\includegraphics{shallit-vs-binary_l2r-32}
+\caption{Shallit and Sorenson compared to our simplified left-to-right binary GCD.}
+\label{fig:shallit-vs-binary_l2r-32}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics{shallit-vs-binary_l2r-64}
+\caption{Shallit and Sorenson compared to our simplified left-to-right binary GCD.}
+\label{fig:shallit-vs-binary_l2r-64}
+\end{figure}
+
+In all the cases that we tested, our implementation of the Euclidean Algorithm out performs Lehmer's GCD.  For the 32-bit implementation, the non-windowed and the 3-bit windowed right-to-left binary GCD perform well, and for the 64-bit implementation, the 4-bit windowed version out performs other window sizes.  Finally, for the left-to-right variants of the binary GCD, our simplified version always out performs the approach proposed by Shallit and Sorenson.  In Figures \ref{fig:all-32} and \ref{fig:all-64}, we compare these algorithms.  For integer inputs less than 32-bits, the standard Euclidean Algorithm performs best, and for inputs between 32-bits and 64-bits, our simplified left-to-right binary GCD is fastest.
+\begin{figure}[H]
+\centering
+\includegraphics{all-32}
+\caption{Euclidean vs windowed right-to-left binary vs our simplified left-to-right binary.}
+\label{fig:all-32}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics{all-64}
+\caption{Euclidean vs windowed right-to-left binary vs our simplified left-to-right binary.}
+\label{fig:all-64}
+\end{figure}
+
+Since the Euclidean Algorithm and our simplified left-to-right binary GCD are our fastest implementations for inputs less than 64-bits, we extended both to work on 128-bit integers.  We also compared these with the implementation of the extended GCD algorithm from the GNU Multiple Precision (GMP) library.  Figure \ref{fig:mpzgcd} show that our implementations out perform the implementation in GMP for inputs smaller than 64-bits.
+
+\begin{figure}[H]
+\centering
+\includegraphics{mpzgcd}
+\caption{Euclidean vs our simplified left-to-right binary vs GNU Multiple Precision library.}
+\label{fig:mpzgcd}
+\end{figure}
+
 % IDEAL ARITHMETIC
+\pagebreak
 \section{Ideal Arithmetic}
 \label{sec:specializedTypes}
 \subsection{64bit, 128bit, GMP-MPZ}
