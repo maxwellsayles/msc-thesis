@@ -1007,6 +1007,7 @@ A contribution of this thesis is to improve the speed of arithmetic in the ideal
 SPAR is an integer factoring algorithm based on the idea of finding a reduced ambiguous class representative with a discriminant $\Delta$ associated with the integer to be factored.  The algorithm was published by Schnorr and Lenstra in \cite{Schnorr1984}, but was independently discovered by Atkin and Rickert who named it SPAR after Shanks, Pollard, Atkin, and Rickert \cite[p.182]{Jacobson1999}.
 
 \subsection{Ambiguous Forms and the Factorization of the Discriminant}
+\label{subsec:forms}
 
 Following Jacobson \cite{Jacobson1999}, we represent elements of the ideal class group using reduced representative ideals.  We denote the equivalence class $[\mathfrak a]$ for a reduced representative $\mathfrak a$ using the $\ZZ$\mbox{-}module $\mathfrak a = [a, (b + \sqrt\Delta)/2]$. In our implementation we also carry around a third term $c = (b^2 - \Delta)/4a$.
 
@@ -1202,7 +1203,7 @@ All the operations performed on the matrix
 \[
 \matrixtt{R_0}{C_0}{R_1}{C_1}
 \]
-during the Partial Extended Euclidean Algorithm are unimodular operations. By this we mean that the operation can be represented by a matrix with determinant either $+1$ or $-1$.  This turns out to be critical (TODO: Why? Is there an short answer? Can I cite something?) as some variations of the Extended Euclidean Algorithm are represented using matrix operations that are not unimodular and so therefore do not have an extension to the Partial Extended Euclidean Algorithm.
+during the Partial Extended Euclidean Algorithm can be represented by an invertible $2 \times 2$ matrix with determinant $\pm 1$.  This is necessarily the case since each operation relates one representative of an ideal equivalence class to another representative\footnote{Recall our discussion of binary quadratic forms (see subsection \ref{subsec:forms}). Two forms are related if there exists an invertible linear transformation of variables.}. This turns out to be critical as some variations of the Extended Euclidean Algorithm use operations that cannot be represented by an invertible $2 \times 2$ matrix and so cannot be used to compute the partially reduced coefficients for ideal multiplication.
 
 \subsection{Lehmer's GCD}
 
