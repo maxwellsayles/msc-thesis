@@ -1662,14 +1662,38 @@ Since the Euclidean Algorithm and our simplified left-to-right binary GCD are ou
 \end{figure}
 
 % IDEAL ARITHMETIC
-\pagebreak
 \section{Ideal Arithmetic}
 \label{sec:specializedTypes}
 
-In the previous section, we demonstrated results that lead to practical improvements in computing the extended GCD -- a key operation in reduced ideal multiplication.  In this section, we discuss the results of our implementations of ideal arithmetic specialized for discriminants that fit within 64-bits or 128-bits, as well as our implementation for unbounded discriminants.  
-
+In the previous section, we demonstrated results that lead to practical improvements in computing the extended GCD -- a key operation in reduced ideal multiplication.  In this section, we discuss the results of our implementations of ideal arithmetic specialized for discriminants that fit within 64-bits or 128-bits, as well as an implementation for unbounded discriminants.  
 
 \subsection{64bit, 128bit, GMP-MPZ}
+
+Concrete implementation.  We keep $a$, $b$, and $c$.  $a, b \le \sqrt\Delta$ and so require only half the storage.  $c$ requires full storage.   We store $\Delta$ for the class (not per element), and we store $\Delta^{1/2}$ and $\Delta^{1/4}$ as an optimization since this is used frequently.  For GMP, we preallocate the memory needed to save time on memory allocation/releases.
+
+Try to keep things in smaller words, e.g.\ try to do most of the 128-bit using 64-bit arithmetic.
+
+Precompute square roots modulo a prime.  Useful for finding prime ideals.
+
+Only compute left portion of GCD when we're only interested in the left part.
+
+Both Euclidean Algorithm and our simplified left-to-right binary GCD can be used for the partial extended GCD to compute partially reduced coefficients.
+
+For a given prime $p$, let $a = p$, then $b = \pm \sqrt\Delta \pmod p$ if such a $b$ exists.   We want $b^2 - 4ac = \Delta$.  We have $b^2 - 4pc = \Delta$.  Take everything in the residue class modulo $p$ and we have $b^2 = \Delta \pmod p$.  That where it comes from.
+
+Instead of computing $b \bmod 2a$ we compute $b \bmod a$ and then we compute $b \gets b \pm a$ when $q$ is odd for $b = qa + r$.
+
+We compute remainders closest to zero, i.e.\ not necessarily positive.
+
+We cheat on computing a square root.  Instead we note that 
+\begin{equation*}
+\begin{array}{rrlrlr}
+	& x^{1/2} &=& 2^{(\log_2x)/2} &\approx& 2^{\floor{\log_2x+1}/2} \\
+	\Rightarrow & x / x^{1/2} &=& x / 2^{(\log_2x)/2} &\approx& x / 2^{\floor{\log_2x+1}/2}
+\end{array}
+\end{equation*}
+And so we can compute $\floor{x^{1/2}}$ approximately as $\floor{x / 2^{\floor{\log_2x+1}/2}}$, which is simply a bit shift right by half the number of bits in x.
+
 \subsection{When cubing is better than compose + square}
 \subsection{Average time for operations}
 
