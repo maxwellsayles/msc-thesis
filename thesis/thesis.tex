@@ -5,7 +5,6 @@
 \fancyfoot{}
 \renewcommand{\headrulewidth}{0pt}
 \fancyhead[RO,LE]{\thepage}  
-\usepackage{hyperref}
 
 \usepackage{algorithm}
 \usepackage{algorithmic}
@@ -14,9 +13,11 @@
 \usepackage{amssymb}
 \usepackage{amsthm}
 \usepackage{comment}
+%\usepackage{eqparbox}
 \usepackage{float}
-\usepackage{graphics}
+\usepackage{graphicx}
 \usepackage{hyperref}
+\usepackage{subfigure}
 
 %\theoremstyle{plain}
 \theoremstyle{definition}
@@ -27,7 +28,6 @@
 \newtheorem{cor}[thm]{Corollary}
 \newtheorem{defn}[thm]{Definition}
 
-%\usepackage{eqparbox}
 \renewcommand{\algorithmiccomment}[1]{\hfill \{#1\}}
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
@@ -1559,40 +1559,22 @@ For Lehmer's GCD, we precomputed a table of 8-bit inputs for the inner GCD compu
 \end{figure}
 
 
-Figures \ref{fig:stein1-32v64}, \ref{fig:stein2-32v64}, \ref{fig:stein3-32v64}, \ref{fig:stein4-32v64}, and \ref{fig:stein5-32v64}, show that for all window sizes from 1 to 5 bits, that the 32-bit version of the right-to-left binary GCD is faster than the 64-bit version.
+The graphs in Figure \ref{fig:stein-32v64} show that for all window sizes from 1 to 5 bits, that the 32-bit version of the right-to-left binary GCD is faster than the 64-bit version.
 \begin{figure}[H]
 \centering
-\includegraphics{stein1-32v64}
-\caption{Non-Windowed Right-to-Left Binary.}
-\label{fig:stein1-32v64}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics{stein2-32v64}
-\caption{Right-to-Left 2-bit Windowed Binary.}
-\label{fig:stein2-32v64}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics{stein3-32v64}
-\caption{Right-to-Left 3-bit Windowed Binary.}
-\label{fig:stein3-32v64}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics{stein4-32v64}
-\caption{Right-to-Left 4-bit Windowed Binary.}
-\label{fig:stein4-32v64}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics{stein5-32v64}
-\caption{Right-to-Left 5-bit Windowed Binary.}
-\label{fig:stein5-32v64}
+\mbox{
+	\subfigure{\includegraphics[width=3in]{stein1-32v64}}
+	\subfigure{\includegraphics[width=3in]{stein2-32v64}}
+}
+\mbox{
+	\subfigure{\includegraphics[width=3in]{stein3-32v64}}
+	\subfigure{\includegraphics[width=3in]{stein4-32v64}}
+}
+\mbox{
+	\subfigure{\includegraphics[width=3in]{stein5-32v64}}
+}
+\caption{Performance of varying the window size of the right-to-left binary GCD.}
+\label{fig:stein-32v64}
 \end{figure}
 
 The left-to-right variant of the binary GCD proposed by Shallit and Sorenson is shown in figure \ref{fig:shallit-32v64}.  Here the 32-bit implementation is slightly faster than the 64-bit implementation.
@@ -1613,16 +1595,15 @@ Lastly, our simplified version of the left-to-right binary GCD is shown in figur
 \label{fig:binary_l2r-32v64}
 \end{figure}
 
-Note that the 32-bit versions of the right-to-left binary GCD are only accurate up to 29-bits (ignoring sign), while the 64-bit versions are only accurate to 60-bits. The 32-bit version of the left-to-right binary GCD proposed by Shallit and Sorenson is accurate up to 30-bits.  All other 32-bit implementations are accurate to 31-bits\footnote{The input is less than or equal to 31-bits, since in a two's complement representation the sign of the input variable takes the most significant bit and accounts for all 32-bits.} and all 64-bit implementations are accurate to 63-bits\footnote{Similar to the 32-bit implementation, the most significant bit represents the sign of the integer.}.
+Note that the 32-bit versions of the right-to-left binary GCD are only accurate up to 29-bits (ignoring sign), while the 64-bit versions are only accurate to 60-bits. All other 32-bit implementations are accurate to 31-bits\footnote{The input is less than or equal to 31-bits, since in a two's complement representation the sign of the input variable takes the most significant bit and accounts for all 32-bits.} and all 64-bit implementations are accurate to 63-bits\footnote{Similar to the 32-bit implementation, the most significant bit represents the sign of the integer.}.
 
 Since the 32-bit implementation of each algorithm is at least no slower than the 64-bit implementation, when comparing the different algorithms, we always prefer the 32-bit implementation of each when the algorithm is known to be accurate for the size of the inputs.
 
-Both the Extended Euclidean Algorithm and Lehmer's GCD use division with remainder to compute their result, so we first compare our implementations of both.  Figure \ref{fig:divrem-vs-lehmer} show that the Extended Euclidean Algorithm is always faster.
+Both the Extended Euclidean Algorithm and Lehmer's GCD use division with remainder to compute their result, so we first compare our implementations of both.  Figure \ref{fig:divrem-vs-lehmer} shows that the Extended Euclidean Algorithm is always faster.
 
 \begin{figure}[H]
 \centering
-\includegraphics{divrem-vs-lehmer-32}
-\includegraphics{divrem-vs-lehmer-64}
+\includegraphics{divrem-vs-lehmer}
 \caption{Extended Euclidean Algorithm compared to Lehmer's GCD using precomputed 8-bit words.}
 \label{fig:divrem-vs-lehmer}
 \end{figure}
@@ -1639,8 +1620,7 @@ In Figure \ref{fig:steins}, we compare each of our windowed implementations of t
 Figure \ref{fig:shallit-vs-binary_l2r} compares the left-to-right binary GCD proposed by Shallit and Sorenson to our own simplified version.  
 \begin{figure}[H]
 \centering
-\includegraphics{shallit-vs-binary_l2r-32}
-\includegraphics{shallit-vs-binary_l2r-64}
+\includegraphics{shallit-vs-binary_l2r}
 \caption{Shallit and Sorenson compared to our simplified left-to-right binary GCD.}
 \label{fig:shallit-vs-binary_l2r}
 \end{figure}
