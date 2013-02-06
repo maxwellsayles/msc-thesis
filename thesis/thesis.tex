@@ -1674,7 +1674,7 @@ Other practical considerations are to minimize the size of variables and interme
 
 In our 64-bit implementation, $\Delta$ and $c$ take 64-bits of storage, while both $a$ and $b$ require only 32-bits at most.  As such, we take advantage of 32-bit operations when possible, such as our 32-bit implementations of the extended GCD algorithm.  Similarly in our 128-bit implementation, $\Delta$ and $c$ fit within 128-bits of storage, and both $a$ and $b$ fit within one 64-bit machine word.  Again, we use 64-bit arithmetic when possible, and even 32-bit when operands are small.  However, since intermediates may be larger, we sometimes require the full 64-bits or 128-bits of the implementation.
 
-To keep intermediates small, we compute using residue classes.  For example, $b$ may be computed $\pmod{2a}$.  When $b$ (or an intermediate) is known to be close to zero, we do not perform a complete division with remainder, but only add or subtract $2a$ as appropriate (often using the signed mask discussed in Subsection \ref{subsec:gcdImpl}).  Furthermore, rather than computing the positive remainder, we typically compute the remainder that is closest to zero.  The idea here is to minimize the number of bits required by intermediates in order to avoid overflows as much as possible.
+To keep intermediates small, we compute using residue classes.  For example, Equations \ref{eq:idealProductU} states that we can compute $U \pmod {a_1/s}$ and Equation \ref{eq:idealProductB} allows us to compute $b \pmod{2a}$.  When an intermediate is known to be close to zero, we do not perform a complete division with remainder, but only add or subtract the divisor as appropriate (often using the signed mask discussed in Subsection \ref{subsec:gcdImpl}).  Furthermore, rather than computing the positive remainder, we typically compute the remainder that is closest to zero.  The idea here is to minimize the number of bits required by intermediates in order to avoid overflows as much as possible.
 
 In the specific case of ideal reduction (see Algorithm \ref{alg:reduce}), one step is to compute $b'$ such that $-a < b' \le a$ and $b' \equiv b \pmod{2a}$.  To compute $b \bmod{2a}$ we effectively compute $b = q2a + r$ for $q, r \in \ZZ$ where $r < 2a$.  We note that $q = \floor{b/(2a)} = \floor{(b/a)/2}$, and instead compute $b = q'a+r'$ for $q', r' \in \ZZ$ where $r' < a$.  Now $q'$ is at least twice $q$.  If $q'$ is even, then $b = q'a + r' = (q'/2)2a + r' = q2a + r$ and so $q'/2 = q$ and $r' = r$. Suppose $q'$ is odd and positive.  Then $b = q'a + r' = b = (q' - 1)a + (r' + a) = ((q'-1)/2)2a + (r' + a) = q2a + r$.  In this case $(q'-1)/2 = q$ and $(r' + a) = r$.  Notice that $r'+a < 2a$ since $r' < a$.  The proof is similar when $q$ is odd and negative. This leads us to the following implementation
 \begin{align*}
@@ -1693,14 +1693,13 @@ r_m &= \lnot\texttt{sign\_mask}(r) & \textrm{\{$r_m$ has all bits set when $r \g
 a'  &= (a \oplus r_m) - r_m & \textrm{\{negate $a$ when $r_m$ is all set\}} \\
 r   &= r' + (a' \band q_m) & \textrm{\{move $r$ towards zero when $q$ is odd\}} \\
 d   &= r_m \bor 1 & \textrm{1 when $r < 0$ and $-1$ otherwise} \\
-q   &= q' - (d \band q_m) & \textrm{\{adjust $q$ with respect to $r$\}} \\
-b'  &= r
+q   &= q' - (d \band q_m) & \textrm{\{adjust $q$ with respect to $r$\}}
 \end{align*}
-as an equivalent step to computing $b'$ in the ideal reduction algorithm. We note here that instead of computing a new value for $c = (b^2 - \Delta)/4a$, we can compute the new value from $q$ and $r$ above as $c - (b + r)q/2$.
+then $b' = r$. We note here that instead of computing a new value for $c = (b^2 - \Delta)/4a$, we can compute the new value from $q$ and $r$ above as $c - (b + r)q/2$.
 
 For GMP, we preallocate the memory needed to save time on memory allocation/releases.
 
-Only compute left portion of GCD when we're only interested in the left part.
+Only compute left portion of GCD when we're only interested in the left part.  Only compute three part GCD if first part is not 1.
 
 Both Euclidean Algorithm and our simplified left-to-right binary GCD can be used for the partial extended GCD to compute partially reduced coefficients.
 
