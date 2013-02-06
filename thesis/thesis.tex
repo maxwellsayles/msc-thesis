@@ -60,7 +60,8 @@
 \newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
 \newcommand{\amax}{a_\textrm{max}}
 \newcommand{\bmax}{b_\textrm{max}}
-\newcommand{\band}{~\texttt{and}_b~}
+\newcommand{\band}{~\texttt{and}_\texttt{b}~}
+\newcommand{\bor}{~\texttt{or}_\texttt{b}~}
 
 \graphicspath{{./eps/}}
 
@@ -256,6 +257,7 @@ In Subsection \ref{subsec:reduction}, we state what it is for an ideal to be in 
 \label{subsec:reduction}
 
 \begin{defn}
+\label{defn:reducedIdeal}
 A primitive ideal $\mathfrak{a} = [a, (b+\sqrt{\Delta})/2]$ with $\Delta < 0$ is \emph{reduced} when $-a < b \le a < c$ or when $0 \le b \le a = c$ for $c = (b^2 - \Delta)/4a$ \cite[p.241]{Crandall2001}.
 \end{defn}
 
@@ -1115,7 +1117,7 @@ Recall that in Stage 1 of SPAR, we compute $\bclass = \aclass^{\prod_{i=2}^t {p_
 
 A significant contribution of this thesis is to improve the performance of exponentiation in the ideal class group of imaginary quadratic number fields on present day CPUs.  This chapter focuses on the different techniques used to improve performance and the experimental data that lead us to our implementation.  We specialized much of our implementation for the x64 architecture.  Many of our routines benefit when the input is bounded by a single machine word, i.e.\ 64-bits, but we were also able to take advantage of integers that fit within two machine words by implementing a custom library for 128-bit arithmetic.  When integers are larger than 128-bits, we use the GNU Multiple Precision (GMP) arithmetic library.
 
-Improvements to ideal arithmetic also lead to improvements in ideal exponentiation, and so we start there. Arithmetic in the ideal class group uses solutions to equations of the form $s = Ua + Vb$ where $s$ is the largest integer dividing both $a$ and $b$. In Section \ref{sec:eea}, we introduce several algorithms for computing such solutions and we look at their performance in practice. In order to make arithmetic in the ideal class group as efficient as possible, we specialized our implementation and discuss this specialization in Section \ref{sec:specializedTypes}. In Section \ref{sec:exponentiation}, we compare methods to exponentiate ideal representatives to large fixed exponents that are the product of many primes, including many novel approaches to computing double-base representations.
+Improvements to ideal arithmetic also lead to improvements in ideal exponentiation, and so we start there. Arithmetic in the ideal class group uses solutions to equations of the form $s = Ua + Vb$ where $s$ is the largest integer dividing both $a$ and $b$. In Section \ref{sec:eea}, we introduce several algorithms for computing such solutions and look at their performance in practice. In order to make arithmetic in the ideal class group as efficient as possible, we specialized our implementation and discuss this implementation in Section \ref{sec:idealArithmetic}. In Section \ref{sec:exponentiation}, we compare methods to exponentiate ideal representatives to large fixed exponents that are the product of many primes, including many novel approaches to computing double-base representations.
 
 \section{Extended Greatest Common Divisor}
 \label{sec:eea}
@@ -1469,15 +1471,16 @@ If $qt > s$ then the resulting value for $s-qt$ is negative, and so we negate th
 Unlike the right-to-left binary GCD in Subsection \ref{subsec:r2lBinGcd}, all of the operations in the left-to-right binary GCD are unimodular and so can be used to generate the partially reduced coefficients in the partial extended GCD for fast ideal multiplication.
 
 
-\subsection{Specialized Implementations}
+\subsection{Specialized Implementations of the Extended GCD}
+\label{subsec:gcdImpl}
 
 A goal of this thesis is to make arithmetic in the ideal class group as fast as we can on present day CPUs. To this end, we specialized implementations of each of the GCD algorithms discussed in this section for the x64 architecture.  All algorithms are implemented in C99 for the GNU C compiler and often benefit from hand optimized x64 assembler.  The use of assembly language is done in line and is conditionally compiled based on the target platform.  For each of the GCD algorithms presented here, we implemented 32-bit and 64-bit versions, and when arithmetic overflows did not require us to use GMP, we also implemented 128-bit versions.  For appropriately sized inputs, we used these specialized implementations, otherwise we use GMP for the extended GCD computation.
 
 Many of the techniques we use are described in the book ``Hacker's Delight'' \cite{Warren2002}.  Computing $x2^k$ corresponds to shifting $x$ left by $k$ bits.  When $x$ is divisible by $2^k$, computing the integer $x / 2^k$ corresponds to shifting $x$ right by $k$ bits.  When we want $X \bmod 2^k$, we achieve this using $x \band 2^k-1$ where $\band$ is the bitwise `and' operation.  
 
-Assuming a two's complement representation of machine words, the most significant bit of a machine word $x$ is set if $x < 0$ and clear otherwise.  We can generate a bit-mask according to this test by using an arithmetic shift right operation (in the C programming language this is a right shift on a signed integer type).  Let $m$ denote the number of bits in a machine word; then by using an arithmetic shift right on $x$ by $m-1$ bits, the result is either a word with $m$ set bits when $x < 0$ or a word with $m$ clear bits otherwise.  We denote this operation $\texttt{sign\_mask(x)}$.  Notice that a word with $m$ set bits, corresponds to the integer $-1$ under a signed two's complement representation.  Lastly, we use $\oplus$ to denote bitwise exclusive-or, and $\lnot$ to denote bitwise negation.
+Assuming a two's complement representation of machine words, the most significant bit of a machine word $x$ is set if $x < 0$ and clear otherwise.  We can generate a bit-mask according to this test by using an arithmetic shift right operation (in the C programming language this is a right shift on a signed integer type).  Let $m$ denote the number of bits in a machine word; then by using an arithmetic shift right on $x$ by $m-1$ bits, the result is either a word with $m$ set bits when $x < 0$ or a word with $m$ clear bits otherwise.  We denote this operation $\texttt{sign\_mask}(x)$.  Notice that a word with $m$ set bits, corresponds to the integer $-1$ under a signed two's complement representation.  Lastly, we use $\oplus$ to denote bitwise exclusive-or, and $\lnot$ to denote bitwise negation.
 
-Using these operations, we can compute the absolute value of a signed machine word $x$ without using any conditional statements.  Let $y = \texttt{sign\_mask(x)}$ and the absolute value of $x$ is $(x \oplus y) - y$.  To see this, suppose $x \ge 0$.  Then $y$ is 0 and so $(x \oplus y) - y = x$.  When $x < 0$, $y$ has all of its bits set (and is also $-1$).  Therefore, $(x \oplus y) - y = \lnot x + 1 = -x$.
+Using these operations, we can compute the absolute value of a signed machine word $x$ without using any conditional statements.  Let $y = \texttt{sign\_mask}(x)$ and the absolute value of $x$ is $(x \oplus y) - y$.  To see this, suppose $x \ge 0$.  Then $y$ is 0 and so $(x \oplus y) - y = x$.  When $x < 0$, $y$ has all of its bits set (and is also $-1$).  Therefore, $(x \oplus y) - y = \lnot x + 1 = -x$.
 
 Similarly, we can conditionally negate a word $x$ based on a mask $y$.  This is useful since the extended GCD algorithms described previously expect their input, $a$ and $b$, to be positive integers.  We first compute the absolute value of $a$ and $b$ by computing their signed masks and then conditionally negate each respectively.  Since the extended GCD algorithm computes a solution to $s = Ua + Vb$, where $a$ and $b$ have been made positive, the solution for our original inputs is to conditionally negate $U$ based on the signed mask of $a$ and $V$ based on the signed mask of $b$.
 
@@ -1497,13 +1500,13 @@ To swap two machine words, $x_0$ and $y_0$, without using an additional word, we
 \]
 and this reduces to $x_2 = y_0$.  Also, $y_1$ expands to $(x_0 \oplus y_0) \oplus y_0$, which is just $x_0$.  In practice, each assignment to $x_i$ and $y_i$ overwrites the previous $x_{i-1}$ and $y_{i-1}$ and so is performed in place.
 
-We can conditionally swap two words, $x$ and $y$ when $x < y$ by using two additional words.  Let $d = x - y$.  Notice that simply computing $x \gets x - d$ and $y \gets y + d$ swaps $x$ and $y$.  Instead, let $m = \texttt{sign\_mask(d)}$ and then  $x \gets x - (d \band m)$ and $y \gets y + (d \band m)$ swaps $x$ and $y$ only when $x < y$.  In the left-to-right binary GCD, we conditionally swap the triple $(s, U, V)$ with $(t, X, Y)$ when $s < t$.  By fixing $m = \texttt{sign\_mask(s - t)}$, but letting $d$ take on $s - t$, and then $U - X$, and finally $V - Y$, we can conditionally swap the triples when $s < t$. The algorithm is given in Algorithm \ref{alg:condSwap3}.
+We can conditionally swap two words, $x$ and $y$ when $x < y$ by using two additional words.  Let $d = x - y$.  Notice that simply computing $x \gets x - d$ and $y \gets y + d$ swaps $x$ and $y$.  Instead, let $m = \texttt{sign\_mask}(d)$ and then  $x \gets x - (d \band m)$ and $y \gets y + (d \band m)$ swaps $x$ and $y$ only when $x < y$.  In the left-to-right binary GCD, we conditionally swap the triple $(s, U, V)$ with $(t, X, Y)$ when $s < t$.  By fixing $m = \texttt{sign\_mask}(s - t)$, but letting $d$ take on $s - t$, and then $U - X$, and finally $V - Y$, we can conditionally swap the triples when $s < t$. The algorithm is given in Algorithm \ref{alg:condSwap3}.
 \begin{algorithm}[h]
 \caption{Conditionally swap $(s, U, V)$ with $(t, X, Y)$ when $s < t$.}
 \label{alg:condSwap3}
 \begin{algorithmic}[1]
 \STATE $d \gets s - t$
-\STATE $m \gets \texttt{sign\_mask(d)}$
+\STATE $m \gets \texttt{sign\_mask}(d)$
 \STATE $d \gets d \band m$
 \STATE $s \gets s - d$
 \STATE $t \gets t + d$
@@ -1515,7 +1518,7 @@ We can conditionally swap two words, $x$ and $y$ when $x < y$ by using two addit
 \STATE $Y \gets Y + d$
 \end{algorithmic}
 \end{algorithm}
-On the x64 architecture we can optimize the computation of $d \gets s - t$ and $m \gets \texttt{sign\_mask(d)}$ since the operation $s-t$ sets the carry flag when the result is negative.  Using a subtract with borrow, we subtract $m$ from itself.  This sets $m$ to 0 when the carry is clear, and -1 when the carry is set.
+On the x64 architecture we can optimize the computation of $d \gets s - t$ and $m \gets \texttt{sign\_mask}(d)$ since the operation $s-t$ sets the carry flag when the result is negative.  Using a subtract with borrow, we subtract $m$ from itself.  This sets $m$ to 0 when the carry is clear, and -1 when the carry is set.
 
 Often our implementation uses the number of bits in a positive integer $x$.  In the algorithm description we use $\floor{\log_2x} + 1$.  On the x64 architecture there is an instruction (\texttt{bsr}) that returns the index of the most significant set bit.  This allows us to quickly compute that value.  On a platform that does not have such an instruction, we can use a logarithmic search to find the most significant set bit\footnote{There is also a similar algorithm to find the least significant set bit of a machine word (\texttt{bsl} on x64).}.  Let $k = \floor{m/2}$ where $m$ is the number of bits in a machine word and let $i$ be the computed index (initially $i \gets 0$).  We first check if $x \ge 2^k$.  If it is, then $i \gets i + k$ and $x$ is shifted right by $k$.  We repeat on $k \gets \floor{k/2}$ until $k=0$.  At which point, $i$ is the index of the most significant set bit (see Algorithm \ref{alg:msb}).  Notice that we could use the signed mask of $2^k - x$ instead of the conditional `if' statement, and we could unroll the while loop for fixed values of $m$.
 
@@ -1644,39 +1647,71 @@ Since the Euclidean Algorithm and our simplified left-to-right binary GCD are ou
 
 % IDEAL ARITHMETIC
 \section{Ideal Arithmetic}
-\label{sec:specializedTypes}
+\label{sec:idealArithmetic}
 
-In the previous section, we demonstrated results that lead to practical improvements in computing the extended GCD -- a key operation in reduced ideal multiplication.  In this section, we discuss the results of our implementations of ideal arithmetic specialized for discriminants that fit within 64-bits or 128-bits, as well as an implementation for unbounded discriminants.  
+In the previous section, we demonstrated results that lead to practical improvements in computing the extended GCD -- a key operation in reduced ideal multiplication.  In this section, we discuss our implementation of ideal arithmetic.  To improve the performance of ideal arithmetic, we specialized implementations to use at most a single machine word, i.e.\ 64-bits, or at most two machine words, i.e.\ 128-bits.  We also have a reference implementation using GMP that works for unbounded discriminant sizes.  Our 64-bit implementation of ideal arithmetic is accurate for negative discriminants up to 59-bits  in size, while our 128-bit implementation of ideal arithmetic is accurate for discriminants up to 119-bits.
 
-\subsection{64bit, 128bit, GMP-MPZ}
+\subsection{Specialized Implementations of Ideal Arithmetic}
 
-Concrete implementation.  We keep $a$, $b$, and $c$.  $a, b \le \sqrt\Delta$ and so require only half the storage.  $c$ requires full storage.   We store $\Delta$ for the class (not per element), and we store $\Delta^{1/2}$ and $\Delta^{1/4}$ as an optimization since this is used frequently.  For GMP, we preallocate the memory needed to save time on memory allocation/releases.
+Throughout this thesis, we represent an ideal class $[\mathfrak a]$ using the $\ZZ$-module for the reduced ideal representative $\mathfrak a = [a, (b + \sqrt{\Delta})/2]$.  Ideal class multiplication and ideal reduction use the value $c = (b^2 - \Delta)/4a$, which is also useful in determining if an ideal is an ambiguous ideal\footnote{Recall that an ideal is ambiguous if $b=0$, $a=b$, or $a=c$.}.  For this reason, our implementation represents an ideal class using the triple $(a, b, c)$.  Since there are many elements in a given ideal class group, $Cl_\Delta$, we also maintain a representation of the group, which includes the discriminant $\Delta$.
 
-Try to keep things in smaller words, e.g.\ try to do most of the 128-bit using 64-bit arithmetic.
+In Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and \ref{subsec:nucube} we introduced algorithms for fast ideal class multiplication, squaring, and cubing.  These compute a termination bound for the partial extended GCD useful for computing the partially reduced coefficients of the product ideal class.  In all cases, the termination bound contains the coefficient $|\Delta/4|^{1/4}$.  Since the coefficients of the partial extended GCD are integers, we instead compute $\ceil{|\Delta/4|^{1/4}}$ as well as $\ceil{|\Delta/4|^{1/2}}$ and tie both to our representation of the class group.  The reason we store $\ceil{|\Delta/4|^{1/2}}$ is that the termination bound for fast ideal multiplication is
+\[
+\sqrt{a_1/a_2}|\Delta/4|^{1/4} = \sqrt{(a_1/a_2) |\Delta/4|^{1/2}} \approx \sqrt{(a_1/a_2) \ceil{|\Delta/4|^{1/2}}}.
+\]
+In fast ideal cubing the bound is $\sqrt{a_1}|\Delta/4|^{1/4} \approx \sqrt{a_1\ceil{|\Delta/4|^{1/2}}}$. By approximating the termination bound, we can speed the arithmetic at the expense of additional reduction steps. We note here that we compute the values $\ceil{|\Delta/4|^{1/2}}$ and $\ceil{|\Delta/4|^{1/4}}$ as accurately as possible, since these are only computed once per class group and then stored with the representation of the group.
 
-Precompute square roots modulo a prime.  Useful for finding prime ideals.
+We further approximate the computation of integer square roots when computing the termination bound for fast multiplication.  We note that 
+\begin{equation*}
+\begin{array}{rrlrlr}
+	& x^{1/2} &=& 2^{(\log_2x)/2} &\approx& 2^{\floor{\log_2x+1}/2} \\
+	\Rightarrow & x / x^{1/2} &=& x / 2^{(\log_2x)/2} &\approx& x / 2^{\floor{\log_2x+1}/2},
+\end{array}
+\end{equation*}
+where $\floor{\log_2x+1}$ is the number of bits in the binary representation of $x$.  Using this approximation, we compute the integer square root of $x$ as roughly $\floor{x / 2^{\floor{\log_2x+1}/2}}$.  This is simply a bit shift right by half the number of bits in $x$.
+
+Other practical considerations are to minimize the size of variables and intermediate values, as smaller operands often lead to faster arithmetic.  Recall that the discriminant $\Delta$ equals $b^2 - 4ac$.  When $4ac=0$ then $b^2$ is as large as possible and so we obtain the bound $b \le \sqrt\Delta$.  Similarly, when $b^2 = 0$ we obtain the bound $a \le \sqrt{\Delta/4}$ (recall that by Definition \ref{defn:reducedIdeal}, a reduced ideal has $a \le c$).  As such, the variables $a$ and $b$ only require half the memory needed to store $\Delta$.
+
+In our 64-bit implementation, $\Delta$ and $c$ take 64-bits of storage, while both $a$ and $b$ require only 32-bits at most.  As such, we take advantage of 32-bit operations when possible, such as our 32-bit implementations of the extended GCD algorithm.  Similarly in our 128-bit implementation, $\Delta$ and $c$ fit within 128-bits of storage, and both $a$ and $b$ fit within one 64-bit machine word.  Again, we use 64-bit arithmetic when possible, and even 32-bit when operands are small.  However, since intermediates may be larger, we sometimes require the full 64-bits or 128-bits of the implementation.
+
+To keep intermediates small, we compute using residue classes.  For example, $b$ may be computed $\pmod{2a}$.  When $b$ (or an intermediate) is known to be close to zero, we do not perform a complete division with remainder, but only add or subtract $2a$ as appropriate (often using the signed mask discussed in Subsection \ref{subsec:gcdImpl}).  Furthermore, rather than computing the positive remainder, we typically compute the remainder that is closest to zero.  The idea here is to minimize the number of bits required by intermediates in order to avoid overflows as much as possible.
+
+In the specific case of ideal reduction (see Algorithm \ref{alg:reduce}), one step is to compute $b'$ such that $-a < b' \le a$ and $b' \equiv b \pmod{2a}$.  To compute $b \bmod{2a}$ we effectively compute $b = q2a + r$ for $q, r \in \ZZ$ where $r < 2a$.  We note that $q = \floor{b/(2a)} = \floor{(b/a)/2}$, and instead compute $b = q'a+r'$ for $q', r' \in \ZZ$ where $r' < a$.  Now $q'$ is at least twice $q$.  If $q'$ is even, then $b = q'a + r' = (q'/2)2a + r' = q2a + r$ and so $q'/2 = q$ and $r' = r$. Suppose $q'$ is odd and positive.  Then $b = q'a + r' = b = (q' - 1)a + (r' + a) = ((q'-1)/2)2a + (r' + a) = q2a + r$.  In this case $(q'-1)/2 = q$ and $(r' + a) = r$.  Notice that $r'+a < 2a$ since $r' < a$.  The proof is similar when $q$ is odd and negative. This leads us to the following implementation
+\begin{align*}
+	b' &= \begin{cases}
+		r & \textrm{when $q$ is even} \\
+		r - a & \textrm{when $q$ is odd and $r > 0$} \\
+		r + a & \textrm{otherwise.}
+	\end{cases}
+\end{align*}
+
+As with our implementations of the extended GCD algorithms, we optimize this to be free of conditionals.  Using two's complement for fixed sized words, we compute 
+\begin{align*}
+b   &= q'a + r' & \textrm{\{division with remainder\}}\\
+q_m &= -(q \band 1) & \textrm{\{$q_m$ has all bits set when $q$ is odd\}} \\
+r_m &= \lnot\texttt{sign\_mask}(r) & \textrm{\{$r_m$ has all bits set when $r \ge 0$\}} \\
+a'  &= (a \oplus r_m) - r_m & \textrm{\{negate $a$ when $r_m$ is all set\}} \\
+r   &= r' + (a' \band q_m) & \textrm{\{move $r$ towards zero when $q$ is odd\}} \\
+d   &= r_m \bor 1 & \textrm{1 when $r < 0$ and $-1$ otherwise} \\
+q   &= q' - (d \band q_m) & \textrm{\{adjust $q$ with respect to $r$\}} \\
+b'  &= r
+\end{align*}
+as an equivalent step to computing $b'$ in the ideal reduction algorithm. We note here that instead of computing a new value for $c = (b^2 - \Delta)/4a$, we can compute the new value from $q$ and $r$ above as $c - (b + r)q/2$.
+
+For GMP, we preallocate the memory needed to save time on memory allocation/releases.
 
 Only compute left portion of GCD when we're only interested in the left part.
 
 Both Euclidean Algorithm and our simplified left-to-right binary GCD can be used for the partial extended GCD to compute partially reduced coefficients.
 
-For a given prime $p$, let $a = p$, then $b = \pm \sqrt\Delta \pmod p$ if such a $b$ exists.   We want $b^2 - 4ac = \Delta$.  We have $b^2 - 4pc = \Delta$.  Take everything in the residue class modulo $p$ and we have $b^2 = \Delta \pmod p$.  That where it comes from.
+Precompute square roots modulo a prime.  Useful for finding prime ideals. For a given prime $p$, let $a = p$, then $b = \pm \sqrt\Delta \pmod p$ if such a $b$ exists.   We want $b^2 - 4ac = \Delta$.  We have $b^2 - 4pc = \Delta$.  Take everything in the residue class modulo $p$ and we have $b^2 = \Delta \pmod p$.  That where it comes from.
 
-Instead of computing $b \bmod 2a$ we compute $b \bmod a$ and then we compute $b \gets b \pm a$ when $q$ is odd for $b = qa + r$.
 
-We compute remainders closest to zero, i.e.\ not necessarily positive.
 
-We cheat on computing a square root.  Instead we note that 
-\begin{equation*}
-\begin{array}{rrlrlr}
-	& x^{1/2} &=& 2^{(\log_2x)/2} &\approx& 2^{\floor{\log_2x+1}/2} \\
-	\Rightarrow & x / x^{1/2} &=& x / 2^{(\log_2x)/2} &\approx& x / 2^{\floor{\log_2x+1}/2}
-\end{array}
-\end{equation*}
-And so we can compute $\floor{x^{1/2}}$ approximately as $\floor{x / 2^{\floor{\log_2x+1}/2}}$, which is simply a bit shift right by half the number of bits in x.
+\subsection{Average time for operations}
 
 \subsection{When cubing is better than compose + square}
-\subsection{Average time for operations}
+
 
 \section{Exponentiation Experiments}
 \label{sec:exponentiation}
