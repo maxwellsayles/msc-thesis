@@ -1649,7 +1649,7 @@ Since the Euclidean Algorithm and our simplified left-to-right binary GCD are ou
 \section{Ideal Arithmetic}
 \label{sec:idealArithmetic}
 
-In the previous section, we demonstrated results that lead to practical improvements in computing the extended GCD -- a key operation in reduced ideal multiplication.  In this section, we discuss our implementation of ideal arithmetic.  To improve the performance of ideal arithmetic, we specialized implementations to use at most a single machine word, i.e.\ 64-bits, or at most two machine words, i.e.\ 128-bits.  We also have a reference implementation using GMP that works for unbounded discriminant sizes.  Our 64-bit implementation of ideal arithmetic is accurate for negative discriminants up to 59-bits  in size, while our 128-bit implementation of ideal arithmetic is accurate for discriminants up to 119-bits.
+In the previous section, we demonstrated results that lead to practical improvements in computing the extended GCD -- a key operation in reduced ideal multiplication.  In this section, we discuss our implementation of ideal arithmetic.  To improve the performance of ideal arithmetic, we specialized implementations to use at most a single machine word, i.e.\ 64-bits, or at most two machine words, i.e.\ 128-bits.  We also have a reference implementation using GMP that works for unbounded discriminant sizes.  Our 64-bit implementation of ideal arithmetic is accurate for negative discriminants up to 59-bits  in size, while our 128-bit implementation of ideal arithmetic is accurate for discriminants up to 118-bits.
 
 \subsection{Specialized Implementations of Ideal Arithmetic}
 
@@ -1659,16 +1659,16 @@ In Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and \ref{subsec:nucube}
 \[
 \sqrt{a_1/a_2}|\Delta/4|^{1/4} = \sqrt{(a_1/a_2) |\Delta/4|^{1/2}} \approx \sqrt{(a_1/a_2) \ceil{|\Delta/4|^{1/2}}}.
 \]
-In fast ideal cubing the bound is $\sqrt{a_1}|\Delta/4|^{1/4} \approx \sqrt{a_1\ceil{|\Delta/4|^{1/2}}}$. By approximating the termination bound, we can speed the arithmetic at the expense of additional reduction steps. We note here that we compute the values $\ceil{|\Delta/4|^{1/2}}$ and $\ceil{|\Delta/4|^{1/4}}$ as accurately as possible, since these are only computed once per class group and then stored with the representation of the group.
+In fast ideal squaring, the bound is simply $|\Delta/4|^{1/4}$ and in fast ideal cubing the bound is $\sqrt{a_1}|\Delta/4|^{1/4} \approx \sqrt{a_1\ceil{|\Delta/4|^{1/2}}}$. By approximating the termination bound, we can speed the arithmetic at the expense of additional reduction steps. We note here that we compute the values $\ceil{|\Delta/4|^{1/2}}$ and $\ceil{|\Delta/4|^{1/4}}$ as accurately as possible, since these are only computed once per class group and then stored with the representation of the group.
 
 We further approximate the computation of integer square roots when computing the termination bound for fast multiplication.  We note that 
 \begin{equation*}
 \begin{array}{rrlrlr}
-	& x^{1/2} &=& 2^{(\log_2x)/2} &\approx& 2^{\floor{\log_2x+1}/2} \\
-	\Rightarrow & x / x^{1/2} &=& x / 2^{(\log_2x)/2} &\approx& x / 2^{\floor{\log_2x+1}/2},
+	& x^{1/2} &=& 2^{(\log_2x)/2} &\approx& 2^{\floor{\floor{\log_2x+1}/2}} \\
+	\Rightarrow & x / x^{1/2} &=& x / 2^{(\log_2x)/2} &\approx& x / 2^{\floor{\floor{\log_2x+1}/2}},
 \end{array}
 \end{equation*}
-where $\floor{\log_2x+1}$ is the number of bits in the binary representation of $x$.  Using this approximation, we compute the integer square root of $x$ as roughly $\floor{x / 2^{\floor{\log_2x+1}/2}}$.  This is simply a bit shift right by half the number of bits in $x$.
+where $\floor{\log_2x+1}$ is the number of bits in the binary representation of $x$.  Using this approximation, we compute the integer square root of $x$ as roughly $\floor{x / 2^{\floor{\floor{\log_2x+1}/2}}}$.  This is simply a bit shift right by half the number of bits in $x$.
 
 Other practical considerations are to minimize the size of variables and intermediate values, as smaller operands often lead to faster arithmetic.  Recall that the discriminant $\Delta$ equals $b^2 - 4ac$.  When $4ac=0$ then $b^2$ is as large as possible and so we obtain the bound $b \le \sqrt\Delta$.  Similarly, when $b^2 = 0$ we obtain the bound $a \le \sqrt{\Delta/4}$ (recall that by Definition \ref{defn:reducedIdeal}, a reduced ideal has $a \le c$).  As such, the variables $a$ and $b$ only require half the memory needed to store $\Delta$.
 
@@ -1676,7 +1676,7 @@ In our 64-bit implementation, $\Delta$ and $c$ take 64-bits of storage, while bo
 
 To keep intermediates small, we compute using residue classes.  For example, Equations \ref{eq:idealProductU} states that we can compute $U \pmod {a_1/s}$ and Equation \ref{eq:idealProductB} allows us to compute $b \pmod{2a}$.  When an intermediate is known to be close to zero, we do not perform a complete division with remainder, but only add or subtract the divisor as appropriate (often using the signed mask discussed in Subsection \ref{subsec:gcdImpl}).  Furthermore, rather than computing the positive remainder, we typically compute the remainder that is closest to zero.  The idea here is to minimize the number of bits required by intermediates in order to avoid overflows as much as possible.
 
-In the specific case of ideal reduction (see Algorithm \ref{alg:reduce}), one step is to compute $b'$ such that $-a < b' \le a$ and $b' \equiv b \pmod{2a}$.  To compute $b \bmod{2a}$ we effectively compute $b = q2a + r$ for $q, r \in \ZZ$ where $r < 2a$.  We note that $q = \floor{b/(2a)} = \floor{(b/a)/2}$, and instead compute $b = q'a+r'$ for $q', r' \in \ZZ$ where $r' < a$.  Now $q'$ is at least twice $q$.  If $q'$ is even, then $b = q'a + r' = (q'/2)2a + r' = q2a + r$ and so $q'/2 = q$ and $r' = r$. Suppose $q'$ is odd and positive.  Then $b = q'a + r' = b = (q' - 1)a + (r' + a) = ((q'-1)/2)2a + (r' + a) = q2a + r$.  In this case $(q'-1)/2 = q$ and $(r' + a) = r$.  Notice that $r'+a < 2a$ since $r' < a$.  The proof is similar when $q$ is odd and negative. This leads us to the following implementation
+In the specific case of ideal reduction (see Algorithm \ref{alg:reduce}), one step is to compute $b'$ such that $-a < b' \le a$ and $b' \equiv b \pmod{2a}$.  To compute $b \bmod{2a}$ we effectively compute $b = q2a + r$ for $q, r \in \ZZ$ where $|r| < 2a$.  We note that $q = \floor{b/(2a)} = \floor{(b/a)/2}$, and instead compute $b = q'a+r'$ for $q', r' \in \ZZ$ where $|r'| < a$.  Now $q'$ is at least twice $q$.  If $q'$ is even, then $b = q'a + r' = (q'/2)2a + r'$ and we let $b' = r'$. Suppose $q'$ is odd and $r'$ is positive.  Then $b = q'a + r' = (q' + 1)a + (r' - a) = ((q' + 1)/2)2a + (r' - a)$.  Since $0 < r' < a$, we have $b' = r' - a$ and $-a < b' \le a$.  The proof is similar when $q$ is odd and $r'$ is negative. This leads us to the following implementation
 \begin{align*}
 	b' &= \begin{cases}
 		r & \textrm{when $q$ is even} \\
@@ -1693,11 +1693,27 @@ r_m &= \lnot\texttt{sign\_mask}(r) & \textrm{\{$r_m$ has all bits set when $r \g
 a'  &= (a \oplus r_m) - r_m & \textrm{\{negate $a$ when $r_m$ is all set\}} \\
 r   &= r' + (a' \band q_m) & \textrm{\{move $r$ towards zero when $q$ is odd\}} \\
 d   &= r_m \bor 1 & \textrm{1 when $r < 0$ and $-1$ otherwise} \\
-q   &= q' - (d \band q_m) & \textrm{\{adjust $q$ with respect to $r$\}}
+q   &= (q' - (d \band q_m))/2 & \textrm{\{adjust $q$ with respect to $r$\}}
 \end{align*}
-then $b' = r$. We note here that instead of computing a new value for $c = (b^2 - \Delta)/4a$, we can compute the new value from $q$ and $r$ above as $c - (b + r)q/2$.
+and finally $b' = r$.
 
-For GMP, we preallocate the memory needed to save time on memory allocation/releases.
+Since we represent an ideal class using the triple $(a, b, c)$, it is necessary to compute a new value $c' = (b'^2 - \Delta)/4a$ after reduction.  This can be simplified as
+\begin{align*}
+	c &= (b^2 - \Delta)/4a \\
+	  &= ((2aq + r)^2 - \Delta)/4a \\
+	  &= (4a^2q^2 + 4aqr + r^2 - \Delta)/4a \\
+	  &= (r^2 - \Delta)/4a + aq^2 + qr \\
+	  &= c' + q(aq + r) \\
+	  &= c' + q(2aq + r - aq) \\
+	  &= c' + q(b - aq).
+\end{align*}
+We can further reduce this by one multiplication by rewriting $b = 2aq + r$ as
+\begin{align*}
+	b - 2aq &= r \\
+	2b - 2aq &= b + r \\
+	b - aq &= (b+r)/2.
+\end{align*}
+Since $b - aq \in \ZZ$, the divide by 2 can be performed with an arithmetic bit shift right. As such, we have $c' = c - q(b + r)/2$.
 
 Only compute left portion of GCD when we're only interested in the left part.  Only compute three part GCD if first part is not 1.
 
@@ -1705,9 +1721,14 @@ Both Euclidean Algorithm and our simplified left-to-right binary GCD can be used
 
 Precompute square roots modulo a prime.  Useful for finding prime ideals. For a given prime $p$, let $a = p$, then $b = \pm \sqrt\Delta \pmod p$ if such a $b$ exists.   We want $b^2 - 4ac = \Delta$.  We have $b^2 - 4pc = \Delta$.  Take everything in the residue class modulo $p$ and we have $b^2 = \Delta \pmod p$.  That where it comes from.
 
+For GMP, we preallocate the memory needed to save time on memory allocation/releases.
+
+
 
 
 \subsection{Average time for operations}
+
+s128 cubing often requires the use of GMP to prevent overflows, while multiplication and squaring never do.  this explains why s128 cubing does not perform as well as compose + square.   for mpz implementation, each of multiplication, square, and cubing all use GMP, and so cubing is more performant again.  with s64 implementation, both multiplication and squaring fit within 64-bits, and cubing sometimes overflows to 128, but this easily fits within two registers so we use special assembly for these cases. so with s64 implementation cubing is more performant than multiply with square.
 
 \subsection{When cubing is better than compose + square}
 
