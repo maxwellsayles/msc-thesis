@@ -12,6 +12,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsthm}
+%\usepackage{caption}
 \usepackage{comment}
 %\usepackage{eqparbox}
 \usepackage{float}
@@ -1731,10 +1732,29 @@ A final performance improvement we make is useful for finding prime ideals.  For
 
 \subsection{Average time for operations}
 
-s128 cubing often requires the use of GMP to prevent overflows, while multiplication and squaring never do.  this explains why s128 cubing does not perform as well as compose + square.   for mpz implementation, each of multiplication, square, and cubing all use GMP, and so cubing is more performant again.  with s64 implementation, both multiplication and squaring fit within 64-bits, and cubing sometimes overflows to 128, but this easily fits within two registers so we use special assembly for these cases. so with s64 implementation cubing is more performant than multiply with square.
+Here, we demonstrate the performance of our implementations of ideal class arithmetic. Let $k$ be the target number of bits in the discriminant $\Delta$.  We iterate $k$ from 16 to 140, and for each $k$ we repeat the following 100,000 times: We compute two prime numbers $p$ and $q$ such that $p$ is $\floor{k/2}$ bits and $q$ is $k-\floor{k/2}$ bits.  We use the negative of their product $\Delta = -pq$ as the discriminant for a class group.  We then pick a prime form, $[\mathfrak a]$, uniformly a random from among the primes less than 1000.  To time the performance of multiplication, we initially set $[\mathfrak b] \gets [\mathfrak a]$.  We then iterate 1000 times the operations $[\mathfrak c] \gets [\mathfrak a\mathfrak b]$, $[\mathfrak a] \gets [\mathfrak b]$, and $[\mathfrak b] \gets [\mathfrak c]$. Dividing the total time by 100,000,000 gives the average time to compose two ideals.  For squaring and cubing, we only maintain the ideal class $[\mathfrak a]$ and we repeatedly compute either $[\mathfrak a] \gets [\mathfrak a^2]$ or $[\mathfrak a] \gets [\mathfrak a^3]$ as appropriate.  Figure \ref{fig:idealArithComparison} shows the results of these timings and that for all discriminant sizes, our 64-bit implementation out performs our 128-bit implementation, which out performs our reference GMP implementation.
 
-\subsection{When cubing is better than compose + square}
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.9]{compose-all}
+\includegraphics[scale=0.9]{square-all}
+\includegraphics[scale=0.9]{cube-all}
+\caption{Average time to multiply, square, or cube ideal classes. The lower the time, the better.}
+\label{fig:idealArithComparison}
+\end{figure}
 
+Our GMP implementation uses only GMP integers for the ideal class representation, group representation, and intermediate operands.  Intermediate operands during multiplication and squaring always fit within 64-bits for the 64-bit implementation, and 128-bits for the 128-bit implementation.  On the 64-bit implementation, we use 32-bit operations when operands are sufficiently small, and likewise, on the 128-bit implementation, we use 64-bit operations when the operands are sufficiently small.  Intermediate operands during cubing, however, sometimes overflow the target size of the implementation.  In our 64-bit implementation, this is handled by customized assembler (or the use of our 128-bit general arithmetic library) to deal with the possible overflow.  In our 128-bit implementation, we defer to the use of GMP integers when an intermediate operand may overflow.  A result of this can be seen in Figure \ref{fig:cubingVsSquareAndMultiply} where we compare the average time to cube an ideal class representative against the average time to multiply a representative with its square.  Our 128-bit implementation of ideal class cubing performs more poorly than that of multiplying an ideal with its square.  This is likely because of the reliance on GMP integers for overflow.  Contrast this to our 64-bit implementation that does not use GMP at all, and our GMP implementation that only uses GMP.  In both of these implementations, cubing out performs multiplying an ideal with its square.
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.9]{cube-vs-64}
+\includegraphics[scale=0.9]{cube-vs-128}
+\includegraphics[scale=0.9]{cube-vs-mpz}
+\caption{Average time to cube an ideal class compared to the time to square and multiply.  Notice that cubing performs poorly in our 128-bit implementation.}
+\label{fig:cubingVsSquareAndMultiply}
+\end{figure}
+
+In this section we discussed methods we used to speed the performance of arithmetic in the ideal class group and we compared the average time of multiplication, squaring, and cubing.  In the next section, we will look at a variety of methods for exponentiating within the ideal class group that we have not discussed previously.  Many of these methods will take the average time of multiplication, squaring, and cubing into account when computing the operations of exponentiation.
 
 \section{Exponentiation Experiments}
 \label{sec:exponentiation}
