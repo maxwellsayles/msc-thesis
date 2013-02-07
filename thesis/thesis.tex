@@ -1205,7 +1205,7 @@ All the operations performed on the matrix
 \[
 \matrixtt{R_0}{C_0}{R_1}{C_1}
 \]
-during the Partial Extended Euclidean Algorithm can be represented by an invertible $2 \times 2$ matrix with determinant $\pm 1$.  This is necessarily the case since each operation relates one representative of an ideal equivalence class to another representative\footnote{Recall our discussion of binary quadratic forms (see subsection \ref{subsec:forms}). Two forms are related if there exists an invertible linear transformation of variables.}. This turns out to be critical as some variations of the Extended Euclidean Algorithm use operations that cannot be represented by an invertible $2 \times 2$ matrix and so cannot be used to compute the partially reduced coefficients for ideal multiplication.
+during the Partial Extended Euclidean Algorithm can be represented by an invertible $2 \times 2$ matrix with determinant $\pm 1$ (known as a \emph{unimodular} matrix).  This is necessarily the case since each operation relates one representative of an ideal equivalence class to another representative\footnote{Recall our discussion of binary quadratic forms (see subsection \ref{subsec:forms}). Two forms are related if there exists an invertible linear transformation of variables.}. This turns out to be critical as some variations of the Extended Euclidean Algorithm use operations that cannot be represented by an invertible $2 \times 2$ matrix and so cannot be used to compute the partially reduced coefficients for ideal multiplication.
 
 \subsection{Lehmer's GCD}
 
@@ -1653,7 +1653,7 @@ In the previous section, we demonstrated results that lead to practical improvem
 
 \subsection{Specialized Implementations of Ideal Arithmetic}
 
-Throughout this thesis, we represent an ideal class $[\mathfrak a]$ using the $\ZZ$-module for the reduced ideal representative $\mathfrak a = [a, (b + \sqrt{\Delta})/2]$.  Ideal class multiplication and ideal reduction use the value $c = (b^2 - \Delta)/4a$, which is also useful in determining if an ideal is an ambiguous ideal\footnote{Recall that an ideal is ambiguous if $b=0$, $a=b$, or $a=c$.}.  For this reason, our implementation represents an ideal class using the triple $(a, b, c)$.  Since there are many elements in a given ideal class group, $Cl_\Delta$, we also maintain a representation of the group, which includes the discriminant $\Delta$.
+Throughout this thesis, we represent an ideal class $[\mathfrak a]$ using the $\ZZ$-module for the reduced ideal representative $\mathfrak a = [a, (b + \sqrt{\Delta})/2]$.  Ideal class multiplication and ideal reduction use the value $c = (b^2 - \Delta)/4a$, which is also useful in determining if an ideal is an ambiguous ideal\footnote{Recall that an ideal is ambiguous if $b=0$, $a=b$, or $a=c$.}.  For this reason, our implementation represents an ideal class using the triple $(a, b, c)$.  Since there are many elements in a given ideal class group, $Cl_\Delta$, we also maintain a representation of the group\footnote{The group representation also includes all intermediate integers needed for use by the GMP library.  The reason for this is that GMP integers are managed on the heap, and preallocating them alongside the representation of the group reduces the overhead of managing them during ideal class group operations.}, which includes the discriminant $\Delta$.
 
 In Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and \ref{subsec:nucube} we introduced algorithms for fast ideal class multiplication, squaring, and cubing.  These compute a termination bound for the partial extended GCD useful for computing the partially reduced coefficients of the product ideal class.  In all cases, the termination bound contains the coefficient $|\Delta/4|^{1/4}$.  Since the coefficients of the partial extended GCD are integers, we instead compute $\ceil{|\Delta/4|^{1/4}}$ as well as $\ceil{|\Delta/4|^{1/2}}$ and tie both to our representation of the class group.  The reason we store $\ceil{|\Delta/4|^{1/2}}$ is that the termination bound for fast ideal multiplication is
 \[
@@ -1697,7 +1697,7 @@ q   &= (q' - (d \band q_m))/2 & \textrm{\{adjust $q$ with respect to $r$\}}
 \end{align*}
 and finally $b' = r$.
 
-Since we represent an ideal class using the triple $(a, b, c)$, it is necessary to compute a new value $c' = (b'^2 - \Delta)/4a$ after reduction.  This can be simplified as
+Since we represent an ideal class using the triple $(a, b, c)$, it is necessary to compute a new value $c' = (b'^2 - \Delta)/4a$ after a reduction step.  This can be simplified as
 \begin{align*}
 	c &= (b^2 - \Delta)/4a \\
 	  &= ((2aq + r)^2 - \Delta)/4a \\
@@ -1705,25 +1705,28 @@ Since we represent an ideal class using the triple $(a, b, c)$, it is necessary 
 	  &= (r^2 - \Delta)/4a + aq^2 + qr \\
 	  &= c' + q(aq + r) \\
 	  &= c' + q(2aq + r - aq) \\
-	  &= c' + q(b - aq).
+	  &= c' + q(b - aq) \\
+	  &= c' + q(b + r)/2.
 \end{align*}
-We can further reduce this by one multiplication by rewriting $b = 2aq + r$ as
+As such, we have
+\[
+c' = c - q(b + r)/2.
+\]
+Note, the last step above is obtained by rewriting $b = 2aq + r$ as
 \begin{align*}
 	b - 2aq &= r \\
 	2b - 2aq &= b + r \\
 	b - aq &= (b+r)/2.
 \end{align*}
-Since $b - aq \in \ZZ$, the divide by 2 can be performed with an arithmetic bit shift right. As such, we have $c' = c - q(b + r)/2$.
+Since $b - aq \in \ZZ$, the divide by 2 can be performed with an arithmetic bit shift right. (TODO: Is this published anywhere? should I cite something?)
 
-Only compute left portion of GCD when we're only interested in the left part.  Only compute three part GCD if first part is not 1.
+In the previous section, we fine tuned our implementation of the extended GCD computation.  We further refine our use of it here.  Our derivation of ideal multiplication computes
+\[
+s = \gcd(a_1, a_2, (b_1+b_2)/2) = Ya_1 + Va_2 + W(b_1+b_2)/2
+\]
+(this is Equation \ref{eq:idealProductS} from Subsection \ref{subsec:idealMultiply}).  In our algorithm for fast ideal multiplication (Algorithm \ref{alg:nucomp}), we break this computation into two parts: the first computes $s' = \gcd(a_1, a_2) = Y'a_1 + V'a_2$ and the second only computes $s = \gcd(s', (b_1 + b_2)/2) = Vs' + W(b_1 + b_2)/2$ when $s' \neq 1$.  We do this since checking for $s \neq 1$ is relatively inexpensive when compared to performing an extended GCD computation.  In addition to this, however, we note that the coefficient $Y'$ is not used in order to derive the product ideal.  As such, computing it is unnecessary and we can simplify our extended GCD computation by dropping the corresponding column from the computation.  This makes it computationally similar to the partial extended GCD, except for the initial and terminating conditions. Lastly, since our simplified left-to-right binary GCD uses only operations representable by unimodular matrices, it can be used to compute the partially reduced coefficients of the product ideal (i.e.\ the partial extended GCD).  This is a performance improvement over the recurrences used for fast ideal multiplication (Subsection \ref{subsec:nucomp}) when the operands are between 32-bits and 64-bits -- since our GCD experiments show that our simplified left-to-right binary GCD performs the best for this range.
 
-Both Euclidean Algorithm and our simplified left-to-right binary GCD can be used for the partial extended GCD to compute partially reduced coefficients.
-
-Precompute square roots modulo a prime.  Useful for finding prime ideals. For a given prime $p$, let $a = p$, then $b = \pm \sqrt\Delta \pmod p$ if such a $b$ exists.   We want $b^2 - 4ac = \Delta$.  We have $b^2 - 4pc = \Delta$.  Take everything in the residue class modulo $p$ and we have $b^2 = \Delta \pmod p$.  That where it comes from.
-
-For GMP, we preallocate the memory needed to save time on memory allocation/releases.
-
-
+A final performance improvement we make is useful for finding prime ideals.  For a given prime $p$, we would like to find an ideal of the form $[p, (b + \sqrt\Delta)/2]$.  We have $b^2 - 4pc = \Delta$, and so we take everything in the residue class modulo $p$ and get $b^2 \equiv \Delta \pmod p$ or $b \equiv \pm\sqrt\Delta \pmod p$.  Computing $b$, then, is a matter of computing a square root modulo a prime, if one exists.  There are efficient algorithms for this (see \cite{Bach1996}), but since we are generally interested in finding some prime ideal, rather than a specific prime ideal, we instead precompute all square roots modulo each prime $p$ for sufficiently many small $p$.  For our purposes, all primes $p < 1000$ was enough.  Finding $b \equiv \pm\sqrt\Delta \pmod p$ is now a table lookup. Having found a value for $b$, we have not necessarily found a prime ideal $[p, (b + \sqrt\Delta)/2]$.  Since $\Delta = b^2 - 4pc$, this implies that $c = (b^2 - \Delta)/4p$ must have an integral solution.  Our implementation maintains the value $c$ for an ideal class, so we compute $c$ and if $c$ is an integer, than we have found a prime ideal.  Otherwise, we try again for some other prime (usually the smallest prime greater than $p$).
 
 
 \subsection{Average time for operations}
