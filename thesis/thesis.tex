@@ -215,8 +215,7 @@ Prime ideals allow us to easily create an ideal.  For a prime ideal $\mathfrak p
 \]
 and it follows that either $s=p$ and $a=1$, or $s=1$ and $a=p$.  In the first case $\mathfrak p = p\OO_\Delta$, while in the second case $b = \pm \sqrt{\Delta} \pmod p$ and $\mathfrak p = [p, (b + \sqrt{\Delta})/2]$ when $4p ~|~ b^2 - \Delta$.  Algorithm \ref{alg:prime} gives pseudo-code.
 
-% PRIME
-\bigbreak
+% PRIME IDEAL
 \begin{algorithm}[h]
 \caption{Prime Ideal}
 \label{alg:prime}
@@ -608,7 +607,7 @@ In the next chapter, we'll discuss some exponentiation techniques that make use 
 
 Given a group $G$, an element $g \in G$, and an integer $n$, computing $g^n$ is a common operation and is known as exponentiation.  Diffie-Hellman key exchange is an example that uses exponentiation whereby two parties can jointly establish a shared secret key over an insecure channel.  An application discussed in detail in this thesis is that of computing the order of a group element.  Our approach is to exponentiate a group element to the product, $P$, of several small primes.  The result is an element whose order is likely to not be divisible by any of these primes. The order of this new element is then computed using a variant of Shanks' baby-step giant-step algorithm where only powers relatively prime to $P$ are computed.  Determining the order of an element can be useful in computing the structure of a group, or in factoring an integer associated with a group.  Being able to exponentiate faster implies that the entire computation can complete more quickly.
 
-In Sections \ref{section:binaryExp} and \ref{section:naf} we discuss standard exponentiation techniques that rely on a base 2 representation of the exponent.  In Section \ref{section:dbns} we introduce double-base number systems, which, as the name implies, are number systems that make use of multiple bases in the representation of a number.  We pay particular attention to double-base representations that use bases 2 and 3, since in our implementation of ideal class group arithmetic the cost of squaring is less than the cost of multiplying, and the cost of cubing is less than the cost of multiplying an element with its square. For this reason, we distinguish between the number of multiplications, squares, and cubes in an algorithm. In Section \ref{section:dbnsMethods} we discuss some methods to compute double-base representations found in the literature.  
+In Sections \ref{sec:binaryExp} and \ref{sec:naf} we discuss standard exponentiation techniques that rely on a base 2 representation of the exponent.  In Section \ref{sec:dbns} we introduce double-base number systems, which, as the name implies, are number systems that make use of multiple bases in the representation of a number.  We pay particular attention to double-base representations that use bases 2 and 3, since in our implementation of ideal class group arithmetic the cost of squaring is less than the cost of multiplying, and the cost of cubing is less than the cost of multiplying an element with its square. For this reason, we distinguish between the number of multiplications, squares, and cubes in an algorithm. In Section \ref{sec:dbnsMethods} we discuss some methods to compute double-base representations found in the literature.  
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -616,7 +615,7 @@ In Sections \ref{section:binaryExp} and \ref{section:naf} we discuss standard ex
 %%%%%%%%%%%%%%%%%%%%%%%%%
 \bigbreak
 \section{Binary Exponentiation}
-\label{section:binaryExp}
+\label{sec:binaryExp}
 The simplest method of exponentiation is binary exponentiation.  Let $g$ be an element in the group $G$ and $n$ be a positive integer.  We want to compute $g^n \in G$.  We first represent $n$ in binary as
 \[
 	n = \sum_{i=0}^{\floor{\log_2 n}} b_i 2^i
@@ -634,7 +633,7 @@ Binary exponentiation algorithms require $\floor{\log_2 n}$ squarings and on ave
 %%%%%%%%%%%%%%%%%%%%%%
 \bigbreak
 \section{Non-Adjacent Form Exponentiation}
-\label{section:naf}
+\label{sec:naf}
 
 The Non-Adjacent Form (NAF) of an integer is a \emph{signed} base two representation such that no two non-zero terms in the representation are adjacent. Each integer, $n$, has a unique representation in non-adjacent form. Formally, an integer $n$ is represented such that
 \[
@@ -696,7 +695,7 @@ A particular advantage of a non-adjacent form exponentiation over a binary expon
 %%%%%%%%
 \bigbreak
 \section{Double-Base Number Systems}
-\label{section:dbns}
+\label{sec:dbns}
 
 A significant advantage of non-adjacent form over a binary representation is that on average the number of non-zero terms (the density of the representation) is lower.  We can achieve an even lower density on average when we extend the representation to a signed double-base number system (DBNS).  Binary and non-adjacent form are both base 2 number systems.  In the case of a double base number system, as the name suggests, we use two bases.  This system was first introduced by Dimitrov and Cooklev \cite{Dimitrov1995a, Dimitrov1995b}.  Given two coprime integers $p$ and $q$ and some integer $n$, we represent $n$ as the sum and difference of the product of powers of $p$ and $q$,
 \begin{equation}\label{eq:generalDbnsForm}
@@ -766,7 +765,7 @@ $0 \le b_1 \le ... \le b_k \in \ZZ.$
 \end{algorithmic}
 \end{algorithm}
 
-The benefit of restricting 2,3 representations to chained representations is the ease with which one can compute $g^n$ when $n$ is given as a chain.  For example $g^{23814216} = g^{2^3 3^2 - 2^{13} 3^2 + 2^{15} 3^6}$ can be computed by first computing $x_1 = g^{2^3 3^2}$, $x_2 = {x_1}^{2^{10}}$, $x_3 = {x_2}^{2^2 3^4}$, and finally $g^{23814216} = \left(x_1 \cdot x_3\right) \cdot \left(x_2\right)^{-1}$.  Algorithm \ref{alg:expWithChain} can be used to compute $g^n$ for $g \in G$ and $n$ given as a chained 2,3 representation.  The cost of algorithm \ref{alg:expWithChain} is as follows: Let $n$ be defined as $\sum s_i 2^{a_i} 3^{b_i}$, let $max_a = \max \{a_1,...,a_k\}$, and let $max_b = \max \{b_1,...,b_k\}$.  Then we require $max_a$ squares, $max_b$ cubes, $k-1$ multiplications, and at most one inverse.  Since $x_i ~|~ x_{i+1}$, we need only retain $x_i$ in order to compute $x_{i+1}$, and so exponentiation and chain generation can easily be interleaved. For this reason, many algorithms that find 2,3 representations constrain these representations to be chains.  Section \ref{section:dbnsMethods} discusses some algorithms for simultaneously generating and exponentiating with such chains.
+The benefit of restricting 2,3 representations to chained representations is the ease with which one can compute $g^n$ when $n$ is given as a chain.  For example $g^{23814216} = g^{2^3 3^2 - 2^{13} 3^2 + 2^{15} 3^6}$ can be computed by first computing $x_1 = g^{2^3 3^2}$, $x_2 = {x_1}^{2^{10}}$, $x_3 = {x_2}^{2^2 3^4}$, and finally $g^{23814216} = \left(x_1 \cdot x_3\right) \cdot \left(x_2\right)^{-1}$.  Algorithm \ref{alg:expWithChain} can be used to compute $g^n$ for $g \in G$ and $n$ given as a chained 2,3 representation.  The cost of algorithm \ref{alg:expWithChain} is as follows: Let $n$ be defined as $\sum s_i 2^{a_i} 3^{b_i}$, let $max_a = \max \{a_1,...,a_k\}$, and let $max_b = \max \{b_1,...,b_k\}$.  Then we require $max_a$ squares, $max_b$ cubes, $k-1$ multiplications, and at most one inverse.  Since $x_i ~|~ x_{i+1}$, we need only retain $x_i$ in order to compute $x_{i+1}$, and so exponentiation and chain generation can easily be interleaved. For this reason, many algorithms that find 2,3 representations constrain these representations to be chains.  Section \ref{sec:dbnsMethods} discusses some algorithms for simultaneously generating and exponentiating with such chains.
 
 
 
@@ -824,7 +823,7 @@ as depicted by figure \ref{fig:yao1}.  The result of the computation is $R_4 = g
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \bigbreak
 \section{Methods for computing 2,3 Chains/Representations}
-\label{section:dbnsMethods}
+\label{sec:dbnsMethods}
 
 Factors influencing the speed of a 2,3 exponentiation are the time to generate the 2,3 chain or representation, and the cost of group operations such as compose, square, and cube. If the exponent is a constant, then we can precompute the chain or representation. Here we discuss some methods from the literature: the first generates strict chains from low order to high order (right-to-left), the second generates representations (chained or unchained) from high order to low order (left-to-right), and the last generates strict chains using a tree-based approach.  For an integer $n$, each successive method introduced below typically requires more time to generate a 2,3 representation, but the representation typically has fewer terms.  As such, these methods show a trade off between the time spent computing a representation and the time spent exponentiating with the representation.  None of these methods take the relative cost of composing, squaring, or cubing into account.  In Chapter \ref{chap:idealExponentiationExperiments} we will look at variations of these algorithms that generate representations that attempt to minimize the cost of exponentiation given the relative costs of group operations.
 
@@ -1376,7 +1375,7 @@ Even though this algorithm performs well in practice (see Subsection \ref{subsec
 
 \subsection{Windowed Right-to-Left Binary GCD}
 
-Windowing is a common technique used to extend the base of an algorithm.  We saw this earlier in our discussion of binary exponentiation in Section \ref{section:binaryExp}.  The idea there was to precompute $g^w$ for each $w$ in some window $0 \le w \le 2^k$ for some $k$ and then to iterate over the exponent $k$ bits at a time.  We can apply this technique to the right-to-left extended binary GCD.
+Windowing is a common technique used to extend the base of an algorithm.  We saw this earlier in our discussion of binary exponentiation in Section \ref{sec:binaryExp}.  The idea there was to precompute $g^w$ for each $w$ in some window $0 \le w \le 2^k$ for some $k$ and then to iterate over the exponent $k$ bits at a time.  We can apply this technique to the right-to-left extended binary GCD.
 
 In the algorithm in the previous section, we repeatedly reduce either the equation $t=Xa+Yb$ or the equation $t=(X+b)a+(Y-a)b$ by 2. When $Y$ is odd, we can simultaneously add $b$ to $X$ and subtract $a$ from $Y$ in order to make both $X$ and $Y$ even.  Suppose that $t$ was a multiple of 4.  We could simultaneously add $b$ to $X$ and subtract $a$ from $Y$ repeatedly until both $X$ and $Y$ were divisible by 4.  Choose $m$ such that $ma \equiv Y \pmod 4$, and then $t = (X+mb)a + (Y-ma)b$ is evenly divisible by 4 when $t$ is divisible by 4.
 
@@ -1732,7 +1731,7 @@ A final performance improvement we make is useful for finding prime ideals.  For
 
 \subsection{Average time for operations}
 
-Here, we demonstrate the performance of our implementations of ideal class arithmetic. Let $k$ be the target number of bits in the discriminant $\Delta$.  We iterate $k$ from 16 to 140, and for each $k$ we repeat the following 100,000 times: We compute two prime numbers $p$ and $q$ such that $p$ is $\floor{k/2}$ bits and $q$ is $k-\floor{k/2}$ bits.  We use the negative of their product $\Delta = -pq$ as the discriminant for a class group.  We then pick a prime form, $[\mathfrak a]$, uniformly a random from among the primes less than 1000.  To time the performance of multiplication, we initially set $[\mathfrak b] \gets [\mathfrak a]$.  We then iterate 1000 times the operations $[\mathfrak c] \gets [\mathfrak a\mathfrak b]$, $[\mathfrak a] \gets [\mathfrak b]$, and $[\mathfrak b] \gets [\mathfrak c]$. Dividing the total time by 100,000,000 gives the average time to compose two ideals.  For squaring and cubing, we only maintain the ideal class $[\mathfrak a]$ and we repeatedly compute either $[\mathfrak a] \gets [\mathfrak a^2]$ or $[\mathfrak a] \gets [\mathfrak a^3]$ as appropriate.  Figure \ref{fig:idealArithComparison} shows the results of these timings and that for all discriminant sizes, our 64-bit implementation out performs our 128-bit implementation, which out performs our reference GMP implementation.
+Here, we demonstrate the performance of our implementations of ideal class arithmetic. Let $k$ be the target number of bits in the discriminant $\Delta$.  We iterate $k$ from 16 to 140, and for each $k$ we repeat the following 10,000 times: We compute two prime numbers $p$ and $q$ such that $p$ is $\floor{k/2}$ bits and $q$ is $k-\floor{k/2}$ bits.  We use the negative of their product $\Delta = -pq$ as the discriminant for a class group, unless $\Delta \not\equiv 1 \pmod 4$. In which case, we try again with a different $p$ and $q$.  We then pick a prime form, $[\mathfrak a]$, randomly from among the primes less than 1000.  To time the performance of squaring and cubing, we iterate 1000 times either $[\mathfrak a] \gets [\mathfrak a^2]$ or $[\mathfrak a] \gets [\mathfrak a^3]$ respectively.  Dividing the total cost by 10,000,000 gives the average time to square or cube an ideal.  For multiplication, we initially set $[\mathfrak b] \gets [\mathfrak a]$.  We then iterate 1000 times the sequence of operations $[\mathfrak c] \gets [\mathfrak a\mathfrak b]$, $[\mathfrak a] \gets [\mathfrak b]$, and $[\mathfrak b] \gets [\mathfrak c]$. Figure \ref{fig:idealArithComparison} shows the results of these timings. For all discriminant sizes, our 64-bit implementation out performs our 128-bit implementation, which out performs our GMP implementation.
 
 \begin{figure}[H]
 \centering
@@ -1743,7 +1742,7 @@ Here, we demonstrate the performance of our implementations of ideal class arith
 \label{fig:idealArithComparison}
 \end{figure}
 
-Our GMP implementation uses only GMP integers for the ideal class representation, group representation, and intermediate operands.  Intermediate operands during multiplication and squaring always fit within 64-bits for the 64-bit implementation, and 128-bits for the 128-bit implementation.  On the 64-bit implementation, we use 32-bit operations when operands are sufficiently small, and likewise, on the 128-bit implementation, we use 64-bit operations when the operands are sufficiently small.  Intermediate operands during cubing, however, sometimes overflow the target size of the implementation.  In our 64-bit implementation, this is handled by customized assembler (or the use of our 128-bit general arithmetic library) to deal with the possible overflow.  In our 128-bit implementation, we defer to the use of GMP integers when an intermediate operand may overflow.  A result of this can be seen in Figure \ref{fig:cubingVsSquareAndMultiply} where we compare the average time to cube an ideal class representative against the average time to multiply a representative with its square.  Our 128-bit implementation of ideal class cubing performs more poorly than that of multiplying an ideal with its square.  This is likely because of the reliance on GMP integers for overflow.  Contrast this to our 64-bit implementation that does not use GMP at all, and our GMP implementation that only uses GMP.  In both of these implementations, cubing out performs multiplying an ideal with its square.
+Our GMP implementation uses only GMP integers for the ideal class representation, group representation, and intermediate operands.  Intermediate operands during multiplication and squaring always fit within 64-bits for the 64-bit implementation, and 128-bits for the 128-bit implementation.  On the 64-bit implementation, we use 32-bit operations when operands are sufficiently small, and likewise, on the 128-bit implementation, we use 64-bit operations when the operands are sufficiently small.  Intermediate operands during cubing, however, can overflow the target size of the implementation.  In our 64-bit implementation, this is handled by customized assembler (or the use of our 128-bit general arithmetic library).  In our 128-bit implementation, we defer to GMP for overflows.  A result of this is visible in Figure \ref{fig:cubingVsSquareAndMultiply} where we compare the average time to cube an ideal class representative against the average time to multiply a representative with its square.  Our 128-bit implementation of cubing performs more poorly than that of multiplying an ideal with its square.  This is likely because of our reliance on GMP integers for overflow.  Contrast this to our 64-bit implementation that does not use GMP at all, and our GMP implementation that only uses GMP for arithmetic -- in both of these implementations, cubing out performs multiplying an ideal with its square.  For each implementation, we focus the graph on the bit range where that implementation performs the best.
 
 \begin{figure}[H]
 \centering
@@ -1754,18 +1753,51 @@ Our GMP implementation uses only GMP integers for the ideal class representation
 \label{fig:cubingVsSquareAndMultiply}
 \end{figure}
 
-In this section we discussed methods we used to speed the performance of arithmetic in the ideal class group and we compared the average time of multiplication, squaring, and cubing.  In the next section, we will look at a variety of methods for exponentiating within the ideal class group that we have not discussed previously.  Many of these methods will take the average time of multiplication, squaring, and cubing into account when computing the operations of exponentiation.
+In this section we discussed methods to speed the performance of arithmetic in the ideal class group and we compared the average time of multiplication, squaring, and cubing.  In the next section, we will look at a variety of methods for exponentiating within the ideal class group that we have not discussed previously.  Many of these methods will take the average time of multiplication, squaring, and cubing into account when computing the operations of exponentiation.
 
 \section{Exponentiation Experiments}
 \label{sec:exponentiation}
 
-\subsection{NAF-R2L}
+In this section, we are interested in finding the fastest approach to exponentiating an ideal class representative to a large exponent.  In particular, we consider large exponents that are the product of many small prime powers where the exponent is known in advance.  With the exponent known in advance, this allows us to precompute the sequence of operations in the exponentiation, so that the exponentiation may be as fast as possible without incurring the cost of computing the sequence of operations themselves.
 
-\subsection{$\pm$ Chains R2l $\pmod 3$}
-\begin{itemize}
-\item Fast mod 3.
-\item Fast div 3
-\end{itemize}
+We begin by recalling exponentiation techniques from Chapter \ref{chap:exponentiation}.  These include techniques that use signed and unsigned base two representations, as well as greedy right-to-left and left-to-right double-base chains.  Following this, we consider several greedy representations and extend each approach to a tree based greedy search.  We also consider a search technique for 16-bit windowed 2,3 representations, and finally we compare exponentiating by a single exponent that is the product of many prime powers with that of exponentiating by each prime power separately.
+
+\subsection{Binary and Right-to-Left Non-Adjacent Form}
+
+In Sections \ref{sec:binaryExp} and \ref{sec:naf} we introduced binary exponentiation and non-adjacent form exponentiation.  Briefly again, binary exponentiation uses the binary representation of an exponent $n$.  The representation can be parsed from high-order to low-order or from low-order to high-order -- we typically refer this difference as left-to-right or right-to-left respectively.  Using either approach, we use $\floor{\log_2n}$ squares and $\floor{\log_2n}/2$ multiplications on average.
+
+A non-adjacent form exponentiation uses a signed base 2 representation of the exponent such that no two non-zero terms are adjacent\footnote{By ``adjacent'' we mean that for any term $s_i2^i$ for $s_i \in \{-1, 1\}$ there is no term $s_j2^j$ such that $|j-i|=1$.}.  Similarly, when computing a non-adjacent form we can parse the exponent from left-to-right or from right-to-left.  Either direction, we use $\floor{\log_2n} + 1$ squares and $(\floor{\log_2n}+1)/3$ multiplications on average.   
+
+\subsection{Right-to-Left Chains}
+In Subsection \ref{subsec:rtolchains}, we introduced a method for computing 2,3 chains from low-order to high-order that is conceptually similar to computing a binary or non-adjacent form exponentiation from low-order to high-order.  In a right-to-left binary exponentiation, we evaluate the exponent $n \bmod 2$ and then reduce the exponent by 2.  Similarly, for a right-to-left non-adjacent form exponentiation, we evaluate the exponent $n \bmod 4$, and then either add or subtract 1 to the exponent to adjust it to the nearest multiple of 4. We then reduce the exponent by 2. In a right-to-left 2,3 chain, we evaluate the exponent $n \bmod 2$ and reduce by 2 if it is even.  Then we evaluate the exponent $n \bmod 3$ and reduce by 3 if it is divisible by 3.  If not, then adding or subtracting 1 will adjust it to the nearest multiple of 6.  We can then reduce the exponent by both 2 and 3 again.
+
+Since this approach evaluates the exponent modulo 3 and may reduce the exponent by 3, efficient methods to compute $n \pmod 3$ and $n/3$ will speed the computation of a right-to-left 2,3 chain.  Notice that $4 \equiv 1 \pmod 3$.  As such, we can write $n$ as
+\[
+	n = 4 \floor{n/4} + (n \bmod 4) \equiv \floor{n/4} + n \pmod 4.
+\]
+This provides us with a method to quickly compute $x \bmod 3$ -- we partition $n$ into \mbox{2-bit} blocks and sum each block modulo 4.  The resulting sum $s$ is $s \equiv n \pmod 3$.  We can further improve the performance of this algorithm when $4$ divides $2^m$ where $m$ is the number of bits in a machine word.  Rather than compute the sum $s \pmod 4$, we compute \mbox{$s \pmod{2^m}$}. After all $m$-bit blocks have been summed, we partition $s$ into two blocks of $m/2$ bits each and sum these modulo $2^{m/2}$.  We repeat this step using blocks of half the size as the previous iteration while the number of bits in a block is at least 4.  See Algorithm \ref{alg:fastMod3} for complete details.
+
+\begin{algorithm}[h]
+\caption{Fast $n \bmod 3$ (adapted from Hacker's Delight \cite{Warren2002}).}
+\label{alg:fastMod3}
+\begin{algorithmic}[1]
+\REQUIRE $n \in \ZZ$ and the number of bits in a machine word, $m$.
+\ENSURE $n \bmod 3$.
+\STATE $s \gets 0$  \COMMENT{Invariant: $0 \le s \le 3$}
+\FOR {$i$ from $0$ to $\floor{\log_2 n}$ by $m$}
+	\STATE $t \gets \floor{n / 2^i} \bmod {2^m}$
+	\STATE $s \gets (s + t) \bmod {2^m}$
+\ENDFOR
+\IF {$m$ is even and $m > 2$}
+	\STATE $k \gets m$
+	\WHILE {$k$ is even and $k > 4$}
+\ENDIF
+\RETURN $s \bmod 3$ \COMMENT{Lookup from a table with 4 entries.}
+\end{algorithmic}
+\end{algorithm}
+
+
+Fast div 3.
 
 \subsection{$\pm$ Chains R2l (mod 36)}
 Fast mod 36
@@ -1796,6 +1828,8 @@ Fast mod 36
 \subsection{Exponentiation by list of prime powers}
 
 \subsection{Exponentiation by general integers}
+
+\subsection{Experimental Results}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % CHAPTER 6             %
