@@ -1769,37 +1769,35 @@ In Sections \ref{sec:binaryExp} and \ref{sec:naf} we introduced binary exponenti
 A non-adjacent form exponentiation uses a signed base 2 representation of the exponent such that no two non-zero terms are adjacent\footnote{By ``adjacent'' we mean that for any term $s_i2^i$ for $s_i \in \{-1, 1\}$ there is no term $s_j2^j$ such that $|j-i|=1$.}.  Similarly, when computing a non-adjacent form we can parse the exponent from left-to-right or from right-to-left.  Either direction, we use $\floor{\log_2n} + 1$ squares and $(\floor{\log_2n}+1)/3$ multiplications on average.   
 
 \subsection{Right-to-Left Chains}
-In Subsection \ref{subsec:rtolchains}, we introduced a method for computing 2,3 chains from low-order to high-order that is conceptually similar to computing a binary or non-adjacent form exponentiation from low-order to high-order.  In a right-to-left binary exponentiation, we evaluate the exponent $n \bmod 2$ and then reduce the exponent by 2.  Similarly, for a right-to-left non-adjacent form exponentiation, we evaluate the exponent $n \bmod 4$, and then either add or subtract 1 to the exponent to adjust it to the nearest multiple of 4. We then reduce the exponent by 2. In a right-to-left 2,3 chain, we evaluate the exponent $n \bmod 2$ and reduce by 2 if it is even.  Then we evaluate the exponent $n \bmod 3$ and reduce by 3 if it is divisible by 3.  If not, then adding or subtracting 1 will adjust it to the nearest multiple of 6.  We can then reduce the exponent by both 2 and 3 again.
+In Subsection \ref{subsec:rtolchains}, we introduced a method for computing 2,3 chains from low-order to high-order that is conceptually similar to computing a binary or non-adjacent form from low-order to high-order.  In a right-to-left binary exponentiation, we evaluate the exponent $n \bmod 2$ and then reduce the exponent by 2.  Similarly, for a right-to-left non-adjacent form exponentiation, we evaluate the exponent $n \bmod 4$, and then either add or subtract 1 to the exponent to adjust it to the nearest multiple of 4. We then reduce the exponent by 2. In a right-to-left 2,3 chain, we evaluate the exponent $n \bmod 2$ and reduce by 2 if it is even; then evaluate the exponent $n \bmod 3$ and reduce by 3 if it is divisible by 3.  If not, adding or subtracting 1 will adjust it to the nearest multiple of 6.  We can then reduce the exponent by both 2 and 3 again.
 
-Since this approach evaluates the exponent modulo 3 and may reduce the exponent by 3, efficient methods to compute $n \pmod 3$ and $n/3$ will speed the computation of a right-to-left 2,3 chain.  Notice that $4 \equiv 1 \pmod 3$.  As such, we can write $n$ as
+Since this approach evaluates the exponent modulo 3 and may reduce the exponent by 3, efficient methods to compute $n \bmod 3$ and $n/3$ will speed the computation of a right-to-left 2,3 chain.  This is useful when the exponent is not known in advance so we briefly discuss implementations here. Notice that $4 \equiv 1 \pmod 3$.  As such, we can write $n$ as
 \[
 	n = 4 \floor{n/4} + (n \bmod 4) \equiv \floor{n/4} + n \pmod 4.
 \]
-This provides us with a method to quickly compute $x \bmod 3$ -- we partition $n$ into \mbox{2-bit} blocks and sum each block modulo 4.  The resulting sum $s$ is $s \equiv n \pmod 3$.  We can further improve the performance of this algorithm when $4$ divides $2^m$ where $m$ is the number of bits in a machine word.  Rather than compute the sum $s \pmod 4$, we compute \mbox{$s \pmod{2^m}$}. After all $m$-bit blocks have been summed, we partition $s$ into two blocks of $m/2$ bits each and sum these modulo $2^{m/2}$.  We repeat this step using blocks of half the size as the previous iteration while the number of bits in a block is at least 4.  See Algorithm \ref{alg:fastMod3} for complete details.
+This provides us with a method to quickly compute $n \bmod 3$ -- we partition the binary representation of $n$ into \mbox{2-bit} blocks and sum each block modulo 4.  The resulting sum $s$ is $s \equiv n \pmod 3$.  We can further improve the performance of this algorithm when $4$ divides $2^m$ where $m$ is the number of bits in a machine word.  Rather than compute the sum $s \pmod 4$, we compute \mbox{$s \pmod{2^m}$}. After all $m$-bit blocks have been summed, we treat the sum $s$ as the new input $n$ to an algorithm using words of half the size (assuming 4 divides $2^{m/2}$), and repeat. Since our target architecture (and language) uses 64-bit words, we specialize the algorithm for this case (see Algorithm \ref{alg:fastMod3}).
 
 \begin{algorithm}[h]
 \caption{Fast $n \bmod 3$ (adapted from Hacker's Delight \cite{Warren2002}).}
 \label{alg:fastMod3}
 \begin{algorithmic}[1]
-\REQUIRE $n \in \ZZ$ and the number of bits in a machine word, $m$.
+\REQUIRE $n \in \ZZ$.
 \ENSURE $n \bmod 3$.
-\STATE $s \gets 0$  \COMMENT{Invariant: $0 \le s \le 3$}
-\FOR {$i$ from $0$ to $\floor{\log_2 n}$ by $m$}
-	\STATE $t \gets \floor{n / 2^i} \bmod {2^m}$
-	\STATE $s \gets (s + t) \bmod {2^m}$
+\STATE $s \gets 0$
+\FOR {$i$ from $0$ to $\floor{\log_2 n}$ by 64}
+	\STATE $t \gets \floor{n / 2^i} \bmod {2^{64}}$
+	\STATE $s \gets (s + t) \bmod {2^{64}}$
 \ENDFOR
-\IF {$m$ is even and $m > 2$}
-	\STATE $k \gets m$
-	\WHILE {$k$ is even and $k > 4$}
-\ENDIF
-\RETURN $s \bmod 3$ \COMMENT{Lookup from a table with 4 entries.}
+\STATE $s \gets \left(s + \floor{s/{2^{32}}} \right) \bmod {2^{32}}$
+\STATE $s \gets \left(s + \floor{s/{2^{16}}} \right) \bmod {2^{16}}$
+\STATE $s \gets \left(s + \floor{s/{2^{8}}} \right) \bmod {2^{8}}$
+\RETURN $s \bmod 3$ \COMMENT{Lookup from a table with 256 entries.}
 \end{algorithmic}
 \end{algorithm}
 
+Division by 3 is still relatively expensive when compared to computing the remainder.  A common approach is to precompute a single word approximation of the inverse of 3, and then to use multiplication by the inverse with some adjustment steps \cite{Granlund1994,Warren2002,Moller2011}.  As the GNU Multiple Precision (GMP) library implements exact division by 3 and we are interested in exponents that require multiple machine words any ways, we simply use the implementation available in GMP.
 
-Fast div 3.
-
-\subsection{$\pm$ Chains R2l (mod 36)}
+\subsection{Windowed Right-to-Left Chains}
 Fast mod 36
 
 \subsection{$\pm$ Chains L2R (Ostrowski based)}
