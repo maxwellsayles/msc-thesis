@@ -1795,10 +1795,47 @@ This provides us with a method to quickly compute $n \bmod 3$ -- we partition th
 \end{algorithmic}
 \end{algorithm}
 
-Division by 3 is still relatively expensive when compared to computing the remainder.  A common approach is to precompute a single word approximation of the inverse of 3, and then to use multiplication by the inverse with some adjustment steps \cite{Granlund1994,Warren2002,Moller2011}.  As the GNU Multiple Precision (GMP) library implements exact division by 3 and we are interested in exponents that require multiple machine words any ways, we simply use the implementation available in GMP.
+Division by 3 is relatively expensive when compared to computing the remainder.  A common approach is to precompute a single word approximation of the inverse of 3, and then to use multiplication by the inverse with some adjustment steps \cite{Granlund1994,Warren2002,Moller2011}.  As the GNU Multiple Precision (GMP) library implements exact division by 3 and we are interested in exponents that require multiple machine words any ways, we simply use the implementation available in GMP.
 
 \subsection{Windowed Right-to-Left Chains}
-Fast mod 36
+We used windowing to improve the performance of right-to-left binary exponentiation and non-adjacent form exponentiation.  We also used it for a right-to-left binary GCD computation.  Similarly, we can use windowing to improve the performance of a right-to-left 2,3 chain.  Specifically, we experimented with a window size of $2^2 3^2$.  Similar to the right-to-left 2,3 chain in the previous section, while the exponent is even, we reduce it by 2, and while it is divisible by 3, we reduce it by 3.  At this point, we know that the exponent $n$ is $n \equiv 1, 5 \pmod 6$ since those are the only numbers coprime to 6.  We could add or subtract 1 from $n$ such that $n$ is known to be divisible by 6, but instead we compute $n \bmod {2^2 3^2}$.  Since $n$ is not divisible by either 2 or 3, the only possibilities are $n \equiv 1, 5, 7, 11, 13, 17, 19, 23, 25, 29, 31, 35 \pmod {36}$.  Now, we want to add or subtract 1 from $n$ such that the resulting value $n+1 \bmod {36}$ or $n-1 \bmod {36}$ is evenly divisible by the largest possible $2^a3^b$ for integers $a$ and $b$.  Table \ref{table:nMod36} shows a map from $n \bmod {36}$ to either $n-1$ or $n+1$.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|r|c|}
+\hline
+$n \bmod {36}$ & Target & Target can be reduced by \\
+\hline
+1 & 0, 2 & $n/36$ \\
+5 & 4, 6 & $n/36$ \\
+7 & 6, 8 & $n/36$ \\
+11 & 10, 12 & $n/36$ \\
+13 & 12, 14 & $n/36$ \\
+17 & 16, 18 & $n/36$ \\
+19 & 20, 21 & $n/36$ \\
+23 & 22, 24 & $n/36$ \\
+25 & 24, 26 & $n/36$ \\
+29 & 28, 30 & $n/36$ \\
+31 & 30, 32 & $n/36$ \\
+35 & 34, 36 & $n/36$ \\
+\hline
+\end{tabular}
+\caption{Map $n \bmod {36}$ to either $n-1$ or $n+1$.}
+\label{table:nMod36}
+\end{table}
+
+\begin{align*}
+36q+12 &= 12(3q+1) \\
+36q+14 &= 2(18q+7) \\
+36q+4  &= 4(9q+1) \\
+36q+6  &= 6(6q+1) \\
+36q+0  &= 36(1q+0) \\
+36q+2  &= 2(18q+1) \\
+36q+16 &= 4(9q+4) \\
+36q+18 &= 18(2q+1) \\
+36q+6  &= 6(6q+1) \\
+36q+8  &= 4(9q+2)
+\end{align*}
 
 \subsection{$\pm$ Chains L2R (Ostrowski based)}
 
