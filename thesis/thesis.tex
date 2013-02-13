@@ -1769,13 +1769,13 @@ In Sections \ref{sec:binaryExp} and \ref{sec:naf} we introduced binary exponenti
 A non-adjacent form exponentiation uses a signed base 2 representation of the exponent such that no two non-zero terms are adjacent\footnote{By ``adjacent'' we mean that for any term $s_i2^i$ for $s_i \in \{-1, 1\}$ there is no term $s_j2^j$ such that $|j-i|=1$.}.  Similarly, when computing a non-adjacent form we can parse the exponent from left-to-right or from right-to-left.  Either direction, we use $\floor{\log_2n} + 1$ squares and $(\floor{\log_2n}+1)/3$ multiplications on average.   
 
 \subsection{Right-to-Left Chains}
-In Subsection \ref{subsec:rtolchains}, we introduced a method for computing 2,3 chains from low-order to high-order that is conceptually similar to computing a binary or non-adjacent form from low-order to high-order.  In a right-to-left binary exponentiation, we evaluate the exponent $n \bmod 2$ and then reduce the exponent by 2.  Similarly, for a right-to-left non-adjacent form exponentiation, we evaluate the exponent $n \bmod 4$, and then either add or subtract 1 to the exponent to adjust it to the nearest multiple of 4. We then reduce the exponent by 2. In a right-to-left 2,3 chain, we evaluate the exponent $n \bmod 2$ and reduce by 2 if it is even; then evaluate the exponent $n \bmod 3$ and reduce by 3 if it is divisible by 3.  If not, adding or subtracting 1 will adjust it to the nearest multiple of 6.  We can then reduce the exponent by both 2 and 3 again.
+In Subsection \ref{subsec:rtolchains}, we introduced a method for computing 2,3 chains from low-order to high-order that is a natural extension of the binary representation or non-adjacent form of an exponent.  In this method, we reduce the exponent by 2 while it is even, and by 3 while it is divisible by 3.  Once it is neither divisible by 2 nor divisible by 3, we can add or subtract 1 to move it to the nearest multiple of both 2 and 3.
 
-Since this approach evaluates the exponent modulo 3 and may reduce the exponent by 3, efficient methods to compute $n \bmod 3$ and $n/3$ will speed the computation of a right-to-left 2,3 chain.  This is useful when the exponent is not known in advance so we briefly discuss implementations here. Notice that $4 \equiv 1 \pmod 3$.  As such, we can write $n$ as
+Since this approach evaluates the exponent modulo 3 and may reduce the exponent by 3, efficient methods to compute $n \bmod 3$ and $n/3$ will speed the computation of the chain. Notice that $4 \equiv 1 \pmod 3$.  As such, we can write $n$ as
 \[
-	n = 4 \floor{n/4} + (n \bmod 4) \equiv \floor{n/4} + n \pmod 4.
+n = 4 \floor{n/4} + (n \bmod 4) \equiv \floor{n/4} + (n \bmod 4) \pmod 3
 \]
-This provides us with a method to quickly compute $n \bmod 3$ -- we partition the binary representation of $n$ into \mbox{2-bit} blocks and sum each block modulo 4.  The resulting sum $s$ is $s \equiv n \pmod 3$.  We can further improve the performance of this algorithm when $4$ divides $2^m$ where $m$ is the number of bits in a machine word.  Rather than compute the sum $s \pmod 4$, we compute \mbox{$s \pmod{2^m}$}. After all $m$-bit blocks have been summed, we treat the sum $s$ as the new input $n$ to an algorithm using words of half the size (assuming 4 divides $2^{m/2}$), and repeat. Since our target architecture (and language) uses 64-bit words, we specialize the algorithm for this case (see Algorithm \ref{alg:fastMod3}).
+and then recursively compute $\floor{n/4} \pmod 3$ the same way. This provides us with a method to quickly compute $n \bmod 3$ -- we partition the binary representation of $n$ into \mbox{2-bit} blocks and sum each block modulo 4.  The resulting sum $s$ is $s \equiv n \pmod 3$.  We can further improve the performance of this algorithm when $4$ divides $2^m$ where $m$ is the number of bits in a machine word.  Rather than compute the sum $s \pmod 4$, we compute \mbox{$s \pmod{2^m}$}. After all $m$-bit blocks have been summed, we partition $s$ using words of half the size (assuming 4 divides $2^{m/2}$), sum the half words, and repeat. Since our target architecture (and language) uses 64-bit words, we specialize the algorithm for this case (see Algorithm \ref{alg:fastMod3}).
 
 \begin{algorithm}[h]
 \caption{Fast $n \bmod 3$ (adapted from Hacker's Delight \cite{Warren2002}).}
@@ -1795,51 +1795,19 @@ This provides us with a method to quickly compute $n \bmod 3$ -- we partition th
 \end{algorithmic}
 \end{algorithm}
 
-Division by 3 is relatively expensive when compared to computing the remainder.  A common approach is to precompute a single word approximation of the inverse of 3, and then to use multiplication by the inverse with some adjustment steps \cite{Granlund1994,Warren2002,Moller2011}.  As the GNU Multiple Precision (GMP) library implements exact division by 3 and we are interested in exponents that require multiple machine words any ways, we simply use the implementation available in GMP.
+Division by 3 is relatively expensive when compared to computing the remainder.  A common approach is to precompute a single word approximation of the inverse of 3, and then to use multiplication by an approximation of the inverse and then to adjust the result \cite{Granlund1994,Warren2002,Moller2011}.  As the GNU Multiple Precision (GMP) library implements exact division by 3, we use this implementation.
 
 \subsection{Windowed Right-to-Left Chains}
-We used windowing to improve the performance of right-to-left binary exponentiation and non-adjacent form exponentiation.  We also used it for a right-to-left binary GCD computation.  Similarly, we can use windowing to improve the performance of a right-to-left 2,3 chain.  Specifically, we experimented with a window size of $2^2 3^2$.  Similar to the right-to-left 2,3 chain in the previous section, while the exponent is even, we reduce it by 2, and while it is divisible by 3, we reduce it by 3.  At this point, we know that the exponent $n$ is $n \equiv 1, 5 \pmod 6$ since those are the only numbers coprime to 6.  We could add or subtract 1 from $n$ such that $n$ is known to be divisible by 6, but instead we compute $n \bmod {2^2 3^2}$.  Since $n$ is not divisible by either 2 or 3, the only possibilities are $n \equiv 1, 5, 7, 11, 13, 17, 19, 23, 25, 29, 31, 35 \pmod {36}$.  Now, we want to add or subtract 1 from $n$ such that the resulting value $n+1 \bmod {36}$ or $n-1 \bmod {36}$ is evenly divisible by the largest possible $2^a3^b$ for integers $a$ and $b$.  Table \ref{table:nMod36} shows a map from $n \bmod {36}$ to either $n-1$ or $n+1$.
+Windowing is a technique to improve the performance of right-to-left binary exponentiation and non-adjacent form exponentiation.  We also use it for our right-to-left binary GCD computation.  Similarly, we use windowing to improve the performance of a right-to-left 2,3 chain.  Specifically, we experimented with a window size of $2^2 3^2$.  Again, while the exponent is even, we reduce it by 2, and while it is divisible by 3, we reduce it by 3.  In a non-windowed variant, we would add or subtract 1 to the current exponent so that it was a multiple of 6.  In the windowed variant, we evaluate the exponent $n$ modulo $2^2 3^2$, which gives us $n \equiv 1, 5, 7, 11, 13, 17, 19, 23, 25, 29, 31, 35 \pmod {36}$.  As there are 12 different equivalence classes, and for each equivalence class we could either add or subtract 1 from $n$, we have $2^{12}$ different strategies for a right-to-left 2,3 chain using a window size of $2^2 3^2$.  For each strategy, we evaluated the cost to exponentiate the following 50 different primorials using our implementation of 64-bit and 128-bit ideal class arithmetic (see Section \ref{sec:idealArithmetic}).  For $1 \le k \le 50$, let $j=100k$ and the primorial $P_j=\prod_{i=1}^j p_i$ where $p_i$ is the $i^{\textrm{th}}$ smallest prime.  For 48 out of 50 of the primorials tested, the same strategy lead to the cheapest cost of exponentiation\footnote{For the primorial $P_{200}$, this strategy was the third most efficient, and for $P_{500}$ it was the second most efficient.}, which was to subtract 1 from $n$ when $n \equiv 1, 5, 13, 17, 25, 29 \pmod{36}$ and to add 1 otherwise.
 
-\begin{table}[H]
-\centering
-\begin{tabular}{|c|r|c|}
-\hline
-$n \bmod {36}$ & Target & Target can be reduced by \\
-\hline
-1 & 0, 2 & $n/36$ \\
-5 & 4, 6 & $n/36$ \\
-7 & 6, 8 & $n/36$ \\
-11 & 10, 12 & $n/36$ \\
-13 & 12, 14 & $n/36$ \\
-17 & 16, 18 & $n/36$ \\
-19 & 20, 21 & $n/36$ \\
-23 & 22, 24 & $n/36$ \\
-25 & 24, 26 & $n/36$ \\
-29 & 28, 30 & $n/36$ \\
-31 & 30, 32 & $n/36$ \\
-35 & 34, 36 & $n/36$ \\
-\hline
-\end{tabular}
-\caption{Map $n \bmod {36}$ to either $n-1$ or $n+1$.}
-\label{table:nMod36}
-\end{table}
+Since the windowed variant of a 2,3 chain computes $n \bmod 36$, we give a fast method to compute this.  By the Chinese Remainder Theorem, let $x \equiv n \pmod{2^2}$ and $y \equiv n \pmod{3^2}$ and we have $n \equiv x + 4y \pmod{2^23^2}$.  Computing $n \bmod 4$ is done with a binary ``and'' operation.  To compute $n \bmod{3^2}$, we point out that $64 \equiv 1 \pmod 9$.  Similar to the case of computing $n \bmod 3$, we write
+\[
+	n = 64 \floor{n/64} + (n \bmod 64) \equiv \floor{n/64} + (n \bmod 64) \pmod 9
+\]
+and recursively compute $\floor{n/64} \pmod 9$.  To compute $n \bmod 9$, we partition $n$ into blocks of 6-bits (since $2^6 = 64$) and sum each 6-bit block modulo 64.  We then compute the sum $s \bmod 9$.  Again, since our target architecture has 64-bit machine words, we improve upon this by first partitioning $n$ into 192-bit blocks\footnote{We use 192-bit blocks since a 64-bit machine word evenly partitions a 192-bit block and $2^{192} \equiv 1 \pmod 9$.} and computing an intermediate sum of each 192-bit block.  We then partition our intermediate sum into 6-bit blocks and compute the final result.
 
-\begin{align*}
-36q+12 &= 12(3q+1) \\
-36q+14 &= 2(18q+7) \\
-36q+4  &= 4(9q+1) \\
-36q+6  &= 6(6q+1) \\
-36q+0  &= 36(1q+0) \\
-36q+2  &= 2(18q+1) \\
-36q+16 &= 4(9q+4) \\
-36q+18 &= 18(2q+1) \\
-36q+6  &= 6(6q+1) \\
-36q+8  &= 4(9q+2)
-\end{align*}
+\subsection{Left-to-Right Chains}
 
-\subsection{$\pm$ Chains L2R (Ostrowski based)}
-
-\subsection{Optimal +2, 3 strictly chained partitions (incorporates cost)}
 
 \subsection{$\pm$ 2,3 Representation using best 2,3 approximation of $N$, i.e. $\min\{|N-2^a3^b|\}$}
 
@@ -1850,6 +1818,8 @@ $n \bmod {36}$ & Target & Target can be reduced by \\
 \subsection{$\pm$ 2,3 Representation using $\min (N \pm 2^a \pm 3^b)/2^c3^d$}
 
 \subsection{Iterating on the \emph{best} $k=16$ results for each of the greedy $\pm$ 2,3 representation algorithms above.}
+
+\subsection{Optimal +2, 3 strictly chained partitions (incorporates cost)}
 
 \subsection{Precomputing best $\pm$ 2,3 representations for 16bit numbers}
 \begin{itemize}
