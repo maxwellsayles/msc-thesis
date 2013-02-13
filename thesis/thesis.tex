@@ -778,7 +778,7 @@ Factors influencing the speed of a 2,3 exponentiation are the time to generate t
 
 \bigbreak
 \subsection{Right-to-Left Chains (from low-order to high-order)}
-\label{subsec:rtolchains}
+\label{subsec:rtolChains}
 
 The first method we present computes a strictly chained 2,3 partition that is generated from low order to high order and is based on Ciet et al \cite{Ciet2006}.  We begin by recalling the technique for binary exponentiation that computes from low order to high order.  Given an element $g \in G$ and an integer $n$, the function
 \begin{align*}
@@ -836,6 +836,7 @@ To see the correctness of the above procedure, consider a modification to the re
 
 \bigbreak
 \subsection{Left-to-Right Chains (from high-order to low-order)}
+\label{subsec:ltorChains}
 
 \newcommand{\greedyltor}{\textrm{greedy}}
 \newcommand{\greedychain}{\textrm{greedy}'}
@@ -902,7 +903,7 @@ Naturally though, non-chained representations tend to have a lower density than 
 \bigbreak
 \subsection{Pruned Trees}
 
-The next technique for finding strictly chained 2,3 partitions was suggested by Doche and Habsieger \cite{Doche2008}. The idea is similar to the method for generating chains from right to left as described in Subsection \ref{subsec:rtolchains} above, but this technique differs by generating several possible values that may be further reduced by powers of 2 and 3. The procedure is given in Algorithm \ref{alg:dbnsTree}.  The idea is to maintain a tree, $T$, with at most $B$ leaf nodes. At each iteration, each leaf node $v \in T$ generates two new leaves, $v-1$ and $v+1$, which are then reduced as much as possible by removing factors of 2 and 3.  We then discard any duplicate nodes and all but the smallest $B$ elements generated. The path from the root to the first leaf with a value of 1 represents a chained 2,3 partition of the number $n$.
+The next technique for finding strictly chained 2,3 partitions was suggested by Doche and Habsieger \cite{Doche2008}. The idea is similar to the method for generating chains from right to left as described in Subsection \ref{subsec:rtolChains} above, but this technique differs by generating several possible values that may be further reduced by powers of 2 and 3. The procedure is given in Algorithm \ref{alg:dbnsTree}.  The idea is to maintain a tree, $T$, with at most $B$ leaf nodes. At each iteration, each leaf node $v \in T$ generates two new leaves, $v-1$ and $v+1$, which are then reduced as much as possible by removing factors of 2 and 3.  We then discard any duplicate nodes and all but the smallest $B$ elements generated. The path from the root to the first leaf with a value of 1 represents a chained 2,3 partition of the number $n$.
 
 \begin{algorithm}[h]
 \caption{Tree-Based Chained 2,3 Partitions. Doche and Habsieger \cite{Doche2008}.}
@@ -1704,7 +1705,7 @@ In Sections \ref{sec:binaryExp} and \ref{sec:naf} we introduced binary exponenti
 A non-adjacent form exponentiation uses a signed base 2 representation of the exponent such that no two non-zero terms are adjacent\footnote{By ``adjacent'' we mean that for any term $s_i2^i$ for $s_i \in \{-1, 1\}$ there is no term $s_j2^j$ such that $|j-i|=1$.}.  Similarly, when computing a non-adjacent form we can parse the exponent from left-to-right or from right-to-left.  Either direction, we use $\floor{\log_2n} + 1$ squares and $(\floor{\log_2n}+1)/3$ multiplications on average.   
 
 \subsection{Right-to-Left Chains}
-In Subsection \ref{subsec:rtolchains}, we introduced a method for computing 2,3 chains from low-order to high-order that is a natural extension of the binary representation or non-adjacent form of an exponent.  In this method, we reduce the exponent by 2 while it is even, and by 3 while it is divisible by 3.  Once it is neither divisible by 2 nor divisible by 3, we can add or subtract 1 to move it to the nearest multiple of both 2 and 3.
+In Subsection \ref{subsec:rtolChains}, we introduced a method for computing 2,3 chains from low-order to high-order that is a natural extension of the binary representation or non-adjacent form of an exponent.  In this method, we reduce the exponent by 2 while it is even, and by 3 while it is divisible by 3.  Once it is neither divisible by 2 nor divisible by 3, we can add or subtract 1 to move it to the nearest multiple of both 2 and 3.
 
 Since this approach evaluates the exponent modulo 3 and may reduce the exponent by 3, efficient methods to compute $n \bmod 3$ and $n/3$ will speed the computation of the chain. Notice that $4 \equiv 1 \pmod 3$.  As such, we can write $n$ as
 \[
@@ -1741,7 +1742,10 @@ Since the windowed variant of a 2,3 chain computes $n \bmod 36$, we give a fast 
 \]
 and recursively compute $\floor{n/64} \pmod 9$.  To compute $n \bmod 9$, we partition $n$ into blocks of 6-bits (since $2^6 = 64$) and sum each 6-bit block modulo 64.  We then compute the sum $s \bmod 9$.  Again, since our target architecture has 64-bit machine words, we improve upon this by first partitioning $n$ into 192-bit blocks\footnote{We use 192-bit blocks since a 64-bit machine word evenly partitions a 192-bit block and $2^{192} \equiv 1 \pmod 9$.} and computing an intermediate sum of each 192-bit block.  We then partition our intermediate sum into 6-bit blocks and compute the final result.
 
+
 \subsection{Left-to-Right Chains}
+
+Previously, in Subsection \ref{subsec:ltorChains} we introduced a greedy algorithm for computing 2,3 representations from high-order to low-order.  Briefly, for a given exponent $n$ and for $a_i, b_i \in \ZZgez$ and $s_i \in \{-1, 1\}$, we compute the term $s_i2^{a_i}3^{b_i}$ such that $\left|n-s_i2^{a_i}3^{b_i}\right|$ is as small as possible.  We then recurse on the result $n' = n - s_i2^{a_i}3^{b_i}$.  This approach generates 2,3 representations where there is no restriction on the relationship between $a_i$ and $a_{i+1}$ or $b_i$ and $b_{i+1}$. Chains can be generated by restricting each $a_i$ and $b_i$ such that $0 \le a_i \le a_{i-1}$ and $0 \le b_i \le b_{i-1}$ for subsequent terms.  Furthermore, the cost of a greedy left-to-right chain varies when a global bound $A$ and $B$ are applied such that $a_i \le A$ and $b_i \le B$ for all terms.
 
 
 \subsection{$\pm$ 2,3 Representation using best 2,3 approximation of $N$, i.e. $\min\{|N-2^a3^b|\}$}
