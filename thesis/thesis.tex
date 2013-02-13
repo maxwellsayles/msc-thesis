@@ -120,9 +120,6 @@ A focus of this thesis is arithmetic and exponentiation in the ideal class group
 
 
 
-%%%%%%%%%%%%%%%%%%%%%
-% QUADRATIC NUMBERS %
-%%%%%%%%%%%%%%%%%%%%%
 \section{Quadratic Numbers}
 
 A \emph{quadratic number} is a root $\alpha$ of a quadratic polynomial $f(x) = ax^2 + bx + c$ with integer coefficients. The roots of $f(x)$ are given by the quadratic formula
@@ -136,9 +133,6 @@ The \emph{discriminant} of $f(x)$ is $\Delta = b^2 - 4ac$, and we can construct 
 When $\Delta$ is positive, $\KK$ is a subset of the real numbers, $\RR$, and is a \emph{real} quadratic number field. When $\Delta$ is negative, $\KK$ is a subset of the complex numbers, $\CC$, and is an \emph{imaginary} quadratic number field.  In this thesis we concern ourselves only with the imaginary case.  Notice that if $\Delta = f^2 \Delta_0$ for some $f \in \ZZgtz$ where $\Delta_0$ is square-free, then $\QQ(\sqrt{\Delta}) = \QQ(\sqrt{\Delta_0})$. For $\Delta_0$ to be square-free, it must be that $\Delta_0 \not\equiv 0 \pmod 4$ since this would imply that $\Delta_0$ is divisible by 4, a perfect square.  
 
 
-%%%%%%%%%%%%%%%%%%%%%%
-% QUADRATIC INTEGERS %
-%%%%%%%%%%%%%%%%%%%%%%
 \bigbreak
 \section{Quadratic Integers}
 
@@ -155,9 +149,6 @@ A quadratic integer $\alpha$ is an algebraic integer of $\QQ(\sqrt{\Delta_0})$ w
 \end{thm}
 
 
-%%%%%%%%%%%%%%%%%
-% MAXIMAL ORDER %
-%%%%%%%%%%%%%%%%%
 \bigbreak
 \section{Maximal Order of Algebraic Integers}
 
@@ -182,9 +173,6 @@ The maximal order $\OO_\Delta = [1, \omega_0]$ of $\QQ(\sqrt\Delta_0)$ is the ri
 \end{thm}
 
 
-%%%%%%%%%%
-% IDEALS %
-%%%%%%%%%%
 \bigbreak
 \section{Ideals of $\OO_\Delta$}
 
@@ -215,7 +203,6 @@ Prime ideals allow us to easily create an ideal.  For a prime ideal $\mathfrak p
 \]
 and it follows that either $s=p$ and $a=1$, or $s=1$ and $a=p$.  In the first case $\mathfrak p = p\OO_\Delta$, while in the second case $b = \pm \sqrt{\Delta} \pmod p$ and $\mathfrak p = [p, (b + \sqrt{\Delta})/2]$ when $4p ~|~ b^2 - \Delta$.  Algorithm \ref{alg:prime} gives pseudo-code.
 
-% PRIME IDEAL
 \begin{algorithm}[h]
 \caption{Prime Ideal}
 \label{alg:prime}
@@ -237,9 +224,6 @@ and it follows that either $s=p$ and $a=1$, or $s=1$ and $a=p$.  In the first ca
 Two ideals $\mathfrak a$ and $\mathfrak b$ are \emph{equivalent} if there exists $\alpha, \beta \in \OO_\Delta$ such that $\alpha \beta \neq 0$ and $(\alpha)\mathfrak a = (\beta) \mathfrak b$ \cite[p.88]{Jacobson2009}. Following Jacobson \cite[p.88]{Jacobson2009}, we denote by $[\mathfrak a]$ the \emph{ideal class} of all ideals equivalent to $\mathfrak a$. 
 
 
-%%%%%%%%%%%%%%%%%%%%%
-% IDEAL CLASS GROUP %
-%%%%%%%%%%%%%%%%%%%%%
 \bigbreak
 \section{Ideal Class Group}
 
@@ -250,9 +234,6 @@ Our implementation of ideal arithmetic represents an ideal as $\mathfrak a = [a,
 In Subsection \ref{subsec:reduction}, we state what it is for an ideal to be in reduced form, and in subsection \ref{subsec:idealMultiply}, we show how to multiply two reduced class representatives. In Subsection \ref{subsec:nucomp} we discuss how to perform multiplication such that the result is a reduced or almost reduced representative, and then extend this to the case of computing the square (\ref{subsec:nudupl}) and cube (\ref{subsec:nucube}) of an ideal class.  
 
 
-%%%%%%%%%%%%%
-% REDUCTION %
-%%%%%%%%%%%%%
 \subsection{Reduced Representatives}
 \label{subsec:reduction}
 
@@ -261,7 +242,6 @@ In Subsection \ref{subsec:reduction}, we state what it is for an ideal to be in 
 A primitive ideal $\mathfrak{a} = [a, (b+\sqrt{\Delta})/2]$ with $\Delta < 0$ is \emph{reduced} when $-a < b \le a < c$ or when $0 \le b \le a = c$ for $c = (b^2 - \Delta)/4a$ \cite[p.241]{Crandall2001}.
 \end{defn}
 
-% REDUCE
 \begin{algorithm}[h]
 \caption{Ideal Reduction}
 \label{alg:reduce}
@@ -306,9 +286,6 @@ Since $c = (b^2 - \Delta)/4a$ we have
 As such, the first step is if $a > c$, we can reduce $a$ by setting $\mathfrak a = [c, (-b + \sqrt\Delta)/2]$.  Since $b$ is unique $\bmod{~2a}$, we can also reduce $b \bmod{2a}$.  We repeat these steps while $\mathfrak a$ is not reduced.  In the case that $a = c$, we use the absolute value of $b$, since by Equation \ref{eq:idealSwapAC} the ideals $[a, (b + \sqrt\Delta)/2]$ and $[c, (-b+\sqrt\Delta)/2]$ are equivalent.  Pseudo-code is given in Algorithm \ref{alg:reduce}.
 
 
-%%%%%%%%%%%%%%%%%%
-% MULTIPLICATION %
-%%%%%%%%%%%%%%%%%%
 \subsection{Multiplication of Ideal Classes}
 \label{subsec:idealMultiply}
 
@@ -395,9 +372,6 @@ Let $c_2 = ({b_2}^2 - \Delta)/4a_2$ and $U = (V(b_1-b_2)/2 - Wc_2) \bmod{(a_1/s)
 which completes the derivation of Equation \ref{eq:idealProductB}.  Note that the product ideal $\mathfrak a \mathfrak b$ is not a reduced representative and that the storage needed can be as much as twice that of the ideal factors $\mathfrak a$ and $\mathfrak b$.
 
 
-%%%%%%%%%%
-% NUCOMP %
-%%%%%%%%%%
 \subsection{Fast Ideal Multiplication (NUCOMP)}
 \label{subsec:nucomp}
 
@@ -436,7 +410,6 @@ for the reduced or almost reduced product $\mathfrak a \mathfrak b = [a, (b + \s
 
 Our implementation of fast ideal multiplication includes some optimizations on the above technique.  Equation \ref{eq:idealProductS} requires that we compute $\gcd(a_1, a_2, (b_1 + b_2)/2)$. Since $\gcd(a_1, a_2)$ is often equal to 1, we only need compute $\gcd(a_1, a_2, (b_1 + b_2)/2)$ when $\gcd(a_1, a_2) \neq 1$. Also, by Equation \ref{eq:idealProductS}, we have that $s ~|~ a_1$ and $s ~|~ a_2$, so we reduce both $a_1$ and $a_2$ by $s$ throughout. Finally, the first coefficient, $Y$, from Equation \ref{eq:idealProductS} is never used, and so we do not compute it. We give pseudo-code in Algorithm \ref{alg:nucomp}. 
 
-% NUCOMP
 \begin{algorithm}[h]
 \caption{NUCOMP -- Fast Ideal Multiplication. Based on \cite[pp.441-443]{Jacobson2009}.}
 \label{alg:nucomp}
@@ -472,9 +445,6 @@ $C_i=C_{i-2}-q_i C_{i-1}$
 \end{algorithm}
 
 
-%%%%%%%%%%
-% NUDUPL %
-%%%%%%%%%%
 \subsection{Fast Ideal Squaring (NUDUPL)}
 \label{subsec:nudupl}
 
@@ -496,7 +466,6 @@ Computing the ideal class representative simplifies as well -- we have
 \end{align*}
 As before, the representative $[a, (b+\sqrt\Delta)/2]$ is either reduced or almost reduced.  \break Pseudo-code for our implementation is given in algorithm \ref{alg:nudupl}.
 
-% NUDUPL.
 \begin{algorithm}[h]
 \caption{NUDUPL -- Fast Ideal Squaring.}
 \label{alg:nudupl}
@@ -525,9 +494,6 @@ As before, the representative $[a, (b+\sqrt\Delta)/2]$ is either reduced or almo
 \end{algorithm}
 
 
-%%%%%%%%%%
-% NUCUBE %
-%%%%%%%%%%
 \subsection{Fast Ideal Cubing (NUCUBE)}
 \label{subsec:nucube}
 
@@ -610,9 +576,6 @@ Given a group $G$, an element $g \in G$, and an integer $n$, computing $g^n$ is 
 In Sections \ref{sec:binaryExp} and \ref{sec:naf} we discuss standard exponentiation techniques that rely on a base 2 representation of the exponent.  In Section \ref{sec:dbns} we introduce double-base number systems, which, as the name implies, are number systems that make use of multiple bases in the representation of a number.  We pay particular attention to double-base representations that use bases 2 and 3, since in our implementation of ideal class group arithmetic the cost of squaring is less than the cost of multiplying, and the cost of cubing is less than the cost of multiplying an element with its square. For this reason, we distinguish between the number of multiplications, squares, and cubes in an algorithm. In Section \ref{sec:dbnsMethods} we discuss some methods to compute double-base representations found in the literature.  
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%
-% BINARY EXPONENTIATION %
-%%%%%%%%%%%%%%%%%%%%%%%%%
 \bigbreak
 \section{Binary Exponentiation}
 \label{sec:binaryExp}
@@ -628,9 +591,7 @@ This description is known as right-to-left binary exponentiation because the res
 
 Binary exponentiation algorithms require $\floor{\log_2 n}$ squarings and on average $\floor{\log_2 n}/2$ multiplications, since a multiplication is only necessary when $b_i = 1$ and the probability of $b_i = 1$ is 1/2.
 
-%%%%%%%%%%%%%%%%%%%%%%
-% NAF EXPONENTIATION %
-%%%%%%%%%%%%%%%%%%%%%%
+
 \bigbreak
 \section{Non-Adjacent Form Exponentiation}
 \label{sec:naf}
@@ -661,7 +622,6 @@ A typical method to compute the non-adjacent form of an integer $n$ is to inspec
 
 In our experiments, we use a variation of the above, originally due to Reitwiesner \cite{reitwiesner1960}, that maintains a carry flag $c$.  Instead of adding $2^i$ to $n$, we set $c = 1$, and instead of subtracting $2^i$ from $n$, we set $c = 0$.  When inspecting $n$ two bits at a time, we consider the bit pattern $(m+c) \bmod 4$ where $m = 2 b_{i+1} + b_i$.  For large enough $n$, the cost of addition and subtraction is reduced from $O(\log n)$ to $O(1)$.  See Algorithm \ref{alg:nafR2LImmutable}.
 
-% R2L NAF EXPONENTIATION
 \begin{algorithm}[h]
 \caption{Computes $g^n$ using right-to-left non-adjacent form. Reitwiesner \cite{reitwiesner1960}}
 \label{alg:nafR2LImmutable}
@@ -690,9 +650,6 @@ In our experiments, we use a variation of the above, originally due to Reitwiesn
 A particular advantage of a non-adjacent form exponentiation over a binary exponentiation is the number of operations required.  While the binary method requires $\floor{\log_2 n}$ squares and on average $\floor{\log_2 n}/2$ multiplications, a non-adjacent form exponentiation requires at most $\floor{\log_2 n}+1$ squares and on average $(\floor{\log_2 n}+1)/3$ multiplications.  To see this, recall that non-adjacent form requires that no two non-zero terms be adjacent.  Consider any two adjacent terms.  The possible outcomes are $(0,0)$, $(s, 0)$, or $(0, s$) where $s \in \{-1, 1\}$. This means that 2/3 of the time, 1/2 of the terms will be non-zero, and so the probability of any given term being non-zero is 1/3.
 
 
-%%%%%%%%
-% DBNS %
-%%%%%%%%
 \bigbreak
 \section{Double-Base Number Systems}
 \label{sec:dbns}
@@ -723,7 +680,6 @@ Recall, the binary representation \eqref{eq:binaryEg}, non-adjacent form \eqref{
 \end{align*}
 The binary representation has 10 terms, while the non-adjacent form has only 8 terms.  The 2,3 representation given above contains only three terms.  While a non-adjacent form has in expectation $\floor{\log_2 n}/3$ terms and a binary representation has in expectation $\floor{\log_2 n}/2$ terms, both are bounded by $O(\log n)$ in the number of terms.  Both Dimitrov et al \cite{Dimitrov2008} and Ciet and Sica \cite{Ciet2005} give algorithms for 2,3 double-base representations, where they prove that the number of terms is bounded by $O(\log n / \log \log n)$.  For this reason, many algorithms focus on reducing the number of terms in a 2,3 representation.   Naturally, the time to compute a 2,3 double-base exponentiation is further reduced if the corresponding cost to compute $g^2$ is less than the cost to compute $g \cdot g$, or the cost to compute $g^3$ is less than the cost to compute $g^2 \cdot g$. 
 
-%%%%%%%%%%%%%%%%%%%
 \bigbreak
 \subsection{Chains}
 
@@ -736,7 +692,6 @@ A partition of an integer $n = x_1 \pm x_2 \pm \cdots \pm x_k$ is \emph{chained}
 \noindent
 Binary and non-adjacent form are special types of strictly chained partitions, since for any two non-zero terms where $i < j$, we have $x_i = 2^i$, $x_j = 2^j$, $ x_i ~|~ x_j$, and $x_i < x_j$.  The 2,3 representation of $23814216 = 2^3 3^2 - 2^{13} 3^2 + 2^{15} 3^6$ is another example of a strictly chained partition, since $2^3 3^2 ~|~ 2^{13} 3^2 ~|~ 2^{15} 3^6$.
 
-% EXPONENTIATE USING A CHAIN
 \begin{algorithm}[h]
 \caption{Computes $g^n$ given $n$ as a chained 2,3 partition. Adapted from \cite{Dimitrov2005}.}
 \label{alg:expWithChain}
@@ -768,14 +723,11 @@ $0 \le b_1 \le ... \le b_k \in \ZZ.$
 The benefit of restricting 2,3 representations to chained representations is the ease with which one can compute $g^n$ when $n$ is given as a chain.  For example $g^{23814216} = g^{2^3 3^2 - 2^{13} 3^2 + 2^{15} 3^6}$ can be computed by first computing $x_1 = g^{2^3 3^2}$, $x_2 = {x_1}^{2^{10}}$, $x_3 = {x_2}^{2^2 3^4}$, and finally $g^{23814216} = \left(x_1 \cdot x_3\right) \cdot \left(x_2\right)^{-1}$.  Algorithm \ref{alg:expWithChain} can be used to compute $g^n$ for $g \in G$ and $n$ given as a chained 2,3 representation.  The cost of algorithm \ref{alg:expWithChain} is as follows: Let $n$ be defined as $\sum s_i 2^{a_i} 3^{b_i}$, let $max_a = \max \{a_1,...,a_k\}$, and let $max_b = \max \{b_1,...,b_k\}$.  Then we require $max_a$ squares, $max_b$ cubes, $k-1$ multiplications, and at most one inverse.  Since $x_i ~|~ x_{i+1}$, we need only retain $x_i$ in order to compute $x_{i+1}$, and so exponentiation and chain generation can easily be interleaved. For this reason, many algorithms that find 2,3 representations constrain these representations to be chains.  Section \ref{sec:dbnsMethods} discusses some algorithms for simultaneously generating and exponentiating with such chains.
 
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \bigbreak
 \subsection{Exponentiating general 2,3 representations}
 
 Another class of algorithms compute representations without the constraint that larger terms be divisible by smaller terms.  Given a general 2,3 representation for an integer $n = \sum s_i 2^{a_i} 3^{b_i}$, M\'{e}loni and Hasan \cite[Section 3.2]{Meloni2009} use a modification of Yao's Algorithm to achieve the same bound on the number of operations as in algorithm \ref{alg:expWithChain}, but with a bound of $O(\min \{max_a, max_b\})$ on the memory used.  Suppose $max_b < max_a$.  We require the terms to be labelled and sorted such that $a_1 \ge ... \ge a_k$.  The algorithm works by precomputing a table of $T_b = g^{3^b}$ for $0 \le b \le max_b$.  Let $i=1$ and begin with the first term $s_i2^{a_i}3^{b_i}$.  We look up $T_{b_i} = g^{3^{b_i}}$ and, after applying the sign $s_i$, we multiply ${T_{b_i}}^{s_i}$ with the running result.  Let $a_\Delta = a_i - a_{i+1}$ when $i < k$ and $a_\Delta = a_k$ when $i = k$.  It then squares the running result $a_\Delta$ times.  The algorithm removes the term $s_i2^{a_i}3^{b_i}$ from the list of terms, and continues in this way with the next largest $a_i$.  The algorithm terminates when there are no more terms in the list.  Algorithm  \ref{alg:yaos} gives pseudo-code for this approach and requires $O(max_b)$ memory.  When $max_a < max_b$, we use a related algorithm that requires the terms to be sorted such that $b_1 \ge ... \ge b_k$; it precomputes $T_a = g^{2^a}$ for $0 \le a \le max_a$ and works similar to Algorithm \ref{alg:yaos} but with cubing and squaring appropriately swapped.
 
-% EXPONENTIATE USING YAO'S
 \begin{algorithm}[h]
 \caption{Computes $g^n$ given $n$ in 2,3 representation. M\'{e}loni \cite[Section 3.2]{Meloni2009}.}
 \label{alg:yaos}
@@ -818,16 +770,12 @@ as depicted by figure \ref{fig:yao1}.  The result of the computation is $R_4 = g
 \end{figure}
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% METHODS FOR COMPUTING 2,3 CHAINS/REPRESENTATIONS %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \bigbreak
 \section{Methods for computing 2,3 Chains/Representations}
 \label{sec:dbnsMethods}
 
 Factors influencing the speed of a 2,3 exponentiation are the time to generate the 2,3 chain or representation, and the cost of group operations such as compose, square, and cube. If the exponent is a constant, then we can precompute the chain or representation. Here we discuss some methods from the literature: the first generates strict chains from low order to high order (right-to-left), the second generates representations (chained or unchained) from high order to low order (left-to-right), and the last generates strict chains using a tree-based approach.  For an integer $n$, each successive method introduced below typically requires more time to generate a 2,3 representation, but the representation typically has fewer terms.  As such, these methods show a trade off between the time spent computing a representation and the time spent exponentiating with the representation.  None of these methods take the relative cost of composing, squaring, or cubing into account.  In Chapter \ref{chap:idealExponentiationExperiments} we will look at variations of these algorithms that generate representations that attempt to minimize the cost of exponentiation given the relative costs of group operations.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \bigbreak
 \subsection{Right-to-Left Chains (from low-order to high-order)}
 \label{subsec:rtolchains}
@@ -856,7 +804,6 @@ We can extend this concept to a 2,3 number system.  We will repeatedly remove fa
 
 There is a non-recursive function with group operations that correspond to those generated by $\rtol$. This is useful when recursion is not possible, or when the exponent $n$ is a constant (since we can precompute the representation of $n$ to save time). Algorithm \ref{alg:rtolDbnsChain} computes the corresponding strictly chained 2,3 partition.  The idea is as follows: let $a = 0$, $b=0$, and $i=1$.  While $n > 0$, repeatedly remove factors of 2 from $n$ and increment $a$ for each factor of 2 removed. Then repeatedly remove factors of 3 from $n$ and increment $b$ for each factor of 3 removed. At this point, either $n \equiv 1 \pmod 6$ or $n \equiv 5 \pmod 6$ and so continue on $n-1$ or $n+1$ respectively.  When we continue on $n-1$, this corresponds to adding the current term, so we set $s_i=1$, and when we continue on $n+1$, this corresponds to subtracting the current term, so we set $s_i=-1$. Let $a_i = a$ and $b_i = b$ and then increment $i$ and then repeat this process while $n > 0$.  We can then use Algorithm \ref{alg:expWithChain} to compute the exponentiation given a strictly chained 2,3 partition. Additionally, since the terms $s_i2^{a_i}3^{b_i}$ are computed in increasing order for $i=1..k$, it is relatively straightforward to interleave the computation of the partition with the computation of the exponentiation for additional speed and memory savings.
 
-% R2L 2,3 CHAIN
 \begin{algorithm}[h]
 \caption{Computes a 2,3 strictly chained representation from low order to high order. Ciet \cite{Ciet2006}.}
 \label{alg:rtolDbnsChain}
@@ -887,7 +834,6 @@ There is a non-recursive function with group operations that correspond to those
 
 To see the correctness of the above procedure, consider a modification to the recursive function $\rtol$ such that it returns a partition of the input $n$ as a list of terms $s_i2^{a_i}3^{b_i}$. When the result of the recursive call is squared, this corresponds to incrementing $a_i$ in each term of the list.  Similarly, when the result is cubed, this corresponds to incrementing $b_i$ in each term of the list. When the result is composed with $g$, we prepend a term of $+1$ to the partition, and when the result is composed with $g^{-1}$, we prepend a term of $-1$ to the partition. Note that since either $n \equiv 0 \pmod 2$ or $n \equiv 0 \pmod 3$ on each iteration of the loop, either $a$ will increase or $b$ will increase. Since every term $|s_i2^{a_i}3^{b_i}|$ is strictly less than $|s_j2^{a_j}3^{b_j}|$ when $i < j$, the partition is strictly chained.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \bigbreak
 \subsection{Left-to-Right Chains (from high-order to low-order)}
 
@@ -926,7 +872,6 @@ where $0 \le a \le \amax$, $0 \le b \le \bmax$, $a$ and $b$ minimize $\left| |n|
 \noindent
 We present pseudocode in Algorithm \ref{alg:greedyltor}. Note that on successive invocations of $\greedychain$, the absolute value of $v=|s2^a3^b|$ returned by $\closest'$ is monotonically decreasing.  Reversing the terms of the partition gives a chained 2,3 partition of $n$ that we can use to perform exponentiation using Algorithm \ref{alg:expWithChain}.
 
-% GREEDY L2R
 \begin{algorithm}[h]
 \caption{Greedy left to right representations. Berth\'{e} and Imbert \cite{Berthe2009}.}
 \label{alg:greedyltor}
@@ -954,16 +899,11 @@ take the element $v \in V$ that is closest to $|n|$, and take $s \in \{-1, 1\}$ 
 Naturally though, non-chained representations tend to have a lower density than chained representations but at the expense of requiring more memory to perform exponentiation.  Since we can exponentiate non-chained representations using Algorithm \ref{alg:yaos} and require memory proportional to the largest values of $a$ and $b$ in the representation, constraining $a$ and $b$ globally over the complete representation can result in representations that exponentiate more quickly in practice. In this case, recursive calls to $\greedychain$ use the original values of $\amax$ and $\bmax$ rather than further constraining $a$ and $b$ based on the values generated by $\closest'$.  Finding the best greedy representation is then a matter of iterating over $\amax$ and $\bmax$ and computing 2,3 representations constrained appropriately.  We will discuss approaches and results of this in Chapter \ref{chap:idealExponentiationExperiments}.
 
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%
 \bigbreak
 \subsection{Pruned Trees}
 
 The next technique for finding strictly chained 2,3 partitions was suggested by Doche and Habsieger \cite{Doche2008}. The idea is similar to the method for generating chains from right to left as described in Subsection \ref{subsec:rtolchains} above, but this technique differs by generating several possible values that may be further reduced by powers of 2 and 3. The procedure is given in Algorithm \ref{alg:dbnsTree}.  The idea is to maintain a tree, $T$, with at most $B$ leaf nodes. At each iteration, each leaf node $v \in T$ generates two new leaves, $v-1$ and $v+1$, which are then reduced as much as possible by removing factors of 2 and 3.  We then discard any duplicate nodes and all but the smallest $B$ elements generated. The path from the root to the first leaf with a value of 1 represents a chained 2,3 partition of the number $n$.
 
-%%%%%%%%%%%%%
-% DBNS TREE %
-%%%%%%%%%%%%%
 \begin{algorithm}[h]
 \caption{Tree-Based Chained 2,3 Partitions. Doche and Habsieger \cite{Doche2008}.}
 \label{alg:dbnsTree}
@@ -984,6 +924,7 @@ The next technique for finding strictly chained 2,3 partitions was suggested by 
 
 Empirically they found that $B=4$ was a good compromise between the length of the chain generated and the time to compute the chain. Larger values of $B$ sometimes produce chains with fewer terms, but take longer to compute. When the number for the target chain is known in advance and precomputation is permitted, a larger value of $B$ can be advantageous since this can lead to fewer terms, which can lead to a cheaper exponentiation.  The downside is that large values of $B$ can be prohibitively expensive even for precomputation when the integer $n$ is quite large.
 
+\bigbreak
 \section{Coming up}
 
 In this chapter, we outlined some exponentiation techniques from the literature.  We started with binary exponentiation based on a binary representation of the exponent.  Next we introduced Non-Adjacent form that uses a signed base 2 encoding of the exponent.  Since cubing is faster than combine multiplication with squaring in our implementation of ideal arithmetic, we introduce 2,3 number systems where an integer can have many representations as the sum of the products of 2 and 3.  Exponentiation based on 2,3 representations fall under two classes: chained and unchained.  Chained representations can typically be computed while interleaved with the exponentiation operation.  They also only require a constant number of group elements in addition to the input arguments.  Unchained representations often have fewer terms in the representation or can be designed to reduce real world running time of exponentiation.  Exponentiation of a group element using an unchained representation of the exponent can be performed using a linear number of group elements in the size of the exponent.
@@ -1000,9 +941,6 @@ Coming up in Chapter \ref{chap:idealExpExperiments}, we introduce several variat
 
 A contribution of this thesis is to improve the speed of arithmetic in the ideal class group of imaginary quadratic number fields with an application to integer factoring.  In Chapter \ref{chap:idealArithmetic} we introduced the ideal class group, and in Chapter \ref{chap:exponentiation} we introduced some methods for exponentiation in generic groups.  In this chapter, we make a connection between the two and that of integer factoring.  In Section \ref{sec:spar} we introduce an algorithm, called SPAR, that uses a group isomorphic to the ideal class group to factor an integer associated with the discriminant.  In Section \ref{sec:primorial}, we discuss the primorial steps algorithm for order finding in generic groups that is asymptotically faster than both Pollard's rho method and Shank's baby-steps giant-steps technique.  Finally, in Section \ref{sec:superSpar} we reconsider the factoring algorithm SPAR in the context of primorial steps for order finding.  We call this new algorithm SuperSPAR.
 
-%%%%%%%%
-% SPAR %
-%%%%%%%%
 \section{SPAR}
 \label{sec:spar}
 
@@ -1074,9 +1012,7 @@ This claim was based on a false assumption and had to be later withdrawn.  For a
 
 
 
-%%%%%%%%%%%%%%%%%%%
-% PRIMORIAL STEPS %
-%%%%%%%%%%%%%%%%%%%
+\bigbreak
 \section{Primorial Steps}
 \label{sec:primorial}
 
@@ -1095,10 +1031,7 @@ Recall that in Stage 1 of SPAR, we compute $\bclass = \aclass^{\prod_{i=2}^t {p_
 \subsection{How do we do it (empirically)}
 
 
-%%%%%%%%%%%%%
-% SUPERSPAR %
-%%%%%%%%%%%%%
-%\bigbreak
+\bigbreak
 \section{SuperSPAR}
 \label{sec:superSpar}
 
@@ -1645,7 +1578,8 @@ Since the Euclidean Algorithm and our simplified left-to-right binary GCD are ou
 \label{fig:mpzgcd}
 \end{figure}
 
-% IDEAL ARITHMETIC
+
+\bigbreak
 \section{Ideal Arithmetic}
 \label{sec:idealArithmetic}
 
@@ -1755,6 +1689,7 @@ Our GMP implementation uses only GMP integers for the ideal class representation
 
 In this section we discussed methods to speed the performance of arithmetic in the ideal class group and we compared the average time of multiplication, squaring, and cubing.  In the next section, we will look at a variety of methods for exponentiating within the ideal class group that we have not discussed previously.  Many of these methods will take the average time of multiplication, squaring, and cubing into account when computing the operations of exponentiation.
 
+\bigbreak
 \section{Exponentiation Experiments}
 \label{sec:exponentiation}
 
@@ -1844,6 +1779,7 @@ and recursively compute $\floor{n/64} \pmod 9$.  To compute $n \bmod 9$, we part
 
 \section{Motivation: How fast can we make SuperSPAR}
 
+\bigbreak
 \section{Coprime Finding}
 \begin{itemize}
 \item Wheeling
@@ -1851,6 +1787,7 @@ and recursively compute $\floor{n/64} \pmod 9$.  To compute $n \bmod 9$, we part
 \item Delta Tables
 \end{itemize}
 
+\bigbreak
 \section{Exponentiation}
 \subsection{Bounds for primorial (bound for prime vs exponent)}
 \subsection{Primorial vs Prime Powers}
