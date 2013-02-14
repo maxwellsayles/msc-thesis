@@ -682,6 +682,7 @@ The binary representation has 10 terms, while the non-adjacent form has only 8 t
 
 \bigbreak
 \subsection{Chains}
+\label{subsec:dbnsChains}
 
 One way to classify algorithms that compute 2,3 representations is by the constraints placed on the \emph{partition} of an integer $n$.  For an example of a partition, consider the 2,3 representation of $23814216 = 2^3 3^2 -2^{13} 3^2 +2^{15} 3^6$.  The terms $2^3 3^2$, $2^{13} 3^2$, and $2^{15} 3^6$ when monotonically increasing by absolute value is a partition of the integer $23814216$.  
 
@@ -1696,22 +1697,23 @@ In this section we discussed methods to speed the performance of arithmetic in t
 
 In this section, we are interested in finding the fastest approach to exponentiating an ideal class representative to a large exponent.  In particular, we consider large exponents that are the product of many small prime powers where the exponent is known in advance.  With the exponent known in advance, this allows us to precompute the sequence of operations in the exponentiation, so that the exponentiation may be as fast as possible without incurring the cost of computing the sequence of operations themselves.
 
-We begin by recalling exponentiation techniques from Chapter \ref{chap:exponentiation}.  These include techniques that use signed and unsigned base two representations, as well as greedy right-to-left and left-to-right double-base chains.  Following this, we consider several greedy representations and extend each approach to a tree based greedy search.  We also consider a search technique for 16-bit windowed 2,3 representations, and finally we compare exponentiating by a single exponent that is the product of many prime powers with that of exponentiating by each prime power separately.
+We begin by recalling exponentiation techniques from Chapter \ref{chap:exponentiation}.  These include techniques that use signed and unsigned base two representations, greedy right-to-left and left-to-right double-base representations, and a tree-based approach.  Following this, we consider several greedy variations as well as tree-based extensions of each.  For small exponents (16-bits or less), we consider an incremental search technique, and then extend this to larger exponents by partitioning the exponent into 16-bit blocks. Finally we compare exponentiating by the product of many small primes powers (known as a power primorial) with that of exponentiating by each prime power separately.
 
 \subsection{Binary and Right-to-Left Non-Adjacent Form}
 
-In Sections \ref{sec:binaryExp} and \ref{sec:naf} we introduced binary exponentiation and non-adjacent form exponentiation.  Briefly again, binary exponentiation uses the binary representation of an exponent $n$.  The representation can be parsed from high-order to low-order or from low-order to high-order -- we typically refer this difference as left-to-right or right-to-left respectively.  Using either approach, we use $\floor{\log_2n}$ squares and $\floor{\log_2n}/2$ multiplications on average.
+In Sections \ref{sec:binaryExp} and \ref{sec:naf} we introduced binary exponentiation and non-adjacent form exponentiation.  Briefly again, binary exponentiation uses the binary representation of an exponent $n$.  The representation can be parsed from high-order to low-order or from low-order to high-order -- we typically refer to this difference as left-to-right or right-to-left respectively.  Using either approach, we use $\floor{\log_2n}$ squares and $\floor{\log_2n}/2$ multiplications on average.
 
 A non-adjacent form exponentiation uses a signed base 2 representation of the exponent such that no two non-zero terms are adjacent\footnote{By ``adjacent'' we mean that for any term $s_i2^i$ for $s_i \in \{-1, 1\}$ there is no term $s_j2^j$ such that $|j-i|=1$.}.  Similarly, when computing a non-adjacent form we can parse the exponent from left-to-right or from right-to-left.  Either direction, we use $\floor{\log_2n} + 1$ squares and $(\floor{\log_2n}+1)/3$ multiplications on average.   
 
 \subsection{Right-to-Left Chains}
-In Subsection \ref{subsec:rtolChains}, we introduced a method for computing 2,3 chains from low-order to high-order that is a natural extension of the binary representation or non-adjacent form of an exponent.  In this method, we reduce the exponent by 2 while it is even, and by 3 while it is divisible by 3.  Once it is neither divisible by 2 nor divisible by 3, we can add or subtract 1 to move it to the nearest multiple of both 2 and 3.
+In Subsection \ref{subsec:rtolChains}, we introduced a method for computing 2,3 chains from low-order to high-order that is a natural extension of the binary representation or non-adjacent form of an exponent.  In this method, we reduce the exponent by 2 while it is even, and by 3 while it is divisible by 3.  Once it is neither divisible by 2 nor divisible by 3, we can add or subtract 1 to move it to the nearest multiple of both 2 and 3.  The resulting partitions of $n$ can be sorted such that the number of squares or cubes in successive terms is monotonically increasing.  This is referred to as a \emph{chain}, and is useful when memory is constrained as we only require a constant number of group elements in order to perform the exponentiation (see Subsection \ref{subsec:dbnsChains}).
+
 
 Since this approach evaluates the exponent modulo 3 and may reduce the exponent by 3, efficient methods to compute $n \bmod 3$ and $n/3$ will speed the computation of the chain. Notice that $4 \equiv 1 \pmod 3$.  As such, we can write $n$ as
 \[
 n = 4 \floor{n/4} + (n \bmod 4) \equiv \floor{n/4} + (n \bmod 4) \pmod 3
 \]
-and then recursively compute $\floor{n/4} \pmod 3$ the same way. This provides us with a method to quickly compute $n \bmod 3$ -- we partition the binary representation of $n$ into \mbox{2-bit} blocks and sum each block modulo 4.  The resulting sum $s$ is $s \equiv n \pmod 3$.  We can further improve the performance of this algorithm when $4$ divides $2^m$ where $m$ is the number of bits in a machine word.  Rather than compute the sum $s \pmod 4$, we compute \mbox{$s \pmod{2^m}$}. After all $m$-bit blocks have been summed, we partition $s$ using words of half the size (assuming 4 divides $2^{m/2}$), sum the half words, and repeat. Since our target architecture (and language) uses 64-bit words, we specialize the algorithm for this case (see Algorithm \ref{alg:fastMod3}).
+and then recursively write $\floor{n/4} \pmod 3$ the same way. This provides us with a method to quickly compute $n \bmod 3$ -- we partition the binary representation of $n$ into \mbox{2-bit} blocks and sum each block modulo 4.  The resulting sum $s$ is $s \equiv n \pmod 3$.  We can further improve the performance of this algorithm when $4$ divides $2^m$ where $m$ is the number of bits in a machine word.  Rather than compute the sum $s \pmod 4$, we compute \mbox{$s \pmod{2^m}$}. After all $m$-bit blocks have been summed, we partition $s$ using words of half the size (assuming 4 divides $2^{m/2}$), sum the half words, and repeat. Since our target architecture (and language) uses 64-bit words, we specialize the algorithm for this case (see Algorithm \ref{alg:fastMod3}).
 
 \begin{algorithm}[h]
 \caption{Fast $n \bmod 3$ (adapted from Hacker's Delight \cite{Warren2002}).}
@@ -1731,7 +1733,7 @@ and then recursively compute $\floor{n/4} \pmod 3$ the same way. This provides u
 \end{algorithmic}
 \end{algorithm}
 
-Division by 3 is relatively expensive when compared to computing the remainder.  A common approach is to precompute a single word approximation of the inverse of 3, and then to use multiplication by an approximation of the inverse and then to adjust the result \cite{Granlund1994,Warren2002,Moller2011}.  As the GNU Multiple Precision (GMP) library implements exact division by 3, we use this implementation.
+Division by 3 is relatively expensive when compared to computing the remainder.  A common approach is to precompute a single word approximation of the inverse of 3, and then to use multiplication by an approximation of the inverse and then to adjust the result (see \cite{Granlund1994,Warren2002,Moller2011} for additional information).  As the GNU Multiple Precision (GMP) library implements exact division by 3, we use this.
 
 
 \subsection{Windowed Right-to-Left Chains}
