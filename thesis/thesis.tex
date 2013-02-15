@@ -105,6 +105,8 @@
 
 Woop.
 
+Primorial $P_{10} = 6469693230$.  Maybe use that for examples.
+
 \section{Overview of Thesis}
 
 
@@ -722,7 +724,7 @@ The benefit of restricting 2,3 representations to chained representations is the
 
 
 \bigbreak
-\subsection{Exponentiating general 2,3 representations}
+\subsection{Exponentiating General 2,3 Representations}
 
 Another class of algorithms compute representations without the constraint that larger terms be divisible by smaller terms.  Given a general 2,3 representation for an integer $n = \sum s_i 2^{a_i} 3^{b_i}$, M\'{e}loni and Hasan \cite[Section 3.2]{Meloni2009} use a modification of Yao's Algorithm to achieve the same bound on the number of operations as in algorithm \ref{alg:expWithChain}, but with a bound of $O(\min \{max_a, max_b\})$ on the memory used.  Suppose $max_b < max_a$.  We require the terms to be labelled and sorted such that $a_1 \ge ... \ge a_k$.  The algorithm works by precomputing a table of $T_b = g^{3^b}$ for $0 \le b \le max_b$.  Let $i=1$ and begin with the first term $s_i2^{a_i}3^{b_i}$.  We look up $T_{b_i} = g^{3^{b_i}}$ and, after applying the sign $s_i$, we multiply ${T_{b_i}}^{s_i}$ with the running result.  Let $a_\Delta = a_i - a_{i+1}$ when $i < k$ and $a_\Delta = a_k$ when $i = k$.  It then squares the running result $a_\Delta$ times.  The algorithm removes the term $s_i2^{a_i}3^{b_i}$ from the list of terms, and continues in this way with the next largest $a_i$.  The algorithm terminates when there are no more terms in the list.  Algorithm  \ref{alg:yaos} gives pseudo-code for this approach and requires $O(max_b)$ memory.  When $max_a < max_b$, we use a related algorithm that requires the terms to be sorted such that $b_1 \ge ... \ge b_k$; it precomputes $T_a = g^{2^a}$ for $0 \le a \le max_a$ and works similar to Algorithm \ref{alg:yaos} but with cubing and squaring appropriately swapped.
 
@@ -769,7 +771,7 @@ as depicted by figure \ref{fig:yao1}.  The result of the computation is $R_4 = g
 
 
 \bigbreak
-\section{Methods for computing 2,3 Chains/Representations}
+\section{Methods for Computing 2,3 Chains/Representations}
 \label{sec:dbnsMethods}
 
 Factors influencing the speed of a 2,3 exponentiation are the time to generate the 2,3 chain or representation, and the cost of group operations such as compose, square, and cube. If the exponent is known in advance, then we can precompute the chain or representation. Here we discuss some methods from the literature: the first generates strict chains from low order to high order (right-to-left), the second generates representations (both chained or unchained) from high order to low order (left-to-right), and the last generates strict chains using a tree-based approach.  For an integer $n$, each successive method introduced below typically requires more time to generate a 2,3 representation, but the representation typically has fewer terms.  As such, these methods show a trade off between the time spent computing a representation and the time spent exponentiating with the representation.  None of these methods take the relative cost of composing, squaring, or cubing into account.  In Chapter \ref{chap:idealPowExperiments} we will look at some variations of these algorithms that attempt to minimize the cost of exponentiation given the relative costs of group operations.
@@ -899,13 +901,14 @@ Naturally though, non-chained representations tend to have a lower density than 
 
 
 \bigbreak
-\subsection{Pruned Trees}
+\subsection{Pruned Tree of $\pm1$ Nodes}
+\label{subsec:pm1Tree}
 
-The next technique for finding strictly chained 2,3 partitions was suggested by Doche and Habsieger \cite{Doche2008}. The idea is similar to the method for generating chains from right to left as described in Subsection \ref{subsec:rtolChains} above, but this technique differs by generating several possible values that may be further reduced by powers of 2 and 3. The procedure is given in Algorithm \ref{alg:dbnsTree}.  The idea is to maintain a tree, $T$, with at most $B$ leaf nodes. At each iteration, each leaf node $v \in T$ generates two new leaves, $v-1$ and $v+1$, which are then reduced as much as possible by removing factors of 2 and 3.  We then discard any duplicate nodes and all but the smallest $B$ elements generated. The path from the root to the first leaf with a value of 1 represents a chained 2,3 partition of the number $n$.
+The next technique for finding strictly chained 2,3 partitions was suggested by Doche and Habsieger \cite{Doche2008}. The idea is similar to the method for generating chains from right to left as described in Subsection \ref{subsec:rtolChains} above, but this technique differs by generating multiple values that may be further reduced by powers of 2 and 3. The procedure is given in Algorithm \ref{alg:pm1Tree}.  The idea is to maintain a tree, $T$, with at most $B$ leaf nodes. At each iteration, each leaf node $v \in T$ generates two new leaves, $v-1$ and $v+1$, which are then reduced as much as possible by removing factors of 2 and 3.  We then discard any duplicate nodes and all but the smallest $B$ elements generated. The path from the root to the first leaf with a value of 1 represents a chained 2,3 partition of the number $n$.
 
 \begin{algorithm}[h]
-\caption{Tree-Based Chained 2,3 Partitions. Doche and Habsieger \cite{Doche2008}.}
-\label{alg:dbnsTree}
+\caption{Chain from $\pm 1$ Pruned Tree (Doche and Habsieger \cite{Doche2008}).}
+\label{alg:pm1Tree}
 \begin{algorithmic}[1]
 \REQUIRE $n \in \ZZgtz$
 \STATE $T \gets$ a binary tree on the node $n$
@@ -922,6 +925,16 @@ The next technique for finding strictly chained 2,3 partitions was suggested by 
 \end{algorithm}
 
 Empirically they found that $B=4$ was a good compromise between the length of the chain generated and the time to compute the chain. Larger values of $B$ sometimes produce chains with fewer terms, but take longer to compute. When the number for the target chain is known in advance and precomputation is permitted, a larger value of $B$ can be advantageous since this can lead to fewer terms, which can lead to a cheaper exponentiation.  The downside is that large values of $B$ can be prohibitively expensive even for precomputation when the integer $n$ is quite large.
+
+\subsection{Optimal Additive 2, 3 Chains}
+\label{subsec:optAddChains}
+
+TODO: Fill this out. \cite{Imbert2010b}.
+
+ (incorporates cost)
+
+This section should probably go into the chapter on exponentiation since it's been published.
+
 
 \bigbreak
 \section{Coming up}
@@ -1017,17 +1030,17 @@ This claim was based on a false assumption and had to be later withdrawn.  For a
 
 Recall that in Stage 1 of SPAR, we compute $\bclass = \aclass^{\prod_{i=2}^t {p_i}^{e_i}}$ and $\cclass = \bclass^{\left(2^k\right)}$.  In Stage 2, we perform a random walk on the cyclic group generated by $\cclass$.  In 
 
-\subsection{How is the primorial bound chosen}
+\subsection{How is the Primorial Bound Chosen}
 
-\subsection{Bound on primes}
+\subsection{Bound on Primes}
 
-\subsection{Bound on prime power}
+\subsection{Bound on Prime Power}
 
-\subsection{How is this done in the original SPAR}
+\subsection{How is this Done in the Original SPAR}
 
-\subsection{How is this done for generic groups}
+\subsection{How is this Done for Generic Groups}
 
-\subsection{How do we do it (empirically)}
+\subsection{How Do We Do It (Empirically)}
 
 
 \bigbreak
@@ -1035,9 +1048,9 @@ Recall that in Stage 1 of SPAR, we compute $\bclass = \aclass^{\prod_{i=2}^t {p_
 \label{sec:superSpar}
 
 \subsection{Complexity}
-\subsection{Analysis for generic groups}
-\subsection{Analysis for class group of imaginary quadratic number fields}
-\subsection{Comparison with original SPAR}
+\subsection{Analysis for Generic Groups}
+\subsection{Analysis for Class Group of Imaginary Quadratic Number Fields}
+\subsection{Comparison with Original SPAR}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1696,13 +1709,15 @@ In this section, we are interested in finding the fastest approach to exponentia
 
 We begin by recalling exponentiation techniques from Chapter \ref{chap:exponentiation}.  These include techniques that use signed and unsigned base two representations, greedy right-to-left and left-to-right double-base representations, and a tree-based approach.  Following this, we consider several greedy variations as well as tree-based extensions of each.  For small exponents (16-bits or less), we consider an incremental search technique, and then extend this to larger exponents by partitioning the exponent into 16-bit blocks. Finally we compare exponentiating by the product of many small primes powers (known as a power primorial) with that of exponentiating by each prime power separately.
 
+TODO: Define \emph{partial representation}.
+
 \subsection{Binary and Right-to-Left Non-Adjacent Form}
 
 In Sections \ref{sec:binaryExp} and \ref{sec:naf} we introduced binary exponentiation and non-adjacent form exponentiation.  Briefly again, binary exponentiation uses the binary representation of an exponent $n$.  The representation can be parsed from high-order to low-order or from low-order to high-order -- we typically refer to this difference as left-to-right or right-to-left respectively.  Using either approach, we use $\floor{\log_2n}$ squares and $\floor{\log_2n}/2$ multiplications on average.
 
 A non-adjacent form exponentiation uses a signed base 2 representation of the exponent such that no two non-zero terms are adjacent\footnote{Non-adjacent form is written as $n=\prod s_i2^i$ for $s_i \in \{0, -1, 1\}$. By ``non-adjacent'' we mean that $s_i \cdot s_{i+1} = 0$ for all $i$.}.  Similarly, when computing a non-adjacent form we can parse the exponent from left-to-right or from right-to-left.  Either direction, we use $\floor{\log_2n} + 1$ squares and $(\floor{\log_2n}+1)/3$ multiplications on average.   
 
-\subsection{Right-to-Left Chains}
+\subsection{Right-to-Left 2,3 Chains}
 In Subsection \ref{subsec:rtolChains}, we introduced a method for computing 2,3 chains from low-order to high-order that is a natural extension of the binary representation or non-adjacent form of an exponent.  In this method, we reduce the exponent $n$ by 2 while it is even, and by 3 while it is divisible by 3.  At which point either $n \equiv 1 \pmod 6$ or $n \equiv 5 \pmod 6$ and we add or subtract 1 so that $n$ is a multiple of 6.  The resulting partition of $n$ is then reversed such that the number of squares or cubes in successive terms is monotonically increasing and we can use Algorithm \ref{alg:expWithChain} from Chapter \ref{chap:exponentiation} to compute the exponentiation.
 
 Since this approach evaluates the exponent modulo 3 and may reduce the exponent by 3, efficient methods to compute $n \bmod 3$ and $n/3$ will speed the computation of the chain. Notice that $4 \equiv 1 \pmod 3$.  As such, we can write $n$ as
@@ -1749,7 +1764,8 @@ and recursively write $\floor{n/64} \pmod 9$.  To compute $n \bmod 9$, we partit
 
 
 
-\subsection{Left-to-Right Chains}
+\subsection{Left-to-Right 2,3 Representations and Chains}
+\label{subsec:ltorChains2}
 
 In Subsection \ref{subsec:ltorChains} we introduced a greedy algorithm for computing 2,3 representations from high-order to low-order.  Briefly, for a given exponent $n$ and for $a_i, b_i \in \ZZgez$ and \mbox{$s_i \in \{-1, 1\}$}, we compute the term $s_i2^{a_i}3^{b_i}$ such that $\left|n-s_i2^{a_i}3^{b_i}\right|$ is as small as possible.  We then recurse on the result $n - s_i2^{a_i}3^{b_i}$.  A chain can be generated by restricting each $a_i$ and $b_i$ such that it is no greater than the $a_{i-1}$ and $b_{i-1}$ from the previous term.  We then reverse the order of terms so that the number of squares and cubes is monotonically increasing. Placing a bound on the number of squares and cubes can also be done globally, i.e.\ for every $a_i, b_i$ we have $0 \le a_i \le A$ and $0 \le b_i \le B$. When a bound is applied globally, the cost of a left-to-right chain or representation varies as the global bound varies.
 
@@ -1766,15 +1782,47 @@ In general, bounding the maximum number of squares and cubes give representation
 
 When the exponent $n$ is known in advance, we generate the 2,3 chain or representation ahead of time and do not include the time to compute the chain or representation in the overall time of the exponentiation.  Since varying the bounds on the number of squares and cubes also varies the cost of exponentiating, in practice we iterate over a range of bounds for the number of cubes in order to find the most efficient chain or representation.  We iterate the bound on the number of cubes rather than squares since $0 \le B \le \ceil{\log_3 n}$ while $0 \le A \le \ceil{\log_2 n}$.
 
-\subsection{$\pm$ 2,3 Representation using $\min (N \pm 1) / 2^c3^d$}
+\subsection{Greedy Pruned Trees}
 
-\subsection{$\pm$ 2,3 Representation using $\min (N \pm 2^a3^b) / 2^c 3^d$}
+A right-to-left 2,3 chain can be generated by repeatedly reducing the exponent by 2 and 3 and then either adding or subtracting 1 and repeating this process until the exponent is 1.  In the windowed variant, after reducing the exponent by 2 and 3, we had 12 residues modulo $2^2 3^2$ and this lead to $2^{12}$ different strategies for adding or subtracting 1 from the residue.
 
-\subsection{$\pm$ 2,3 Representation using $\min (N \pm 2^a \pm 3^b)/2^c3^d$}
+In Subsection \ref{subsec:pm1Tree}, we discussed a tree based method where a set of at most $k$ of the smallest intermediate exponents are maintained.  At each iteration, each element $x$ in the set generates two new elements $x-1$ and $x+1$.  Again, after reducing each element by powers of 2 and 3, only the $k$ smallest are kept.  That is to say that an element $x$ generates new integral elements $(x \pm 1)/(2^c3^d)$.  As an example, when keeping only the smallest intermediate value, the $10^{\textrm{th}}$ primorial $P_{10} = 6469693230$ generates this representation
+\begin{align*}
+6469693230 &= 2^1 3^1 (2^1 3^4 (2^6 3^1 (2^2 3^4 (2^2 3^3 - 1) - 1) - 1) - 1) \\
+           &= 2^1 3^1 (2^1 3^4 (2^6 3^1 (2^4 3^7 - 2^2 3^4 - 1) - 1) - 1) \\
+           &= 2^1 3^1 (2^1 3^4 (2^{10} 3^8 - 2^8 3^5 - 2^6 3^1 - 1) - 1) \\
+           &= 2^1 3^1 (2^{11} 3^{12} - 2^9 3^9 - 2^7 3^5 - 2^1 3^4 - 1) \\
+           &= 2^{12} 3^{13} - 2^{10} 3^{10} - 2^8 3^6 - 2^2 3^5 - 2^1 3^1.
+\end{align*}
 
-\subsection{Iterating on the \emph{best} $k=16$ results for each of the greedy $\pm$ 2,3 representation algorithms above.}
+Here we consider two variations to the approach of maintaining the $k$ best partial representations.  By ``best'' we mean that we keep the $k$ smallest intermediate values, but that when two values are equal, we compute the cost of the partial chain (with respect to the average cost of multiplication, squaring, and cubing) and say that the value with the smaller cost is better.  The first variation we consider is to generate many new nodes with integer values of the form $(x \pm 2^a3^b)/(2^c3^d)$ for bounded $a$ and $b$ such that $0 \le a \le A$ and $0 \le b \le B$.  Here we chose $A = 2 \ceil{\log_2 n}$ and $B = 3 \ceil{\log_3 n}$ for the input exponent $n$.  The second variation we consider is to include another term before each reduction step, i.e.\ each node generates values of the form $(x \pm 2^{a_1}3^{b_1} \pm 2^{a_2}3^{b_2}) / (2^c 3^d)$.  Notice that the first variation includes the forms $(x \pm 1)/(2^c 3^d)$.  The assumption is that by adjusting $x$ by a fixed length 2,3 representation, we are more likely to find a multiple of a large $2^c3^d$ window than we are by only adding or subtracting one to $x$.
 
-\subsection{Optimal +2, 3 strictly chained partitions (incorporates cost)}
+Using the first variant, where we only consider keeping the single best intermediate value, we obtain the following representation
+\begin{align*}
+6469693230 &= 2^1 3^1 (2^0 3^7 (2^0 3^5 (2^0 3^5 (2^1 3^1 + 2^0 3^0) + 2^3 3^0) + 2^{14} 3^0) + 2^{27} 3^0) \\
+&= 2^1 3^1 (2^0 3^7 (2^0 3^5 (2^1 3^6 + 2^0 3^5 + 2^3 3^0) + 2^{14} 3^0) + 2^{27} 3^0) \\
+&= 2^1 3^1 (2^0 3^7 (2^1 3^{11} + 2^0 3^{10} + 2^3 3^5 + 2^{14} 3^0) + 2^{27} 3^0) \\
+&= 2^1 3^1 (2^1 3^{18} + 2^0 3^{17} + 2^3 3^{12} + 2^{14} 3^7 + 2^{27} 3^0) \\
+&= 2^2 3^{19} + 2^1 3^{18} + 2^4 3^{13} + 2^{15} 3^8 + 2^{28} 3^1
+\end{align*}
+
+TODO: Come up with an example where successive approaches perform better (if there is one!)
+
+TODO: Say something about $k=1$ being a simple greedy algorithm.
+
+\subsection{The $k$ Best Approximations}
+
+The approach of maintaining a set of the $k$ best partial representations of an exponent can be adapted to that of the left-to-right 2,3 representation from Subsections \ref{subsec:ltorChains} and \ref{subsec:ltorChains2}.  For a given integer $x$ we say that $2^a3^b$ is a best approximation of $|x|$ when $\left||x| - 2^a3^b \right|$ is minimized.  The algorithm for the left-to-right representation finds a best approximation for $x$ and then repeats on the positive difference. However, instead of only iterating on the best approximation, here each value from the set of partial representations generates new values of the form $\left||x| - 2^a3^b\right|$ (being careful to record the sign of $x$), and we keep the $k$ best partial representations.  In this case, we iterate $b$ from $0 \le b \le \ceil{\log_3 |x|}$ and let $a_1 = \floor{\log_2 (x/3^b)}$ and $a_2 = \ceil{\log_2 (x/3^b)}$ (using $a_2 = a_1 + 1$ is sufficient since either $\ceil{\log_2 (x/3^b)} = \floor{\log_2 (x/3^b)}$ or $\ceil{\log_2 (x/3^b)} = \floor{\log_2 (x/3^b)} + 1$). We then use $\left||x|-2^{2_1}3^b\right|$ and $\left||x|-2^{a_2}3^b\right|$ as candidates for the new set.
+
+\subsection{Optimal Additive 2,3 Chains}
+
+When the exponent is not too large, Imbert and Philippe \cite{Imbert2010b} give a method to compute optimal additive strictly chained 2,3 partitions.  These partitions do not permit subtraction and every term is strictly less than and divides all subsequent terms. These partitions take the form
+\[
+	n = \sum_{i=0}^k 2^{a_i}3^{b_i}
+\]
+for $a_i, b_i \in \ZZgez$ where $2^{a_i}3^{b_i}$ divides $2^{a_j}3^{b_j}$ and $a_i < a_j$ and $b_i < b_j$ for all $i < j$.
+
+We discussed this technique in detail in Subsection \ref{subsec:optAddChains}.  Here, we only add that in our experiments, we were able to modify the algorithm of Imbert and Philippe so that it incorporates the average cost of multiplication, squaring, and cubing in the ideal class group, so that the resulting additive 2,3 chains should give the optimal average time for a chain under these restrictions.  Since their algorithm uses an exponential amount of time in the length of the input, we were only able to compute optimal additive chains for small exponents.  This is useful, however, when we consider methods that partition larger exponents into smaller blocks using their binary representation, or when we consider exponentiating by a list of prime powers, rather than by their large product.
 
 \subsection{Precomputing best $\pm$ 2,3 representations for 16bit numbers}
 \begin{itemize}
@@ -1857,6 +1905,8 @@ For example, the ideal ring of algebraic integers of real quadratic fields.
 For example Hyperelliptic Curves
 
 \section{DBNS with other coprime bases}
+
+Could try tree based approaches where we approximate the cost of the complete chain based on the partial chain, rather than using the smallest remaining exponent and the cost to break ties.
 
 \section{Number systems with three, four, or more bases.}
 
