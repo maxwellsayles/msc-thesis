@@ -926,8 +926,8 @@ The next technique for finding strictly chained 2,3 partitions was suggested by 
 
 Empirically they found that $B=4$ was a good compromise between the length of the chain generated and the time to compute the chain. Larger values of $B$ sometimes produce chains with fewer terms, but take longer to compute. When the number for the target chain is known in advance and precomputation is permitted, a larger value of $B$ can be advantageous since this can lead to fewer terms, which can lead to a cheaper exponentiation.  The downside is that large values of $B$ can be prohibitively expensive even for precomputation when the integer $n$ is quite large.
 
-\subsection{Optimal Additive 2, 3 Chains}
-\label{subsec:optAddChains}
+\subsection{Shortest Additive 2, 3 Chains}
+\label{subsec:shortAddChains}
 
 TODO: Fill this out. \cite{Imbert2010b}.
 
@@ -1814,17 +1814,41 @@ TODO: Say something about $k=1$ being a simple greedy algorithm.
 
 The approach of maintaining a set of the $k$ best partial representations of an exponent can be adapted to that of the left-to-right 2,3 representation from Subsections \ref{subsec:ltorChains} and \ref{subsec:ltorChains2}.  For a given integer $x$ we say that $2^a3^b$ is a best approximation of $|x|$ when $\left||x| - 2^a3^b \right|$ is minimized.  The algorithm for the left-to-right representation finds a best approximation for $x$ and then repeats on the positive difference. However, instead of only iterating on the best approximation, here each value from the set of partial representations generates new values of the form $\left||x| - 2^a3^b\right|$ (being careful to record the sign of $x$), and we keep the $k$ best partial representations.  In this case, we iterate $b$ from $0 \le b \le \ceil{\log_3 |x|}$ and let $a_1 = \floor{\log_2 (x/3^b)}$ and $a_2 = \ceil{\log_2 (x/3^b)}$ (using $a_2 = a_1 + 1$ is sufficient since either $\ceil{\log_2 (x/3^b)} = \floor{\log_2 (x/3^b)}$ or $\ceil{\log_2 (x/3^b)} = \floor{\log_2 (x/3^b)} + 1$). We then use $\left||x|-2^{2_1}3^b\right|$ and $\left||x|-2^{a_2}3^b\right|$ as candidates for the new set.
 
-\subsection{Optimal Additive 2,3 Chains}
+\subsection{Additive 2,3 Chains}
 
-When the exponent is not too large, Imbert and Philippe \cite{Imbert2010b} give a method to compute optimal additive strictly chained 2,3 partitions.  These partitions do not permit subtraction and every term is strictly less than and divides all subsequent terms. These partitions take the form
+When the exponent is not too large, Imbert and Philippe \cite{Imbert2010b} give a method to compute the shortest additive strictly chained 2,3 partitions.  These partitions do not permit subtraction and every term is strictly less than and divides all subsequent terms. These partitions take the form
 \[
 	n = \sum_{i=0}^k 2^{a_i}3^{b_i}
 \]
 for $a_i, b_i \in \ZZgez$ where $2^{a_i}3^{b_i}$ divides $2^{a_j}3^{b_j}$ and $a_i < a_j$ and $b_i < b_j$ for all $i < j$.
 
-We discussed this technique in detail in Subsection \ref{subsec:optAddChains}.  Here, we only add that in our experiments, we were able to modify the algorithm of Imbert and Philippe so that it incorporates the average cost of multiplication, squaring, and cubing in the ideal class group, so that the resulting additive 2,3 chains should give the optimal average time for a chain under these restrictions.  Since their algorithm uses an exponential amount of time in the length of the input, we were only able to compute optimal additive chains for small exponents.  This is useful, however, when we consider methods that partition larger exponents into smaller blocks using their binary representation, or when we consider exponentiating by a list of prime powers, rather than by their large product.
+We discussed this technique in detail in Subsection \ref{subsec:shortAddChains}.  For our purposes, we were able to modify this algorithm to incorporate the average cost of arithmetic in the ideal class group, so that the resulting additive 2,3 chains give a better average time for exponentiation.  Since their algorithm uses an exponential amount of time in the length of the input, we were only able to compute optimal additive chains for small exponents.  This is useful, however, when we consider methods that partition larger exponents into smaller blocks using their binary representation, or when we consider exponentiating by a list of prime powers, rather than by their large product.
 
-\subsection{Precomputing best $\pm$ 2,3 representations for 16bit numbers}
+Let $M$, $S$, and $C$ be the average cost to multiply, square, and cube respectively. Our modified function is as follows
+\begin{equation*}
+f(n) = \begin{cases}
+	\min(S + f(n/2), C + f(n/3)) & \textrm{when } n \equiv 0 \pmod 6 \\
+	\min(M + f(n-1), M + f(n+1)) & \textrm{when } n \equiv 1 \pmod 6 \\
+	\min(S + f(n/2), M + C + f((n+1)/3) & \textrm{when } n \equiv 2 \pmod 6 \\
+	\min(C + f(n/3), M + S + f((n-1)/2) & \textrm{when } n \equiv 3 \pmod 6 \\
+	\min(S + f(n/2), M + f(n-1)) & \textrm{when } n \equiv 4 \pmod 6 \\
+	\min(M + f(n-1), M + f(n+1)) & \textrm{when } n \equiv 5 \pmod 6
+\end{cases}
+\end{equation*}
+where $f(1) = 0$, $f(2) = S$, and $f(3) = C$ are the base cases.
+
+\begin{figure}[H]
+\centering
+\includegraphics{add_chains-64}
+\caption{a}
+\label{fig:addChains64}
+\end{figure}
+
+
+\subsection{Searching For 2,3 Representations}
+
+The approach to computing optimal additive 2,3 chains constrains the search space sufficiently, that we can then exhaustively compute all additive 2,3 strictly chained partitions in order to find the one with the cheapest average cost to exponentiate.  Here we consider a different approach to searching for representations.
+
 \begin{itemize}
 \item Algorithm, incorporates cost of compose, square, cube, cache efficiency
 \item 16-bit blocking of exponent
