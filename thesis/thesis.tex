@@ -713,7 +713,7 @@ $0 \le b_1 \le ... \le b_k \in \ZZ.$
 	\WHILE {$b < b_i$}
 		\STATE $T \gets T^3, b \gets b + 1$
 	\ENDWHILE
-	\STATE $R \gets R \cdot T^{s_i}$ \COMMENT{compose with $T$ or $T^{-1}$}
+	\STATE $R \gets R \cdot T^{s_i}$ \COMMENT{multiply with $T$ or $T^{-1}$}
 	\STATE $i \gets i + 1$
 \ENDWHILE
 \RETURN $R$
@@ -741,7 +741,7 @@ $b_1,...,b_k \in \ZZgez.$
 \STATE $R \gets 1_G$
 \STATE $i \gets 1$
 \WHILE {$i < k$}
-	\STATE $R \gets R \cdot {T_{b_i}}^{s_i}$ \COMMENT{compose with $T_{b_i}$ or ${T_{b_i}}^{-1}$}
+	\STATE $R \gets R \cdot {T_{b_i}}^{s_i}$ \COMMENT{multiply with $T_{b_i}$ or ${T_{b_i}}^{-1}$}
 	\STATE $a_\Delta \gets a_i - a_{i+1}$
 	\STATE $R \gets R ^ {2^{a_\Delta}}$ \COMMENT{by squaring $a_\Delta$ number of times}
 	\STATE $i \gets i + 1$
@@ -774,9 +774,10 @@ as depicted by figure \ref{fig:yao1}.  The result of the computation is $R_4 = g
 \section{Methods for Computing 2,3 Chains/Representations}
 \label{sec:dbnsMethods}
 
-Factors influencing the speed of a 2,3 exponentiation are the time to generate the 2,3 chain or representation, and the cost of group operations such as compose, square, and cube. If the exponent is known in advance, then we can precompute the chain or representation. Here we discuss some methods from the literature: the first generates strict chains from low order to high order (right-to-left), the second generates representations (both chained or unchained) from high order to low order (left-to-right), and the last generates strict chains using a tree-based approach.  For an integer $n$, each successive method introduced below typically requires more time to generate a 2,3 representation, but the representation typically has fewer terms.  As such, these methods show a trade off between the time spent computing a representation and the time spent exponentiating with the representation.  None of these methods take the relative cost of composing, squaring, or cubing into account.  In Chapter \ref{chap:idealPowExperiments} we will look at some variations of these algorithms that attempt to minimize the cost of exponentiation given the relative costs of group operations.
+In this section, we discuss some of the methods from the literature for computing 2,3 representations. The first method we consider generates strict chains from low order to high order (right-to-left), while the second method generates representations (both chained and unchained) from high order to low order (left-to-right).  The third technique we discuss generates strict chains using a tree-based approach, and the final method computes additive only strict chains of shortest length in a manner similar to chains generated from low order to high order.  
 
-\bigbreak
+These methods trade off the time to compute a representation against the time to exponentiate using that representation.  In the case that the exponent is known in advance, then we can precompute the chain or representation.  None of the methods presented here take into account the relative cost of multiplying, squaring, or cubing ideals.  In Chapter \ref{chap:idealPowExperiments} we will look at some variations of these algorithms that attempt to minimize the cost of exponentiation given the average costs of group operations.
+
 \subsection{Right-to-Left Chains (from low-order to high-order)}
 \label{subsec:rtolChains}
 
@@ -832,7 +833,7 @@ Algorithm \ref{alg:rtolDbnsChain} implements a non-recursive function with group
 \end{algorithmic}
 \end{algorithm}
 
-To see the correctness of the above procedure, consider a modification to the recursive function $\rtol$ such that it returns a partition of the input $n$ as a list of terms $s_i2^{a_i}3^{b_i}$. When the result of the recursive call is squared, this corresponds to incrementing $a_i$ in each term of the list.  Similarly, when the result is cubed, this corresponds to incrementing $b_i$ in each term of the list. When the result is composed with $g$, we prepend a term of $+1$ to the partition, and when the result is composed with $g^{-1}$, we prepend a term of $-1$ to the partition. On each iteration of the loop, either $n \equiv 0 \pmod 2$ or $n \equiv 0 \pmod 3$, so either $a$ increases or $b$ increases. Since every term $|s_i2^{a_i}3^{b_i}|$ is strictly less than $|s_j2^{a_j}3^{b_j}|$ when $i < j$, the partition is strictly chained.
+To see the correctness of the above procedure, consider a modification to the recursive function $\rtol$ such that it returns a partition of the input $n$ as a list of terms $s_i2^{a_i}3^{b_i}$. When the result of the recursive call is squared, this corresponds to incrementing $a_i$ in each term of the list.  Similarly, when the result is cubed, this corresponds to incrementing $b_i$ in each term of the list. When the result is multiplied with $g$, we prepend a term of $+1$ to the partition, and when the result is multiplied with $g^{-1}$, we prepend a term of $-1$ to the partition. On each iteration of the loop, either $n \equiv 0 \pmod 2$ or $n \equiv 0 \pmod 3$, so either $a$ increases or $b$ increases. Since every term $|s_i2^{a_i}3^{b_i}|$ is strictly less than $|s_j2^{a_j}3^{b_j}|$ when $i < j$, the partition is strictly chained.
 
 \bigbreak
 \subsection{Left-to-Right Chains (from high-order to low-order)}
@@ -843,7 +844,7 @@ To see the correctness of the above procedure, consider a modification to the re
 \newcommand{\greedybound}{\textrm{greedy}''}
 \newcommand{\closest}{\textrm{closest}}
 
-The previous section gave a procedure for generating a strictly chained 2,3 partition for an integer $n$ such that the terms were ordered from smallest absolute value to largest.  Here we present a greedy approach that generates the terms in order of the largest absolute value to the smallest. The general idea is to find a term, $s2^a3^b$, that is closest to the remaining target integer $n$ and then repeat on $n - s2^a3^b$. Let
+The previous section gave a procedure for generating a strictly chained 2,3 partition for an integer $n$ such that the terms were ordered from smallest absolute value to largest.  Here we present a greedy approach, suggested by Berth{\'e} and Imbert \cite{Berthe2009}, which generates the terms in order of the largest absolute value to the smallest. The general idea is to find a term, $s2^a3^b$, that is closest to the remaining target integer $n$ and then repeat on $n - s2^a3^b$. Let
 \[
 \closest(n) = s2^a3^b
 \]
@@ -874,7 +875,7 @@ where $0 \le a \le \amax$, $0 \le b \le \bmax$, $a$ and $b$ minimize $\left| |n|
 We present pseudocode in Algorithm \ref{alg:greedyltor}. Note that on successive invocations of $\greedychain$, the absolute value of $v=|s2^a3^b|$ returned by $\closest'$ is monotonically decreasing.  Reversing the terms of the partition gives a chained 2,3 partition of $n$ that we can use to perform exponentiation using Algorithm \ref{alg:expWithChain}.
 
 \begin{algorithm}[h]
-\caption{Greedy left to right representations. Berth\'{e} and Imbert \cite{Berthe2009}.}
+\caption{Greedy left to right representations. Berth{\'e} and Imbert \cite{Berthe2009}.}
 \label{alg:greedyltor}
 \begin{algorithmic}[1]
 \REQUIRE $n, \amax, \bmax \in \{\ZZgez, +\infty\}$ \COMMENT{$+\infty$ for unbounded $a$ or $b$}
@@ -926,22 +927,31 @@ The next technique for finding strictly chained 2,3 partitions was suggested by 
 
 Empirically they found that $B=4$ was a good compromise between the length of the chain generated and the time to compute the chain. Larger values of $B$ sometimes produce chains with fewer terms, but take longer to compute. When the number for the target chain is known in advance and precomputation is permitted, a larger value of $B$ can be advantageous since this can lead to fewer terms, which can lead to a cheaper exponentiation.  The downside is that large values of $B$ can be prohibitively expensive even for precomputation when the integer $n$ is quite large.
 
+
 \subsection{Shortest Additive 2, 3 Chains}
 \label{subsec:shortAddChains}
 
-TODO: Fill this out. \cite{Imbert2010b}.
+In the previous Subsection, the search for a 2,3 chain iterates on $\pm 1$ the value of the $B$ smallest candidates.  We can further restrict a chain to contain only positive terms and the number of possible 2,3 chains is reduced.   Imbert and Phillipe \cite{Imbert2010b} consider searching for additive 2,3 strictly chained partitions that contain as few terms as possible.  They give the following recursive function to compute the minimum number of terms in such a chain. Let $s(n)$ denote the smallest $k$ such that $n$ can be represented as $n = \sum_{i=1}^k 2^{a_i} 3^{b_i}$. We define $s(n)$ as
+\begin{equation*}
+s(n) = \begin{cases}
+	\min\{s(n/3), s(n/2)\} & \textrm{when } n \equiv 0 \pmod 6 \\
+	1 + s(n-1) & \textrm{when } n \equiv 1 \pmod 6 \\
+	s(n/2) & \textrm{when } n \equiv 2 \pmod 6 \\
+	\min\{s(n/3), 1 + s((n-1)/2)\} & \textrm{when } n \equiv 3 \pmod 6 \\ 
+	\min\{s(n/2), 1 + s((n-1)/3)\} & \textrm{when } n \equiv 4 \pmod 6 \\
+	1 + s((n-1)/2) & \textrm{when } n \equiv 5 \pmod 6
+\end{cases}
+\end{equation*}
+where the base cases are handled by $s(n) = 1$ when $n \le 2$.
 
- (incorporates cost)
-
-This section should probably go into the chapter on exponentiation since it's been published.
-
+The corresponding 2,3 chain is computed by memoizing a shortest chain for each solution to $s(n)$ encountered. When a recursive call uses $n/2$, the chain for $n$ is the chain for $n/2$ with each term multiplied by 2.  Similarly, if the recursion uses $n/3$, each term is multiplied by 3.  When the recursion uses $n-1$, we simply add the term 1 to the chain representing $n-1$.
 
 \bigbreak
 \section{Coming up}
 
-In this chapter, we outlined some exponentiation techniques from the literature.  We started with binary exponentiation based on a binary representation of the exponent.  Next we introduced Non-Adjacent form that uses a signed base 2 encoding of the exponent.  Since cubing is faster than combine multiplication with squaring in our implementation of ideal arithmetic, we introduce 2,3 number systems where an integer can have many representations as the sum of the products of 2 and 3.  Exponentiation based on 2,3 representations fall under two classes: chained and unchained.  Chained representations can typically be computed while interleaved with the exponentiation operation.  They also only require a constant number of group elements in addition to the input arguments.  Unchained representations often have fewer terms in the representation or can be designed to reduce real world running time of exponentiation.  Exponentiation of a group element using an unchained representation of the exponent can be performed using a linear number of group elements in the size of the exponent.
+In this chapter, we outlined some exponentiation techniques from the literature.  We started with binary exponentiation based on a binary representation of the exponent.  Next we introduced Non-Adjacent form that uses a signed base 2 encoding of the exponent.  Since cubing is often faster than combined multiplication with squaring, we introduced 2,3 number systems where an integer can have many representations as the sum of the products of 2 and 3.  Exponentiation based on 2,3 representations fall under two classes: chained and unchained.  Chained representations can typically be computed while interleaved with the exponentiation operation.  They also require only a constant number of group elements in addition to the input arguments.  Unchained representations often have fewer terms or operations in their representation.  Exponentiation of a group element using an unchained representation of the exponent can be performed using a linear number of group elements in the size of the exponent.
 
-Coming up in Chapter \ref{chap:idealPowExperiments}, we introduce several variations of chained and unchained 2,3 representations, many of which take into account the real world running time to multiply, square, and cube elements from the ideal class group.  We use the practical performance of these variations in optimizing our implementation of a factoring algorithm called ``SuperSPAR''.  In the next chapter, we introduce the background of SPAR and then the SuperSPAR factoring algorithm itself.
+Coming up in Chapter \ref{chap:idealPowExperiments}, we introduce several variations of chained and unchained 2,3 representations, many of which take into account the average time to multiply, square, and cube elements from the ideal class group.  We let the actual performance of these variations guide our implementation of a factoring algorithm called ``SuperSPAR''.  In the next chapter, we introduce the background for SPAR and the SuperSPAR factoring algorithm.
 
 
 %%%%%%%%%%%%%
@@ -967,7 +977,7 @@ The description of SPAR uses binary quadratic forms. A binary quadratic form is 
 \[
 	f(x, y) = ax^2 + bxy + cy^2
 \]
-where $a$, $b$, and $c$ are integer coefficients.  For a given form there is a set of integers represented by $f(x, y)$ for integers $x$ and $y$. Two forms are equivalent if the sets of integers they represent are equivalent \cite[pp.239-240]{Crandall2001}, and these sets are equivalent if and only if there exists an invertible integral linear change of variables that transforms the first form into the second form. Necessarily, two equivalent forms have the same discriminant, which is given as $\Delta = b^2 - 4ac$ and corresponds to the discriminant of our ideal.  Furthermore, as Fr\"olich and Taylor \cite{Frolich1993} show, the form $ax^2 + bxy + cy^2$ is isomorphic to the primitive ideal $[a, (b + \sqrt\Delta)/2]$.  The set of all equivalent forms for a given discriminant form an equivalence class, and as shown by Gau\ss, representatives of equivalence classes of forms can be composed together to form a group, $G(\Delta)$.  In the case of a negative discriminant, each form is equivalent to a unique reduced form \cite[p.241]{Crandall2001}.  Since forms are isomorphic to ideals, the class group of binary quadratic forms with negative discriminant, $G(\Delta)$, is also isomorphic to the ideal class group of imaginary quadratic number fields, $Cl_\Delta$. As such, we adapt our discussion of the SPAR factoring algorithm to use the language of ideal classes.
+where $a$, $b$, and $c$ are integer coefficients.  For a given form there is a set of integers represented by $f(x, y)$ for integers $x$ and $y$. Two forms are equivalent if the sets of integers they represent are equivalent \cite[pp.239-240]{Crandall2001}, and these sets are equivalent if and only if there exists an invertible integral linear change of variables that transforms the first form into the second form. Necessarily, two equivalent forms have the same discriminant, which is given as $\Delta = b^2 - 4ac$ and corresponds to the discriminant of our ideal.  Furthermore, as Fr\"olich and Taylor \cite{Frolich1993} show, the form $ax^2 + bxy + cy^2$ is isomorphic to the primitive ideal $[a, (b + \sqrt\Delta)/2]$.  The set of all equivalent forms for a given discriminant form an equivalence class, and as shown by Gau\ss, representatives of equivalence classes of forms can be multiplied together to form a group, $G(\Delta)$.  In the case of a negative discriminant, each form is equivalent to a unique reduced form \cite[p.241]{Crandall2001}.  Since forms are isomorphic to ideals, the class group of binary quadratic forms with negative discriminant, $G(\Delta)$, is also isomorphic to the ideal class group of imaginary quadratic number fields, $Cl_\Delta$. As such, we adapt our discussion of the SPAR factoring algorithm to use the language of ideal classes.
 
 \begin{defn}
 The \emph{ambiguous classes} are the classes $[\mathfrak a]$ such that ${[\mathfrak a]}^2$ is the identity class \cite{Schnorr1984}.  This holds for both the equivalence class of forms and the equivalence class of ideals.  Notice that the identity ideal class $[\mathcal O_\Delta] \in Cl_\Delta$ is an ambiguous class.
@@ -1816,13 +1826,17 @@ The approach of maintaining a set of the $k$ best partial representations of an 
 
 \subsection{Additive 2,3 Chains}
 
-When the exponent is not too large, Imbert and Philippe \cite{Imbert2010b} give a method to compute the shortest additive strictly chained 2,3 partitions.  These partitions do not permit subtraction and every term is strictly less than and divides all subsequent terms. These partitions take the form
+When the integer to be represented is not too large, Imbert and Philippe \cite{Imbert2010b} give a method to compute the shortest additive strictly chained 2,3 partitions.  These partitions do not permit subtraction and every term is strictly less than and divides all subsequent terms. These partitions take the form
 \[
 	n = \sum_{i=0}^k 2^{a_i}3^{b_i}
 \]
 for $a_i, b_i \in \ZZgez$ where $2^{a_i}3^{b_i}$ divides $2^{a_j}3^{b_j}$ and $a_i < a_j$ and $b_i < b_j$ for all $i < j$.
 
-We discussed this technique in detail in Subsection \ref{subsec:shortAddChains}.  For our purposes, we were able to modify this algorithm to incorporate the average cost of arithmetic in the ideal class group, so that the resulting additive 2,3 chains give a better average time for exponentiation.  Since their algorithm uses an exponential amount of time in the length of the input, we were only able to compute optimal additive chains for small exponents.  This is useful, however, when we consider methods that partition larger exponents into smaller blocks using their binary representation, or when we consider exponentiating by a list of prime powers, rather than by their large product.
+We discussed this technique previously in Subsection \ref{subsec:shortAddChains}.  For our purposes, we modified this algorithm to compute additive 2,3 chains that minimize the average cost of arithmetic in the ideal class group -- the resulting additive 2,3 chains give a better average time for exponentiation, while they may not necessarily be the shortest possible.
+
+Since this algorithm uses an exponential amount of time in the length of the input, we were only able to compute optimal additive chains for small exponents.  This is useful, however, when we consider methods that partition larger exponents into smaller blocks using their binary representation, or when we consider exponentiating by a list of prime powers, rather than by their large product.
+
+TODO: This isn't an additive chain!
 
 Let $M$, $S$, and $C$ be the average cost to multiply, square, and cube respectively. Our modified function is as follows
 \begin{equation*}
@@ -1839,9 +1853,10 @@ where $f(1) = 0$, $f(2) = S$, and $f(3) = C$ are the base cases.
 
 \begin{figure}[H]
 \centering
-\includegraphics{add_chains-64}
-\caption{a}
-\label{fig:addChains64}
+\includegraphics{memo_chains-64}
+\includegraphics{memo_chains-128}
+\caption{Time to exponentiate 16-bit integers using precomputed cost based additive chains and $\pm 1$ chains.}
+\label{fig:memoChains}
 \end{figure}
 
 
@@ -1850,7 +1865,7 @@ where $f(1) = 0$, $f(2) = S$, and $f(3) = C$ are the base cases.
 The approach to computing optimal additive 2,3 chains constrains the search space sufficiently, that we can then exhaustively compute all additive 2,3 strictly chained partitions in order to find the one with the cheapest average cost to exponentiate.  Here we consider a different approach to searching for representations.
 
 \begin{itemize}
-\item Algorithm, incorporates cost of compose, square, cube, cache efficiency
+\item Algorithm, incorporates cost of multiply, square, cube, cache efficiency
 \item 16-bit blocking of exponent
 \item Comparison of precomputed representations with greedy approaches
 \end{itemize}
