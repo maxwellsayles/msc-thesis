@@ -1715,6 +1715,8 @@ In this section we discussed methods to speed the performance of arithmetic in t
 \section{Exponentiation Experiments}
 \label{sec:exponentiation}
 
+TODO: Algorithm, incorporates cost of multiply, square, cube, cache efficiency
+
 In this section, we are interested in finding the fastest approach to exponentiating an ideal class representative to a large exponent.  In particular, we consider large exponents that are the product of many small prime powers where the exponent is known in advance.  With the exponent known in advance, this allows us to precompute the sequence of operations in the exponentiation, so that the exponentiation may be as fast as possible without incurring the cost of computing the sequence of operations themselves.
 
 We begin by recalling exponentiation techniques from Chapter \ref{chap:exponentiation}.  These include techniques that use signed and unsigned base two representations, greedy right-to-left and left-to-right double-base representations, and a tree-based approach.  Following this, we consider several greedy variations as well as tree-based extensions of each.  For small exponents (16-bits or less), we consider an incremental search technique, and then extend this to larger exponents by partitioning the exponent into 16-bit blocks. Finally we compare exponentiating by the product of many small primes powers (known as a power primorial) with that of exponentiating by each prime power separately.
@@ -1862,7 +1864,7 @@ again, where $f(1) = 0$, $f(2) = S$, and $f(3) = C$ are the base cases.  One thi
 
 Since both functions require an exponential amount of computation in the length of the input, we were only able to compute chains for small exponents.  This is still useful, however, when we consider methods that partition large exponents into smaller blocks using their binary representation, or when we consider multiple exponentiations by a list of prime powers, rather than a single exponentiation by the product of many primes.
 
-In Figure \ref{fig:memoChains} we show the average time to exponentiate ideals with 59-bit and 118-bit discriminants for exponents 1 through 65536.  The graph shows every $512^{\textrm{th}}$ point where the two approaches give different timings\footnote{In the case of the 59-bit discriminant, the timings were the same for 21,816 exponents, and for the 118-bit discriminant, the timings were the same for 16,481 exponents.}.  For every exponent tested, $\pm 2, 3$ chains were on average as fast or faster than additive only chains.
+In Figure \ref{fig:memoChains} we show the average time to exponentiate ideals with 59-bit and 118-bit discriminants for exponents 1 through 65535.  The graph shows every $512^{\textrm{th}}$ point where the two approaches give different timings\footnote{In the case of the 59-bit discriminant, the timings were the same for 21,816 exponents, and for the 118-bit discriminant, the timings were the same for 16,481 exponents.}.  For every exponent tested, $\pm 2, 3$ chains were on average as fast or faster than additive only chains.
 \begin{figure}[H]
 \centering
 \includegraphics{memo_chains-64}
@@ -1876,27 +1878,31 @@ In Figure \ref{fig:memoChains} we show the average time to exponentiate ideals w
 
 When computing the shortest additive 2,3 chains, Imbert and Phillipe constrained the search space sufficiently in order to exhaustively compute all additive 2,3 strictly chained partitions for the input integer. Here we consider a different approach to searching for representations.  Rather than searching for a representation for a specific integer, we instead iterate over a set of possible representations and compute the integer that is represented.  For each integer represented in the set, we record the cheapest representation encountered.
 
-For example, we first iterated over all single term representations $2^{a_1}3^{b_1}$ for $0 \le a_1 \le A$ and $0 \le b_1 \le B$, and then all two term representations $2^{a_1}3^{b_1} \pm 2^{a_2}3^{b_2}$ for $0 \le a_1 < a_2 \le A$ and $0 \le b_1 < b_2 \le B$.  In general, we computed the set of representations
+We first iterate over all single term representations $2^{a_1}3^{b_1}$ for $0 \le a_1 \le A$ and $0 \le b_1 \le B$, and then all two term representations $2^{a_1}3^{b_1} \pm 2^{a_2}3^{b_2}$ for $0 \le a_1 < a_2 \le A$ and $0 \le b_1 < b_2 \le B$.  In general, we compute the set of representations
 \[
 R = \left\{\sum_{i=1}^k\pm 2^{a_i}3^{b_i} ~:~ 0 \le a_1 < \cdots < a_k \le A \textrm{ and } 0 \le b_1 < \cdots < b_k \le B \right\}
 \]
-and recorded the lowest average cost of a representation for each integer discovered.
+and record the lowest average cost of a representation for each integer discovered.
 
-Since this approach to searching for 2, 3 representations is 
+We wanted to search for representations for all 16-bit integers, so we started our search with $A=\ceil{\log_2\left(2^{16}\right)} = 16$, $B=\ceil{\log_3 \left(2^{16}\right)} = 11$, and the number of terms $i$ as 1.  We increased $i$ by 1 each round, so long as it resulted in at least one integer in the range 1 through $2^{16}$ having a reduced cost.  We found that for representations of 1 through 6 terms for integers in our range, that no integer was associated with a minimal cost representation of more than 5 terms.  We then ran our search again using $A=18$ and $B=12$ and found that none of our minimal representations changed.
 
-\begin{itemize}
-\item Algorithm, incorporates cost of multiply, square, cube, cache efficiency
-\item 16-bit blocking of exponent
-\item Comparison of precomputed representations with greedy approaches
-\end{itemize}
-
-\subsection{Exponentiation by fixed primorial}
-
-\subsection{Exponentiation by list of prime powers}
-
-\subsection{Exponentiation by general integers}
+Similar to before, Figure \ref{fig:preVsMemo} shows the average time to exponentiate ideals with 59-bit and 118-bit discriminants for exponents 1 through 65535. Again, the graph shows every $512^{\textrm{th}}$ point where the two approaches give different timings\footnote{For the 59-bit discriminant, the timings were the same for 37,732 exponents and the incremental search always yielded a lower average cost. For the 118-bit discriminant, the timings were the same for 44,291 exponents. For 19,390 exponents, the incremental search produced lower average costs, but for 1854 exponents, the cost was actually higher.} For the 64-bit implementation, the incremental search was as fast or faster on average for all exponents tested, while the 128-bit implementation was slower on average for 2.8\% of the exponents tested.
+\begin{figure}[H]
+\centering
+\includegraphics{pre_vs_memo-64}
+\includegraphics{pre_vs_memo-128}
+\caption{Time to exponentiate 16-bit integers using precomputed $\pm 1$ chains and chains discovered by an incremental search.}
+\label{fig:preVsMemo}
+\end{figure}
 
 \subsection{Experimental Results}
+
+\begin{itemize}
+\item Exponentiation by fixed primorial
+\item Exponentiation by list of prime powers
+\item Exponentiation by general integers
+\end{itemize}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % CHAPTER 6             %
