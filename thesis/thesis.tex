@@ -1827,14 +1827,15 @@ TODO: Say something about $k=1$ being a simple greedy algorithm.
 The approach of maintaining a set of the $k$ best partial representations of an exponent can be adapted to that of the left-to-right 2,3 representation from Subsections \ref{subsec:ltorChains} and \ref{subsec:ltorChains2}.  For a given integer $x$ we say that $2^a3^b$ is a best approximation of $|x|$ when $\left||x| - 2^a3^b \right|$ is minimized.  The algorithm for the left-to-right representation finds a best approximation for $x$ and then repeats on the positive difference. However, instead of only iterating on the best approximation, here each value from the set of partial representations generates new values of the form $\left||x| - 2^a3^b\right|$ (being careful to record the sign of $x$), and we keep the $k$ best partial representations.  In this case, we iterate $b$ from $0 \le b \le \ceil{\log_3 |x|}$ and let $a_1 = \floor{\log_2 (x/3^b)}$ and $a_2 = \ceil{\log_2 (x/3^b)}$ (using $a_2 = a_1 + 1$ is sufficient since either $\ceil{\log_2 (x/3^b)} = \floor{\log_2 (x/3^b)}$ or $\ceil{\log_2 (x/3^b)} = \floor{\log_2 (x/3^b)} + 1$). We then use $\left||x|-2^{2_1}3^b\right|$ and $\left||x|-2^{a_2}3^b\right|$ as candidates for the new set.
 
 \subsection{Additive 2,3 Chains}
+\label{subsec:addChains}
 
-When the integer to be represented is not too large, Imbert and Philippe \cite{Imbert2010b} give a method to compute the shortest additive strictly chained 2,3 partitions.  These partitions do not permit subtraction and every term is strictly less than and divides all subsequent terms. These partitions take the form
+When the integer to be represented is not too large, Imbert and Philippe \cite{Imbert2010b} give a method (see Subsection \ref{subsec:shortAddChains}) to compute the shortest additive strictly chained 2,3 partition.  Such partitions do not permit subtraction and every term is strictly less than and divides all subsequent terms. They take the form
 \[
 	n = \sum_{i=0}^k 2^{a_i}3^{b_i}
 \]
 for $a_i, b_i \in \ZZgez$ where $2^{a_i}3^{b_i}$ divides $2^{a_j}3^{b_j}$ and $a_i < a_j$ and $b_i < b_j$ for all $i < j$.
 
-We discussed this technique previously in Subsection \ref{subsec:shortAddChains}.  For our purposes, we modified this algorithm to compute additive 2,3 chains that minimize the average cost of arithmetic in the ideal class group -- the resulting additive 2,3 chains give a better average time for exponentiation, while they may not necessarily be the shortest possible.  
+For our purposes, we modified this algorithm to compute additive 2,3 chains that minimize the average cost of arithmetic in the ideal class group -- the resulting additive 2,3 chains give a better average time for exponentiation, while they may not necessarily be the shortest possible.  
 
 Let $M$, $S$, and $C$ be the average cost to multiply, square, and cube respectively. Our modified function is as follows
 \begin{equation*}
@@ -1860,9 +1861,60 @@ f(n) = \begin{cases}
 	\min\{M + f(n+1), M + S + f((n-1)/2)\} & \textrm{when } n \equiv 5 \pmod 6 \\
 \end{cases}
 \end{equation*}
-again, where $f(1) = 0$, $f(2) = S$, and $f(3) = C$ are the base cases.  One thing to notice is that the function $s'$ computes a subset of the representations computed by the function $f$, as evidenced by the definitions of these two functions.  Therefore, we expect the average cost to exponentiate using a representation computed by $f$ to be no worse than the average cost to exponentiate using a representation computed by $s$.
+again, where $f(1) = 0$, $f(2) = S$, and $f(3) = C$ are the base cases.  One thing to notice is that the function $s'$ computes a subset of the representations computed by the function $f$.  As such, we expect the average cost to exponentiate using a representation computed by $f$ to be no worse than the average cost to exponentiate using a representation computed by $s$.
 
-Since both functions require an exponential amount of computation in the length of the input, we were only able to compute chains for small exponents.  This is still useful, however, when we consider methods that partition large exponents into smaller blocks using their binary representation, or when we consider multiple exponentiations by a list of prime powers, rather than a single exponentiation by the product of many primes.
+Since both functions require an exponential amount of computation in the length of the input, we were only able to compute chains for small exponents.  This is still useful when we consider methods that partition large exponents into smaller blocks using their binary representation, or when we consider multiple exponentiations by a list of prime powers, rather than a single exponentiation by the product of many primes.
+
+
+\subsection{Incremental Searching}
+\label{subsec:incrementalSearching}
+
+For small enough inputs, the number of possible additive 2,3 chains is sufficiently few that we can compute all such chains in order to find the shortest such chain.  Here we consider a different approach to searching for representations.  Rather than searching for a representation for a specific integer, we instead iterate over a set of possible representations and compute each integer that is represented.  For each integer represented in the set, we record the cheapest representation encountered.
+
+We first iterate over all single term representations $2^{a_1}3^{b_1}$ for $0 \le a_1 \le A$ and $0 \le b_1 \le B$, and then all two term representations $2^{a_1}3^{b_1} \pm 2^{a_2}3^{b_2}$ for $0 \le a_1 < a_2 \le A$ and $0 \le b_1 < b_2 \le B$.  In general, we compute the set of representations
+\[
+R = R_1 \cup R_2 \cup ... \cup R_m
+\]
+for some maximum number of terms $m$ where
+\[
+R_k = \left\{\sum_{i=1}^k\pm 2^{a_i}3^{b_i} ~:~ 0 \le a_1 < \cdots < a_k \le A \textrm{ and } 0 \le b_1 < \cdots < b_k \le B \right\}.
+\]
+We iterate over the set $R$ and for each integer represented, we record the lowest cost representation for that integer in $R$.
+
+In our experiments, we wanted to search for representations for all 16-bit integers, so we started our search with $A=\ceil{\log_2\left(2^{16}\right)} = 16$, $B=\ceil{\log_3 \left(2^{16}\right)} = 11$, and we iterated the number of terms $k$ from 1 through 5. For representations of $k=6$ terms, our implementation took several days to complete.  We found that for our 64-bit implementation of ideal arithmetic, that no integer was associated with a minimal cost representation of more than 5 terms.  We then ran our search again using $A=18$ and $B=12$ and found that none of our minimal representations changed.  For our 128-bit implementation of ideal arithmetic, we found that (TODO) number of integers had better minimal representations with 6 terms.  We did not extend the search to representations with 7 terms, however.
+
+\subsection{16-bit Blocked Exponentiation}
+
+The techniques of the previous two Subsections are computationally expensive and as such, we limited our search to representations of 16-bit integers.  We mentioned previously that this is still useful for larger exponents, since we can represent the exponent $n$ in 16-bit blocks as
+\[
+	n = \sum_{i=0}^k 2^{16i} b_i
+\]
+where $0 \le b_i < 2^{16}$.  Assuming that we can exponentiate a group element $g$ to a 16-bit exponent $b_i$, Algorithm \ref{alg:blockedExp} computes the exponentiation $g^n$ using an approach similar to a left-to-right windowed binary exponentiation.
+
+
+\begin{algorithm}[h]
+\caption{16-bit Blocked Exponentiation.}
+\label{alg:blockedExp}
+\begin{algorithmic}[1]
+\REQUIRE $n \in \ZZ, g \in G$ and a method to compute $g^{b_i}$ for $0 \le b_i < 2^{16}$.
+\ENSURE $g^n$.
+\STATE $R \gets 1_G$
+\FOR {$i$ from $\ceil{\log_{2^{16}} n}$ downto 0}
+	\STATE $R \gets R^{2^{16}}$
+	\STATE $b_i \gets \floor{n / 2^{16i}} \bmod {2^{16}}$
+	\STATE $R \gets R \cdot g^{b_i}$
+\ENDFOR
+\RETURN $R$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Exponentiation by the Prime Factorization}
+
+\subsection{Experimental Results}
+
+One reason to improve the performance of exponentiation in the ideal class group is to improve the performance of order finding in this group.  In particular, we consider the approach where we exponentiate a random ideal class to the product of several small prime powers.  For a group element $g$, and the odd primorial $P_n = \prod_{i=2}^n p_i$ where $p_i$ is the $i^{\textrm{th}}$ prime number, we want to compute $g^{P_n}$. We first show empirical results for computing $g^{p_2} \cdot g^{p_3} \cdots g^{p_n}$ as a series of $n-1$ small exponentiations and $n-2$ multiplications.  We then show results for computing $g^{P_n}$ Then we show our results of computing $g^{P_n}$ as one large exponentiation.  Finally, we compare the two different approaches in order to determine which is faster in practice.
+
+In the case of computing $g^{p_2} \cdot g^{p_3} \cdots g^{p_n}$ as a series of small exponentiations, we limited the primorials tested to consist only of primes no larger than 16-bits.  Specifically, we tested the odd primorials $P_i$ such that $2 \le i \le 2500$.  The largest prime used is $p_{2500} = 22307$.
 
 In Figure \ref{fig:memoChains} we show the average time to exponentiate ideals with 59-bit and 118-bit discriminants for exponents 1 through 65535.  The graph shows every $512^{\textrm{th}}$ point where the two approaches give different timings\footnote{In the case of the 59-bit discriminant, the timings were the same for 21,816 exponents, and for the 118-bit discriminant, the timings were the same for 16,481 exponents.}.  For every exponent tested, $\pm 2, 3$ chains were on average as fast or faster than additive only chains.
 \begin{figure}[H]
@@ -1873,19 +1925,6 @@ In Figure \ref{fig:memoChains} we show the average time to exponentiate ideals w
 \label{fig:memoChains}
 \end{figure}
 
-
-\subsection{Searching For 2,3 Representations}
-
-When computing the shortest additive 2,3 chains, Imbert and Phillipe constrained the search space sufficiently in order to exhaustively compute all additive 2,3 strictly chained partitions for the input integer. Here we consider a different approach to searching for representations.  Rather than searching for a representation for a specific integer, we instead iterate over a set of possible representations and compute the integer that is represented.  For each integer represented in the set, we record the cheapest representation encountered.
-
-We first iterate over all single term representations $2^{a_1}3^{b_1}$ for $0 \le a_1 \le A$ and $0 \le b_1 \le B$, and then all two term representations $2^{a_1}3^{b_1} \pm 2^{a_2}3^{b_2}$ for $0 \le a_1 < a_2 \le A$ and $0 \le b_1 < b_2 \le B$.  In general, we compute the set of representations
-\[
-R = \left\{\sum_{i=1}^k\pm 2^{a_i}3^{b_i} ~:~ 0 \le a_1 < \cdots < a_k \le A \textrm{ and } 0 \le b_1 < \cdots < b_k \le B \right\}
-\]
-and record the lowest average cost of a representation for each integer discovered.
-
-We wanted to search for representations for all 16-bit integers, so we started our search with $A=\ceil{\log_2\left(2^{16}\right)} = 16$, $B=\ceil{\log_3 \left(2^{16}\right)} = 11$, and the number of terms $i$ as 1.  We increased $i$ by 1 each round, so long as it resulted in at least one integer in the range 1 through $2^{16}$ having a reduced cost.  We found that for representations of 1 through 6 terms for integers in our range, that no integer was associated with a minimal cost representation of more than 5 terms.  We then ran our search again using $A=18$ and $B=12$ and found that none of our minimal representations changed.
-
 Similar to before, Figure \ref{fig:preVsMemo} shows the average time to exponentiate ideals with 59-bit and 118-bit discriminants for exponents 1 through 65535. Again, the graph shows every $512^{\textrm{th}}$ point where the two approaches give different timings\footnote{For the 59-bit discriminant, the timings were the same for 37,732 exponents and the incremental search always yielded a lower average cost. For the 118-bit discriminant, the timings were the same for 44,291 exponents. For 19,390 exponents, the incremental search produced lower average costs, but for 1854 exponents, the cost was actually higher.} For the 64-bit implementation, the incremental search was as fast or faster on average for all exponents tested, while the 128-bit implementation was slower on average for 2.8\% of the exponents tested.
 \begin{figure}[H]
 \centering
@@ -1895,7 +1934,6 @@ Similar to before, Figure \ref{fig:preVsMemo} shows the average time to exponent
 \label{fig:preVsMemo}
 \end{figure}
 
-\subsection{Experimental Results}
 
 \begin{itemize}
 \item Exponentiation by fixed primorial
