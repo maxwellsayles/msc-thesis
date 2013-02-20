@@ -1907,21 +1907,20 @@ Another way that we can use the 16-bit representations from the previous two Sub
 
 \subsection{Experimental Results}
 
-One reason to improve the performance of exponentiation in the ideal class group is to improve the performance of order finding in this group.  In particular, we exponentiate a random ideal class to a primorial so that the order of the resulting ideal class is likely to be coprime to our exponent.  Here, we first compare the techniques of this section using 16-bit exponents, and then compare the methods useful for larger exponents using the first 2500 odd primorials.
+One reason to improve the performance of exponentiation in the ideal class group is to improve the performance of order finding in this group.  In particular, we exponentiate a random ideal class to a primorial so that the order of the resulting ideal class is likely to be coprime to our exponent.  Here, we first show our results for 16-bit exponents, and then compare the various methods useful for larger exponents by computing the average time to exponentiate using the first 2500 odd primorials.
 
-In the following figures we show the average time to exponentiate ideals with 59-bit and 118-bit discriminants for exponents 1 through 65535.  The graphs show every $512^{\textrm{th}}$ point where the approaches give different timings.
+In the following figures we sample the average time to exponentiate ideals with 59-bit and 118-bit discriminants for exponents 1 through 65535.  The graphs only show points where the timings differ. Figure \ref{fig:memoChains} show the average cost to exponentiate using the additive chains and $\pm 1$ chains from Subsection \ref{subsec:addChains}. For every exponent tested, $\pm 2, 3$ chains were on average as fast or faster than additive only chains, which is to be expected since the one function computes a subset of the representations of the other function.
 \begin{figure}[H]
 \centering
 \mbox{
 	\subfigure{\includegraphics[width=3in]{memo_chains-64}}
 	\subfigure{\includegraphics[width=3in]{memo_chains-128}}
 }
-\caption{Time to exponentiate 16-bit integers using precomputed cost based additive chains and $\pm 1$ chains.}
+\caption{Time to exponentiate 16-bit integers using cost based additive chains and $\pm 1$ chains.}
 \label{fig:memoChains}
 \end{figure}
-Figure \ref{fig:memoChains} show the average cost to exponentiate using the additive chains and $\pm 1$ chains from Subsection \ref{subsec:addChains}. For every exponent tested, $\pm 2, 3$ chains were on average as fast or faster than additive only chains\footnote{In the case of the 59-bit discriminant, the timings were the same for 21,816 exponents, and for the 118-bit discriminant, the timings were the same for 16,481 exponents.}.  This is to be expected since the function to compute additive chains computes a subset of the representations computed by the function which computes $\pm 1$ chains.  
 
-Similarly, Figure \ref{fig:preVsMemo} compares the average time for a representation found using the incremental search of Subsection \ref{subsec:incrementalSearching} against a $\pm 1$ from the previous graph. For the 64-bit implementation, the incremental search was as fast or faster on average for all exponents tested, while the 128-bit implementation was slower on average for 2.8\% of the exponents tested\footnote{For the 59-bit discriminant, the timings were the same for 37,732 exponents and the incremental search always yielded a lower average cost. For the 118-bit discriminant, the timings were the same for 44,291 exponents. For 19,390 exponents, the incremental search produced lower average costs, but for 1854 exponents, the cost was actually higher.}.
+Similarly, Figure \ref{fig:preVsMemo} compares the average time for representations found using the incremental search of Subsection \ref{subsec:incrementalSearching} against cost based $\pm 1$ chains from the previous graph. For all exponents tested, representations found using the incremental search were as fast or faster on average.
 \begin{figure}[H]
 \centering
 \mbox{
