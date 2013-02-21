@@ -1909,27 +1909,22 @@ Another way that we can use the 16-bit representations from the previous two Sub
 
 One reason to improve the performance of exponentiation in the ideal class group is to improve the performance of order finding in this group.  In particular, we exponentiate a random ideal class to a primorial so that the order of the resulting ideal class is likely to be coprime to our exponent.  Here, we first show our results for 16-bit exponents, and then compare the various methods useful for larger exponents by computing the average time to exponentiate using the first 2500 odd primorials.
 
-In the following figures we sample the average time to exponentiate ideals with 59-bit and 118-bit discriminants for exponents 1 through 65535.  The graphs only show points where the timings differ. Figure \ref{fig:memoChains} show the average cost to exponentiate using the additive chains and $\pm 1$ chains from Subsection \ref{subsec:addChains}. For every exponent tested, $\pm 2, 3$ chains were on average as fast or faster than additive only chains, which is to be expected since the one function computes a subset of the representations of the other function.
-\begin{figure}[H]
-\centering
-\mbox{
-	\subfigure{\includegraphics[width=3in]{memo_chains-64}}
-	\subfigure{\includegraphics[width=3in]{memo_chains-128}}
-}
-\caption{Time to exponentiate 16-bit integers using cost based additive chains and $\pm 1$ chains.}
-\label{fig:memoChains}
-\end{figure}
-
-Similarly, Figure \ref{fig:preVsMemo} compares the average time for representations found using the incremental search of Subsection \ref{subsec:incrementalSearching} against cost based $\pm 1$ chains from the previous graph. For all exponents tested, representations found using the incremental search were as fast or faster on average.
-\begin{figure}[H]
-\centering
-\mbox{
-	\subfigure{\includegraphics[width=3in]{pre_vs_memo-64}}
-	\subfigure{\includegraphics[width=3in]{pre_vs_memo-128}}
-}
-\caption{Time to exponentiate 16-bit integers using precomputed $\pm 1$ chains and chains discovered by an incremental search.}
-\label{fig:preVsMemo}
-\end{figure}
+In the following, we compute the average time to exponentiate ideals with 59-bit and 118-bit discriminants  for exponents 1 through 65535.  The graphs sample points where the timings differ. Figure \ref{fig:memoChains} show the average cost to exponentiate using the additive chains and $\pm 1$ chains from Subsection \ref{subsec:addChains}. For every exponent tested, $\pm 2, 3$ chains were on average as fast or faster than additive only chains, which is to be expected since the one function computes a subset of the representations of the other function.
+\begin{center}
+\begin{tabular}{| l | l |}
+\hline
+greedy $\pm 1$ & 1.07260 \\
+dbns l2r & 1.06930 \\
+binary & 1.24655 \\
+add chain & 1.07724 \\
+dbns r2l & 1.13916 \\
+pre & 1.00000 \\
+dbns r2l36 & 1.16138 \\
+dbns l2r tree & 1.00011 \\
+memo & 1.01555 \\
+\hline
+\end{tabular}
+\end{center}
 
 In the case of computing $g^{p_2} \cdot g^{p_3} \cdots g^{p_n}$ as a series of small exponentiations, we limited the primorials tested to consist only of primes no larger than 16-bits.  Specifically, we tested the odd primorials $P_i$ such that $2 \le i \le 2500$.  The largest prime used is $p_{2500} = 22307$.
 
@@ -1992,6 +1987,13 @@ i.e. is it faster to use the product and one exponentiation or individual primes
 \end{itemize}
 
 \chapter{Further Research}
+
+\subsection{Improvements}
+
+Time 2,3 representation generation vs 2,3 exponentiation.
+
+Windowed left-to-right GCD.
+2,3 base GCD.
 
 Inclusion into supervisor's ANTL library and hopefully Sage or/and Pari/GP.
 
