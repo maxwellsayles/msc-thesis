@@ -91,7 +91,7 @@
 
 \item Optimized implementations of ideal class arithmetic for discriminants bound by 64 and 128 bits.
 
-\item An improvement in the wall clock running time to exponentiate when squaring and cubing is more efficient than straight multiplication (as is the case in the ideal class group) and the exponent is known in advance.
+\item An improvement in the wall clock running time to exponentiate in the ideal class group when the exponent is known in advance.
 
 \item The fastest implementation that we tested for integer factoring in the range of 54bit integers to 62bit integers.
 
@@ -99,7 +99,7 @@
 
 \item A library for arithmetic in the class group of imaginary quadratic number fields, specialized for 64-bit, 128-bit, and unbound discriminants is available at \url{https://www.github.com/maxwellsayles/libqform}
 
-\item A stand alone integer factoring algorithm (SuperSPAR) is available at \url{https://www.github.com/maxwellsayles/libsspar}  (COMING SOON)
+\item An integer factoring library (SuperSPAR) suitable for non-cryptographic sizes is available at \url{https://www.github.com/maxwellsayles/libsspar}  (COMING SOON)
 
 \end{enumerate}
 
@@ -1674,7 +1674,7 @@ Note, the last step above is obtained by rewriting $b = 2aq + r$ as
 	2b - 2aq &= b + r \\
 	b - aq &= (b+r)/2.
 \end{align*}
-Since $b - aq \in \ZZ$, the divide by 2 can be performed with an arithmetic bit shift right. (TODO: Is this published anywhere? should I cite something?)
+Since $b - aq \in \ZZ$, the divide by 2 can be performed with an arithmetic bit shift right. (TODO: Is this method of computing $c'$ published anywhere?)
 
 In the previous section, we fine tuned our implementation of the extended GCD computation.  We further refine our use of it here.  Our derivation of ideal multiplication computes
 \[
@@ -1694,7 +1694,7 @@ Here, we demonstrate the performance of our implementations of ideal class arith
 \includegraphics[scale=0.9]{compose-all}
 \includegraphics[scale=0.9]{square-all}
 \includegraphics[scale=0.9]{cube-all}
-\caption{Average time to multiply, square, or cube ideal classes. The lower the time, the better.}
+\caption{Average time to multiply, square, or cube ideal classes.}
 \label{fig:idealArithComparison}
 \end{figure}
 
@@ -1717,9 +1717,11 @@ In this section we discussed methods to speed the performance of arithmetic in t
 
 % TODO: Come up with expamples for each.
 
-In this section, we discuss several approaches to exponentiating an ideal class representative to a large exponent.  In particular, we consider large exponents that are the product of many small prime powers where the exponent is known in advance.  This allows us to precompute the sequence of operations in the exponentiation, so that the exponentiation may be as fast as possible without incurring the cost of computing the sequence of operations themselves.
+In this section, we discuss several approaches to exponentiating an ideal class representative to a large exponent.  In particular, we consider large exponents that are the product of all primes less than some bound\footnote{The product of all primes less than a bound $B$ is called a ``primorial''.  See Section \ref{sec:primorial} for the definition of ``primorial'' and our motivation using them.} where the exponent is known in advance.  This allows us to precompute the sequence of operations in the exponentiation, so that the exponentiation may be as fast as possible without incurring the cost of computing the sequence of operations themselves.
 
-We begin by recalling exponentiation techniques from Chapter \ref{chap:exponentiation}.  These include techniques that use signed and unsigned base two representations, greedy right-to-left and left-to-right double-base representations, and a tree-based approach. Then we consider several extensions of these ideas.  For small exponents (16-bits or less), we consider placing constraints on chains such that we can exhaustively compute all possible constrained representations.  We also consider an incremental search technique.  Knowing efficient representations for 16-bit integers allows us to use larger exponents by partitioning the exponent into 16-bit blocks. Finally, we compare exponentiating by the product of many small primes (known as a primorial) with that of exponentiating by each prime separately.
+We begin by recalling exponentiation techniques from Chapter \ref{chap:exponentiation}.  These include techniques that use signed and unsigned base two representations, greedy right-to-left and left-to-right double-base representations, and a tree-based approach. We also consider several extensions to these ideas.  For small exponents (16-bits or less), we were able to exhaustively compute all representations under certain constraints.  This allows us to use larger exponents by partitioning the large exponent into 16-bit blocks or by using its factorization. Finally, we compare each method on several primorials to find the best method in practice.
+
+In the previous Section, we discussed our implementations of ideal class arithmetic using 64-bit and 128-bit operations.  In the case of the 64-bit implementation, the largest discriminants supported are those that fit within 59-bits, and for the 120-bit implementation, the largest discriminants fit within 118-bits.  We also computed the average cost of multiplication, squaring, and cubing for class groups with discriminants of these sizes.  Size 59-bits and 118-bits represent an upper bound of the cost of arithmetic operations within each implemenation, our exponentiation experiments focus on improving the time to exponentiation assuming the average cost of operations for the largest discriminants supported by each implementation.
 
 \subsection{Binary and Right-to-Left Non-Adjacent Form}
 
@@ -1815,7 +1817,7 @@ For both variations, we bound $a$ and $b$ such that $0 \le a \le U$ and $0 \le b
 	\subfigure{\includegraphics[width=3in]{pm2a3b_vary_max-64}}
 	\subfigure{\includegraphics[width=3in]{pm2a3b_vary_max-128}}
 }
-\caption{Performance of varying the bounds $a, b \le U$ on $(x \pm 2^a3^b)/(2^c3^d)$.}
+\caption{Performance of varying the bounds $a, b \le U$ on $(x \pm 2^a3^b)/(2^c3^d)$ when exponentiating by the primorial $P_{1000}$.}
 \label{fig:pm2a3bVaryMax}
 \end{figure}
 
@@ -1926,7 +1928,7 @@ Two of the techniques in the previous section compute $g^n$ using a series of sm
 \centering
 \begin{tabular}{| l | r | r |}
 	\hline
-	Method & 59-bit Discriminant & 118-bit Discriminant \\
+	Method & 59-bit Discriminants & 118-bit Discriminants \\
 	\hline
 	Left-to-Right 2,3 Representation & 2536 & 7097 \\
 	16 Best Left-to-Right 2,3 Representations & 9091 & 7230 \\
@@ -1944,7 +1946,7 @@ For each exponent, we then normalized the time of each method relative to the be
 \centering
 \begin{tabular}{| l | c | c |}
 	\hline
-	Method & 59-bit Discriminant & 118-bit Discriminant \\
+	Method & 59-bit Discriminants & 118-bit Discriminants \\
 	\hline
 	Binary & 1.48864 & 1.44287 \\
 	Right-to-Left Non-Adjacent Form & 1.39605 & 1.34547 \\
@@ -1965,10 +1967,7 @@ For each exponent, we then normalized the time of each method relative to the be
 \end{table}
 The method that maintains the 4 best partial representations of the form $x \pm 2^a3^b$ was the best performer in general.  However, since we were interested in precomputing 16-bit representations for use with a block exponentiation and exponentiation by a list of prime factors, we used the best representation available for each exponent.
 
-
-
-
-
+To determine the best method to exponentiate a random ideal by a primorial, we compute the average time to exponentiate for the primorials $P_{250k}$ for $1 \le k \le 100$. 
 
 
 \begin{itemize}
