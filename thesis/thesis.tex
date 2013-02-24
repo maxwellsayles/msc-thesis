@@ -64,6 +64,26 @@
 \newcommand{\band}{~\texttt{and}_\texttt{b}~}
 \newcommand{\bor}{~\texttt{or}_\texttt{b}~}
 
+\newcommand{\mygraph}[3]{
+	\begin{figure}[H]
+	\centering
+	\includegraphics{#1}
+	\caption{#3}
+	\label{#2}
+	\end{figure}
+}
+
+\newcommand{\mygraphTwo}[4]{
+	\begin{figure}[H]
+	\centering
+	\includegraphics{#1}
+	\includegraphics{#2}
+	\caption{#4}
+	\label{#3}
+	\end{figure}
+}
+
+
 \graphicspath{{gcd-eps/}{ideal-eps/}{exp-eps/}}
 
 \begin{document}
@@ -1969,66 +1989,39 @@ The method that maintains the 4 best partial representations of the form $x \pm 
 
 To determine the best method to exponentiate a random ideal by a primorial, we compute the average time to exponentiate for the primorials $P_{250k}$ for $1 \le k \le 100$.  We categorized the different exponentiation techniques as those that use only base 2, those that generate 2,3 chains from right-to-left, from left-to-right, that add or subtract to a partial representation and then reduce by $2^c3^d$, and those that make use of the best 16-bit representations.  We then compared the average time to exponentiate each method from a category, and finally compared the best performers of each category to determine the best performer overall.
 
-Figure \ref{fig:expBinNaf} compares binary exponentiation against a right-to-left non-adjacent form representation.  The non-adjacent form representation leads to faster exponentiations in all cases.  Figure \ref{fig:expDbnsR2L} compares the non-windowed right-to-left 2,3 chain method to the $2^2 3^2$ windowed method.  The $2^23^2$ windowed method out performs the non-windowed method for all exponents.  Figure \ref{fig:expDbnsL2R} compares left-to-right 2,3 representations with that of maintaining the 4 best $\left||x|-2^a3^b\right|$ approximations.  In this case, maintaining the 4 best approximations performs best.  Figure \ref{fig:expPmVariants} compares the three different techniques of adding or subtracting a value to a partial representation and then reducing by a power of 2 and 3.  Here, computing candidates $(x-2^a3^b)/(2^c3^d)$ leads to representations that exponentiate the fastest.  Figure \ref{fig:expBlockList} compares the two methods that rely on the best found 16-bit representations.  In this case, when the factorization of the exponent is easily known, it is faster to exponentiation by the list of prime factors than it is to represent the exponent using 16-bit blocks.  Finally, Figure \ref{fig:expWinners} compares the best performer from each category.  For both our 64-bit and 128-bit implementations and for all primorials tested, the method of iterating on the 4 best $\left||x| - 2^a3^b\right|$ approximations leads to representations with the fastest time to exponentiate.
+We found that for both our 64-bit and 128-bit implementations and for all primorials tested, the method of iterating on the 4 best $\left||x| - 2^a3^b\right|$ approximations leads to representations with the fastest time to exponentiate.  This is in contrast to the method of iterating on the 4 best partial representations $(x \pm 2^a3^b)/(2^c3^d)$ that lead to the best timings for 16-bit integers.  Naturally, we can improve these results by iterating on the $k$ best partial representations for $k > 4$ at the expense of longer precomputation.
 
-\begin{figure}[h]
-\centering
-\mbox{\subfigure{\includegraphics[width=3in]{binary_vs_naf-64}}
-	  \subfigure{\includegraphics[width=3in]{binary_vs_naf-128}}}
-\caption{Binary exponentiation compared to Right-to-Left Non-Adjacent Form exponentiation.}
-\label{fig:expBinNaf}
-\end{figure}
+Figures \ref{fig:expBinNaf64} and \ref{fig:expBinNaf128} compare binary exponentiation against right-to-left non-adjacent form representation.  The non-adjacent form representation leads to faster exponentiations in all cases.  Figures \ref{fig:expDbnsR2L64} and \ref{fig:expDbnsR2L128} compare the non-windowed right-to-left 2,3 chain method to the $2^2 3^2$ windowed method.  The $2^23^2$ windowed method out performs the non-windowed method for all exponents.  Figures \ref{fig:expDbnsL2R64} and \ref{fig:expDbnsL2R128} compare left-to-right 2,3 representations with that of maintaining the 4 best $\left||x|-2^a3^b\right|$ approximations.  In this case, maintaining the 4 best approximations performs best.  Figures \ref{fig:expPmVariants64} and \ref{fig:expPmVariants128} compare the three different techniques of adding or subtracting a value to a partial representation and then reducing by a power of 2 and 3.  Here, computing candidates $(x-2^a3^b)/(2^c3^d)$ leads to representations that exponentiate the fastest.  Figures \ref{fig:expBlockList64} and \ref{fig:expBlockList128} compare the two methods that rely on the best found 16-bit representations.  In this case, when the factorization of the exponent is easily known, it is faster to exponentiation by the list of prime factors than it is to represent the exponent using 16-bit blocks.  Finally, Figures \ref{fig:expWinners64} and \ref{fig:expWinners128} compare the best performer from each category.
 
-\begin{figure}[h]
-\centering
-\mbox{\subfigure{\includegraphics[width=3in]{dbns_r2ls-64}}
-	  \subfigure{\includegraphics[width=3in]{dbns_r2ls-128}}}
-\mbox{\subfigure{\includegraphics[width=3in]{dbns_r2ls-64-zoom}}
-	  \subfigure{\includegraphics[width=3in]{dbns_r2ls-128-zoom}}}
-\caption{Right-to-Left 2,3 Chain compared with a $2^2 3^2$ windowed Right-to-Left 2,3 Chain.}
-\label{fig:expDbnsR2L}
-\end{figure}
+\mygraph{binary_vs_naf-64}{fig:expBinNaf64}{Base 2 Exponentiation (59-bit Discriminants).}
+\mygraph{binary_vs_naf-128}{fig:expBinNaf128}{Base 2 Exponentiation (118-bit Discriminants).}
 
-\begin{figure}[h]
-\centering
-\mbox{\subfigure{\includegraphics[width=3in]{dbns_l2rs-64}}
-      \subfigure{\includegraphics[width=3in]{dbns_l2rs-128}}}
-\mbox{\subfigure{\includegraphics[width=3in]{dbns_l2rs-64-zoom}}
-      \subfigure{\includegraphics[width=3in]{dbns_l2rs-128-zoom}}}
-\caption{Left-to-Right 2,3 Representations compared with iterating on the 16 best approximations of $\left||x|-2^a3^b\right|$.}
-\label{fig:expDbnsL2R}
-\end{figure}
+\mygraph{dbns_r2ls-64}{fig:expDbnsR2L64}{Right-to-Left 2,3 Chains (59-bit Discriminants).}
+\mygraph{dbns_r2ls-128}{fig:expDbnsR2L128}{Right-to-Left 2,3 Chains (118-bit Discriminants).}
 
-\begin{figure}[h]
-\centering
-\mbox{\subfigure{\includegraphics[width=3in]{pm_variants-64}}
-      \subfigure{\includegraphics[width=3in]{pm_variants-128}}}
-\mbox{\subfigure{\includegraphics[width=3in]{pm_variants-64-zoom}}
-      \subfigure{\includegraphics[width=3in]{pm_variants-128-zoom}}}
-\caption{A comparison of iterating on the 4 best candidates where each candidate is either $(x \pm 1)/(2^c3^d)$, $(x \pm 2^a3^b)/(2^c3^d)$, or $(x \pm 2^a \pm 3^b)/(2^c3^d)$.  Iterating on $(x \pm 2^a3^b)/(2^c3^d)$ gives representations that lead to faster exponentiations.}
-\label{fig:expPmVariants}
-\end{figure}
+\mygraphTwo{dbns_l2rs-64}{dbns_l2rs-64-zoom}{fig:expDbnsL2R64}{Left-to-Right 2,3 Representations (59-bit Discriminants).}
+\mygraphTwo{dbns_l2rs-128}{dbns_l2rs-128-zoom}{fig:expDbnsL2R128}{Left-to-Right 2,3 Representations (118-bit Discriminants).}
 
-\begin{figure}[h]
-\centering
-\mbox{\subfigure{\includegraphics[width=3in]{block_vs_list-64}}
-      \subfigure{\includegraphics[width=3in]{block_vs_list-128}}}
-\caption{The average time to exponentiate using a 16-bit block representation of an exponent as compared to using the prime factorization of the exponent.  In each case, we use the best 16-bit representations found earlier.  When the prime factorization is easily known, this method leads to faster exponentiations than a 16-bit block method for exponentiation.}
-\label{fig:expBlockList}
-\end{figure}
+\mygraphTwo{pm_variants-64}{pm_variants-64-zoom}{fig:expPmVariants64}{Tree Based $(x\pm\cdots)/2^c3^d$ (59-bit Discriminants).}
+\mygraphTwo{pm_variants-128}{pm_variants-128-zoom}{fig:expPmVariants128}{Tree Based $(x\pm\cdots)/2^c3^d$ (118-bit Discriminants).}
 
-\begin{figure}[h]
-\centering
-\includegraphics{winners-64}
-\includegraphics{winners-128}
-\caption{Here we compare the best performers from each category above.  For both our 64-bit implementation and our 128-bit implementation, representations generated by iterating on the 4 best $\left||x| - 2^a3^b\right|$ result in the fastest average times to exponentiate by a primorial.}
-\label{fig:expWinners}
-\end{figure}
+\mygraph{block_vs_list-64}{fig:expBlockList64}{Use $g^b$ for 16-bit $b$ (59-bit Discriminants).}
+\mygraph{block_vs_list-128}{fig:expBlockList128}{Use $g^b$ for 16-bit $b$ (118-bit Discriminants).}
+
+\mygraph{winners-64}{fig:expWinners64}{The best performers from each category (59-bit Discriminants).}
+\mygraph{winners-128}{fig:expWinners128}{The best performers from each category (59-bit Discriminants).}
 
 \bigbreak
 \section{Summary}
 
-In this chapter we 
+This Chapter presented the approach and results we used to improve exponentiation in the ideal class group of imaginary quadratic number fields.  We began with several methods for computing solutions to equations of the form $s=Ua + Vb$ where $s$ is the greatest common divisor of both $a$ and $b$, since arithmetic in the ideal class group is dominated by this operation.  We found that when the inputs $a$ and $b$ are bound by $2^{32}$, that the standard Extended Euclidean Algorithm performs best.  When $2^{32} \le a,b < 2^{64}$, a left-to-right binary GCD computation is fastest.  Finally, for $a,b \ge 2^{64}$ we defer to the implementation in the GNU Multple Precision (GMP) library.
+
+In next section we discussed specialized implementations of ideal arithmetic using 64-bit, 128-bit, and unbound arithmetic.  Our 64-bit implementation is known to work correctly for negative discriminants $-2^{58} < \Delta < 0$, while our 128-bit implementation works with negative discriminants $-2^{118} < \Delta < 0$. We discussed several machine specific optimizations we implemented and showed an improvement in the performance of ideal class arithmetic over our reference implementation using GMP.
+
+In the last section of this chapter, we explored several methods for exponentiation including novel extensions of methods for computing 2,3 chains and representations.  We found that for 16-bit exponents, the method of iterating on the $k$ best partial representations $x + \sum s_i2^{a_i}3^{b_i}$ such that each $x$ generates new terms of the form $(x \pm 2^a 3^b)/(2^c3^d) \in \ZZ$ gives the fastest representation on average.  For large primorial exponents, we found that generating new terms of the form $\left||x|-2^a3^b\right|$ gave the fastest representations on average.
+
+In the next Chapter, we bring all of these improvements together in our implementation of SuperSPAR -- an algorithm with the fastest average time to factors integers $n$ in the range $2^{54} \le n < 2^{63}$ of the integer factoring algorithms that we tested.
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
