@@ -1090,22 +1090,22 @@ Recall that in Stage 1 of SPAR, we compute $\bclass = \aclass^{\prod_{i=2}^t {p_
 \chapter{Ideal Exponentiation Experiments}
 \label{chap:idealPowExperiments}
 
-A significant contribution of this thesis is to improve the performance of exponentiation in the ideal class group of imaginary quadratic number fields on present day CPUs.  This chapter focuses on the different techniques used to improve performance and the experimental data that lead us to our implementation.  We specialized much of our implementation for the x64 architecture.  Many of our routines benefit when the input is bounded by a single machine word, i.e.\ 64-bits, but we were also able to take advantage of integers that fit within two machine words by implementing a custom library for 128-bit arithmetic.  When integers are larger than 128-bits, we use the GNU Multiple Precision (GMP) arithmetic library.
+A significant contribution of this thesis is to improve the performance of exponentiation in the ideal class group of imaginary quadratic number fields.  This chapter focuses on the techniques and experimental data that lead us to our implementation.  We specialized much of our implementation for the x64 architecture.  Many of our routines benefit when the input is bounded by a single machine word, i.e.\ 64-bits, but we were also able to take advantage of integers that fit within two machine words by implementing a custom library for 128-bit arithmetic.  When integers are larger than 128-bits, we use the GNU Multiple Precision (GMP) arithmetic library.
 
-Improvements to ideal arithmetic also lead to improvements in ideal exponentiation, and so we start there. Arithmetic in the ideal class group uses solutions to equations of the form $s = Ua + Vb$ where $s$ is the largest integer dividing both $a$ and $b$. In Section \ref{sec:eea}, we introduce several algorithms for computing such solutions and look at their performance in practice. In order to make arithmetic in the ideal class group as efficient as possible, we specialized our implementation and discuss this implementation in Section \ref{sec:idealArithmetic}. In Section \ref{sec:exponentiation}, we compare methods to exponentiate ideal representatives to large fixed exponents that are the product of many primes, including many novel approaches to computing double-base representations.
+Improvements to ideal arithmetic also lead to improvements in ideal exponentiation, and so we start there. Arithmetic in the ideal class group uses solutions to equations of the form $s = Ua + Vb$ where $s$ is the largest integer dividing both $a$ and $b$. In Section \ref{sec:eea}, we introduce several algorithms for computing such solutions and look at their performance in practice. To make arithmetic in the ideal class group as efficient as possible, we specialized our implementation and discuss this implementation in Section \ref{sec:idealArithmetic}. In Section \ref{sec:exponentiation}, we compare methods to exponentiate ideal representatives to large fixed exponents that are the product of many primes, including many novel approaches to computing double-base representations.
 
 \section{Extended Greatest Common Divisor}
 \label{sec:eea}
 
-In the Subsection on Fast Ideal Multiplication (\ref{subsec:nucomp}) we describe an algorithm for the simultaneous multiplication and reduction of two reduced ideal class representatives.  Much of the computational effort of this algorithm is in computing solutions to Diophantine equations of the form
+In the Subsection on Fast Ideal Multiplication (\ref{subsec:nucomp}) we describe an algorithm for the simultaneous multiplication and reduction of two reduced ideal class representatives.  Much of the computational effort of this algorithm is in computing integral solutions to equations of the form
 \[
 	s = Ua + Vb
 \]
-where $a$ and $b$ are fixed integers, and $s$ is the greatest common divisor (GCD) of both $a$ and $b$.  We refer to this computation as the \emph{Extended GCD}.
+where $a$ and $b$ are fixed integers given as input, and $s$ is the greatest common divisor (GCD) of both $a$ and $b$.  We refer to this computation as the \emph{Extended GCD}.
 
 \subsection{The Euclidean Algorithm}
 
-The Euclidean Algorithm is an algorithm for computing the greatest common divisor of two integers and is due to Euclid.  We start with two positive integers $a$ and $b$.  At each iteration of the algorithm, we subtract the smaller of the two numbers from the larger one, until one of them is 0. At this point, the non-zero number is the largest divisor of $a$ and $b$.  Since the smaller number may still be smaller after a single iteration, we can use fewer steps by subtracting an integer multiple of the smaller number from the larger one.
+The Euclidean Algorithm is an algorithm for computing the greatest common divisor of two integers and is due to Euclid.  We start with two positive integers $a$ and $b$.  At each iteration of the algorithm, we subtract the smaller of the two numbers from the larger, until one of them is 0. At this point, the non-zero number is the largest divisor of $a$ and $b$.  Since the smaller number may still be smaller after a single iteration, we can reduce the number of steps of this algorithm by subtracting an integer multiple of the smaller number from the larger one.
 
 We can extend the Euclidean Algorithm by using a system of equations of the form
 \begin{align}
@@ -1146,7 +1146,7 @@ and Equations \ref{eq:initialGcd1} and \ref{eq:initialGcd2} hold.  We maintain t
 \end{algorithmic}
 \end{algorithm}
 
-In practice, these operations are not performed using matrix operations, but by manipulating each variable directly.  Furthermore, we typically implement division with remainder, which solves $s = qt + r$ for $q,r \in \ZZ$ and $r < t$.  Notice that $r = s - qt$ is the target value of $t$ for each iteration of the Euclidean Algorithm.  
+In practice, these operations are performed by manipulating each variable directly, rather than by using matrix arithmetic.  Furthermore, we typically implement division with remainder, which solves $s = qt + r$ for $q,r \in \ZZ$ and $|r| < |t|$.  Notice that $r = s - qt$ is the target value of $t$ for each iteration of the Euclidean Algorithm.  
 
 To compute the partially reduced coefficients of the product ideal from the Fast Ideal Multiplication Algorithm (\ref{alg:nucomp}), we compute the continued fraction expansion of $a/b$ using the recurrences
 \begin{align*}
@@ -1184,13 +1184,13 @@ during the Partial Extended Euclidean Algorithm can be represented by an inverti
 
 \subsection{Lehmer's GCD}
 
-In the previous section, we improved upon the original GCD computation by subtracting a multiple, $q = \floor{s / t}$, of the smaller number from the larger number.  Derrick Henry Lehmer noticed that most of the quotients, $q$, were small and that those small quotients could be computed from the leading digits (or machine word) of the numerator and denominator \cite{Lehmer1938}.
+In the previous section, each iteration subtracts a multiple, $q = \floor{s / t}$, of the smaller number from the larger number.  Derrick Henry Lehmer noticed that most of the quotients, $q$, were small and that those small quotients could be computed from the leading digits (or machine word) of the numerator and denominator \cite{Lehmer1938}.
 
 The idea is similar to the Extended Euclidean Algorithm, only that we have an inner loop that performs an Extended GCD computation using values that fit within a single machine word.  As before, start by letting
 \[
 	\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixThreeTwo{a}{1}{0}{b}{0}{1}
 \]
-for positive integers $a$ and $b$.  Assume that $s \ge t$ (if this is not the case, then swap the rows of the matrix).  We treat $s$ and $t$ as the same bit length by padding $t$ with `0's for the most significant bits.  We want to shift $s$ right such that its most significant bit becomes the most significant bit of a machine word (unless $s$ already fits within a single machine word).  We shift $t$ right by the same amount. Let $s'$ and $t'$ be the single machine word values obtained from $s$ and $t$ respectively.  We then perform an Extended GCD computation on the values $s'$ and $t'$ but only so far as the quotients $q'=\floor{s'/t'}$, generated by each step of the single precision GCD computation, are equal to the quotients $q=\floor{s/t}$, generated by a full precision GCD computation.  Let
+for positive integers $a$ and $b$.  Assume that $s \ge t$ (if this is not the case, then swap the rows of the matrix).  Compute $s'=\floor{s/2^k}$ for some $k$ such that $s'$ fits within a single machine word and is as large as possible (if $s$ already fits within a single machine word, then let $k=0$).  Then compute $t' = \floor{t/2^k}$ for the same value $k$.  We then perform an Extended GCD computation on the values $s'$ and $t'$ but only for as long as the quotients $q'=\floor{s'/t'}$, generated by each step of the single precision GCD computation, are equal to the quotients $q=\floor{s/t}$, generated by a full precision GCD computation.  Let
 \[
 \matrixThreeTwo{s'}{A}{B}{t'}{C}{D} \gets \matrixThreeTwo{s'}{1}{0}{t'}{0}{1}
 \]
@@ -1200,7 +1200,7 @@ Once $q_1 \neq q_2$, the matrix
 \[
 \matrixtt{A}{B}{C}{D}
 \]
-represents the concatenation of the operations performed during the single precision GCD.  If $B \neq 0$, we combine these operation to the outer loop of the larger GCD by computing
+represents the concatenation of the operations performed during the single precision GCD.  If $B \neq 0$, we combine these operation with the outer loop of the larger GCD by computing
 \[
 \matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{A}{B}{C}{D}
 		        \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}.
@@ -1241,7 +1241,7 @@ Since Lehmer's GCD performs the same operations as the Extended Euclidean Algori
 \subsection{Right-to-Left Binary GCD}
 \label{subsec:r2lBinGcd}
 
-The previous extended GCD algorithms used divide with remainder, which can be an expensive operation.  Binary GCD algorithms emphasize bit shifting over multiplication and division.  Such algorithms may out perform other GCD algorithms in practice (see Subsection \ref{subsec:gcdResults} for results).  Here we introduce a binary GCD algorithm that works from the least significant bit to the most significant bit.  We refer to this as right-to-left since this is the direction in which we process the written binary representation.  The concept was originally published by Stein \cite{Stein1967}.
+The previous extended GCD algorithms use divide with remainder, which is often expensive.  Binary GCD algorithms emphasize bit shifting over multiplication and division.  Such algorithms may perform better than other GCD algorithms in practice (see Subsection \ref{subsec:gcdResults} for results).  Here we introduce a binary GCD algorithm that works from the least significant bit to the most significant bit.  We refer to this as right-to-left since this is the direction in which we process the written binary representation.  The concept was originally published by Stein \cite{Stein1967}.
 
 To compute the greatest common divisor of two positive numbers, we can repeatedly apply the following identities,
 \[
@@ -1249,11 +1249,11 @@ To compute the greatest common divisor of two positive numbers, we can repeatedl
 		2 \cdot \gcd(a/2, b/2) & \textrm{ when both $a$ and $b$ are even} \\
 		\gcd(a/2, b) & \textrm{ when only $a$ is even} \\
 		\gcd(a, b/2) & \textrm{ when only $b$ is even} \\
-		\gcd(a-b, b) & \textrm{ when $a \ge b$ and both are odd} \\
-		\gcd(b-a, a) & \textrm{ when $a < b$ and both are odd}.
+		\gcd((a-b)/2, b) & \textrm{ when $a \ge b$ and both are odd} \\
+		\gcd((b-a)/2, a) & \textrm{ when $a < b$ and both are odd}.
 	\end{cases}
 \]
-In the case that only $a$ is even, we can divide $a$ by 2 since 2 is not a common divisor of both.  The same is true when only $b$ is even.  When both $a$ and $b$ are odd, their difference is even and so can be further reduced by 2.  Notice that each identity reduces at least one of the arguments and so the recursion terminates with either $\gcd(a, 0) = a$ or $\gcd(0, b) = b$.
+In the case that only $a$ is even, we can divide $a$ by 2 since 2 is not a common divisor of both.  The same is true when only $b$ is even.  When both $a$ and $b$ are odd, their difference is even and so can be further reduced by 2.  Notice that each relation reduces at least one of the arguments and so the recursion terminates with either $\gcd(a, 0) = a$ or $\gcd(0, b) = b$.
 
 When both $a$ and $b$ are even, we have $\gcd(a, b) = 2 \cdot \gcd(a/2, b/2)$.  So the first step of our binary GCD algorithm is to remove all common powers of two from $a$ and $b$.  Let $r$ be the number of times 2 is removed from both.  Now either $a$ or $b$ or both are odd.  If $a$ is not odd, then swap $a$ and $b$ so that $a$ is guaranteed to be odd.  We will compute the GCD of the reduced $a$ and $b$.  As such, the final solution to the original input is $s2^r = Ua2^r + Vb2^r$.
 
@@ -1267,7 +1267,7 @@ Since $s$ is odd, we first remove any powers of 2 from $t$.  While $t$ is even, 
 \[
 (t, X, Y) \gets \left( \frac{t}{2}, \frac{X}{2}, \frac{Y}{2} \right)
 \]
-but this may result in rational values for $X$ and $Y$ if either were odd. We first point out that
+but this may result in rational values for $X$ and $Y$ if either are odd. We first point out that
 \begin{align*}
 	t &= Xa + Yb \\
 	  &= Xa + Yb + (ab - ab) \\
@@ -1285,8 +1285,8 @@ Assume $t$ is even and that $Y$ is odd.  We have
 \[
 \begin{array}{rllr}
 	         & t \equiv Xa + Yb & \pmod 2 \\
-\Rightarrow~ & 0 \equiv X + b & \pmod 2 & \textrm{ \{Since $t$ is even and $Y$ and $a$ are odd.\}} \\
-\Rightarrow~ & 0 \equiv X + b \equiv Y - a & \pmod 2. 
+\Rightarrow~ & 0 \equiv X + b & \pmod 2 & \textrm{\{Since $t$ is even and $Y$ and $a$ are odd.\}} \\
+\Rightarrow~ & 0 \equiv X + b \equiv Y - a & \pmod 2 & \textrm{\{Since $Y-a$ is even.\}}. 
 \end{array}
 \]
 Now assume $t$ is even and that $X$ is odd.  We have
@@ -1346,11 +1346,11 @@ This ensures that $s$ is odd, $t$ is even, and that both $s$ and $t$ are positiv
 \end{algorithmic}
 \end{algorithm}
 
-Even though this algorithm performs well in practice (see Subsection \ref{subsec:gcdResults}), the operation of dividing $t$, $X$, and $Y$ by 2 and of transforming $X+b$ and $Y-a$ to make them even cannot be expressed as unimodular matrix operations.  Therefore, we could not extend this method to computing the partially reduced coefficients for ideal multiplication.
+Even though this algorithm performs well in practice (see Subsection \ref{subsec:gcdResults}), the operation of dividing $t$, $X$, and $Y$ by 2 and of transforming $X+b$ and $Y-a$ to make them even cannot be expressed as unimodular matrix operations.  Therefore, we cannot extend this method to computing the partially reduced coefficients for ideal multiplication.
 
 \subsection{Windowed Right-to-Left Binary GCD}
 
-Windowing is a common technique used to extend the base of an algorithm.  We saw this earlier in our discussion of binary exponentiation in Section \ref{sec:binaryExp}.  The idea there was to precompute $g^w$ for each $w$ in some window $0 \le w \le 2^k$ for some $k$ and then to iterate over the exponent $k$ bits at a time.  We can apply this technique to the right-to-left extended binary GCD.
+Windowing is a common technique used to extend the base of an algorithm.  We saw this earlier in our discussion of binary exponentiation in Section \ref{sec:binaryExp}.  The idea there was to precompute $g^w$ for each $w$ in some window $0 \le w < 2^k$ for some $k$ and then to iterate over the exponent $k$ bits at a time.  We can apply this technique to the right-to-left extended binary GCD.
 
 In the algorithm in the previous section, we repeatedly reduce either the equation $t=Xa+Yb$ or the equation $t=(X+b)a+(Y-a)b$ by 2. When $Y$ is odd, we can simultaneously add $b$ to $X$ and subtract $a$ from $Y$ in order to make both $X$ and $Y$ even.  Suppose that $t$ was a multiple of 4.  We could simultaneously add $b$ to $X$ and subtract $a$ from $Y$ repeatedly until both $X$ and $Y$ were divisible by 4.  Choose $m$ such that $ma \equiv Y \pmod 4$, and then $t = (X+mb)a + (Y-ma)b$ is evenly divisible by 4 when $t$ is divisible by 4.
 
@@ -1402,7 +1402,7 @@ otherwise, we compute
 	\matrixThreeTwo{s}{U}{V}{t}{X}{Y} =
 		\matrixtt{0}{1}{-1}{2q'} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}.
 \]
-Notice that a result of this step is that $s$ has the previous value of $t$ and that $t$ is a binary number that is one digit shorter than the previous value of $s$, i.e.\ the the left most set bit of the previous value of $s$ is now cleared.  As with the extended Euclidean Algorithm, we maintain the invariant that $s \ge t$, so if after the above operation we have $s < t$, we then swap the rows of the matrix to restore the invariant. The complete algorithm is given in Algorithm \ref{alg:shallitGcd}.
+Notice that after this step $s$ has the previous value of $t$ and that the binary representation of $t$ is one digit shorter than the binary representation of the previous value of $s$, i.e.\ the the left most set bit of the previous value of $s$ is now cleared.  As with the extended Euclidean Algorithm, we maintain the invariant that $s \ge t$; if after the above operation we have $s < t$, we then swap the rows of the matrix to restore the invariant. The complete algorithm is given in Algorithm \ref{alg:shallitGcd}.
 
 \begin{algorithm}[h]
 \caption{Shallit and Sorenson Left-to-Right binary GCD \cite{Shallit1994}.}
@@ -1436,7 +1436,7 @@ Notice that a result of this step is that $s$ has the previous value of $t$ and 
 \end{algorithm}
 In practice, to find $q=2^k$ we compute the number of bits in both $s$ and $t$ and then use the difference as a candidate for $k$.  Let $k' = (\floor{\log_2s} + 1) - (\floor{\log_2t}+1) = \floor{\log_2s} - \floor{\log_2t}$ be our candidate.  If $t2^{k'} \le s$ then $k = k'$, otherwise $k = k'-1$.  Notice that either $k=k'$ in which case $t2^k=t2^{k'}$, or $k=k'-1$ and then $t2^{k+1} = t2^{k'}$.  Either way $t2^{k'}$ can be reused for one half of the comparison of $s-qt < 2qt - s$.  Also, if $k' = 0$ then $t \le s$ (by our invariant) and so there is no possibility of using $t2^{-1}$, since we will use $t2^{k'}$ and $t2^{k'+1}$ in the comparison.
 
-This approach requires us to first compare $t2^{k'}$ to $s$ and then compare one of $t2^{k'-1}$ or $t2^{k'+1}$ to $s$ in order to find which is closer.  Because of this, we also experimented with a simplified version of the algorithm.  We only compute $k = \floor{\log_2s}-\floor{\log_2t}$.  Let $q=2^k$ and we compute
+This approach requires us to first compare $t2^{k'}$ to $s$ and then compare one of $t2^{k'-1}$ or $t2^{k'+1}$ to $s$ in order to find which is closer.  Because of this, we also experimented with a simplified version of the algorithm.  We only compute $k = \floor{\log_2s}-\floor{\log_2t}$.  Let $q=2^k$ and compute
 \[
 	\matrixThreeTwo{s}{U}{V}{t}{X}{Y} =
 		\matrixtt{0}{1}{1}{-q} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}.
@@ -1449,11 +1449,11 @@ Unlike the right-to-left binary GCD in Subsection \ref{subsec:r2lBinGcd}, all of
 \subsection{Specialized Implementations of the Extended GCD}
 \label{subsec:gcdImpl}
 
-A goal of this thesis is to make arithmetic in the ideal class group as fast as we can on present day CPUs. To this end, we specialized implementations of each of the GCD algorithms discussed in this section for the x64 architecture.  All algorithms are implemented in C99 for the GNU C compiler and often benefit from hand optimized x64 assembler.  The use of assembly language is done in line and is conditionally compiled based on the target platform.  For each of the GCD algorithms presented here, we implemented 32-bit and 64-bit versions, and when arithmetic overflows did not require us to use GMP, we also implemented 128-bit versions.  For appropriately sized inputs, we used these specialized implementations, otherwise we use GMP for the extended GCD computation.
+To further improve performance, we specialized implementations of each of the GCD algorithms discussed in this section for the x64 architecture.  All algorithms are implemented in C99 for the GNU C compiler and often benefit from hand optimized x64 assembler.  The use of assembly language is done in line and is conditionally compiled based on the target platform.  For each of the GCD algorithms presented here, we implemented 32-bit and 64-bit versions, and when arithmetic overflows did not require us to use GMP, we also implemented 128-bit versions.  For appropriately sized inputs, we use these specialized implementations, otherwise we use GMP for the extended GCD computation.
 
-Many of the techniques we use are described in the book ``Hacker's Delight'' \cite{Warren2002}.  Computing $x2^k$ corresponds to shifting $x$ left by $k$ bits.  When $x$ is divisible by $2^k$, computing the integer $x / 2^k$ corresponds to shifting $x$ right by $k$ bits.  When we want $X \bmod 2^k$, we achieve this using $x \band 2^k-1$ where $\band$ is the bitwise `and' operation.  
+Many of the techniques we use are described in the book ``Hacker's Delight'' \cite{Warren2002}.  Computing $x2^k$ corresponds to shifting $x$ left by $k$ bits.  Computing the integer $\floor{x / 2^k}$ corresponds to shifting $x$ right by $k$ bits.  When we want $x \bmod 2^k$, we achieve this using $x \band (2^k-1)$ where $\band$ is the bitwise `and' operation.  
 
-Assuming a two's complement representation of machine words, the most significant bit of a machine word $x$ is set if $x < 0$ and clear otherwise.  We can generate a bit-mask according to this test by using an arithmetic shift right operation (in the C programming language this is a right shift on a signed integer type).  Let $m$ denote the number of bits in a machine word; then by using an arithmetic shift right on $x$ by $m-1$ bits, the result is either a word with $m$ set bits when $x < 0$ or a word with $m$ clear bits otherwise.  We denote this operation $\texttt{sign\_mask}(x)$.  Notice that a word with $m$ set bits, corresponds to the integer $-1$ under a signed two's complement representation.  Lastly, we use $\oplus$ to denote bitwise exclusive-or, and $\lnot$ to denote bitwise negation.
+Assuming a two's complement representation of machine words, the most significant bit of a machine word $x$ is set if $x < 0$ and clear otherwise.  We can generate a bit-mask according to this test by using an arithmetic shift right operation (in the C programming language this is a right shift on a signed integer type).  Let $m$ denote the number of bits in a machine word; then the result of an arithmetic shift right on $x$ by $m-1$ bits is either a word with $m$ set bits when $x < 0$ or a word with $m$ clear bits otherwise.  We denote this operation $\texttt{sign\_mask}(x)$.  Notice that a word with $m$ set bits, corresponds to the integer $-1$ under a signed two's complement representation.  Lastly, we use $\oplus$ to denote bitwise exclusive-or, and $\lnot$ to denote bitwise negation.
 
 Using these operations, we can compute the absolute value of a signed machine word $x$ without using any conditional statements.  Let $y = \texttt{sign\_mask}(x)$ and the absolute value of $x$ is $(x \oplus y) - y$.  To see this, suppose $x \ge 0$.  Then $y$ is 0 and so $(x \oplus y) - y = x$.  When $x < 0$, $y$ has all of its bits set (and is also $-1$).  Therefore, $(x \oplus y) - y = \lnot x + 1 = -x$.
 
@@ -1469,7 +1469,7 @@ when $s \ge t$ and
 \]
 otherwise, we can remove the conditional instructions by simply computing the first form and then performing a conditional negation on the triple $(t, X, Y)$ based on the signed mask of $s-t$ before the operation.
 
-To swap two machine words, $x_0$ and $y_0$, without using an additional word, we compute $x_1 = x_0 \oplus y_0$, $y_1 = x_1 \oplus y_0$, and then $x_2 = x_1 \oplus y_1$.  Notice that $x_2$ expands to
+To swap two machine words, $x_0$ and $y_0$, without using additional words, we compute $x_1 = x_0 \oplus y_0$, $y_1 = x_1 \oplus y_0$, and then $x_2 = x_1 \oplus y_1$.  Notice that $x_2$ expands to
 \[
 	x_2 = (x_0 \oplus y_0) \oplus ((x_0 \oplus y_0) \oplus y_0)
 \]
@@ -1495,7 +1495,7 @@ We can conditionally swap two words, $x$ and $y$ when $x < y$ by using two addit
 \end{algorithm}
 On the x64 architecture we can optimize the computation of $d \gets s - t$ and $m \gets \texttt{sign\_mask}(d)$ since the operation $s-t$ sets the carry flag when the result is negative.  Using a subtract with borrow, we subtract $m$ from itself.  This sets $m$ to 0 when the carry is clear, and -1 when the carry is set.
 
-Often our implementation uses the number of bits in a positive integer $x$.  In the algorithm description we use $\floor{\log_2x} + 1$.  On the x64 architecture there is an instruction (\texttt{bsr}) that returns the index of the most significant set bit.  This allows us to quickly compute that value.  On a platform that does not have such an instruction, we can use a logarithmic search to find the most significant set bit\footnote{There is also a similar algorithm to find the least significant set bit of a machine word (\texttt{bsl} on x64).}.  Let $k = \floor{m/2}$ where $m$ is the number of bits in a machine word and let $i$ be the computed index (initially $i \gets 0$).  We first check if $x \ge 2^k$.  If it is, then $i \gets i + k$ and $x$ is shifted right by $k$.  We repeat on $k \gets \floor{k/2}$ until $k=0$.  At which point, $i$ is the index of the most significant set bit (see Algorithm \ref{alg:msb}).  Notice that we could use the signed mask of $2^k - x$ instead of the conditional `if' statement, and we could unroll the while loop for fixed values of $m$.
+Often our implementation uses the number of bits in a positive integer $x$.  In the algorithm description we use $\floor{\log_2x} + 1$.  On the x64 architecture there is an instruction (\texttt{bsr}) that returns the index of the most significant set bit.  This allows us to quickly compute that value.  On a platform that does not have such an instruction, we can use a logarithmic search to find the most significant set bit\footnote{There is also a similar algorithm to find the \emph{least} significant set bit of a machine word (\texttt{bsl} on x64).}.  Let $k = \floor{m/2}$ where $m$ is the number of bits in a machine word and let $i$ be the computed index (initially $i \gets 0$).  We first check if $x \ge 2^k$.  If it is, then $i \gets i + k$ and $x$ is shifted right by $k$.  We repeat on $k \gets \floor{k/2}$ until $k=0$.  At which point, $i$ is the index of the most significant set bit (see Algorithm \ref{alg:msb}).  Notice that we can use the signed mask of $2^k - x$ instead of the conditional `if' statement, and we can unroll the while loop for fixed values of $m$.
 
 \begin{algorithm}[h]
 \caption{Return the index of the most significant set bit of $x$.}
@@ -1513,129 +1513,67 @@ Often our implementation uses the number of bits in a positive integer $x$.  In 
 \end{algorithmic}
 \end{algorithm}
 
-We use the above techniques throughout our implementation of the extended GCD algorithms described in this section.  In the case of Lehmer's GCD, this algorithm is especially useful when the arguments to the GCD are several words in size.  However, since our implementations are specialized up to 128-bit words, we consider 8-bit words for the inner extended GCD computation.  As such, it is possible to precompute the resulting $2 \times 2$ matrix for all possible inputs into the single precision extended GCD computation.  Since there are two inputs, each 8-bits in size, there are 65536 possible pairs of inputs.  The coefficients of the resulting $2 \times 2$ matrix can be bound by 8-bits each, and so the table requires 256Kb of memory. This simplifies the GCD computation dramatically since the inner loop of Lehmer's GCD becomes a lookup from this table.
+Finally, Lehmer's GCD algorithm is especially useful when the arguments to the GCD are several words in size.  However, since our implementations are specialized up to 128-bit words, we consider 8-bit words for the inner extended GCD computation.  As such, it is possible to precompute the resulting $2 \times 2$ matrix for all possible inputs into the single precision extended GCD computation.  Since there are two inputs, each 8-bits in size, there are 65536 possible pairs of inputs.  The coefficients of the resulting $2 \times 2$ matrix can be bound by 8-bits each, and so the table requires 256Kb of memory. This simplifies the GCD computation since the inner loop of Lehmer's GCD becomes a lookup from this table.
 
 \subsection{Experimental Results}
 \label{subsec:gcdResults}
 
-We specialized the implementation of each of the extended GCD algorithms from the previous section for 32-bit and 64-bit words.  For each $k$ from 1 to 63, we generated 1,000,000 pairs of integers of $k$ bits each, and we measured the time to compute the extended GCD of each pair using each algorithm.
+We specialized the implementation of each of the extended GCD algorithms for 32-bit and 64-bit words.  When intermediate terms did not overflow 128-bit words, we also implemented 128-bit versions.  For each $k$ from 1 to 127, we generated 1,000,000 pairs of integers of $k$ bits each, and measured the time to compute the extended GCD of each pair using each algorithm and its specialized implementation when available.
 
-First, we present evidence that in each case, the 32-bit implementation is no slower than the 64-bit implementation, and is in all but one case, always faster.  Figure \ref{fig:divrem-32v64} shows that a 32-bit Extended Euclidean Algorithm using division with remainder is faster than a 64-bit one, for the same inputs.
-\begin{figure}[H]
-\centering
-\includegraphics{divrem-32v64}
-\caption{Extended Euclidean Algorithm using division with remainder.}
-\label{fig:divrem-32v64}
-\end{figure}
+First, we present evidence that in each case, the 32-bit implementation is no slower than the 64-bit implementation, and in all but one case, always faster.  Figure \ref{fig:divrem-32v64} shows that a 32-bit Extended Euclidean Algorithm using division with remainder is faster than a 64-bit one, for the same inputs.
+\mygraph{divrem-32v64}{fig:divrem-32v64}{Extended Euclidean Algorithm using division with remainder.}
 
 For Lehmer's GCD, we precomputed a table of 8-bit inputs for the inner GCD computation -- see Figure \ref{fig:lehmer-32v64}. In each case, the 32-bit implementation is faster than the 64-bit implementation.
-\begin{figure}[H]
-\centering
-\includegraphics{lehmer-32v64}
-\caption{Lehmer's GCD with 8-bit precomputed inner GCD.}
-\label{fig:lehmer-32v64}
-\end{figure}
+\mygraph{lehmer-32v64}{fig:lehmer-32v64}{Lehmer's GCD with 8-bit precomputed inner GCD.}
 
-
-The graphs in Figure \ref{fig:stein-32v64} show that for all window sizes from 1 to 5 bits, that the 32-bit version of the right-to-left binary GCD is faster than the 64-bit version.
-\begin{figure}[H]
-\centering
-\mbox{
-	\subfigure{\includegraphics[width=3in]{stein1-32v64}}
-	\subfigure{\includegraphics[width=3in]{stein2-32v64}}
-}
-\mbox{
-	\subfigure{\includegraphics[width=3in]{stein3-32v64}}
-	\subfigure{\includegraphics[width=3in]{stein4-32v64}}
-}
-\mbox{
-	\subfigure{\includegraphics[width=3in]{stein5-32v64}}
-}
-\caption{Performance of varying the window size of the right-to-left binary GCD.}
-\label{fig:stein-32v64}
-\end{figure}
+The graphs in Figures \ref{fig:stein1-32v64}, \ref{fig:stein2-32v64}, \ref{fig:stein3-32v64}, \ref{fig:stein4-32v64}, and \ref{fig:stein5-32v64} show that for all window sizes from 1 to 5 bits, that the 32-bit version of the right-to-left binary GCD is faster than the 64-bit version.
+\mygraph{stein1-32v64}{fig:stein1-32v64}{Right-to-Left Binary GCD.}
+\mygraph{stein2-32v64}{fig:stein2-32v64}{2-bit Windowed Right-to-Left Binary GCD.}
+\mygraph{stein3-32v64}{fig:stein3-32v64}{3-bit Windowed Right-to-Left Binary GCD.}
+\mygraph{stein4-32v64}{fig:stein4-32v64}{4-bit Windowed Right-to-Left Binary GCD.}
+\mygraph{stein5-32v64}{fig:stein5-32v64}{5-bit Windowed Right-to-Left Binary GCD.}
 
 The left-to-right variant of the binary GCD proposed by Shallit and Sorenson is shown in figure \ref{fig:shallit-32v64}.  Here the 32-bit implementation is slightly faster than the 64-bit implementation.
-
-\begin{figure}[H]
-\centering
-\includegraphics{shallit-32v64}
-\caption{Left-to-Right binary GCD of Shallit and Sorenson.}
-\label{fig:shallit-32v64}
-\end{figure}
+\mygraph{shallit-32v64}{fig:shallit-32v64}{Left-to-Right binary GCD of Shallit and Sorenson.}
 
 Lastly, our simplified version of the left-to-right binary GCD is shown in figure \ref{fig:binary_l2r-32v64}.  In this case, the benefit, if any, to using a 32-bit implementation over a 64-bit implementation is negligible\footnote{Nanosecond differences between the two versions could be attributed to timing inaccuracies.}.
+\mygraph{binary_l2r-32v64}{fig:binary_l2r-32v64}{Simplified Left-to-Right binary GCD.}
 
-\begin{figure}[H]
-\centering
-\includegraphics{binary_l2r-32v64}
-\caption{Simplified Left-to-Right binary GCD.}
-\label{fig:binary_l2r-32v64}
-\end{figure}
-
-Note that the 32-bit versions of the right-to-left binary GCD are only accurate up to 29-bits (ignoring sign), while the 64-bit versions are only accurate to 60-bits. All other 32-bit implementations are accurate to 31-bits\footnote{The input is less than or equal to 31-bits, since in a two's complement representation the sign of the input variable takes the most significant bit and accounts for all 32-bits.} and all 64-bit implementations are accurate to 63-bits\footnote{Similar to the 32-bit implementation, the most significant bit represents the sign of the integer.}.
+Note that the 32-bit versions of the right-to-left binary GCD are only accurate up to 29-bits (ignoring sign), while the 64-bit versions are only accurate to 60-bits. All other 32-bit implementations are accurate to 31-bits\footnote{The input is less than or equal to 31-bits, since in a two's complement representation the sign of the input variable takes the most significant bit and accounts for all 32-bits.} and all other 64-bit implementations are accurate to 63-bits\footnote{Similar to the 32-bit implementation, the most significant bit represents the sign of the integer.}.
 
 Since the 32-bit implementation of each algorithm is at least no slower than the 64-bit implementation, when comparing the different algorithms, we always prefer the 32-bit implementation of each when the algorithm is known to be accurate for the size of the inputs.
 
 Both the Extended Euclidean Algorithm and Lehmer's GCD use division with remainder to compute their result, so we first compare our implementations of both.  Figure \ref{fig:divrem-vs-lehmer} shows that the Extended Euclidean Algorithm is always faster.
-
-\begin{figure}[H]
-\centering
-\includegraphics{divrem-vs-lehmer}
-\caption{Extended Euclidean Algorithm compared to Lehmer's GCD using precomputed 8-bit words.}
-\label{fig:divrem-vs-lehmer}
-\end{figure}
+\mygraph{divrem-vs-lehmer}{fig:divrem-vs-lehmer}{Extended Euclidean Algorithm compared to Lehmer's GCD using precomputed 8-bit words.}
 
 In Figure \ref{fig:steins}, we compare each of our windowed implementations of the right-to-left binary GCD.  Larger windows trade off precomputation against the likelihood that a number will be divisible by some power of two. You can see that the non-windowed version is most efficient for inputs less than 16-bits in size, at which point the 3-bit windowed version is best until 30 bits.  After 30 bits, the 4-bit windowed version out performs other window sizes in the range with which we experimented.  In the 64-bit implementation, the slope of the 5-bit windowed version is the lowest and so presumably it would out perform the 4-bit window once inputs were large enough.
-\begin{figure}[H]
-\centering
-\includegraphics{steins-32}
-\includegraphics{steins-64}
-\caption{Windowed right-to-left binary GCDs.}
-\label{fig:steins}
-\end{figure}
+\mygraphTwo{steins-32}{steins-64}{fig:steins}{Windowed right-to-left binary GCDs.}
 
-Figure \ref{fig:shallit-vs-binary_l2r} compares the left-to-right binary GCD proposed by Shallit and Sorenson to our own simplified version.  
-\begin{figure}[H]
-\centering
-\includegraphics{shallit-vs-binary_l2r}
-\caption{Shallit and Sorenson compared to our simplified left-to-right binary GCD.}
-\label{fig:shallit-vs-binary_l2r}
-\end{figure}
+Figure \ref{fig:shallit-vs-binary_l2r} compares the left-to-right binary GCD proposed by Shallit and Sorenson to our own simplified version.
+\mygraph{shallit-vs-binary_l2r}{fig:shallit-vs-binary_l2r}{Shallit and Sorenson compared to our simplified left-to-right binary GCD.}
 
 Our implementation of the Euclidean Algorithm always out performs Lehmer's GCD.  For our implementations of the right-to-left binary GCD, among the 32-bit implementations, the non-windowed and the 3-bit windowed versions perform well.  For the 64-bit implementation, the 4-bit windowed version out performs the other window sizes.  Finally, for the left-to-right variants of the binary GCD, our simplified version always out performs the approach proposed by Shallit and Sorenson.  In Figure \ref{fig:all-gcd}, we compare these top performers.  For integer inputs less than 32-bits, the standard Euclidean Algorithm performs best, and for inputs between 32-bits and 64-bits, our simplified left-to-right binary GCD is fastest.
-\begin{figure}[H]
-\centering
-\includegraphics{all-32}
-\includegraphics{all-64}
-\caption{Euclidean vs windowed right-to-left binary vs Simplified left-to-right binary.}
-\label{fig:all-gcd}
-\end{figure}
+\mygraphTwo{all-32}{all-64}{fig:all-gcd}{Euclidean vs windowed right-to-left binary vs Simplified left-to-right binary.}
 
-Since the Euclidean Algorithm and our simplified left-to-right binary GCD are our fastest implementations for inputs less than 64-bits, we extended both to work on 128-bit integers.  We also compared these with the implementation of the extended GCD algorithm from the GNU Multiple Precision (GMP) library.  Figure \ref{fig:mpzgcd} show that our implementations out perform the implementation in GMP for inputs smaller than 64-bits.
-\begin{figure}[H]
-\centering
-\includegraphics{mpzgcd}
-\caption{Euclidean vs our simplified left-to-right binary vs GNU Multiple Precision library.}
-\label{fig:mpzgcd}
-\end{figure}
+Since the Euclidean Algorithm and our simplified left-to-right binary GCD are our fastest implementations for inputs less than 64-bits, we extended both to work on 128-bit integers.  We also compared these with the implementation of the extended GCD algorithm from the GNU Multiple Precision (GMP) library.  Figure \ref{fig:mpzgcd} show that our implementations perform faster than the implementation in GMP for inputs smaller than 64-bits.
+\mygraph{mpzgcd}{fig:mpzgcd}{Euclidean vs our simplified left-to-right binary vs GNU Multiple Precision library.}
 
 
 \bigbreak
 \section{Ideal Arithmetic}
 \label{sec:idealArithmetic}
 
-In the previous section, we demonstrated results that lead to practical improvements in computing the extended GCD -- a key operation in reduced ideal multiplication.  In this section, we discuss our implementation of ideal arithmetic.  To improve the performance of ideal arithmetic, we specialized implementations to use at most a single machine word, i.e.\ 64-bits, or at most two machine words, i.e.\ 128-bits.  We also have a reference implementation using GMP that works for unbounded discriminant sizes.  Our 64-bit implementation of ideal arithmetic is accurate for negative discriminants up to 59-bits  in size, while our 128-bit implementation of ideal arithmetic is accurate for discriminants up to 118-bits.
+In the previous section, we demonstrated results that lead to practical improvements in computing the extended GCD -- the dominating operation in reduced ideal multiplication.  In this section, we discuss our implementations of ideal arithmetic.  To improve the performance of ideal arithmetic, we specialized implementations to use at most a single machine word, i.e.\ 64-bits, or at most two machine words, i.e.\ 128-bits.  We also wrote a reference implementation using GMP that works for unbounded discriminant sizes.  Our 64-bit implementation of ideal arithmetic is accurate for negative discriminants up to 59-bits  in size, while our 128-bit implementation of ideal arithmetic is accurate for discriminants up to 118-bits.
 
 \subsection{Specialized Implementations of Ideal Arithmetic}
 
-Throughout this thesis, we represent an ideal class $[\mathfrak a]$ using the $\ZZ$-module for the reduced ideal representative $\mathfrak a = [a, (b + \sqrt{\Delta})/2]$.  Ideal class multiplication and ideal reduction use the value $c = (b^2 - \Delta)/4a$, which is also useful in determining if an ideal is an ambiguous ideal\footnote{Recall that an ideal is ambiguous if $b=0$, $a=b$, or $a=c$.}.  For this reason, our implementation represents an ideal class using the triple $(a, b, c)$.  Since there are many elements in a given ideal class group, $Cl_\Delta$, we also maintain a representation of the group\footnote{The group representation also includes all intermediate integers needed for use by the GMP library.  The reason for this is that GMP integers are managed on the heap, and preallocating them alongside the representation of the group reduces the overhead of managing them during ideal class group operations.}, which includes the discriminant $\Delta$.
+Throughout this thesis, we represent an ideal class $[\mathfrak a]$ using the $\ZZ$-module for the reduced ideal representative $\mathfrak a = [a, (b + \sqrt{\Delta})/2]$.  Ideal class multiplication and ideal reduction use the value $c = (b^2 - \Delta)/4a$, which is also useful in determining if an ideal is an ambiguous ideal\footnote{Recall that an ideal is ambiguous if $b=0$, $a=b$, or $a=c$.}.  For this reason, our implementation represents an ideal class using the triple $(a, b, c)$.  We also maintain a representation of the group\footnote{The group representation also includes all intermediate integers needed for use by the GMP library.  The reason for this is that GMP integers are managed on the heap, and preallocating them alongside the representation of the group reduces the overhead of managing them during ideal class group operations.}, which includes the discriminant $\Delta$.
 
-In Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and \ref{subsec:nucube} we introduced algorithms for fast ideal class multiplication, squaring, and cubing.  These compute a termination bound for the partial extended GCD useful for computing the partially reduced coefficients of the product ideal class.  In all cases, the termination bound contains the coefficient $|\Delta/4|^{1/4}$.  Since the coefficients of the partial extended GCD are integers, we instead compute $\ceil{|\Delta/4|^{1/4}}$ as well as $\ceil{|\Delta/4|^{1/2}}$ and tie both to our representation of the class group.  The reason we store $\ceil{|\Delta/4|^{1/2}}$ is that the termination bound for fast ideal multiplication is
+In Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and \ref{subsec:nucube} we introduced algorithms for fast ideal class multiplication, squaring, and cubing.  These compute a termination bound for the partial extended GCD useful for computing partially reduced coefficients of the product ideal class.  In all cases, the termination bound contains the coefficient $|\Delta/4|^{1/4}$.  Since the coefficients of the partial extended GCD are integers, we instead compute $\ceil{|\Delta/4|^{1/4}}$ as well as $\ceil{|\Delta/4|^{1/2}}$ and store both in our representation of the class group.  The reason we store $\ceil{|\Delta/4|^{1/2}}$ is that the termination bound for ideal multiplication is
 \[
 \sqrt{a_1/a_2}|\Delta/4|^{1/4} = \sqrt{(a_1/a_2) |\Delta/4|^{1/2}} \approx \sqrt{(a_1/a_2) \ceil{|\Delta/4|^{1/2}}}.
 \]
-In fast ideal squaring, the bound is simply $|\Delta/4|^{1/4}$ and in fast ideal cubing the bound is $\sqrt{a_1}|\Delta/4|^{1/4} \approx \sqrt{a_1\ceil{|\Delta/4|^{1/2}}}$. By approximating the termination bound, we can speed the arithmetic at the expense of additional reduction steps. We note here that we compute the values $\ceil{|\Delta/4|^{1/2}}$ and $\ceil{|\Delta/4|^{1/4}}$ as accurately as possible, since these are only computed once per class group and then stored with the representation of the group.
+For ideal squaring, the bound is simply $|\Delta/4|^{1/4}$ and for ideal cubing the bound is $\sqrt{a_1}|\Delta/4|^{1/4} \approx \sqrt{a_1\ceil{|\Delta/4|^{1/2}}}$. By approximating the termination bound, we can speed the arithmetic at the expense of additional reduction steps. We note here that we compute the values $\ceil{|\Delta/4|^{1/2}}$ and $\ceil{|\Delta/4|^{1/4}}$ as accurately as possible, since these are only computed once per class group and then stored with the representation of the group.
 
 We further approximate the computation of integer square roots when computing the termination bound for fast multiplication.  We note that 
 \begin{equation*}
@@ -1646,22 +1584,15 @@ We further approximate the computation of integer square roots when computing th
 \end{equation*}
 where $\floor{\log_2x+1}$ is the number of bits in the binary representation of $x$.  Using this approximation, we compute the integer square root of $x$ as roughly $\floor{x / 2^{\floor{\floor{\log_2x+1}/2}}}$.  This is simply a bit shift right by half the number of bits in $x$.
 
-Other practical considerations are to minimize the size of variables and intermediate values, as smaller operands often lead to faster arithmetic.  Recall that the discriminant $\Delta$ equals $b^2 - 4ac$.  When $4ac=0$ then $b^2$ is as large as possible and so we obtain the bound $b \le \sqrt\Delta$.  Similarly, when $b^2 = 0$ we obtain the bound $a \le \sqrt{\Delta/4}$ (recall that by Definition \ref{defn:reducedIdeal}, a reduced ideal has $a \le c$).  As such, the variables $a$ and $b$ only require half the memory needed to store $\Delta$.
+Other practical considerations are to minimize the size of variables and intermediate values, as smaller operands often lead to faster arithmetic.  Recall that the discriminant $\Delta = b^2 - 4ac$.  When $4ac=0$, then $b^2$ is as large as possible and so we obtain the bound $b \le \sqrt\Delta$.  Similarly, when $b^2 = 0$ we obtain the bound $a \le \sqrt{\Delta/4}$ (recall that by Definition \ref{defn:reducedIdeal}, a reduced ideal has $a \le c$).  As such, the variables $a$ and $b$ only require half the memory needed to store $\Delta$.
 
-In our 64-bit implementation, $\Delta$ and $c$ take 64-bits of storage, while both $a$ and $b$ require only 32-bits at most.  As such, we take advantage of 32-bit operations when possible, such as our 32-bit implementations of the extended GCD algorithm.  Similarly in our 128-bit implementation, $\Delta$ and $c$ fit within 128-bits of storage, and both $a$ and $b$ fit within one 64-bit machine word.  Again, we use 64-bit arithmetic when possible, and even 32-bit when operands are small.  However, since intermediates may be larger, we sometimes require the full 64-bits or 128-bits of the implementation.
+In our 64-bit implementation, $\Delta$ and $c$ take 64-bits of storage, while both $a$ and $b$ require only 32-bits at most.  As such, we take advantage of 32-bit operations when possible, such as our 32-bit implementations of the extended GCD algorithm.  Similarly in our 128-bit implementation, $\Delta$ and $c$ fit within 128-bits of storage, and both $a$ and $b$ fit within one 64-bit machine word.  Again, we use 64-bit arithmetic when possible, and even 32-bit when operands are small.  However, since intermediates may be larger, we sometimes require the full 64-bits or 128-bits of the implementation.  Cubing requires even larger intermediates -- our 64-bit implementation requires some 128-bit arithmetic, while our 128-bit implementation uses GMP when necessary.
 
 To keep intermediates small, we compute using residue classes.  For example, Equations \ref{eq:idealProductU} states that we can compute $U \pmod {a_1/s}$ and Equation \ref{eq:idealProductB} allows us to compute $b \pmod{2a}$.  When an intermediate is known to be close to zero, we do not perform a complete division with remainder, but only add or subtract the divisor as appropriate (often using the signed mask discussed in Subsection \ref{subsec:gcdImpl}).  Furthermore, rather than computing the positive remainder, we typically compute the remainder that is closest to zero.  The idea here is to minimize the number of bits required by intermediates in order to avoid overflows as much as possible.
 
-In the specific case of ideal reduction (see Algorithm \ref{alg:reduce}), one step is to compute $b'$ such that $-a < b' \le a$ and $b' \equiv b \pmod{2a}$.  To compute $b \bmod{2a}$ we effectively compute $b = q2a + r$ for $q, r \in \ZZ$ where $|r| < 2a$.  We note that $q = \floor{b/(2a)} = \floor{(b/a)/2}$, and instead compute $b = q'a+r'$ for $q', r' \in \ZZ$ where $|r'| < a$.  Now $q'$ is at least twice $q$.  If $q'$ is even, then $b = q'a + r' = (q'/2)2a + r'$ and we let $b' = r'$. Suppose $q'$ is odd and $r'$ is positive.  Then $b = q'a + r' = (q' + 1)a + (r' - a) = ((q' + 1)/2)2a + (r' - a)$.  Since $0 < r' < a$, we have $b' = r' - a$ and $-a < b' \le a$.  The proof is similar when $q$ is odd and $r'$ is negative. This leads us to the following implementation
-\begin{align*}
-	b' &= \begin{cases}
-		r & \textrm{when $q$ is even} \\
-		r - a & \textrm{when $q$ is odd and $r > 0$} \\
-		r + a & \textrm{otherwise.}
-	\end{cases}
-\end{align*}
+In the specific case of ideal reduction (see Algorithm \ref{alg:reduce}), one step is to compute $b'$ such that $-a < b' \le a$ and $b' \equiv b \pmod{2a}$.  To compute $b \bmod{2a}$ we effectively compute $b = q2a + r$ for $q, r \in \ZZ$ where $|r| < 2a$.  We note that $q = \floor{b/(2a)} = \floor{(b/a)/2}$, and instead compute $b = q'a+r'$ for $q', r' \in \ZZ$ where $|r'| < a$.  Now $q'$ is at least twice $q$.  If $q'$ is even, then $b = q'a + r' = (q'/2)2a + r'$ and we let $b' = r'$. Suppose $q'$ is odd and $r'$ is positive.  Then $b = q'a + r' = (q' + 1)a + (r' - a) = ((q' + 1)/2)2a + (r' - a)$.  Since $0 < r' < a$, we have $b' = r' - a$ and $-a < b' \le a$.  The proof is similar when $q$ is odd and $r'$ is negative.
 
-As with our implementations of the extended GCD algorithms, we optimize this to be free of conditionals.  Using two's complement for fixed sized words, we compute 
+This leads us to the following implementation, which we optimize to be free of conditionals.  Using two's complement for fixed sized words, we compute 
 \begin{align*}
 b   &= q'a + r' & \textrm{\{division with remainder\}}\\
 q_m &= -(q \band 1) & \textrm{\{$q_m$ has all bits set when $q$ is odd\}} \\
@@ -1696,40 +1627,29 @@ Note, the last step above is obtained by rewriting $b = 2aq + r$ as
 \end{align*}
 Since $b - aq \in \ZZ$, the divide by 2 can be performed with an arithmetic bit shift right. (TODO: Is this method of computing $c'$ published anywhere?)
 
-In the previous section, we fine tuned our implementation of the extended GCD computation.  We further refine our use of it here.  Our derivation of ideal multiplication computes
+We further improve ideal arithmetic by noting that multiplication computes
 \[
 s = \gcd(a_1, a_2, (b_1+b_2)/2) = Ya_1 + Va_2 + W(b_1+b_2)/2
 \]
-(this is Equation \ref{eq:idealProductS} from Subsection \ref{subsec:idealMultiply}).  In our algorithm for fast ideal multiplication (Algorithm \ref{alg:nucomp}), we break this computation into two parts: the first computes $s' = \gcd(a_1, a_2) = Y'a_1 + V'a_2$ and the second only computes $s = \gcd(s', (b_1 + b_2)/2) = Vs' + W(b_1 + b_2)/2$ when $s' \neq 1$.  We do this since checking for $s \neq 1$ is relatively inexpensive when compared to performing an extended GCD computation.  In addition to this, however, we note that the coefficient $Y'$ is not used in order to derive the product ideal.  As such, computing it is unnecessary and we can simplify our extended GCD computation by dropping the corresponding column from the computation.  This makes it computationally similar to the partial extended GCD, except for the initial and terminating conditions. Lastly, since our simplified left-to-right binary GCD uses only operations representable by unimodular matrices, it can be used to compute the partially reduced coefficients of the product ideal (i.e.\ the partial extended GCD).  This is a performance improvement over the recurrences used for fast ideal multiplication (Subsection \ref{subsec:nucomp}) when the operands are between 32-bits and 64-bits -- since our GCD experiments show that our simplified left-to-right binary GCD performs the best for this range.
+(this is Equation \ref{eq:idealProductS} from Subsection \ref{subsec:idealMultiply}).  Our implementations of ideal multiplication (Algorithm \ref{alg:nucomp}) performs this in two parts: the first computes $s' = \gcd(a_1, a_2) = Y'a_1 + V'a_2$ and the second only computes $s = \gcd(s', (b_1 + b_2)/2) = Vs' + W(b_1 + b_2)/2$ when $s' \neq 1$.  We do this since checking for $s \neq 1$ is relatively inexpensive when compared to performing an extended GCD computation.  In addition, we note that the coefficient $Y'$ is not used in order to derive the product ideal, and so we drop the corresponding term from our GCD computation. Lastly, we use our simplified left-to-right binary GCD to compute partially reduced coefficients of the product ideal when the operands are between 32-bits and 64-bits (since this GCD algorithm is unimodular and performed fastest in this range).
 
-A final performance improvement we make is useful for finding prime ideals.  For a given prime $p$, we would like to find an ideal of the form $[p, (b + \sqrt\Delta)/2]$.  We have $b^2 - 4pc = \Delta$, and so we take everything in the residue class modulo $p$ and get $b^2 \equiv \Delta \pmod p$ or $b \equiv \pm\sqrt\Delta \pmod p$.  Computing $b$, then, is a matter of computing a square root modulo a prime, if one exists.  There are efficient algorithms for this (see \cite{Bach1996}), but since we are generally interested in finding some prime ideal, rather than a specific prime ideal, we instead precompute all square roots modulo each prime $p$ for sufficiently many small $p$.  For our purposes, all primes $p < 1000$ was enough.  Finding $b \equiv \pm\sqrt\Delta \pmod p$ is now a table lookup. Having found a value for $b$, we have not necessarily found a prime ideal $[p, (b + \sqrt\Delta)/2]$.  Since $\Delta = b^2 - 4pc$, this implies that $c = (b^2 - \Delta)/4p$ must have an integral solution.  Our implementation maintains the value $c$ for an ideal class, so we compute $c$ and if $c$ is an integer, than we have found a prime ideal.  Otherwise, we try again for some other prime (usually the smallest prime greater than $p$).
+The final performance improvement is for generating prime ideals.  For a given prime $p$, we would like to find an ideal of the form $[p, (b + \sqrt\Delta)/2]$.  We have $b^2 - 4pc = \Delta$, and so we take everything in the residue class modulo $p$ and get $b^2 \equiv \Delta \pmod p$ or $b \equiv \pm\sqrt\Delta \pmod p$.  Computing $b$ is a matter of computing a square root modulo a prime, if one exists.  There are efficient algorithms for this (see \cite{Bach1996}), but since we are interested in finding some prime ideal, rather than a specific prime ideal, we instead precompute all square roots modulo each prime $p$ for sufficiently many small $p$.  For our purposes, all primes $p < 1000$ was enough.  Finding $b \equiv \pm\sqrt\Delta \pmod p$ is now a table lookup. Having found a value for $b$, we have not necessarily found a prime ideal $[p, (b + \sqrt\Delta)/2]$.  Since $\Delta = b^2 - 4pc$, this implies that $c = (b^2 - \Delta)/4p$ must have an integral solution.  Our implementation maintains the value $c$ for an ideal class, so we compute $c$ and if $c$ is an integer, than we have found a prime ideal.  Otherwise, we try again for some other prime (usually the smallest prime greater than $p$).
 
 
 \subsection{Average time for operations}
 
-Here, we demonstrate the performance of our implementations of ideal class arithmetic. Let $k$ be the target number of bits in the discriminant $\Delta$.  We iterate $k$ from 16 to 140, and for each $k$ we repeat the following 10,000 times: We compute two prime numbers $p$ and $q$ such that $p$ is $\floor{k/2}$ bits and $q$ is $k-\floor{k/2}$ bits.  We use the negative of their product $\Delta = -pq$ as the discriminant for a class group, unless $\Delta \not\equiv 1 \pmod 4$. In which case, we try again with a different $p$ and $q$.  We then pick a prime form, $[\mathfrak a]$, randomly from among the primes less than 1000.  To time the performance of squaring and cubing, we iterate 1000 times either $[\mathfrak a] \gets [\mathfrak a^2]$ or $[\mathfrak a] \gets [\mathfrak a^3]$ respectively.  Dividing the total cost by 10,000,000 gives the average time to square or cube an ideal.  For multiplication, we initially set $[\mathfrak b] \gets [\mathfrak a]$.  We then iterate 1000 times the sequence of operations $[\mathfrak c] \gets [\mathfrak a\mathfrak b]$, $[\mathfrak a] \gets [\mathfrak b]$, and $[\mathfrak b] \gets [\mathfrak c]$. Figure \ref{fig:idealArithComparison} shows the results of these timings. For all discriminant sizes, our 64-bit implementation out performs our 128-bit implementation, which out performs our GMP implementation.
+In this Subsection, we demonstrate the performance of our implementations of ideal class arithmetic. Let $k$ be the target number of bits in the discriminant $\Delta$.  We iterate $k$ from 16 to 140, and for each $k$ we repeat the following 10,000 times: We compute two prime numbers $p$ and $q$ such that $p$ is $\floor{k/2}$ bits and $q$ is $k-\floor{k/2}$ bits.  We use the negative of their product $\Delta = -pq$ as the discriminant for a class group, unless $\Delta \not\equiv 1 \pmod 4$. In which case, we try again with a different $p$ and $q$.  We then pick a prime form, $[\mathfrak a]$, randomly from among the primes less than 1000.  To time the performance of squaring and cubing, we iterate 1000 times either $[\mathfrak a] \gets [\mathfrak a^2]$ or $[\mathfrak a] \gets [\mathfrak a^3]$ respectively.  Dividing the total cost by 10,000,000 gives the average time to square or cube an ideal.  For multiplication, we initially set $[\mathfrak b] \gets [\mathfrak a]$.  We then iterate 1000 times the sequence of operations $[\mathfrak c] \gets [\mathfrak a\mathfrak b]$, $[\mathfrak a] \gets [\mathfrak b]$, and $[\mathfrak b] \gets [\mathfrak c]$. Figures \ref{fig:idealCompose}, \ref{fig:idealSquare}, and \ref{fig:idealCube} show the results of these timings. For all discriminant sizes, our 64-bit implementation performs faster than our 128-bit implementation, which performs faster than our GMP implementation.
 
-\begin{figure}[H]
-\centering
-\includegraphics[scale=0.9]{compose-all}
-\includegraphics[scale=0.9]{square-all}
-\includegraphics[scale=0.9]{cube-all}
-\caption{Average time to multiply, square, or cube ideal classes.}
-\label{fig:idealArithComparison}
-\end{figure}
+\mygraph{compose-all}{fig:idealCompose}{Average Time to Multiply Reduced Ideal Class Representatives.}
+\mygraph{square-all}{fig:idealSquare}{Average Time to Square Reduced Ideal Class Representatives.}
+\mygraph{cube-all}{fig:idealCube}{Average Time to Cube Reduced Ideal Class Representatives.}
 
-Our GMP implementation uses only GMP integers for the ideal class representation, group representation, and intermediate operands.  Intermediate operands during multiplication and squaring always fit within 64-bits for the 64-bit implementation, and 128-bits for the 128-bit implementation.  On the 64-bit implementation, we use 32-bit operations when operands are sufficiently small, and likewise, on the 128-bit implementation, we use 64-bit operations when the operands are sufficiently small.  Intermediate operands during cubing, however, can overflow the target size of the implementation.  In our 64-bit implementation, this is handled by customized assembler (or the use of our 128-bit general arithmetic library).  In our 128-bit implementation, we defer to GMP for overflows.  A result of this is visible in Figure \ref{fig:cubingVsSquareAndMultiply} where we compare the average time to cube an ideal class representative against the average time to multiply a representative with its square.  Our 128-bit implementation of cubing performs more poorly than that of multiplying an ideal with its square.  This is likely because of our reliance on GMP integers for overflow.  Contrast this to our 64-bit implementation that does not use GMP at all, and our GMP implementation that only uses GMP for arithmetic -- in both of these implementations, cubing out performs multiplying an ideal with its square.  For each implementation, we focus the graph on the bit range where that implementation performs the best.
+In Figures \ref{fig:cubingVs64}, \ref{fig:cubingVs128}, and \ref{fig:cubingVsMpz} we compare the average time to cube against the average time to multiply a representative with its square.  One thing to notice is that our 128-bit implementation of cubing performs more poorly than that of multiplying an ideal with its square.  This is likely because we rely on GMP integers for overflow.  Contrast this to our 64-bit implementation that does not use GMP at all, and our GMP implementation that only uses GMP for arithmetic -- in both of these implementations, cubing is faster than multiplying an ideal with its square.
+\mygraph{cube-vs-64}{fig:cubingVs64}{Time to compute $[\mathfrak a^3]$ in our 64-bit implementation.}
+\mygraph{cube-vs-128}{fig:cubingVs128}{Time to compute $[\mathfrak a^3]$ in our 128-bit implementation.}
+\mygraph{cube-vs-mpz}{fig:cubingVsMpz}{Time to compute $[\mathfrak a^3]$ in our GMP implementation.}
 
-\begin{figure}[H]
-\centering
-\includegraphics[scale=0.9]{cube-vs-64}
-\includegraphics[scale=0.9]{cube-vs-128}
-\includegraphics[scale=0.9]{cube-vs-mpz}
-\caption{Average time to cube an ideal class compared to the time to square and multiply.  Notice that cubing performs poorly in our 128-bit implementation.}
-\label{fig:cubingVsSquareAndMultiply}
-\end{figure}
-
-In this section we discussed methods to speed the performance of arithmetic in the ideal class group and we compared the average time of multiplication, squaring, and cubing.  In the next section, we will look at a variety of methods for exponentiating within the ideal class group that we have not discussed previously.  Many of these methods will take the average time of multiplication, squaring, and cubing into account when computing the operations of exponentiation.
+In this Section we discussed methods to improve the performance of arithmetic in the ideal class group and compared the average time of multiplication, squaring, and cubing.  In the next section, we look at several methods for exponentiating that we have not discussed previously -- many of which take the average time of multiplication, squaring, and cubing into consideration.
 
 \bigbreak
 \section{Exponentiation Experiments}
