@@ -60,9 +60,19 @@
 \newcommand{\ntoinfty}{\lim_{n \rightarrow \infty}}
 \newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
 \newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+
 \newcommand{\band}{~\texttt{and}_\texttt{2}~}
 \newcommand{\bor}{~\texttt{or}_\texttt{2}~}
+\newcommand{\bxor}{\oplus}
+\newcommand{\bnot}{\lnot}
 \newcommand{\binary}[1]{\texttt{#1}_\texttt{2}}
+
+\newcommand{\aclass}{[\mathfrak a]}
+\newcommand{\bclass}{[\mathfrak b]}
+\newcommand{\cclass}{[\mathfrak c]}
+\newcommand{\dclass}{[\mathfrak d]}
+\newcommand{\idclass}{[\mathcal O_\Delta]}
+
 
 \newcommand{\mygraph}[3]{
 	\begin{figure}[H]
@@ -1028,11 +1038,6 @@ According to \cite{Schnorr1984}, every reduced representative of an ambiguous cl
 Suppose we wish to find a factor of an odd integer $N$. Since $\Delta = b^2 - 4ac$ we must have $\Delta \equiv 0, 1 \pmod 4$.  Therefore, set $\Delta = -N$ when $-N \equiv 1 \pmod 4$ and $\Delta = -4N$ otherwise.  This way, $\Delta \equiv 0, 1 \pmod 4$ and $\Delta < 0$. Now, to find a factor of $N$ we can find a reduced ambiguous class representative for the discriminant $\Delta$ that is not the identity element, since the identity element gives the trivial factorization $1N=N$.
 
 \subsection{Algorithm}
-\newcommand{\aclass}{[\mathfrak a]}
-\newcommand{\bclass}{[\mathfrak b]}
-\newcommand{\cclass}{[\mathfrak c]}
-\newcommand{\dclass}{[\mathfrak d]}
-\newcommand{\idclass}{[\mathcal O_\Delta]}
 
 In Chapter \ref{chap:idealArithmetic}, we mentioned that for a negative discriminant $\Delta < 0$, the ideal class group $Cl_\Delta$ has a finite number of elements.  This means that for a random ideal class $\aclass$, there exists an integer $m$ such that $\aclass^m = \idclass$. We say that $m$ is the \emph{order} of the element $\aclass$ and denote this $m = \ord(\aclass)$.  When the order is even, then $\bclass = \aclass^{m/2}$ is an ambiguous ideal class.  This follows from the fact that $\bclass^2 = \idclass$.  Therefore, factoring an integer $N$ reduces to the problem of determining the order of a random ideal class $\aclass \in Cl_\Delta$.
 
@@ -1082,15 +1087,53 @@ Sutherland observed \cite[p.56]{Sutherland2007} that if $h = \ord(\alpha)$ is od
 
 The problem is that $\ord(\alpha)$ may not be odd.  However, by repeated squaring of $\alpha$ it is easy to find an element whose order is guaranteed to be even \cite[p.56]{Sutherland2007}.  Given a bound $M$ on the group order, compute $\beta = \alpha^{2^\ell}$ where $\ell = \floor{\log_2 M}$ and now run our modified algorithm on $\beta$ to find $h' = \ord(\beta)$.  The order of $\alpha$ can be found by computing $\gamma = \alpha^{h'}$ and then repeatedly squaring $\gamma$ until $\gamma^{2^k} = 1_G$ for some $k$.  The order of $\alpha$ is then $2^k h'$.
 
+\begin{algorithm}[h]
+\caption{Primorial Steps \cite[p.57]{Sutherland2007}.}
+\label{alg:primorial}
+\begin{algorithmic}[1]
+\REQUIRE $\alpha \in G$, a bound $M \ge \ord(\alpha)$, and a fast order algorithm $\mathcal A(\alpha, E)$.
+\STATE maximize $P_n$ such that $P_n \le \sqrt{M}$
+\STATE maximize $m$ such that $m^2P_n\phi(P_n) \le M$
+\STATE $b = mP_n$
+\STATE $E = \prod_{i=1}^n p_i^{\floor{\log_{p_i} M}}$
+\STATE $\beta \gets \alpha^E$
+\FOR{$i$ from 1 to $b$ where $i$ is coprime to $P_n$}
+	\STATE compute $\beta^i$ and store $(\beta^i, i)$ in the table \COMMENT{baby steps}
+	\IF {$\beta^i = 1_G$}
+		\RETURN $i \cdot \mathcal A(\alpha^i, E)$
+	\ENDIF
+\ENDFOR
+\FOR{$j=2b, 3b, ...$}
+	\IF{$\beta^j$ is in the table}
+		\STATE lookup $i$ from the table using $\beta^j$ \COMMENT{giant steps}
+		\STATE $h' = j - i$
+		\RETURN $h' \cdot \mathcal A(\alpha^{h'}, E)$
+	\ENDIF
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
+
 We can extend this approach to computing $\beta = \alpha^E$ where $E = 2^{\floor{\log_2 M}} 3^{\floor{\log_3 M}}$ and the order of $\beta$ is coprime to both 2 and 3.  In this case, we compute baby steps with exponents coprime to 6 and giant steps that are a multiple of 6.  More generally, we choose some primorial $P_n$ such that
 \[
 	P_n = 2 \times 3 \times \cdots \times p_n = \prod_{i=1}^n p_i
 \]
-where $p_i$ is the $i^{\textrm{th}}$ prime. Let $e_i = \floor{\log_{p_i} M}$ and $E = 2^{e_2} \times 3^{e_3} \times \cdots \times {p_n}^{e_n}$.  Then we compute $\beta = \alpha^E$, and use baby steps coprime to $P_n$ and giant steps that are a multiple of $P_n$.  Following Sutherland \cite[p.57]{Sutherland2007}, we select the largest $P_n \le \sqrt{M}$ and then maximize $m$ such that $m^2P_n \phi(P_n) \le M$ where $\phi(P_n)$ is number of integers coprime to $P_n$ given as
+where $p_i$ is the $i^{\textrm{th}}$ prime. Let $e_i = \floor{\log_{p_i} M}$ for $1 \le i \le n$ and $E = 2^{e_2} \times 3^{e_3} \times \cdots \times {p_n}^{e_n}$.  Then we compute $\beta = \alpha^E$, and use baby steps coprime to $P_n$ and giant steps that are a multiple of $P_n$.  Following Sutherland \cite[p.57]{Sutherland2007}, we select the largest $P_n \le \sqrt{M}$ and then maximize $m$ such that $m^2P_n \phi(P_n) \le M$ where $\phi(P_n)$ is the number of integers coprime to $P_n$ given as
 \[
 	\phi(P_n) = (2-1) \times (3-1) \times \cdots \times (p_n - 1) = \prod_{i=1}^n (p_i - 1).
 \]
-The bound on the largest baby step $b$ is $b = m P_n$.  We then compute $h' = \ord(\beta)$ and use $\alpha^{h'}$, $E$, and a fast order finding algorithm (such as one from \cite[Chapter 7]{Sutherland2007}) to compute $h = \ord(\alpha)$.
+The bound on the largest baby step $b$ is $b = m P_n$.  We then compute $h' = \ord(\beta)$ and use a fast order finding algorithm $\mathcal A(\alpha^{h'}, E)$ (such as one from \cite[Chapter 7]{Sutherland2007}) to compute $h = \ord(\alpha)$.  The complete Algorithm is in listing \ref{alg:primorial}.
+
+One fast order finding algorithm $\mathcal A(\alpha^{h'}, E)$ to compute $\ord(\alpha)$ uses the factorization of $E=\prod {p_i}^{e_i}$.  Notice that ${\alpha^{h'}}^E = \beta^{h'} = 1_G$.  The idea is to iterate on the factors of $E$, removing each factor $p$ before computing $\gamma = {\alpha^{h'}}^{E'}$ for the product $E' = E/p$. If $\gamma = 1_G$, then $\ord(\alpha) ~|~ h'E'$ and we continue with the next factor in the product $E'$.  Otherwise, $p$ is a factor of $\ord(\alpha)$ and we continue with the next factor of $E$.  There are asymptotically faster algorithms to compute this (see Chapter 7 from \cite{Sutherland2007}), however, since our interest is in finding an ambiguous ideal only, we do not discuss such techniques here.
+
+
+\bigbreak
+\section{SuperSPAR}
+\label{sec:superSpar}
+
+
+In Stage 1 of SPAR, we compute $\bclass = \aclass^{\prod_{i=2}^t {p_i}^{e_i}}$ and $\cclass = \bclass^{\left(2^k\right)}$.  In Stage 2, we perform a random walk on the cyclic group generated by $\cclass$.  The purpose of Stage 1 is to find an ideal class $\bclass$ whose order is known not have any of the odd primes $p_2, ..., p_t$ as divisors.  If the odd part of $\ord(\bclass)$ divides $\prod_{i=2}^t {p_i}^{e_i}$ and the order of $\bclass$ is even, then computing $\cclass$ produces an ambiguous ideal and we can attempt to factor $N$.
+
+Failing this, Stage 2 attempts to find the order of the ideal class $\cclass$.  Schnorr and Lenstra \cite[p.294]{Schnorr1984} suggest a Pollard-Brent Recursion \cite{Brent1980} based on Pollard's rho method \cite{Pollard1975}.  This approach will yield $\ord(\cclass)$ within $\sqrt{\pi/2}p_t$ steps if $\ord(\cclass) \le {p_t}^2$ and requires only a constant number of group elements.  They also remark \cite[p.298]{Schnorr1984} that Shanks' baby-step giant-step method \cite{Shanks1971} could be used to deterministically find $\ord(\cclass)$ within $\sqrt{2}p_t$ group operations when $\ord(\cclass) \le {p_t}^2$, but requiring $O(p_t)$ storage.  They point out that this approach can be made faster by exploiting the fact that $\ord(\cclass)$ is likely to have no prime divisors $p_1, ..., p_t$, and this leads us to the Primorial Steps algorithm.
 
 
 \subsection{How is the Primorial Bound Chosen}
@@ -1106,14 +1149,6 @@ The bound on the largest baby step $b$ is $b = m P_n$.  We then compute $h' = \o
 \subsection{How Do We Do It (Empirically)}
 
 
-\bigbreak
-\section{SuperSPAR}
-\label{sec:superSpar}
-
-
-In Stage 1 of SPAR, we compute $\bclass = \aclass^{\prod_{i=2}^t {p_i}^{e_i}}$ and $\cclass = \bclass^{\left(2^k\right)}$.  In Stage 2, we perform a random walk on the cyclic group generated by $\cclass$.  The purpose of Stage 1 is to find an ideal class $\bclass$ whose order is known not have any of the odd primes $p_2, ..., p_t$ as divisors.  If the odd part of $\ord(\bclass)$ divides $\prod_{i=2}^t {p_i}^{e_i}$ and the order of $\bclass$ is even, then computing $\cclass$ produces an ambiguous ideal and we can attempt to factor $N$.
-
-Failing this, Stage 2 attempts to find the order of the ideal class $\cclass$.  Schnorr and Lenstra \cite[p.294]{Schnorr1984} suggest a Pollard-Brent Recursion \cite{Brent1980} based on Pollard's rho method \cite{Pollard1975}.  This approach will yield $\ord(\cclass)$ within $\sqrt{\pi/2}p_t$ steps if $\ord(\cclass) \le {p_t}^2$ and requires only a constant number of group elements.  They also remark \cite[p.298]{Schnorr1984} that Shanks' baby-step giant-step method \cite{Shanks1971} could be used to deterministically find $\ord(\cclass)$ within $\sqrt{2}p_t$ group operations when $\ord(\cclass) \le {p_t}^2$, but requiring $O(p_t)$ storage.  They point out that this approach can be made faster by exploiting the fact that $\ord(\cclass)$ is likely to have no prime divisors $p_1, ..., p_t$, and this leads us to the Primorial Steps algorithm.
 
 \subsection{Complexity}
 \subsection{Analysis for Generic Groups}
@@ -1489,11 +1524,11 @@ Unlike the right-to-left binary GCD in Subsection \ref{subsec:r2lBinGcd}, all of
 
 To further improve performance, we specialized implementations of each of the GCD algorithms discussed in this section for the x64 architecture.  All algorithms are implemented in C99 for the GNU C compiler and often benefit from hand optimized x64 assembler.  The use of assembly language is done in line and is conditionally compiled based on the target platform.  For each of the GCD algorithms presented here, we implemented 32-bit and 64-bit versions, and when arithmetic overflows did not require us to use GMP, we also implemented 128-bit versions.  For appropriately sized inputs, we use these specialized implementations, otherwise we use GMP for the extended GCD computation.
 
-Many of the techniques we use are described in the book ``Hacker's Delight'' \cite{Warren2002}.  Computing $x2^k$ corresponds to shifting $x$ left by $k$ bits.  Computing the integer $\floor{x / 2^k}$ corresponds to shifting $x$ right by $k$ bits.  When we want $x \bmod 2^k$, we achieve this using $x \band (2^k-1)$ where $\band$ is the bitwise `and' operation.  
+Many of the techniques we use are described in the book ``Hacker's Delight'' \cite{Warren2002}.  We use $\band$ to denote bitwise `and', $\bor$ for bitwise `or', `$\bxor$' for bitwise `exclusive or', and lastly `$\bnot$' for bitwise negation.  Computing $x2^k$ corresponds to shifting $x$ left by $k$ bits, while computing the integer $\floor{x / 2^k}$ corresponds to shifting $x$ right by $k$ bits.  When we want $x \bmod 2^k$, we use $x \band (2^k-1)$.
 
-Assuming a two's complement representation of machine words, the most significant bit of a machine word $x$ is set if $x < 0$ and clear otherwise.  We can generate a bit-mask according to this test by using an arithmetic shift right operation (in the C programming language this is a right shift on a signed integer type).  Let $m$ denote the number of bits in a machine word; then the result of an arithmetic shift right on $x$ by $m-1$ bits is either a word with $m$ set bits when $x < 0$ or a word with $m$ clear bits otherwise.  We denote this operation $\texttt{sign\_mask}(x)$.  Notice that a word with $m$ set bits, corresponds to the integer $-1$ under a signed two's complement representation.  Lastly, we use $\oplus$ to denote bitwise exclusive-or, and $\lnot$ to denote bitwise negation.
+Assuming a two's complement representation of machine words, the most significant bit of a machine word $x$ is set if $x < 0$ and clear otherwise.  We can generate a bit-mask according to this test by using an arithmetic shift right operation (in the C programming language this is a right shift on a signed integer type).  Let $m$ denote the number of bits in a machine word; then the result of an arithmetic shift right on $x$ by $m-1$ bits is either a word with $m$ set bits when $x < 0$ or a word with $m$ clear bits otherwise.  We denote this operation $\texttt{sign\_mask}(x)$.  Notice that a word with $m$ set bits, corresponds to the integer $-1$ under a signed two's complement representation.
 
-Using these operations, we can compute the absolute value of a signed machine word $x$ without using any conditional statements.  Let $y = \texttt{sign\_mask}(x)$ and the absolute value of $x$ is $(x \oplus y) - y$.  To see this, suppose $x \ge 0$.  Then $y$ is 0 and so $(x \oplus y) - y = x$.  When $x < 0$, $y$ has all of its bits set (and is also $-1$).  Therefore, $(x \oplus y) - y = \lnot x + 1 = -x$.
+Using these operations, we can compute the absolute value of a signed machine word $x$ without using any conditional statements.  Let $y = \texttt{sign\_mask}(x)$ and the absolute value of $x$ is $(x \bxor y) - y$.  To see this, suppose $x \ge 0$.  Then $y$ is 0 and so $(x \bxor y) - y = x$.  When $x < 0$, $y$ has all of its bits set (and is also $-1$).  Therefore, $(x \bxor y) - y = \bnot x + 1 = -x$.
 
 Similarly, we can conditionally negate a word $x$ based on a mask $y$.  This is useful since the extended GCD algorithms described previously expect their input, $a$ and $b$, to be positive integers.  We first compute the absolute value of $a$ and $b$ by computing their signed masks and then conditionally negate each respectively.  Since the extended GCD algorithm computes a solution to $s = Ua + Vb$, where $a$ and $b$ have been made positive, the solution for our original inputs is to conditionally negate $U$ based on the signed mask of $a$ and $V$ based on the signed mask of $b$.
 
@@ -1507,11 +1542,11 @@ when $s \ge t$ and
 \]
 otherwise, we can remove the conditional instructions by simply computing the first form and then performing a conditional negation on the triple $(t, X, Y)$ based on the signed mask of $s-t$ before the operation.
 
-To swap two machine words, $x_0$ and $y_0$, without using additional words, we compute $x_1 = x_0 \oplus y_0$, $y_1 = x_1 \oplus y_0$, and then $x_2 = x_1 \oplus y_1$.  Notice that $x_2$ expands to
+To swap two machine words, $x_0$ and $y_0$, without using additional words, we compute $x_1 = x_0 \bxor y_0$, $y_1 = x_1 \bxor y_0$, and then $x_2 = x_1 \bxor y_1$.  Notice that $x_2$ expands to
 \[
-	x_2 = (x_0 \oplus y_0) \oplus ((x_0 \oplus y_0) \oplus y_0)
+	x_2 = (x_0 \bxor y_0) \bxor ((x_0 \bxor y_0) \bxor y_0)
 \]
-and this reduces to $x_2 = y_0$.  Also, $y_1$ expands to $(x_0 \oplus y_0) \oplus y_0$, which is just $x_0$.  In practice, each assignment to $x_i$ and $y_i$ overwrites the previous $x_{i-1}$ and $y_{i-1}$ and so is performed in place.
+and this reduces to $x_2 = y_0$.  Also, $y_1$ expands to $(x_0 \bxor y_0) \bxor y_0$, which is just $x_0$.  In practice, each assignment to $x_i$ and $y_i$ overwrites the previous $x_{i-1}$ and $y_{i-1}$ and so is performed in place.
 
 We can conditionally swap two words, $x$ and $y$ when $x < y$ by using two additional words.  Let $d = x - y$.  Notice that simply computing $x \gets x - d$ and $y \gets y + d$ swaps $x$ and $y$.  Instead, let $m = \texttt{sign\_mask}(d)$ and then  $x \gets x - (d \band m)$ and $y \gets y + (d \band m)$ swaps $x$ and $y$ only when $x < y$.  In the left-to-right binary GCD, we conditionally swap the triple $(s, U, V)$ with $(t, X, Y)$ when $s < t$.  By fixing $m = \texttt{sign\_mask}(s - t)$, but letting $d$ take on $s - t$, and then $U - X$, and finally $V - Y$, we can conditionally swap the triples when $s < t$. The algorithm is given in Algorithm \ref{alg:condSwap3}.
 \begin{algorithm}[h]
@@ -1634,8 +1669,8 @@ This leads us to the following implementation, which we optimize to be free of c
 \begin{align*}
 b   &= q'a + r' & \textrm{\{division with remainder\}}\\
 q_m &= -(q \band 1) & \textrm{\{$q_m$ has all bits set when $q$ is odd\}} \\
-r_m &= \lnot\texttt{sign\_mask}(r) & \textrm{\{$r_m$ has all bits set when $r \ge 0$\}} \\
-a'  &= (a \oplus r_m) - r_m & \textrm{\{negate $a$ when $r_m$ is all set\}} \\
+r_m &= \bnot\texttt{sign\_mask}(r) & \textrm{\{$r_m$ has all bits set when $r \ge 0$\}} \\
+a'  &= (a \bxor r_m) - r_m & \textrm{\{negate $a$ when $r_m$ is all set\}} \\
 r   &= r' + (a' \band q_m) & \textrm{\{move $r$ towards zero when $q$ is odd\}} \\
 d   &= r_m \bor 1 & \textrm{1 when $r < 0$ and $-1$ otherwise} \\
 q   &= (q' - (d \band q_m))/2 & \textrm{\{adjust $q$ with respect to $r$\}}
