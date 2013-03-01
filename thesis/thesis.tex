@@ -853,7 +853,6 @@ Algorithm \ref{alg:rtolDbnsChain} implements a non-recursive function with group
 \label{alg:rtolDbnsChain}
 \begin{algorithmic}[1]
 \REQUIRE $n \in \ZZgez$
-%\ENSURE $n=\sum_{i=1}^k s_i2^{a_i}3^{b_i}$ as a strictly chained partition.
 \STATE $(a, b) \gets (0, 0)$
 \STATE $i \gets 1$
 \WHILE {$n > 0$}
@@ -1065,7 +1064,7 @@ In the first stage, we compute $\bclass = \aclass^{\prod_{i=2}^t {p_i}^{e_i}}$ a
 \]
 until there is some $j < k$ such that $[\mathfrak c_j] = [\mathfrak c_k]$.  By the function $f$, we can compute $u$ and $v$ such that $[\mathfrak c_j]=\cclass^u$ and $[\mathfrak c_k]=\cclass^v$.  The order of $\cclass$ is then a multiple of $h = v - u$.  We can compute an ambiguous class representative by computing $\dclass = \bclass^h$ and then computing $\dclass^{\left(2^k\right)}$ for the smallest $k \le \floor{\log_2{\sqrt N}}$ as before.  Assuming that such a $k$ exists, then $\dclass^{\left(2^{k-1}\right)}$ is an ambiguous class representative and we can attempt to factor $N$.
 
-\subsection{Complexity}
+\subsection{SPAR Complexity}
 
 The original publication of SPAR by Schnorr and Lenstra \cite{Schnorr1984} claimed that every composite integer $N$ could be factored in $o\left(\exp\sqrt{\ln N \ln\ln N}\right)$ bit operations.  This was the first factoring algorithm for which this runtime had been conjectured, and it was also the first for which this conjecture had to be withdrawn \cite{Lenstra1992}.
 
@@ -1162,15 +1161,27 @@ and for some $k' < k$ it holds that ${\left(\dclass^{k'}\right)}^2 = \idclass$ a
 
 \subsection{SuperSPAR in Practice}
 
-In practice, the efficiency of the SuperSPAR factoring algorithm depends on the smoothness of the order of the ideal class $\aclass$ with respect to the primorial $E$ chosen.  The larger the divisor that $\ord(\aclass)$ and $E$ have in common, the smaller the order of $\cclass = \aclass^{\left(2^k\right)E}$.  Changing class groups by changing the square free multiplier $k$ for the discriminant $\delta$ also changes the order of random elements in the new group.  As such, we can trade off the number of ideal classes or multipliers $k$ against the size of the bound $M \le h_\Delta$ that we assume.
+In practice, the efficiency of the SuperSPAR factoring algorithm depends on the smoothness of the order of the ideal class $\aclass$ with respect to the power primorial $E$ chosen.  The larger the divisor that $\ord(\aclass)$ and $E$ have in common, the smaller the order of $\cclass = \aclass^{\left(2^k\right)E}$ and the smaller the bound $b$ we need for the baby steps and giant steps.  Changing class groups by changing the square free multiplier $k$ for the discriminant $\Delta$ also changes the order of random elements in the new group.  As such, we can trade off the number of ideal classes or multipliers $k$ against the largest prime used in the power primorial $E$.
+
+Furthermore, Schnorr and Lenstra \cite[p.293]{Schnorr1984} advise the use of smaller exponents $e'_i = \max \{v : {p_i}^v \le p_t \}$ for the first $t$ primes $p_i \le N^{1/2r}$ when computing the exponent $E$ in practice.  As the exponent $e_i$ in the prime power ${p_i}^{e_i}$ increases, the likelihood of a random integer being divisible by that prime power decreases.  For this reason, we bound the exponents $e_i$ of the prime powers ${p_i}^{e_i}$ separately from the bound on the largest prime used in $E$.
+
+Finally, we note that selecting a bound $b=mP_n$ for the primorial steps phase implies that the number of group operations performed during this phase of the algorithm dominates over the number of group operations required to exponentiate $\aclass^E$.  In addition, as $P_n$ grows, computing baby steps coprime to $b$ becomes computational intractable.  For this reason, we select a separate bound on the largest prime used for the primorial $P_n$ in the bound $b$.
+
+Ideally, we want to minimize the expected number of group operations that lead to a factorization of the integer $N$.  The parameters involved are the number of prime ideal classes $\aclass$ tried before switching multipliers and class groups, the bound on the largest prime in the exponent $E$, a bound on the exponents $e_i$ of the prime powers ${p_i}^{e_i}$ whose product is the exponents $E$, and a bound on the largest prime used in the bound $b$ on the number of baby steps.
+
+TODO: Mention that giant steps are twice last baby step rounded up, to take advantage of inversions.
 
 
-Schnorr and Lenstra \cite[p.293]{Schnorr1984} advise smaller exponents $e'_i = \max \{v : {p_i}^v \le p_t \}$ for the first $t$ primes $p_i \le N^{1/2r}$.
+Assuming these parameters are known, the complete SuperSPAR is given in Algorithm \ref{alg:superSpar}.
 
-TODO: describe all the steps of the implemented algorithm, without saying the exact values of things, just that we determine them empirically in Chapter \ref{chap:superSparExperiments}
+\begin{algorithm}[h]
+\caption{SuperSPAR Integer Factoring Algorithm.}
+\label{alg:superSpar}
+\begin{algorithmic}[1]
+\REQUIRE $N \in \ZZgez$
+\end{algorithmic}
+\end{algorithm}
 
-
-\subsection{How is the Primorial Bound Chosen}
 
 TODO: We actually choose a prime bound for $E$ as $B = \Delta^{1/u}$ for some $u$ and use considerably smaller $e_i$ for the prime powers.
 
@@ -1178,9 +1189,12 @@ TODO: Then we choose a different prime bound $B' \le B$ for coprime baby steps. 
 
 The reason is that we can use a much larger primorial for exponentiation than it is reasonable to take baby steps to a multiple of.  By taking fewer baby steps and giant steps, we might not reach the actual bound $h_\Delta$, but then we trade off the time spent on order finding with the number of multipliers used.
 
-\subsection{Bound on Primes}
+\subsection{SuperSPAR Complexity}
 
-\subsection{Bound on Prime Power}
+- Bound on largest prime in power primorial for large exponentiation.
+- Bound on exponents of powers primorial
+- Bound on primorial steps
+- 
 
 \subsection{How is this Done in the Original SPAR}
 
