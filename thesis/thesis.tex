@@ -1142,7 +1142,7 @@ for a random ideal class $\aclass$ and $\cclass = {\bclass}^{\left(2^k\right)}$ 
 
 Failing this, Stage 2 attempts to find the order of $\cclass$ by performing a random walk on the cyclic group that it generates.  Schnorr and Lenstra \cite[p.294]{Schnorr1984} suggest a Pollard-Brent Recursion \cite{Brent1980} based on Pollard's rho method \cite{Pollard1975}.  This approach will yield $\ord(\cclass)$ within $\sqrt{\pi/2}p_t$ steps if $\ord(\cclass) \le {p_t}^2$ and requires only a constant number of group elements.  They also remark \cite[p.298]{Schnorr1984} that Shanks' baby-step giant-step method \cite{Shanks1971} could be used to deterministically find $\ord(\cclass)$ within $\sqrt{2}p_t$ group operations when $\ord(\cclass) \le {p_t}^2$, but requiring $O(p_t)$ storage.  They point out that this approach can be made faster by exploiting the fact that $\ord(\cclass)$ is likely to have no prime divisors $p_1, ..., p_t$, and this leads us to the SuperSPAR factoring algorithm.
 
-\subsection{SuperSPAR Algorithm}
+\subsection{Deterministic SuperSPAR}
 
 SuperSPAR works by finding an ambiguous ideal that leads to the factorization of its discriminant, and we find an ambiguous ideal by applying the relevant parts of the primorial steps algorithm.  Let $N$ be the odd integer we wish to factor.  We start with a square free integer $k$ and choose a discriminant $\Delta = -kN$ or $\Delta = -4kN$ such that $\Delta \equiv 0, 1 \pmod 4$.  We then find a random prime ideal class representative $\aclass \in Cl_\Delta$.  If we were to compute $h = \ord(\aclass)$ and $h$ was even, we could compute an ambiguous ideal $\aclass^{h/2}$, but this is more work than necessary -- all we need is the ambiguous ideal and not the order.
 
@@ -1153,7 +1153,7 @@ To use the bounded primorial steps algorithm, we need some bound $M$ on the orde
 \end{equation}
 Let this be our bound $M$ on the order of $\aclass$.  Following the primorial steps algorithm, we compute the largest primorial $P_n$ such that $P_n \le \sqrt M$.  Next, we maximize $m$ such that $m^2P_n\phi(P_n) \le M$, and set $b = mP_n$.
 
-In the primorial steps algorithm we would compute $E = \prod_{i=1}^n {p_i}^{\floor{\log_{p_i} M}}$ and $\bclass = \aclass^E$.  However, since we want to find an ambiguous ideal, i.e.\ some ideal class $\cclass$ such that $\cclass^2 = \idclass$, we instead only use the \emph{odd} primes $p_i \le p_n$ when computing $E$ and $\bclass = \aclass^E$.
+If we wanted to determine the order of $\aclass$, following the primorial steps algorithm we would compute $E = \prod_{i=1}^n {p_i}^{\floor{\log_{p_i} M}}$ and $\bclass = \aclass^E$.  However, since we only want to find an ambiguous ideal, we instead only use the \emph{odd} primes $p_i \le p_n$ when computing $E$ and $\bclass = \aclass^E$.
 
 Similar to the original SPAR algorithm, we then compute $\cclass = \bclass^{\left(2^k\right)}$.  In this case, we use the bound on the class group $h_\Delta$ from Equation \ref{eq:hDelta} such that $k = \floor{\log_2 h_\Delta}$.  Now we have an ideal class $\cclass$ whose order is known not to have any of the primes $p_i \le p_n$ as divisors.  We compute the order of $\cclass$ by taking baby steps $\cclass^i$ for $1 \le i \le b$ where $i$ is coprime to $P_n$, and giant steps $\cclass^j$ for $j=2b, -2b, 4b, -4b ...$\footnote{We use this sequence of giant steps since computing the inverse in the ideal class group is essentially free.}.  Having computed the order $h' = \ord(\cclass)$, we compute an ambiguous ideal by repeated squaring of $\dclass = \bclass^{h'}$ assuming that $\ord(\bclass)$ is even.  This works since $\bclass = \aclass^E$ and $E$ has no factors of 2.  We have 
 \[
@@ -1161,7 +1161,7 @@ Similar to the original SPAR algorithm, we then compute $\cclass = \bclass^{\lef
 \]
 and for some $k' < k$ it holds that ${\left(\dclass^{k'}\right)}^2 = \idclass$ and $\dclass^{k'}$ is an ambiguous ideal.  If our initial prime ideal class representative $\aclass$ has odd order, then we try again with a different prime ideal, or a different square free multiplier $k$.
 
-\subsection{SuperSPAR in Practice}
+\subsection{Probabilistic SuperSPAR}
 
 In practice, the efficiency of the SuperSPAR factoring algorithm partially depends on the smoothness of the order of the ideal class $\aclass$ with respect to the power primorial $E$.  The larger the divisor that $\ord(\aclass)$ and $E$ have in common, the smaller the order of $\cclass = \aclass^{\left(2^k\right)E}$ and the smaller the bound $b$ we need for the baby steps and giant steps.  Changing the square free multiplier $k$ for the discriminant $\Delta$ changes the class group, and in the new class group elements may have orders that are smoother (TODO: cite something).  As such, we trade off the number of ideal classes and multipliers $k$ against the largest prime used in the power primorial $E$.
 
@@ -1182,16 +1182,16 @@ Assuming we know good choices for each of the variables involved, we give the co
 \IF {$\Delta \not\equiv 0,1 \pmod 4$}
 	\STATE $\Delta \gets 4\Delta$
 \ENDIF
-\STATE select $\aclass$ at random
+\STATE select $\aclass$ at random \COMMENT{typically a prime ideal representative}
 \STATE $\bclass \gets \aclass^E$ \COMMENT{big exponentiation by power primorial}
 \IF {$\bclass = \idclass$}
-	\STATE go to line \ref{goto:tryAgain}
+	\STATE go to line \ref{goto:tryAgain} \COMMENT{no ambiguous ideal since $\ord(\aclass)$ is odd}
 \ENDIF
 \STATE $\cclass \gets \bclass$
 \FOR{$1 \le k \le \floor{\log_2 h_\Delta}$}
 	\STATE $\cclass \gets \cclass^2$ \COMMENT{compute $\cclass^{\left(2^{\floor{\log_2 h_\Delta}}\right)}$ by repeated squaring}
-	\IF {$\cclass = \idclass$}
-		\STATE attempt to factor $\Delta$ since $\bclass^{\left(2^{k-1}\right)}$ is an ambiguous ideal
+	\IF {$\cclass$ is an ambiguous ideal}
+		\RETURN attempt to factor $\Delta$ using $\cclass$
 	\ENDIF
 \ENDFOR
 \STATE clear the lookup table
@@ -1203,11 +1203,18 @@ Assuming we know good choices for each of the variables involved, we give the co
 \ENDFOR
 \FOR{$1 \le j \le \phi(b)$}
 	\IF{$\cclass^{2jb}$ is in the table}
-		\STATE $h' \gets 2jb - i$, then go to line \ref{goto:findAmbiguous}
+		\STATE $h' \gets 2jb - i$, then go to line \ref{goto:findAmbiguous}  \COMMENT{regular giant-step}
+	\ELSIF{$\cclass^{-2jb}$ is in the table}
+		\STATE $h' \gets 2jb + i$, then go to line \ref{goto:findAmbiguous} \COMMENT{inverted giant-step}
 	\ENDIF
 \ENDFOR
-
-
+\STATE $\dclass \gets \bclass^{h'}$ \label{goto:findAmbiguous}
+\FOR{$1 \le k \le \floor{\log_2 h_\Delta}$}
+	\STATE $\dclass \gets \dclass^2$
+	\IF{$\dclass$ is an ambiguous ideal}
+		\RETURN attempt to factor $\Delta$ using $\dclass$
+	\ENDIF
+\ENDFOR
 \STATE choose a different ideal class $\aclass$ or a different multiplier $k$ and try again at line \ref{goto:newK} \label{goto:tryAgain}
 \end{algorithmic}
 \end{algorithm}
@@ -1218,8 +1225,7 @@ Assuming we know good choices for each of the variables involved, we give the co
 Ideally, we want to minimize the expected number of group operations that lead to a factorization of the integer $N$.  The parameters involved are the number of prime ideal classes $\aclass$ tried before switching multipliers and class groups, the bound on the largest prime in the exponent $E$, a bound on the exponents $e_i$ of the prime powers ${p_i}^{e_i}$ whose product is the exponents $E$, and a bound on the largest baby step $b$.
 
 
-\subsection{How Do We Do It (Empirically)}
-
+%\subsection{How Do We Do It (Empirically)}
 %\subsection{Analysis for Generic Groups}
 %\subsection{Analysis for Class Group of Imaginary Quadratic Number Fields}
 %\subsection{Comparison with Original SPAR}
