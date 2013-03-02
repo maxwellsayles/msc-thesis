@@ -1074,15 +1074,17 @@ This claim was based on a false assumption -- for a complete discussion, see Len
 \section{Primorial Steps}
 \label{sec:primorial}
 
-TODO: Mention that giant steps are twice last baby step rounded up, to take advantage of inversions.  \cite[p.50]{Sutherland2007}
-
-TODO: Small proof that baby-steps giant-steps work.  If it's a small proof
-
-
-
 The Bounded Primorial Steps algorithm \cite{Sutherland2007} is an order finding algorithm for generic groups with asymptotic complexity $o(\sqrt N)$ where $N$ is the order of the group element.  This is asymptotically better than previously known order finding algorithms for generic groups, such as the Pollard-Brent method \cite{Brent1980} and Shanks' baby-step giant-step method \cite{Shanks1971}, both of which have complexity $O(\sqrt N)$.
 
+\subsection{Shank's Baby-Step Giant-Step Method}
+
 The idea is similar to Shanks' baby-step giant-step method, which is as follows.  For some element $\alpha$ in a group $G$ and some bound $M$ on the order of the element $\alpha$, let $b = \ceil{\sqrt{M}}$ and compute $\alpha^1, \alpha^2, ..., \alpha^b$ storing each $(\alpha^i, i)$ in a table -- these are the baby steps.  If any $\alpha^i = 1_G$, then we know the order of $\alpha$.  Otherwise compute $\alpha^{2b}, \alpha^{3b}, ...$ and for each $\alpha^{jb}$, if $\alpha^{jb}$ is in the table then $\alpha^{jb} = \alpha^i$ for some $i$ and $jb - i$ is a multiple of the order of $\alpha$.  These are the giant steps.  Notice that we choose $b$ such that after an equal number of baby steps and giant steps, the last giant step has an exponent $b^2 \ge M$.
+
+To see that this works, consider the order of the element $\alpha$.  Let $h = \ord(\alpha)$.  If $h \le b$ then we find some $\alpha^i = 1_G$ with $i \le b$ during the baby steps.  Otherwise, $h = jb + i$ for some integer $j$ and $i < b$, and we find $\alpha^{jb} = \alpha^i$, which implies $\alpha^{jb-i} = 1_G$.
+
+Following Sutherland \cite[p.50]{Sutherland2007}, we point out that if computing the inverse of an element is cheaper than multiplication, we can reduce the number of group operations by letting $b = \ceil{\sqrt{M/2}}$ and computing the giant steps $\alpha^{2b}, \alpha^{-2b}, \alpha^{4b}, \alpha^{-4b}, ...$ instead.  Again, if the order $h \le b$, we find some $\alpha^i = 1_G$ during the baby steps.  Otherwise, either $h = 2jb - i$ or $h = 2jb + i$ for $i \le b$.  In the first case, we find some $\alpha^{2jb} = \alpha^i$ and we have $\alpha^{2jb-i} = 1_G$, and in the second case, we find some $\alpha^{-2jb} = \alpha^i$ and we have $\alpha^{2jb+i} = 1_G$. 
+
+\subsection{Primorial Steps Algorithm}
 
 Sutherland observed \cite[p.56]{Sutherland2007} that if $h = \ord(\alpha)$ is odd, we need only compute odd powers $\alpha^1, \alpha^3, ..., \alpha^{b-1}$ for the baby steps.  We still need to compute giant steps $\alpha^{2b}, \alpha^{3b}, ...,$ for some $b$ that is even since we want to find some $\alpha^{jb} = \alpha^i$ where $jb - i$ is odd.  As before, we choose $b$ such that after an equal number of baby steps and giant steps, the last giant step has an exponent $b^2 \ge M$.  In this case, we choose $b = \ceil{\sqrt{2M}}$ so that after roughly $\sqrt{M/2}$ baby steps and $\sqrt{M/2}$ giant steps, the last giant step has exponent $b^2 \ge M$.
 
@@ -1136,7 +1138,7 @@ In Stage 1 of SPAR, we take the first $t$ primes $p_i \le N^{1/2r}$ for $r = \sq
 \[
 	\bclass = \aclass^{\prod_{i=2}^t {p_i}^{e_i}},
 \]
-for a random ideal class $\aclass$ and $\cclass = {\bclass}^{\left(2^k\right)}$ for $k=\floor{\log_2 {h_\Delta}}$ (where $h_\Delta$ is given by Equation \ref{eq:hDelta}).  The purpose of Stage 1 is to find an ideal class $\bclass$ whose order is likely (TODO: is it guaranteed?) not have any of the odd primes $p_2, ..., p_t$ as divisors.  If the odd part of $\ord(\bclass)$ divides $\prod_{i=2}^t {p_i}^{e_i}$ and the order of $\bclass$ is even, then computing $\cclass$ produces an ambiguous ideal and we can attempt to factor the discriminant $\Delta$.
+for a random ideal class $\aclass$ and $\cclass = {\bclass}^{\left(2^k\right)}$ for $k=\floor{\log_2 {h_\Delta}}$ (where $h_\Delta$ is given by Equation \ref{eq:hDelta}).  The purpose of Stage 1 is to find an ideal class $\bclass$ whose order is likely not have any of the odd primes $p_2, ..., p_t$ as divisors.  If the odd part of $\ord(\bclass)$ divides $\prod_{i=2}^t {p_i}^{e_i}$ and the order of $\bclass$ is even, then computing $\cclass$ produces an ambiguous ideal and we can attempt to factor the discriminant $\Delta$.
 
 Failing this, Stage 2 attempts to find the order of $\cclass$ by performing a random walk on the cyclic group that it generates.  Schnorr and Lenstra \cite[p.294]{Schnorr1984} suggest a Pollard-Brent Recursion \cite{Brent1980} based on Pollard's rho method \cite{Pollard1975}.  This approach will yield $\ord(\cclass)$ within $\sqrt{\pi/2}p_t$ steps if $\ord(\cclass) \le {p_t}^2$ and requires only a constant number of group elements.  They also remark \cite[p.298]{Schnorr1984} that Shanks' baby-step giant-step method \cite{Shanks1971} could be used to deterministically find $\ord(\cclass)$ within $\sqrt{2}p_t$ group operations when $\ord(\cclass) \le {p_t}^2$, but requiring $O(p_t)$ storage.  They point out that this approach can be made faster by exploiting the fact that $\ord(\cclass)$ is likely to have no prime divisors $p_1, ..., p_t$, and this leads us to the SuperSPAR factoring algorithm.
 
@@ -1153,7 +1155,7 @@ Let this be our bound $M$ on the order of $\aclass$.  Following the primorial st
 
 In the primorial steps algorithm we would compute $E = \prod_{i=1}^n {p_i}^{\floor{\log_{p_i} M}}$ and $\bclass = \aclass^E$.  However, since we want to find an ambiguous ideal, i.e.\ some ideal class $\cclass$ such that $\cclass^2 = \idclass$, we instead only use the \emph{odd} primes $p_i \le p_n$ when computing $E$ and $\bclass = \aclass^E$.
 
-Similar to the original SPAR algorithm, we then compute $\cclass = \bclass^{\left(2^k\right)}$.  In this case, we use the bound on the class group $h_\Delta$ from Equation \ref{eq:hDelta} such that $k = \floor{\log_2 h_\Delta}$.  Now we have an ideal class $\cclass$ whose order is known not to have any of the primes $p_i \le p_n$ as divisors.  We compute the order of $\cclass$ by taking baby steps $\cclass^i$ for $1 \le i \le b$ where $i$ is coprime to $P_n$, and giant steps $\cclass^j$ for $j=2b, 3b, ...$.  Having computed the order $h' = \ord(\cclass)$, we compute an ambiguous ideal by repeated squaring of $\dclass = \bclass^{h'}$ assuming that $\ord(\bclass)$ is even.  This works since $\bclass = \aclass^E$ and $E$ has no factors of 2.  We have 
+Similar to the original SPAR algorithm, we then compute $\cclass = \bclass^{\left(2^k\right)}$.  In this case, we use the bound on the class group $h_\Delta$ from Equation \ref{eq:hDelta} such that $k = \floor{\log_2 h_\Delta}$.  Now we have an ideal class $\cclass$ whose order is known not to have any of the primes $p_i \le p_n$ as divisors.  We compute the order of $\cclass$ by taking baby steps $\cclass^i$ for $1 \le i \le b$ where $i$ is coprime to $P_n$, and giant steps $\cclass^j$ for $j=2b, -2b, 4b, -4b ...$\footnote{We use this sequence of giant steps since computing the inverse in the ideal class group is essentially free.}.  Having computed the order $h' = \ord(\cclass)$, we compute an ambiguous ideal by repeated squaring of $\dclass = \bclass^{h'}$ assuming that $\ord(\bclass)$ is even.  This works since $\bclass = \aclass^E$ and $E$ has no factors of 2.  We have 
 \[
 \cclass^{h'} = \bclass^{h'\left(2^k\right)} = \dclass^{\left(2^k\right)} = \idclass
 \]
@@ -1161,15 +1163,13 @@ and for some $k' < k$ it holds that ${\left(\dclass^{k'}\right)}^2 = \idclass$ a
 
 \subsection{SuperSPAR in Practice}
 
-In practice, the efficiency of the SuperSPAR factoring algorithm depends on the smoothness of the order of the ideal class $\aclass$ with respect to the power primorial $E$ chosen.  The larger the divisor that $\ord(\aclass)$ and $E$ have in common, the smaller the order of $\cclass = \aclass^{\left(2^k\right)E}$ and the smaller the bound $b$ we need for the baby steps and giant steps.  Changing class groups by changing the square free multiplier $k$ for the discriminant $\Delta$ also changes the order of random elements in the new group.  As such, we trade off the number of ideal classes or multipliers $k$ against the largest prime used in the power primorial $E$.
+In practice, the efficiency of the SuperSPAR factoring algorithm partially depends on the smoothness of the order of the ideal class $\aclass$ with respect to the power primorial $E$.  The larger the divisor that $\ord(\aclass)$ and $E$ have in common, the smaller the order of $\cclass = \aclass^{\left(2^k\right)E}$ and the smaller the bound $b$ we need for the baby steps and giant steps.  Changing the square free multiplier $k$ for the discriminant $\Delta$ changes the class group, and in the new class group elements may have orders that are smoother (TODO: cite something).  As such, we trade off the number of ideal classes and multipliers $k$ against the largest prime used in the power primorial $E$.
 
-Furthermore, Schnorr and Lenstra \cite[p.293]{Schnorr1984} advise the use of smaller exponents $e'_i = \max \{v : {p_i}^v \le p_t \}$ for the first $t$ primes $p_i \le N^{1/2r}$ when computing the exponent $E$ in practice.  As the exponent $e_i$ in the prime power ${p_i}^{e_i}$ increases, the likelihood of a random integer being divisible by that prime power decreases.  For this reason, we bound the exponents $e_i$ of the prime powers ${p_i}^{e_i}$ separately from the bound on the largest prime used in $E$.
+Furthermore, Schnorr and Lenstra \cite[p.293]{Schnorr1984} advise the use of smaller exponents $e'_i = \max \{v : {p_i}^v \le p_t \}$ for the first $t$ primes $p_i \le N^{1/2r}$ when computing the exponent $E$ in practice.  As the exponent $e_i$ in the prime power ${p_i}^{e_i}$ increases, the likelihood of a random integer being divisible by that prime power decreases.  As such, it is generally more useful to use larger primes in the exponent $E$ than larger prime powers.  For this reason, we bound the exponents $e_i$ of the prime powers ${p_i}^{e_i}$ separately from the bound on the largest prime used in $E$.
 
-Finally, we note that selecting a bound $b=mP_n$ for the primorial steps phase implies that the number of group operations performed during this phase of the algorithm dominates over the number of group operations required to exponentiate $\aclass^E$.  In addition, as $P_n$ grows, computing baby steps coprime to $b$ becomes computational intractable.  For this reason, we select a separate bound on the largest prime used for the primorial $P_n$ in the bound $b$.
+Finally, we note that selecting a bound $b=mP_n$ for the primorial steps phase implies that the number of group operations performed during this phase of the algorithm dominates over the number of group operations required to exponentiate $\aclass^E$.  In addition to this, as $P_n$ grows, computing baby steps up to the bound $b$ becomes computational intractable.  Therefore, we select the bound $b$ on the largest baby step separately.  We point out that after taking $\phi(b)$ baby steps with each step coprime to $b$, followed by $\phi(b)$ giant steps with each step $2b$ in size, the final giant step may have an exponent less than $\ord(\cclass)$.  In which case, we will not find an ambiguous ideal from our initial ideal class $\aclass$ and we try again with a different ideal class $\aclass$ or multiplier $k$ on the discriminant $\Delta$.  Again, this trades off the number of group operations used when searching for an ambiguous ideal against the number of ideals tried per class group or the number of class groups used.
 
-Ideally, we want to minimize the expected number of group operations that lead to a factorization of the integer $N$.  The parameters involved are the number of prime ideal classes $\aclass$ tried before switching multipliers and class groups, the bound on the largest prime in the exponent $E$, a bound on the exponents $e_i$ of the prime powers ${p_i}^{e_i}$ whose product is the exponents $E$, and a bound on the largest prime used in the bound $b$ on the number of baby steps.
-
-Assuming these parameters are known, the complete SuperSPAR is given in Algorithm \ref{alg:superSpar}.
+Assuming we know good choices for each of the variables involved, we give the complete SuperSPAR algorithm in listing \ref{alg:superSpar}.
 
 \begin{algorithm}[h]
 \caption{SuperSPAR Integer Factoring Algorithm.}
@@ -1180,31 +1180,16 @@ Assuming these parameters are known, the complete SuperSPAR is given in Algorith
 \end{algorithm}
 
 
-TODO: We actually choose a prime bound for $E$ as $B = \Delta^{1/u}$ for some $u$ and use considerably smaller $e_i$ for the prime powers.
-
-TODO: Then we choose a different prime bound $B' \le B$ for coprime baby steps.  Note that we take baby steps up to $b = mB'$ and then giant steps as a multiple of $b'$ as before.
-
-The reason is that we can use a much larger primorial for exponentiation than it is reasonable to take baby steps to a multiple of.  By taking fewer baby steps and giant steps, we might not reach the actual bound $h_\Delta$, but then we trade off the time spent on order finding with the number of multipliers used.
-
 \subsection{SuperSPAR Complexity}
 
-- Bound on largest prime in power primorial for large exponentiation.
-- Bound on exponents of powers primorial
-- Bound on primorial steps
-- 
+Ideally, we want to minimize the expected number of group operations that lead to a factorization of the integer $N$.  The parameters involved are the number of prime ideal classes $\aclass$ tried before switching multipliers and class groups, the bound on the largest prime in the exponent $E$, a bound on the exponents $e_i$ of the prime powers ${p_i}^{e_i}$ whose product is the exponents $E$, and a bound on the largest baby step $b$.
 
-\subsection{How is this Done in the Original SPAR}
-
-\subsection{How is this Done for Generic Groups}
 
 \subsection{How Do We Do It (Empirically)}
 
-
-
-\subsection{Complexity}
-\subsection{Analysis for Generic Groups}
-\subsection{Analysis for Class Group of Imaginary Quadratic Number Fields}
-\subsection{Comparison with Original SPAR}
+%\subsection{Analysis for Generic Groups}
+%\subsection{Analysis for Class Group of Imaginary Quadratic Number Fields}
+%\subsection{Comparison with Original SPAR}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
