@@ -1175,7 +1175,40 @@ Assuming we know good choices for each of the variables involved, we give the co
 \caption{SuperSPAR Integer Factoring Algorithm.}
 \label{alg:superSpar}
 \begin{algorithmic}[1]
-\REQUIRE $N \in \ZZgez$
+\REQUIRE an integer $N \in \ZZgez$ to be factored, \\
+  $E, b, \ZZgtz$
+\STATE $k \gets 1$
+\STATE $\Delta \gets -kN$  \label{goto:newK}
+\IF {$\Delta \not\equiv 0,1 \pmod 4$}
+	\STATE $\Delta \gets 4\Delta$
+\ENDIF
+\STATE select $\aclass$ at random
+\STATE $\bclass \gets \aclass^E$ \COMMENT{big exponentiation by power primorial}
+\IF {$\bclass = \idclass$}
+	\STATE go to line \ref{goto:tryAgain}
+\ENDIF
+\STATE $\cclass \gets \bclass$
+\FOR{$1 \le k \le \floor{\log_2 h_\Delta}$}
+	\STATE $\cclass \gets \cclass^2$ \COMMENT{compute $\cclass^{\left(2^{\floor{\log_2 h_\Delta}}\right)}$ by repeated squaring}
+	\IF {$\cclass = \idclass$}
+		\STATE attempt to factor $\Delta$ since $\bclass^{\left(2^{k-1}\right)}$ is an ambiguous ideal
+	\ENDIF
+\ENDFOR
+\STATE clear the lookup table
+\FOR{$1 \le i \le b$ where $\gcd(i,b)=1$}
+	\STATE compute $\cclass^i$ and store $(\cclass^i, i)$ in the lookup table \COMMENT{coprime baby-steps}
+	\IF{$\cclass^i = \idclass$}
+		\STATE $h' \gets i$, then go to line \ref{goto:findAmbiguous} 
+	\ENDIF
+\ENDFOR
+\FOR{$1 \le j \le \phi(b)$}
+	\IF{$\cclass^{2jb}$ is in the table}
+		\STATE $h' \gets 2jb - i$, then go to line \ref{goto:findAmbiguous}
+	\ENDIF
+\ENDFOR
+
+
+\STATE choose a different ideal class $\aclass$ or a different multiplier $k$ and try again at line \ref{goto:newK} \label{goto:tryAgain}
 \end{algorithmic}
 \end{algorithm}
 
@@ -2059,7 +2092,9 @@ i.e. is it faster to use the product and one exponentiation or individual primes
 
 \section{Best multipliers to use}
 
-\section{Chained Hashing vs OPen Address Hashing}
+\section{Chained Hashing vs Open Address Hashing}
+
+Only hash the pair $(a,c)$ so that $\aclass$ and $\aclass^{-1}$ hash to the same value.
 
 \section{Empirical search for primorial and step count}
 \begin{itemize}
