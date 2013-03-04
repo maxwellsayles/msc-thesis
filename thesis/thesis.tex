@@ -1062,7 +1062,7 @@ until there is some $j < k$ such that $[\mathfrak c_j] = [\mathfrak c_k]$.  By t
 
 The original publication of SPAR by Schnorr and Lenstra \cite{Schnorr1984} claimed that every composite integer $N$ could be factored in $o\left(\exp\sqrt{\ln N \ln\ln N}\right)$ bit operations.  This was the first factoring algorithm for which this runtime had been conjectured, and it was also the first for which this conjecture had to be withdrawn \cite{Lenstra1992}.
 
-In the first stage of the algorithm, we exponentiate a random ideal class $\aclass \in Cl_\Delta$ to the product of primes $\prod_{i=2}^t {p_i}^{e_i}$ such that $p_t = N^{1/2r}$ where $r = \sqrt{\ln N / \ln \ln N}$.  Using binary exponentiation, this will take $O(p_t)$ group operations and for a random composite $m \in [0, N]$ will factor $m$ with probability $\ge r^{-r}$ \cite[p.290]{Schnorr1984}. Stage 2 performs a random walk of at most $O(p_t)$ group operations and with probability $\ge (r-2)^{-(r-2)}$ will factor $m$ \cite[p.290]{Schnorr1984}.  Their claim is that if Stage 1 is run on each integer $kN$ for $k \le r^r$, then every composite integer $N$ will be factored within $o\left(\exp \sqrt{ \ln N \ln\ln N } \right)$ bit operations.
+In the first stage of the algorithm, we exponentiate a random ideal class $\aclass \in Cl_\Delta$ to the product of primes $\prod_{i=2}^t {p_i}^{e_i}$ such that $p_t \approx N^{1/2r}$ where $r = \sqrt{\ln N / \ln \ln N}$.  Using binary exponentiation, this will take $O(p_t)$ group operations and for a random composite $m \in [0, N]$ will factor $m$ with probability $\ge r^{-r}$ \cite[p.290]{Schnorr1984}. Stage 2 performs a random walk of at most $O(p_t)$ group operations and with probability $\ge (r-2)^{-(r-2)}$ will factor $m$ \cite[p.290]{Schnorr1984}.  Their claim is that if Stage 1 is run on each integer $kN$ for $k \le r^r$, then every composite integer $N$ will be factored within $o\left(\exp \sqrt{ \ln N \ln\ln N } \right)$ bit operations.
 
 This claim was based on a false assumption -- for a complete discussion, see Lenstra and Pomerance \cite[\S 11]{Lenstra1992}.  In short, the original assumption was that for fixed $N$ and variable $k$, that the class number ($h_\Delta$ for $\Delta = -kN$) was as likely to be smooth with respect to some largest prime $p_t$ as the class number associated with a random discriminant of approximately the same size.  This assumption meant that one could take both $k$ and $p_t$ to be no larger than $N^{1/2r} = \exp\left(\frac{1}{2}\sqrt{\ln N \ln \ln N}\right)$, leading to an upper bound of $\exp\left(\sqrt{\ln N \ln \ln N}\right)$ for the expected running time.  However, as Lenstra and Pomerance show \cite[\S 11]{Lenstra1992}, this assumption is incorrect for a sufficiently dense sequence of integers.
 
@@ -1122,15 +1122,15 @@ where $p_i$ is the $i^{\textrm{th}}$ prime. Let $e_i = \floor{\log_{p_i} M}$ for
 \[
 	\phi(P_n) = (2-1) \times (3-1) \times \cdots \times (p_n - 1) = \prod_{i=1}^n (p_i - 1).
 \]
-The bound on the largest baby step $b$ is $b = m P_n$.  We then compute $h' = \ord(\beta)$ and use a fast order finding algorithm $\mathcal A(\alpha^{h'}, E)$ (such as one from \cite[Chapter 7]{Sutherland2007}) to compute $h = \ord(\alpha)$.  The complete Algorithm is in listing \ref{alg:primorial}.
+The bound on the largest baby step $b$ is $b = m P_n$.  We then compute $h' = \ord(\beta)$ and use a fast order finding algorithm $\mathcal A(\alpha^{h'}, E)$ to compute $h = \ord(\alpha)$.  Pseudo-code for the bounded Primorial Steps technique is given in Algorithm \ref{alg:primorial}.
 
-One fast order finding algorithm $\mathcal A(\alpha^{h'}, E)$ uses the factorization of $E=\prod {p_i}^{e_i}$.  Notice that ${\alpha^{h'}}^E = \beta^{h'} = 1_G$.  The idea is to iterate on the factors of $E$, removing each factor $p$ before computing $\gamma = {\alpha^{h'}}^{E'}$ for the product $E' = E/p$. If $\gamma = 1_G$, then $\ord(\alpha) ~|~ h'E'$ and we continue with the next factor in the product $E'$.  Otherwise, $p$ is a factor of $\ord(\alpha)$ and we continue with the next factor of $E$.  There are asymptotically faster algorithms to compute this (see Chapter 7 from \cite{Sutherland2007}), however, our interest is primarily in finding an ambiguous ideal that leads to the factorization of the discriminant.
+One fast order finding algorithm $\mathcal A(\alpha^{h'}, E)$ uses the factorization of $E=\prod {p_i}^{e_i}$.  Notice that ${\alpha^{h'}}^E = \beta^{h'} = 1_G$.  The idea is to iterate on the factors of $E$, removing each factor $p$ before computing $\gamma = {\alpha^{h'}}^{E'}$ for the product $E' = E/p$. If $\gamma = 1_G$, then $\ord(\alpha) ~|~ h'E'$ and we continue with the next factor in the product $E'$.  Otherwise, $p$ is a factor of $\ord(\alpha)$ and we continue with the next factor of $E$.  Additional fast order finding algorithms are given in Chapter 7 of \cite{Sutherland2007}.
 
 \subsection{Primorial Steps for a Set of Elements}
 
-Suppose the success of a computation is not limited to computing the order of a single element, but that the order of any element from a set of groups will work.  Let $\{ \alpha_i \in G_i \}$ be a set of elements from different groups such that the order of $\alpha_i$ is distributed uniformly at random on the interval $[1, U]$.  When the order of any element $\alpha_i$ from the set will suffice, Sutherland gives an algorithm with subexponential complexity.
+Suppose the success of a computation is not limited to computing the order of a single element, but that the order of any element from a set of groups will work.  Let $\{ \alpha_i \in G_i \}$ be a set of elements from different groups such that the order of $\alpha_i$ is distributed uniformly at random on the interval $[1, M]$ where $M$ is a bound on the largest order of the elements $\alpha_i$.  When the order of any element $\alpha_i$ from the set will suffice, Sutherland gives an algorithm with subexponential complexity.
 
-Recall that an integer $x$ is $y$-smooth if none of its prime factors are larger than $y$.  By \cite[p.81]{Sutherland2007}, the probability that a random integer $x$ is $x^{1/u}$ smooth is $u^{-u+o(1)}$.  As such, the idea is to pick some $u$ and attempt to compute $\ord(\alpha_i)$ using at most $O(M^{1/u})$ group operations (where $M$ is an estimate of the group order), and then to try again for the next $\alpha_{i+1}$ in the set.  Using this approach, the expected running time by \cite[p.81, 82]{Sutherland2007} is approximately
+Recall that an integer $x$ is $y$-smooth if none of its prime factors are larger than $y$.  By \cite[p.81]{Sutherland2007}, the probability that a random integer $x$ is $x^{1/u}$ smooth is $u^{-u+o(1)}$.  As such, the idea is to pick some $u$ and attempt to compute $\ord(\alpha_i)$ using at most $O(M^{1/u})$ group operations, and then to try again for the next $\alpha_{i+1}$ in the set if we fail for $\alpha_i$.  Using this approach, the expected running time by \cite[p.81, 82]{Sutherland2007} is approximately
 \[
 	u^{u+o(1)}M^{1/u} = \exp \left( \frac{1}{u}\log M + u \log u + o(1) \right).
 \]
@@ -1139,11 +1139,8 @@ This cost is minimized for $u \approx \sqrt{2 \log M / \log \log M}$, which give
 	\exp \left( \left( \sqrt2 + o(1) \right) \sqrt{\log M \log \log M} \right).
 \]
 
-Sutherland notes \cite[p.84]{Sutherland2007} that the distribution of $\ord(\alpha_i)$ may not be uniform.
 
-
-TODO: Note that $M \approx \sqrt{N} \log N$ for the ideal class group which brings the expected running time down to $\exp \left( \left( 1 + o(1) \right) \sqrt{\log M \log \log M} \right)$.
-
+The idea behind the SPAR factoring algorithm is to find an ambiguous ideal for one of the class groups with valid discriminant $\Delta = -kN$ for $1 \le k \le r^r$ where $r = \sqrt{\ln N / \ln \ln N}$.  In this case, the success of splitting a composite integer $N$ is not limited to finding an ambiguous ideal within a single group, but instead to finding an ambiguous ideal from any of several groups.  As such, we can directly apply the above approach to that of the SPAR factoring algorithm.
 
 \bigbreak
 \section{SuperSPAR}
@@ -1236,6 +1233,14 @@ Assuming we know good choices for each of the variables involved, we give the co
 
 
 \subsection{SuperSPAR Complexity}
+
+
+
+Sutherland notes \cite[p.84]{Sutherland2007} that the distribution of $\ord(\alpha_i)$ may not be uniform.
+
+
+TODO: Note that $M \approx \sqrt{N} \log N$ for the ideal class group which brings the expected running time down to $\exp \left( \left( 1 + o(1) \right) \sqrt{\log M \log \log M} \right)$.
+
 
 Ideally, we want to minimize the expected number of group operations that lead to a factorization of the integer $N$.  The parameters involved are the number of prime ideal classes $\aclass$ tried before switching multipliers and class groups, the bound on the largest prime in the exponent $E$, a bound on the exponents $e_i$ of the prime powers ${p_i}^{e_i}$ whose product is the exponents $E$, and a bound on the largest baby step $b$.
 
