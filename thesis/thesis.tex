@@ -1044,7 +1044,7 @@ The SPAR algorithm works in two stages. The first stage is to pick a random elem
 An integer, $x$, is \emph{smooth} with respect to $y$ if all of the prime factors $p$ dividing $x$ are no larger than $y$.
 \end{defn}
 
-Following Schnorr and Lenstra \cite{Schnorr1984}, we take the first $t$ primes $p_1 = 2, p_2 = 3, ..., p_t \le N^{1/2r}$ for $r = \sqrt{\ln N / \ln \ln N}$.  Let $e_i = \max \{ v : {p_i}^v \le {p_t}^2 \}$ and compute
+Following Schnorr and Lenstra \cite{Schnorr1984}, we take the first $t$ primes $p_1 = 2, p_2 = 3, ..., p_t \approx N^{1/2r}$ for $r = \sqrt{\ln N / \ln \ln N}$.  Let $e_i = \max \{ v : {p_i}^v \le {p_t}^2 \}$ and compute
 \[
 	\bclass = \aclass^{\prod_{i=2}^t {p_i}^{e_i}}.
 \]
@@ -1064,7 +1064,7 @@ The original publication of SPAR by Schnorr and Lenstra \cite{Schnorr1984} claim
 
 In the first stage of the algorithm, we exponentiate a random ideal class $\aclass \in Cl_\Delta$ to the product of primes $\prod_{i=2}^t {p_i}^{e_i}$ such that $p_t \approx N^{1/2r}$ where $r = \sqrt{\ln N / \ln \ln N}$.  Using binary exponentiation, this will take $O(p_t)$ group operations and for a random composite $m \in [0, N]$ will factor $m$ with probability $\ge r^{-r}$ \cite[p.290]{Schnorr1984}. Stage 2 performs a random walk of at most $O(p_t)$ group operations and with probability $\ge (r-2)^{-(r-2)}$ will factor $m$ \cite[p.290]{Schnorr1984}.  Their claim is that if Stage 1 is run on each integer $kN$ for $k \le r^r$, then every composite integer $N$ will be factored within $o\left(\exp \sqrt{ \ln N \ln\ln N } \right)$ bit operations.
 
-This claim was based on a false assumption -- for a complete discussion, see Lenstra and Pomerance \cite[\S 11]{Lenstra1992}.  In short, the original assumption was that for fixed $N$ and variable $k$, that the class number ($h_\Delta$ for $\Delta = -kN$) was as likely to be smooth with respect to some largest prime $p_t$ as the class number associated with a random discriminant of approximately the same size.  This assumption meant that one could take both $k$ and $p_t$ to be no larger than $N^{1/2r} = \exp\left(\frac{1}{2}\sqrt{\ln N \ln \ln N}\right)$, leading to an upper bound of $\exp\left(\sqrt{\ln N \ln \ln N}\right)$ for the expected running time.  However, as Lenstra and Pomerance show \cite[\S 11]{Lenstra1992}, this assumption is incorrect for a sufficiently dense sequence of integers.
+This claim was based on a false assumption -- for a complete discussion, see Lenstra and Pomerance \cite[\S 11]{Lenstra1992}.  In short, the original assumption was that for fixed $N$ and variable $k$, that the class number ($h_\Delta$ for $\Delta = -kN$) was as likely to be smooth with respect to some largest prime $p_t$ as the class number associated with a random discriminant of approximately the same size.  This assumption meant that one could take both $k$ and $p_t$ to be no larger than $N^{1/2r} = \exp\left(\frac{1}{2}\sqrt{\ln N \ln \ln N}\right)$, leading to an upper bound of $\exp\left(\sqrt{\ln N \ln \ln N}\right)$ for the expected running time (TODO: where does the little-oh come in?).  However, as Lenstra and Pomerance show \cite[\S 11]{Lenstra1992}, this assumption is incorrect for a sufficiently dense sequence of integers.
 
 
 
@@ -1148,28 +1148,34 @@ The idea behind the SPAR factoring algorithm is to find an ambiguous ideal for o
 
 Here we introduce SuperSPAR -- an algorithm for factoring integers and our motivation for improving the performance of exponentiation in the ideal class group.  First we review SPAR to show how it relates to the primorial steps algorithm of the previous section.
 
-In Stage 1 of SPAR, we take the first $t$ primes $p_i \le N^{1/2r}$ for $r = \sqrt{\ln N / \ln \ln N}$, and let $e_i = \max \{ v : {p_i}^v \le {p_t}^2 \}$ (TODO: Should this be $N$ or $\Delta$?).  We then compute
+In Stage 1 of SPAR, we take the first $t$ primes $p_1 = 2, p_2 = 3, ..., p_t \approx N^{1/2r}$ for $r = \sqrt{\ln N / \ln \ln N}$, and let $e_i = \max \{ v : {p_i}^v \le {p_t}^2 \}$.  We then compute
 \[
 	\bclass = \aclass^{\prod_{i=2}^t {p_i}^{e_i}},
 \]
-for a random ideal class $\aclass$ and $\cclass = {\bclass}^{\left(2^k\right)}$ for $k=\floor{\log_2 {h_\Delta}}$ (where $h_\Delta$ is given by Equation \ref{eq:hDelta}).  The purpose of Stage 1 is to find an ideal class $\bclass$ whose order is likely not have any of the odd primes $p_2, ..., p_t$ as divisors.  If the odd part of $\ord(\bclass)$ divides $\prod_{i=2}^t {p_i}^{e_i}$ and the order of $\bclass$ is even, then computing $\cclass$ produces an ambiguous ideal and we can attempt to factor the discriminant $\Delta$.
+for a random ideal class $\aclass$ and $\cclass = {\bclass}^{\left(2^k\right)}$ for $k=\floor{\log_2 \sqrt{|\Delta|}}$.  The purpose of \mbox{Stage 1} is to find an ideal class $\bclass$ whose order is likely not have any of the odd primes $p_2, ..., p_t$ as divisors.  If the odd part of $\ord(\bclass)$ divides $\prod_{i=2}^t {p_i}^{e_i}$ and the order of $\bclass$ is even, then computing $\cclass$ produces an ambiguous ideal and we can attempt to factor the \mbox{discriminant $\Delta$}.
 
-Failing this, Stage 2 attempts to find the order of $\cclass$ by performing a random walk on the cyclic group that it generates.  Schnorr and Lenstra \cite[p.294]{Schnorr1984} suggest a Pollard-Brent Recursion \cite{Brent1980} based on Pollard's rho method \cite{Pollard1975}.  This approach will yield $\ord(\cclass)$ within $\sqrt{\pi/2}p_t$ steps if $\ord(\cclass) \le {p_t}^2$ and requires only a constant number of group elements.  They also remark \cite[p.298]{Schnorr1984} that Shanks' baby-step giant-step method \cite{Shanks1971} could be used to deterministically find $\ord(\cclass)$ within $\sqrt{2}p_t$ group operations when $\ord(\cclass) \le {p_t}^2$, but requiring $O(p_t)$ storage.  They point out that this approach can be made faster by exploiting the fact that $\ord(\cclass)$ is likely to have no prime divisors $p_1, ..., p_t$, and this leads us to the SuperSPAR factoring algorithm.
+Failing this, Stage 2 attempts to find the order of $\cclass$ by performing a random walk on the cyclic group that it generates.  Schnorr and Lenstra \cite[p.294]{Schnorr1984} suggest a Pollard-Brent Recursion \cite{Brent1980} based on Pollard's rho method \cite{Pollard1975}.  This approach will yield $\ord(\cclass)$ within $\sqrt{\pi/2}p_t$ steps if $\ord(\cclass) \le {p_t}^2$ and requires only a constant number of group elements \cite[p.294]{Schnorr1984}.  They also remark \cite[p.298]{Schnorr1984} that Shanks' baby-step giant-step method \cite{Shanks1971} could be used to deterministically find $\ord(\cclass)$ within $\sqrt{2}p_t$ group operations when $\ord(\cclass) \le {p_t}^2$, but requiring $O(p_t)$ storage \cite[p.298]{Schnorr1984}.  They point out that this approach can be made faster by exploiting the fact that $\ord(\cclass)$ is likely to have no prime divisors $p_1, ..., p_t$, and this leads us to the SuperSPAR factoring algorithm.
 
 \subsection{SuperSPAR Algorithm}
 
-SuperSPAR works by finding an ambiguous ideal that leads to the factorization of its discriminant, and we find an ambiguous ideal by applying the relevant parts of the primorial steps algorithm.  Let $N$ be the odd integer we wish to factor.  We start with a square free integer $k$ and choose a discriminant $\Delta = -kN$ or $\Delta = -4kN$ such that $\Delta \equiv 0, 1 \pmod 4$.  We then find a random prime ideal class representative $\aclass \in Cl_\Delta$.  If we were to compute $h = \ord(\aclass)$ and $h$ was even, we could compute an ambiguous ideal $\aclass^{h/2}$, but this is more work than necessary -- all we need is the ambiguous ideal and not the order.
+SuperSPAR, similar to SPAR, works by finding an ambiguous ideal with a discriminant associated with the integer we wish to factor, and does so by combining both SPAR and the Primorial Steps algorithm.
 
-To use the bounded primorial steps algorithm, we need some bound $M$ on the order of the element.  Cohen \cite[p.295]{Cohen1993} states a bound on the number of elements in the class group $Cl_\Delta$ as
+Let $N$ be the odd integer we wish to factor.  For some square free integer $k$, choose a discriminant $\Delta = -kN$ or $\Delta = -4kN$ such that $\Delta \equiv 0, 1 \pmod 4$, and a random prime ideal class representative $\mathfrak a$ such that $\aclass \in Cl_\Delta$.  Similar to SPAR, SuperSPAR begins by computing the primes $p_1=2, p_2=3, ..., p_t \approx N^{1/2r}$ for $r = \sqrt{\ln N / \ln \ln |N}$.  Treating the order of a random ideal class in $Cl_\Delta$ as uniformly distributed, we expect $h = \ord(\aclass)$ to be $N^{1/2r}$-smooth with probability $r^{-r}$.  TODO: something about the class number being $\sqrt{|\Delta|}$ as $\Delta \rightarrow \infty$ \cite[p.247]{Crandall2001}.
+
+To take advantage of the search phase of the Primorial Steps algorithm, we would like to compute an ideal class whose order is known to not have any of primes $p_i \le p_t$ as divisors.  By exponentiating $\aclass$ to the product of each prime $p_i$ raised the largest value less than or equal to the number of elements in the class group, we are guaranteed such an element.  Cohen \cite[p.295]{Cohen1993} states a bound on the number of elements in the class group $Cl_\Delta$ as
 \begin{equation}
 \label{eq:hDelta}
 	h_\Delta < \frac{1}{\pi} \sqrt{|\Delta|}\log{|\Delta|} \textrm{ when } \Delta < -4.
 \end{equation}
-Let this be our bound $M$ on the order of $\aclass$.  Following the primorial steps algorithm, we compute the largest primorial $P_n$ such that $P_n \le \sqrt M$.  Next, we maximize $m$ such that $m^2P_n\phi(P_n) \le M$, and set $b = mP_n$.
+Using the above bound, let $e_i = \max \{ v : {p_i}^v \le h_\Delta \}$ for each prime $p_i$, and compute the \emph{odd} power primorial 
+\[
+	E = \prod_{i=2}^t {p_i}^{e_i}
+\]
+and the ideal class $\bclass = \aclass^E$.  Finally, compute $\cclass = \bclass^{\left(2^k\right)}$ for $k = \floor{\log_2 h_\Delta}$ and we are guaranteed that $h' = \ord(\cclass)$ does not have any primes $p_i \le p_t$ as divisors.  Notice that the exponent $E$ is odd following SPAR since if the order $h' = \ord(\cclass)$ is known, an ambiguous form can easily be computed by repeated squaring of $\bclass^{h'}$. 
 
-If we wanted to determine the order of $\aclass$, following the primorial steps algorithm we would compute $E = \prod_{i=1}^n {p_i}^{\floor{\log_{p_i} M}}$ and $\bclass = \aclass^E$.  However, since we only want to find an ambiguous ideal, we instead only use the \emph{odd} primes $p_i \le p_n$ when computing $E$ and $\bclass = \aclass^E$.
+TODO: continue here.
 
-Similar to the original SPAR algorithm, we then compute $\cclass = \bclass^{\left(2^k\right)}$.  In this case, we use the bound on the class group $h_\Delta$ from Equation \ref{eq:hDelta} such that $k = \floor{\log_2 h_\Delta}$.  Now we have an ideal class $\cclass$ whose order is known not to have any of the primes $p_i \le p_n$ as divisors.  We compute the order of $\cclass$ by taking baby steps $\cclass^i$ for $1 \le i \le b$ where $i$ is coprime to $P_n$, and giant steps $\cclass^j$ for $j=2b, -2b, 4b, -4b ...$\footnote{We use this sequence of giant steps since computing the inverse in the ideal class group is essentially free.}.  Having computed the order $h' = \ord(\cclass)$, we compute an ambiguous ideal by repeated squaring of $\dclass = \bclass^{h'}$ assuming that $\ord(\bclass)$ is even.  This works since $\bclass = \aclass^E$ and $E$ has no factors of 2.  We have 
+The order of $\cclass$ is then computed by taking baby steps $\cclass^i$ for $1 \le i \le b$ where $i$ is coprime to $P_n$, and giant steps $\cclass^j$ for $j=2b, -2b, 4b, -4b ...$\footnote{We use this sequence of giant steps since computing the inverse in the ideal class group is essentially free.}.  Having computed the order $h' = \ord(\cclass)$, we compute an ambiguous ideal by repeated squaring of $\dclass = \bclass^{h'}$ assuming that $\ord(\bclass)$ is even.  This works since $\bclass = \aclass^E$ and $E$ has no factors of 2.  We have 
 \[
 \cclass^{h'} = \bclass^{h'\left(2^k\right)} = \dclass^{\left(2^k\right)} = \idclass
 \]
@@ -1235,6 +1241,7 @@ Assuming we know good choices for each of the variables involved, we give the co
 \subsection{SuperSPAR Complexity}
 
 
+For the purpose of discussing SuperSPAR, we treat the distribution on the order of random ideals as uniform.  Let $N$ be the odd integer we wish to factor.  For some square free integer $k$, choose a discriminant $\Delta = -kN$ or $\Delta = -4kN$ such that $\Delta \equiv 0, 1 \pmod 4$, and a random prime ideal class representative $\mathfrak a$ such that $\aclass \in Cl_\Delta$.  The idea is that for some real value $u$, we will perform $O(|\Delta|^{1/u})$ group operations on $\aclass$ in an attempt to find an ambiguous idea.  Treating the order $h = \ord(\aclass)$ as uniformly distributed, we can expect $h$ to be $|\Delta|^{1/u}$-smooth with probability $u^{-u}$.  As such, we can expect to try $u^u$ different discriminants. TODO: more rigour here.
 
 Sutherland notes \cite[p.84]{Sutherland2007} that the distribution of $\ord(\alpha_i)$ may not be uniform.
 
