@@ -603,7 +603,7 @@ In the next chapter, we'll discuss some exponentiation techniques that make use 
 
 Exponentiation has many applications. Diffie-Hellman key exchange uses exponentiation so that two parties may jointly establish a shared secret key over an insecure channel.  An application discussed in detail in this thesis is that of computing the order of a group element.  Our approach is to exponentiate a group element to the product, $P$, of several small primes.  The result is an element whose order is likely to not be divisible by any of these primes. We then compute the order using a variant of Shanks' baby-step giant-step algorithm where only powers relatively prime to $P$ are computed.  Determining the order of an element is useful in computing the structure of a group, and in factoring an integer associated with a group.  Faster exponentiation means the entire computation is faster.
 
-In Sections \ref{sec:binaryExp} and \ref{sec:naf} we discuss standard exponentiation techniques that rely on a base 2 representation of the exponent.  In Section \ref{sec:dbns} we introduce double-base number systems, which, as the name implies, are number systems that make use of two bases in the representation of a number.  We are particularly interested in representations that use bases 2 and 3, since our implementation of ideal class group arithmetic provides multiplication, squaring, and cubing. In Section \ref{sec:dbnsMethods} we discuss some methods to compute double-base representations found in the literature.  
+In Sections \ref{sec:binaryExp} and \ref{sec:naf} we discuss standard exponentiation techniques that rely on a base 2 representation of the exponent.  In Section \ref{sec:dbns} we describe double-base number systems, which, as the name implies, are number systems that make use of two bases in the representation of a number.  We are particularly interested in representations that use bases 2 and 3, since our implementation of ideal class group arithmetic provides multiplication, squaring, and cubing. In Section \ref{sec:dbnsMethods} we discuss some methods to compute double-base representations found in the literature.  
 
 \bigbreak
 \section{Binary Exponentiation}
@@ -992,9 +992,9 @@ The corresponding 2,3 chain is computed by memoizing a shortest chain for each s
 \bigbreak
 \section{Coming up}
 
-In this chapter, we outlined some exponentiation techniques from the literature.  We started with binary exponentiation based on a binary representation of the exponent.  Next we introduced non-adjacent form that uses a signed base 2 encoding of the exponent.  Since cubing is often faster than combined multiplication with squaring, we introduced 2,3 number systems where an integer can have many representations as the sum of the products of 2 and 3.  Exponentiation based on 2,3 representations fall under two classes: chained and unchained.  Chained representations can typically be computed while interleaved with the exponentiation operation.  They also require only a constant number of group elements in addition to the input arguments.  Unchained representations often have fewer terms or operations in their representation.  Exponentiation of a group element using an unchained representation of the exponent can be performed using a linear number of group elements in the size of the exponent.
+In this chapter, we outlined some exponentiation techniques from the literature.  We started with binary exponentiation based on a binary representation of the exponent.  Next we describe non-adjacent form that uses a signed base 2 encoding of the exponent.  Since cubing is often faster than combined multiplication with squaring, we discussed 2,3 number systems where an integer can have many representations as the sum of the products of 2 and 3.  Exponentiation based on 2,3 representations fall under two classes: chained and unchained.  Chained representations can typically be computed while interleaved with the exponentiation operation.  They also require only a constant number of group elements in addition to the input arguments.  Unchained representations often have fewer terms or operations in their representation.  Exponentiation of a group element using an unchained representation of the exponent can be performed using a linear number of group elements in the size of the exponent.
 
-Coming up in Chapter \ref{chap:idealPowExperiments}, we introduce several variations of chained and unchained 2,3 representations, many of which take into account the average time to multiply, square, and cube elements from the ideal class group.  We let the actual performance of these variations guide our implementation of a factoring algorithm called ``SuperSPAR''.  In the next chapter, we introduce the background for SPAR and the SuperSPAR factoring algorithm.
+Coming up in Chapter \ref{chap:idealPowExperiments}, we introduce several variations of chained and unchained 2,3 representations, many of which take into account the average time to multiply, square, and cube elements from the ideal class group.  We let the actual performance of these variations guide our implementation of a factoring algorithm called ``SuperSPAR''.  In the next chapter, we provide the background for SPAR and the SuperSPAR factoring algorithm.
 
 
 %%%%%%%%%%%%%
@@ -1004,7 +1004,7 @@ Coming up in Chapter \ref{chap:idealPowExperiments}, we introduce several variat
 \chapter{SuperSPAR}
 \label{chap:superspar}
 
-A contribution of this thesis is to improve the speed of arithmetic in the ideal class group of imaginary quadratic number fields with an application to integer factoring.  In Chapter \ref{chap:idealArithmetic} we introduce the ideal class group, and in Chapter \ref{chap:exponentiation} we introduce methods for exponentiation in generic groups.  In this chapter, we make a connection between the two and that of integer factoring.  In Section \ref{sec:spar} we introduce an algorithm, called SPAR, that uses a group isomorphic to the ideal class group to factor an integer associated with the discriminant.  In Section \ref{sec:primorial}, we discuss the primorial steps algorithm for order finding in generic groups that is asymptotically faster than both Pollard's rho method \cite{Pollard1975} and Shank's baby-steps giant-steps technique \cite{Shanks1971}.  Finally, in Section \ref{sec:superSpar} we reconsider the factoring algorithm SPAR in the context of primorial steps for order finding.  We call this new algorithm ``SuperSPAR''.
+One contribution of this thesis is to improve the speed of arithmetic in the ideal class group of imaginary quadratic number fields with an application to integer factoring.  In Chapter \ref{chap:idealArithmetic} we described the ideal class group, and in Chapter \ref{chap:exponentiation} we gave methods for exponentiation in generic groups.  In this chapter, we make a connection between the two and that of integer factoring.  In Section \ref{sec:spar} we discuss an algorithm, called SPAR, that uses a group isomorphic to the ideal class group to factor an integer associated with the discriminant.  In Section \ref{sec:primorial}, we discuss the primorial steps algorithm for order finding in generic groups that is asymptotically faster than both Pollard's rho method \cite{Pollard1975} and Shank's baby-steps giant-steps technique \cite{Shanks1971}.  Finally, in Section \ref{sec:superSpar} we reconsider the factoring algorithm SPAR in the context of primorial steps for order finding.  We call this new algorithm ``SuperSPAR''.
 
 \section{SPAR}
 \label{sec:spar}
@@ -1018,12 +1018,12 @@ The description of SPAR uses binary quadratic forms. A binary quadratic form is 
 \[
 	f(x, y) = ax^2 + bxy + cy^2
 \]
-where $a$, $b$, and $c$ are integer coefficients.  For a given form there is a set of integers represented by $f(x, y)$ for integers $x$ and $y$. Two forms are equivalent if the sets of integers they represent are equivalent \cite[pp.239-240]{Crandall2001}, and these sets are equivalent if and only if there exists an invertible integral linear change of variables that transforms the first form into the second form. Necessarily, two equivalent forms have the same discriminant, which is given as $\Delta = b^2 - 4ac$.  The set of all equivalent forms for a given discriminant form an equivalence class, and as shown by Gau\ss, representatives of equivalence classes of forms can be multiplied together to form a group, $G(\Delta)$.  In the case of a negative discriminant, each form is equivalent to a unique reduced form \cite[p.241]{Crandall2001}.  
+where $a$, $b$, and $c$ are integer coefficients.  For a given form there is a set of integers represented by $f(x, y)$ for integers $x$ and $y$. Two forms are equivalent if the sets of integers they represent are identical \cite[pp.239-240]{Crandall2001}, if and only if there exists an invertible integral linear change of variables that transforms the first form into the second form. Necessarily, two equivalent forms have the same discriminant, which is given as $\Delta = b^2 - 4ac$.  The set of all equivalent forms for a given discriminant form an equivalence class, and as shown by Gau\ss, representatives of equivalence classes of forms can be multiplied together to form a group.  In the case of a negative discriminant, each form is equivalent to a unique reduced form \cite[p.241]{Crandall2001}.  
 
 The group of equivalence classes of binary quadratic forms is isomorphic to the ideal class group of imaginary quadratic fields, as shown by Fr{\"o}lich and Taylor \cite{Frolich1993}.  Throughout this thesis, we represent elements of the ideal class group using reduced representatives.  We denote the equivalence class $[\mathfrak a]$ for a reduced representative $\mathfrak a$ using the $\ZZ$\mbox{-}module $\mathfrak a = [a, (b + \sqrt\Delta)/2]$.  In our  implementation we also maintain a third term $c = (b^2 - \Delta)/4a$.  We note that the variables $a$ and $b$ are the same as the representative binary quadratic form $ax^2 + bxy + cy^2$ with discriminant $\Delta$. Furthermore, both necessarily share the same value $c$.  As such, we adapt our discussion of the SPAR factoring algorithm to the language of ideal classes.
 
 \begin{defn}
-The \emph{ambiguous classes} are the classes $[\mathfrak a]$ such that ${[\mathfrak a]}^2$ is the identity class \cite{Schnorr1984}.  This holds for both the equivalence class of forms and the equivalence class of ideals.  Notice that the identity ideal class $[\mathcal O_\Delta] \in Cl_\Delta$ is an ambiguous class.
+The \emph{ambiguous classes} are the classes $[\mathfrak a]$ such that ${[\mathfrak a]}^2$ is the identity class \cite{Schnorr1984}.  Notice that the identity ideal class $[\mathcal O_\Delta] \in Cl_\Delta$ is an ambiguous class.
 \end{defn}
 
 According to \cite{Schnorr1984}, every reduced representative of an ambiguous class with negative discriminant has either $b = 0$, $a = b$, or $a = c$.  Since the discriminant is defined as $\Delta = b^2 - 4ac$, these reduced representatives correspond to a factorization of the discriminant.  We have either
@@ -1032,13 +1032,14 @@ According to \cite{Schnorr1984}, every reduced representative of an ambiguous cl
 	\Delta &= b(b - 4c) & \textrm{ when } & a = b, \textrm{ or} \\
 	\Delta &= (b - 2a)(b + 2a) & \textrm{ when } & a = c.
 \end{align*}
-Suppose we wish to find a factor of an odd integer $N$. Since $\Delta = b^2 - 4ac$ we must have $\Delta \equiv 0, 1 \pmod 4$.  Therefore, let $\Delta = -N$ when $-N \equiv 1 \pmod 4$ and $\Delta = -4N$ otherwise.  This way, $\Delta \equiv 0, 1 \pmod 4$ and $\Delta < 0$.  Now, to find a factor of $N$ we find a reduced ambiguous class representative with discriminant $\Delta$.  If we are lucky, we get a proper factor of $N$. If we are unlucky we get the trivial factorization $1N=N$ or a factor 2 or 4 of $4N$. In which case, we try again.
+Suppose we wish to find a factor of an odd integer $N$. Since $\Delta = b^2 - 4ac$ we must have $\Delta \equiv 0, 1 \pmod 4$.  Therefore, for some square free integer $k$, let $\Delta = -kN$ when $-kN \equiv 1 \pmod 4$ and $\Delta = -4kN$ otherwise.  Now, to find a factor of $N$ we find a reduced ambiguous class representative with discriminant $\Delta$.  If we are lucky, we get a proper factor of $N$.
+
 
 \subsection{SPAR Algorithm}
 
-In Chapter \ref{chap:idealArithmetic}, we mentioned that for a negative discriminant $\Delta < 0$, the ideal class group $Cl_\Delta$ has a finite number of elements.  This means that for a random ideal class $\aclass$, there exists an integer $m$ such that $\aclass^m = \idclass$. We say that $m$ is the \emph{order} of the element $\aclass$ and denote this $m = \ord(\aclass)$.  When the order is even, then $\bclass = \aclass^{m/2}$ is an ambiguous ideal class.  This follows from the fact that $\bclass^2 = \idclass$.  Therefore, factoring an integer $N$ reduces to the problem of determining the order of a random ideal class $\aclass \in Cl_\Delta$ for $\Delta$ a square free multiple of $-N$ or $-4N$.
+In Chapter \ref{chap:idealArithmetic}, we mentioned that for a negative discriminant $\Delta$, the ideal class group $Cl_\Delta$ has a finite number of elements.  This means that for a random ideal class $\aclass$, there exists an integer $m$ such that $\aclass^m = \idclass$. We say that $m$ is the \emph{order} of the element $\aclass$ and denote this $m = \ord(\aclass)$.  When the order is even, then $\bclass = \aclass^{m/2}$ is an ambiguous ideal class.  This follows from the fact that $\bclass^2 = \idclass$.  Therefore, factoring an integer $N$ reduces to the problem of determining the order of a random ideal class $\aclass \in Cl_\Delta$ for $\Delta$ a square free multiple of $-N$ or $-4N$.
 
-The SPAR algorithm works in two stages. The first stage is to pick a random element $\aclass \in Cl_\Delta$ and exponentiate it to the product of many small odd prime powers $E$, such that $\bclass = \aclass^E$.  We then attempt to find an ambiguous ideal by repeated squaring of $\bclass$.  If this fails, we perform a random walk on the group generated by the ideal class $\bclass = \aclass^E$.  We limit the number of class operations performed by each stage, and if both stages fail to find a factorization of $N$, we try again with a square free multiple $\Delta = -kN$ or $\Delta = -4kN$.  Introducing the multiplier $k$ changes the group structure and order of elements -- the hope is to find a group with smooth order.
+The SPAR algorithm works in two stages. The first stage is to pick a random element $\aclass \in Cl_\Delta$ and exponentiate it to the product of many small odd prime powers $E$, such that $\bclass = \aclass^E$.  We then attempt to find an ambiguous ideal by repeated squaring of $\bclass$.  If this fails, we perform a random walk on the group generated from repeated squaring of $\bclass$.  We limit the number of class operations performed by each stage, and if both stages fail to find a factorization of $N$, we try again with a different square free multiple $\Delta = -kN$ or $\Delta = -4kN$.  The use of a multiplier $k$ changes the group structure and order of elements -- the hope is to find a group with smooth order.
 
 \begin{defn}
 An integer, $x$, is \emph{smooth} with respect to $y$ if all of the prime factors $p$ dividing $x$ are no larger than $y$.
@@ -1050,7 +1051,7 @@ Following Schnorr and Lenstra \cite{Schnorr1984}, we take the first $t$ primes $
 \]
 Notice that we exponentiate $\aclass$ to the product of only \emph{odd} prime powers.  The reason for this is that if $\ord(\aclass)$ is smooth with respect to $p_t$, then we can compute $\bclass^{\left(2^k\right)}$ for the smallest $k$ such that $\bclass^{\left(2^k\right)} = \idclass$.  It follows that $\bclass^{\left(2^{k-1}\right)}$ is an ambiguous ideal class and we can attempt to factor $N$.
 
-Since we do not know if $\ord(\aclass)$ is smooth, we instead bound $k$ such that $2^k$ is no larger than the number of elements in the class group.  Schnorr and Lenstra \cite[p.291]{Schnorr1984} use $k = \floor{\log_2{\sqrt N}}$.  As such, we only need compute $\bclass^{\left(2^k\right)}$ for the smallest $k \le \floor{\log_2{\sqrt N}}$ such that $\bclass^{\left(2^k\right)} = \idclass$ if such a $k$ exists. If such a $k$ does not exist, then the algorithm continues with the second stage.
+Since we do not know if $\ord(\aclass)$ is smooth, we instead bound $k$ such that $2^k$ is no larger than the number of elements in the class group.  Schnorr and Lenstra \cite[p.291]{Schnorr1984} use $k = \floor{\log_2{\sqrt N}}$.  As such, we only need to compute $\bclass^{\left(2^k\right)}$ for the smallest $k \le \floor{\log_2{\sqrt N}}$ such that $\bclass^{\left(2^k\right)} = \idclass$ if such a $k$ exists. If such a $k$ does not exist, then the algorithm continues with the second stage.
 
 In the first stage, we compute $\bclass = \aclass^{\prod_{i=2}^t {p_i}^{e_i}}$ and $\cclass = \bclass^{\left(2^k\right)}$.  The second stage is a random walk through the cyclic group generated by the ideal class $\cclass$ in an attempt to find the order $h = \ord(\cclass)$.  Let $\langle \cclass \rangle$ denote the cyclic group generated by $\cclass$ and let $f : \langle \cclass \rangle \rightarrow \langle \cclass \rangle$ be a function from one representative in the cyclic group to another.  The function $f$ should have the property that if $x$ is known for some $\cclass ^x$, then $y$ can be determined for $\cclass^y = f(\cclass^x)$.  Let $[\mathfrak c_1] = \cclass$ and repeatedly compute
 \[
@@ -1062,17 +1063,17 @@ until there is some $j < k$ such that $[\mathfrak c_j] = [\mathfrak c_k]$.  By t
 
 The original publication of SPAR by Schnorr and Lenstra \cite{Schnorr1984} claimed that every composite integer $N$ could be factored in $o\left(\exp\sqrt{\ln N \ln\ln N}\right)$ bit operations.  This was the first factoring algorithm for which this runtime had been conjectured, and it was also the first for which this conjecture had to be withdrawn \cite{Lenstra1992}.
 
-In the first stage of the algorithm, we exponentiate a random ideal class $\aclass \in Cl_\Delta$ to the product of primes $\prod_{i=2}^t {p_i}^{e_i}$ such that $p_t \approx N^{1/2r}$ where $r = \sqrt{\ln N / \ln \ln N}$.  Using binary exponentiation, this will take $O(p_t)$ group operations and for a random composite $m \in [0, N]$ will factor $m$ with probability $\ge r^{-r}$ \cite[p.290]{Schnorr1984}. Stage 2 performs a random walk of at most $O(p_t)$ group operations and with probability $\ge (r-2)^{-(r-2)}$ will factor $m$ \cite[p.290]{Schnorr1984}.  Their claim is that if Stage 1 is run on each integer $kN$ for $k \le r^r$, then every composite integer $N$ will be factored within $o\left(\exp \sqrt{ \ln N \ln\ln N } \right)$ bit operations.
+In the first stage of the algorithm, we exponentiate a random ideal class $\aclass \in Cl_\Delta$ to the product of primes $\prod_{i=2}^t {p_i}^{e_i}$ such that $p_t \approx N^{1/2r}$ where $r = \sqrt{\ln N / \ln \ln N}$.  Using binary exponentiation, this will take $O(p_t)$ group operations and for a random composite integer $m \in [0, N]$ will factor $m$ with probability $\ge r^{-r}$ \cite[p.290]{Schnorr1984}. Stage 2 performs a random walk of at most $O(p_t)$ group operations and with probability $\ge (r-2)^{-(r-2)}$ will factor $m$ \cite[p.290]{Schnorr1984}.  Their claim is that if Stage 1 is run on each integer $kN$ for $k \le r^r$, then every composite integer $N$ will be factored within $o\left(\exp \sqrt{ \ln N \ln\ln N } \right)$ bit operations.
 
 This claim was based on a false assumption -- for a complete discussion, see Lenstra and Pomerance \cite[\S 11]{Lenstra1992}.  In short, the original assumption was that for fixed $N$ and variable $k$, that the class number ($h_\Delta$ for $\Delta = -kN$) was as likely to be smooth with respect to some largest prime $p_t$ as the class number associated with a random discriminant of approximately the same size.  This assumption meant that one could take both $k$ and $p_t$ to be no larger than $N^{1/2r} = \exp\left(\frac{1}{2}\sqrt{\ln N \ln \ln N}\right)$, leading to an upper bound of $\exp\left(\sqrt{\ln N \ln \ln N}\right)$ for the expected running time (TODO: where does the little-oh come in?).  However, as Lenstra and Pomerance show \cite[\S 11]{Lenstra1992}, this assumption is incorrect for a sufficiently dense sequence of integers.
 
 
 
 \bigbreak
-\section{Primorial Steps}
+\section{Bounded Primorial Steps}
 \label{sec:primorial}
 
-The Bounded Primorial Steps algorithm \cite{Sutherland2007} is an order finding algorithm for generic groups with asymptotic complexity $o(\sqrt N)$ where $N$ is the order of the group element.  This is asymptotically better than previously known order finding algorithms for generic groups, such as the Pollard-Brent method \cite{Brent1980} and Shanks' baby-step giant-step method \cite{Shanks1971}, both of which have complexity $O(\sqrt N)$.
+The Bounded Primorial Steps algorithm \cite{Sutherland2007} is an order finding algorithm for generic groups with asymptotic complexity $o(\sqrt M)$ where $M$ is a bound on the order of the group element.  This is asymptotically better than previously known order finding algorithms for generic groups, such as the Pollard-Brent method \cite{Brent1980} and Shanks' baby-step giant-step method \cite{Shanks1971}, both of which have complexity $O(\sqrt M)$.
 
 \subsection{Shank's Baby-Step Giant-Step Method}
 
@@ -1082,23 +1083,23 @@ To see that this works, consider the order of the element $\alpha$.  Let $h = \o
 
 Following Sutherland \cite[p.50]{Sutherland2007}, we point out that if computing the inverse of an element is cheaper than multiplication, we can reduce the number of group operations by letting $b = \ceil{\sqrt{M/2}}$ and computing the giant steps $\alpha^{2b}, \alpha^{-2b}, \alpha^{4b}, \alpha^{-4b}, ...$ instead.  Again, if the order $h \le b$, we find some $\alpha^i = 1_G$ during the baby steps.  Otherwise, either $h = 2jb - i$ or $h = 2jb + i$ for $i \le b$.  In the first case, there is some $\alpha^{2jb} = \alpha^i$ and we have $\alpha^{2jb-i} = 1_G$, and in the second case, there is some $\alpha^{-2jb} = \alpha^i$ and we have $\alpha^{2jb+i} = 1_G$. 
 
-\subsection{Primorial Steps Algorithm}
+\subsection{Bounded Primorial Steps Algorithm}
 
 Sutherland observed \cite[p.56]{Sutherland2007} that if $h = \ord(\alpha)$ is odd, then computing only odd powers $\alpha^1, \alpha^3, ..., \alpha^{b-1}$ for the baby steps is sufficient.  We still need to compute giant steps $\alpha^{2b}, \alpha^{3b}, ...,$ for some $b$ that is even since we want to find some $\alpha^{jb} = \alpha^i$ where $jb - i$ is odd.  As before, we choose $b$ such that after an equal number of baby steps and giant steps, the last giant step has an exponent $b^2 \ge M$.  In this case, we choose $b = \ceil{\sqrt{2M}}$ so that after roughly $\sqrt{M/2}$ baby steps and $\sqrt{M/2}$ giant steps, the last giant step has exponent $b^2 \ge M$.
 
-The problem is that $\ord(\alpha)$ may not be odd.  However, by repeated squaring of $\alpha$ it is easy to find an element whose order is guaranteed to be even \cite[p.56]{Sutherland2007}.  Given a bound $M$ on the group order, compute $\beta = \alpha^{2^\ell}$ where $\ell = \floor{\log_2 M}$ and now run our modified algorithm on $\beta$ to find $h' = \ord(\beta)$.  The order of $\alpha$ can be found by computing $\gamma = \alpha^{h'}$ and then repeatedly squaring $\gamma$ until $\gamma^{2^k} = 1_G$ for some $k$.  The order of $\alpha$ is then $2^k h'$.
+The problem is that $\ord(\alpha)$ may not be odd.  However, by repeated squaring of $\alpha$ it is easy to find an element whose order is guaranteed to be even \cite[p.56]{Sutherland2007}.  Given a bound $M$ on the group order, compute $\beta = \alpha^{2^\ell}$ where $\ell = \floor{\log_2 M}$ and now run the modified algorithm on $\beta$ to find $h' = \ord(\beta)$.  The order of $\alpha$ can be found by computing $\gamma = \alpha^{h'}$ and then repeatedly squaring $\gamma$ until $\gamma^{2^k} = 1_G$ for some $k$.  The order of $\alpha$ is then $2^k h'$.
 
 \begin{algorithm}[h]
 \caption{Primorial Steps (Sutherland \cite[p.57]{Sutherland2007}).}
 \label{alg:primorial}
 \begin{algorithmic}[1]
 \REQUIRE $\alpha \in G$, a bound $M \ge \ord(\alpha)$, and a fast order algorithm $\mathcal A(\alpha, E)$.
-\STATE maximize $P_n$ such that $P_n \le \sqrt{M}$
-\STATE maximize $m$ such that $m^2P_n\phi(P_n) \le M$
-\STATE $b = mP_n$
+\STATE maximize $P_w$ such that $P_w \le \sqrt{M}$
+\STATE maximize $m$ such that $m^2P_w\phi(P_w) \le M$
+\STATE $b = mP_w$
 \STATE $E = \prod_{i=1}^n p_i^{\floor{\log_{p_i} M}}$
 \STATE $\beta \gets \alpha^E$
-\FOR{$i$ from 1 to $b$ where $i$ is coprime to $P_n$}
+\FOR{$i$ from 1 to $b$ where $i$ is coprime to $P_w$}
 	\STATE compute $\beta^i$ and store $(\beta^i, i)$ in the table \COMMENT{baby steps}
 	\IF {$\beta^i = 1_G$}
 		\RETURN $i \cdot \mathcal A(\alpha^i, E)$
@@ -1114,19 +1115,21 @@ The problem is that $\ord(\alpha)$ may not be odd.  However, by repeated squarin
 \end{algorithmic}
 \end{algorithm}
 
-This approach can be extended to computing $\beta = \alpha^E$ where $E = 2^{\floor{\log_2 M}} 3^{\floor{\log_3 M}}$ and the order of $\beta$ is coprime to both 2 and 3.  In this case, we compute baby steps with exponents coprime to 6 and giant steps that are a multiple of 6.  More generally, we choose some primorial $P_n$ such that
+This approach can be extended to computing $\beta = \alpha^E$ where $E = 2^{\floor{\log_2 M}} 3^{\floor{\log_3 M}}$ and the order of $\beta$ is coprime to both 2 and 3.  In this case, we compute baby steps with exponents coprime to 6 and giant steps that are a multiple of 6.  More generally, we choose some primorial $P_w$ such that
 \[
-	P_n = 2 \times 3 \times \cdots \times p_n = \prod_{i=1}^n p_i
+	P_w = 2 \times 3 \times \cdots \times p_w = \prod_{i=1}^w p_i
 \]
-where $p_i$ is the $i^{\textrm{th}}$ prime. Let $e_i = \floor{\log_{p_i} M}$ for $1 \le i \le n$ and $E = 2^{e_2} \times 3^{e_3} \times \cdots \times {p_n}^{e_n}$.  Then compute $\beta = \alpha^E$, and use baby steps coprime to $P_n$ and giant steps that are a multiple of $P_n$.  Following Sutherland \cite[p.57]{Sutherland2007}, we select the largest $P_n \le \sqrt{M}$ and then maximize $m$ such that $m^2P_n \phi(P_n) \le M$ where $\phi(P_n)$ is the number of integers coprime to $P_n$ given as
-\[
-	\phi(P_n) = (2-1) \times (3-1) \times \cdots \times (p_n - 1) = \prod_{i=1}^n (p_i - 1).
-\]
-The bound on the largest baby step $b$ is $b = m P_n$.  We then compute $h' = \ord(\beta)$ and use a fast order finding algorithm $\mathcal A(\alpha^{h'}, E)$ to compute $h = \ord(\alpha)$.  Pseudo-code for the bounded Primorial Steps technique is given in Algorithm \ref{alg:primorial}.
+where $p_i$ is the $i^{\textrm{th}}$ prime.  Let $e_i = \floor{\log_{p_i} M}$ for $1 \le i \le w$ and $E = 2^{e_2} \times 3^{e_3} \times \cdots \times {p_w}^{e_w}$.  Then compute $\beta = \alpha^E$, and use baby steps coprime to $P_w$ and giant steps that are a multiple of $P_w$.  Following Sutherland \cite[p.57]{Sutherland2007}, we select the largest $P_w \le \sqrt{M}$ and then maximize $m$ such that $m^2P_w \phi(P_w) \le M$ where $\phi(P_w)$ is the number of integers coprime to $P_w$ given as
+\begin{equation}
+\label{eq:phiPrimorial}
+	\phi(P_w) = (2-1) \times (3-1) \times \cdots \times (p_w - 1) = \prod_{i=1}^w (p_i - 1).
+\end{equation}
+The bound on the largest baby step $b$ is $b = m P_w$.  We then compute $h' = \ord(\beta)$ and use a fast order finding algorithm $\mathcal A(\alpha^{h'}, E)$ to compute $h = \ord(\alpha)$.  Pseudo-code for the bounded Primorial Steps technique is given in Algorithm \ref{alg:primorial}.
 
-One fast order finding algorithm $\mathcal A(\alpha^{h'}, E)$ uses the factorization of $E=\prod {p_i}^{e_i}$.  Notice that ${\alpha^{h'}}^E = \beta^{h'} = 1_G$.  The idea is to iterate on the factors of $E$, removing each factor $p$ before computing $\gamma = {\alpha^{h'}}^{E'}$ for the product $E' = E/p$. If $\gamma = 1_G$, then $\ord(\alpha) ~|~ h'E'$ and we continue with the next factor in the product $E'$.  Otherwise, $p$ is a factor of $\ord(\alpha)$ and we continue with the next factor of $E$.  Additional fast order finding algorithms are given in Chapter 7 of \cite{Sutherland2007}.
+One fast order finding algorithm $\mathcal A(\alpha^{h'}, E)$ uses the factorization of $E=\prod {p_i}^{e_i}$.  Notice that ${\alpha^{h'}}^E = \beta^{h'} = 1_G$.  The idea is to iterate on the factors of $E$, removing each factor $p$ before computing $\gamma = {\alpha^{h'}}^{E'}$ for the product $E' = E/p$. If $\gamma = 1_G$, then $\ord(\alpha) ~|~ h'E'$ and we continue with the next factor in the product $E'$.  Otherwise, $p$ is a factor of $\ord(\alpha)$ and we continue with the next factor of $E$.  More fast order finding algorithms are given in Chapter 7 of \cite{Sutherland2007}.
 
 \subsection{Primorial Steps for a Set of Elements}
+\label{subsec:subexpPrimorialSteps}
 
 Suppose the success of a computation is not limited to computing the order of a single element, but that the order of any element from a set of groups will work.  Let $\{ \alpha_i \in G_i \}$ be a set of elements from different groups such that the order of $\alpha_i$ is distributed uniformly at random on the interval $[1, M]$ where $M$ is a bound on the largest order of the elements $\alpha_i$.  When the order of any element $\alpha_i$ from the set will suffice, Sutherland gives an algorithm with subexponential complexity.
 
@@ -1134,58 +1137,69 @@ Recall that an integer $x$ is $y$-smooth if none of its prime factors are larger
 \[
 	u^{u+o(1)}M^{1/u} = \exp \left( \frac{1}{u}\log M + u \log u + o(1) \right).
 \]
-This cost is minimized for $u \approx \sqrt{2 \log M / \log \log M}$, which gives an expected running time of
+The cost is minimized for $u \approx \sqrt{2 \log M / \log \log M}$, which gives an expected running time of
 \[
 	\exp \left( \left( \sqrt2 + o(1) \right) \sqrt{\log M \log \log M} \right).
 \]
 
 
-The idea behind the SPAR factoring algorithm is to find an ambiguous ideal for one of the class groups with valid discriminant $\Delta = -kN$ for $1 \le k \le r^r$ where $r = \sqrt{\ln N / \ln \ln N}$.  In this case, the success of splitting a composite integer $N$ is not limited to finding an ambiguous ideal within a single group, but instead to finding an ambiguous ideal from any of several groups.  As such, we can directly apply the above approach to that of the SPAR factoring algorithm.
+Notice that the idea behind the SPAR factoring algorithm is to find an ambiguous ideal for one of the class groups with valid discriminant $\Delta = -kN$ for $1 \le k \le r^r$ where $r = \sqrt{\ln N / \ln \ln N}$.  In this case, the success of splitting a composite integer $N$ is not limited to finding an ambiguous ideal within a single group, but instead to finding an ambiguous ideal from any of several groups.  As such, we can directly apply the above approach to that of the SPAR factoring algorithm.
 
 \bigbreak
 \section{SuperSPAR}
 \label{sec:superSpar}
 
-Here we introduce SuperSPAR -- an algorithm for factoring integers and our motivation for improving the performance of exponentiation in the ideal class group.  First we review SPAR to show how it relates to the primorial steps algorithm of the previous section.
+Here we introduce SuperSPAR -- an integer factoring algorithm and our motivation for improving the performance of exponentiation in the ideal class group.  Let $N$ be the odd integer we wish to factor.  For some square free integer $k$, choose a discriminant $\Delta = -kN$ or $\Delta = -4kN$ such that $\Delta \equiv 0, 1 \pmod 4$.  Similar to SPAR, SuperSPAR attempts to find a factor of the discriminant $\Delta$ by finding an ambiguous ideal class in $Cl_\Delta$.  SuperSPAR uses two stages, the first of which is the same as SPAR.
 
-In Stage 1 of SPAR, we take the first $t$ primes $p_1 = 2, p_2 = 3, ..., p_t \approx N^{1/2r}$ for $r = \sqrt{\ln N / \ln \ln N}$, and let $e_i = \max \{ v : {p_i}^v \le {p_t}^2 \}$.  We then compute
+Stage 1 takes the first $t$ primes $p_1 = 2, p_2 = 3, ..., p_t \approx N^{1/2r}$ for $r = \sqrt{\ln N / \ln \ln N}$, sets $e_i = \max \{ v : {p_i}^v \le {p_t}^2 \}$, and then computes
 \[
 	\bclass = \aclass^{\prod_{i=2}^t {p_i}^{e_i}},
 \]
-for a random ideal class $\aclass$ and $\cclass = {\bclass}^{\left(2^k\right)}$ for $k=\floor{\log_2 \sqrt{|\Delta|}}$.  The purpose of \mbox{Stage 1} is to find an ideal class $\bclass$ whose order is likely not have any of the odd primes $p_2, ..., p_t$ as divisors.  If the odd part of $\ord(\bclass)$ divides $\prod_{i=2}^t {p_i}^{e_i}$ and the order of $\bclass$ is even, then computing $\cclass$ produces an ambiguous ideal and we can attempt to factor the \mbox{discriminant $\Delta$}.
+for a random ideal class $\aclass$.  It then computes $\cclass = {\bclass}^{\left(2^k\right)}$ for $k=\floor{\log_2 \sqrt{|\Delta|}}$.  If the odd part of $\ord(\bclass)$ divides $\prod_{i=2}^t {p_i}^{e_i}$ and the order of $\bclass$ is even, then there is some $\bclass^{\left( 2^j \right)}$ for $0 \le j < k$ that is an ambiguous ideal and we can attempt to factor the discriminant $\Delta$.  If we treat the order $h' = \ord(\cclass)$ as being uniformly distributed on the interval $[1, \sqrt N]$, then by \cite[p.81]{Sutherland2007}, the probability of $\ord(\aclass)$ being $N^{1/2r}$-smooth is $r^{-r}$ and so the probabilty of Stage 1 being successful is approximately $r^{-r}$ (TODO: This is probably not rigorous enough.  Look at SPAR paper to see how they bound Stage 1).  Failing this, SuperSPAR continues with stage 2, and this is where SPAR and SuperSPAR differ.
 
-Failing this, Stage 2 attempts to find the order of $\cclass$ by performing a random walk on the cyclic group that it generates.  Schnorr and Lenstra \cite[p.294]{Schnorr1984} suggest a Pollard-Brent Recursion \cite{Brent1980} based on Pollard's rho method \cite{Pollard1975}.  This approach will yield $\ord(\cclass)$ within $\sqrt{\pi/2}p_t$ steps if $\ord(\cclass) \le {p_t}^2$ and requires only a constant number of group elements \cite[p.294]{Schnorr1984}.  They also remark \cite[p.298]{Schnorr1984} that Shanks' baby-step giant-step method \cite{Shanks1971} could be used to deterministically find $\ord(\cclass)$ within $\sqrt{2}p_t$ group operations when $\ord(\cclass) \le {p_t}^2$, but requiring $O(p_t)$ storage \cite[p.298]{Schnorr1984}.  They point out that this approach can be made faster by exploiting the fact that $\ord(\cclass)$ is likely to have no prime divisors $p_1, ..., p_t$, and this leads us to the SuperSPAR factoring algorithm.
+Stage 2 of SPAR attempts to find the order of $\cclass$ by performing a random walk on the cyclic group it generates by using $O(p_t)$ group operations.  Schnorr and Lenstra \cite[p.294]{Schnorr1984} suggest a Pollard-Brent Recursion \cite{Brent1980} based on Pollard's rho method \cite{Pollard1975}, but also remark \cite[p.298]{Schnorr1984} that Shanks' baby-step giant-step method \cite{Shanks1971} could be used to deterministically find $\ord(\cclass)$.  They point out that this approach could be made faster by exploiting the fact that $\ord(\cclass)$ is likely to have no prime divisors $p_1, ..., p_t$, and this is precisely what SuperSPAR does.
 
-\subsection{SuperSPAR Algorithm}
+Stage 2 of SuperSPAR attempts to find the order of $\cclass$ by taking baby steps coprime to some primorial, and then giant steps a multiple of that primorial.  Since the function $\phi(P_w)$ (Equation \ref{eq:phiPrimorial}) gives the number of integers coprime to the primorial $P_w$, we use this to determine the largest primorial to use for the coprime baby steps.  First maximize $\phi(P_w) \le p_t$, then let $m = \floor{p_t / \phi(P_w)}$ and $b = mP_w$.  Notice that $b$ is a multiple of the primorial $P_w$ and that the number of baby steps is $s = m \phi(P_w) \le p_t$.  We then take baby steps $\cclass^i$ for $1 \le i \le b$ with $i$ coprime to $P_w$, followed by giant steps $\cclass^j$ for $j=2b,-2b,4b,-4b,...,2sb,-2sb$\footnote{We use this sequence of giant steps since computing the inverse in the ideal class group is essentially free.}.  Taking an equal number of giant steps as baby steps means that this stage of SuperSPAR uses $O(p_t)$ group operations (not counting inversions).
 
-SuperSPAR, similar to SPAR, works by finding an ambiguous ideal with a discriminant associated with the integer we wish to factor, and does so by combining both SPAR and the Primorial Steps algorithm.
+If Stage 2 successfully computes $h' = \ord(\cclass)$ and assuming that $\ord(\bclass)$ is even, we compute an ambiguous ideal by repeated squaring of $\bclass^{h'}$ and then attempt to factor the discriminant.  If Stage 2 fails, the algorithm tries again with a different prime ideal, or a different square free multiplier $k$.
 
-Let $N$ be the odd integer we wish to factor.  For some square free integer $k$, choose a discriminant $\Delta = -kN$ or $\Delta = -4kN$ such that $\Delta \equiv 0, 1 \pmod 4$, and a random prime ideal class representative $\mathfrak a$ such that $\aclass \in Cl_\Delta$.  Similar to SPAR, SuperSPAR begins by computing the primes $p_1=2, p_2=3, ..., p_t \approx N^{1/2r}$ for $r = \sqrt{\ln N / \ln \ln |N}$.  Treating the order of a random ideal class in $Cl_\Delta$ as uniformly distributed, we expect $h = \ord(\aclass)$ to be $N^{1/2r}$-smooth with probability $r^{-r}$.  TODO: something about the class number being $\sqrt{|\Delta|}$ as $\Delta \rightarrow \infty$ \cite[p.247]{Crandall2001}.
+TODO: something about the class number being $\sqrt{|\Delta|}$ as $\Delta \rightarrow \infty$ \cite[p.247]{Crandall2001}.
 
-To take advantage of the search phase of the Primorial Steps algorithm, we would like to compute an ideal class whose order is known to not have any of primes $p_i \le p_t$ as divisors.  By exponentiating $\aclass$ to the product of each prime $p_i$ raised the largest value less than or equal to the number of elements in the class group, we are guaranteed such an element.  Cohen \cite[p.295]{Cohen1993} states a bound on the number of elements in the class group $Cl_\Delta$ as
+
+\subsection{SuperSPAR Complexity}
+
+
+For the purpose of discussing SuperSPAR, we treat the distribution on the order of random ideals as uniform.  Let $N$ be the odd integer we wish to factor.  For some square free integer $k$, choose a discriminant $\Delta = -kN$ or $\Delta = -4kN$ such that $\Delta \equiv 0, 1 \pmod 4$, and a random prime ideal class representative $\mathfrak a$ such that $\aclass \in Cl_\Delta$.  The idea is that for some real value $u$, we will perform $O(|\Delta|^{1/u})$ group operations on $\aclass$ in an attempt to find an ambiguous idea.  Treating the order $h = \ord(\aclass)$ as uniformly distributed, we can expect $h$ to be $|\Delta|^{1/u}$-smooth with probability $u^{-u}$.  As such, we can expect to try $u^u$ different discriminants. TODO: more rigour here.
+
+Sutherland notes \cite[p.84]{Sutherland2007} that the distribution of $\ord(\alpha_i)$ may not be uniform.
+
+
+TODO: Note that $M \approx \sqrt{N} \log N$ for the ideal class group which brings the expected running time down to $\exp \left( \left( 1 + o(1) \right) \sqrt{\log M \log \log M} \right)$.
+
+
+Ideally, we want to minimize the expected number of group operations that lead to a factorization of the integer $N$.  The parameters involved are the number of prime ideal classes $\aclass$ tried before switching multipliers and class groups, the bound on the largest prime in the exponent $E$, a bound on the exponents $e_i$ of the prime powers ${p_i}^{e_i}$ whose product is the exponents $E$, and a bound on the largest baby step $b$.
+
+
+Cohen \cite[p.295]{Cohen1993} states a bound on the number of elements in the class group $Cl_\Delta$ as
 \begin{equation}
 \label{eq:hDelta}
 	h_\Delta < \frac{1}{\pi} \sqrt{|\Delta|}\log{|\Delta|} \textrm{ when } \Delta < -4.
 \end{equation}
-Using the above bound, let $e_i = \max \{ v : {p_i}^v \le h_\Delta \}$ for each prime $p_i$, and compute the \emph{odd} power primorial 
-\[
-	E = \prod_{i=2}^t {p_i}^{e_i}
-\]
-and the ideal class $\bclass = \aclass^E$.  Finally, compute $\cclass = \bclass^{\left(2^k\right)}$ for $k = \floor{\log_2 h_\Delta}$ and we are guaranteed that $h' = \ord(\cclass)$ does not have any primes $p_i \le p_t$ as divisors.  Notice that the exponent $E$ is odd following SPAR since if the order $h' = \ord(\cclass)$ is known, an ambiguous form can easily be computed by repeated squaring of $\bclass^{h'}$. 
+Since the prime exponents $e_i$ in Stage 1 are bound by $\floor{\log_{p_i} {p_t}^2}$ instead of $\floor{\log_{p_i} h_\Delta}$, there is no guaranteed that $h' = \ord(\cclass)$ does not have some $p_i \le p_t$ as a divisor.
 
-TODO: continue here.
 
-The order of $\cclass$ is then computed by taking baby steps $\cclass^i$ for $1 \le i \le b$ where $i$ is coprime to $P_n$, and giant steps $\cclass^j$ for $j=2b, -2b, 4b, -4b ...$\footnote{We use this sequence of giant steps since computing the inverse in the ideal class group is essentially free.}.  Having computed the order $h' = \ord(\cclass)$, we compute an ambiguous ideal by repeated squaring of $\dclass = \bclass^{h'}$ assuming that $\ord(\bclass)$ is even.  This works since $\bclass = \aclass^E$ and $E$ has no factors of 2.  We have 
-\[
-\cclass^{h'} = \bclass^{h'\left(2^k\right)} = \dclass^{\left(2^k\right)} = \idclass
-\]
-and for some $k' < k$ it holds that ${\left(\dclass^{k'}\right)}^2 = \idclass$ and $\dclass^{k'}$ is an ambiguous ideal.  If our initial prime ideal class representative $\aclass$ has odd order, then we try again with a different prime ideal, or a different square free multiplier $k$.
+%\subsection{How Do We Do It (Empirically)}
+%\subsection{Analysis for Generic Groups}
+%\subsection{Analysis for Class Group of Imaginary Quadratic Number Fields}
+%\subsection{Comparison with Original SPAR}
+
+\subsection{SuperSPAR in Practice}
 
 In practice, the efficiency of the SuperSPAR factoring algorithm partially depends on the smoothness of the order of the ideal class $\aclass$ with respect to the power primorial $E$.  The larger the divisor that $\ord(\aclass)$ and $E$ have in common, the smaller the order of $\cclass = \aclass^{\left(2^k\right)E}$ and the smaller the bound $b$ we need for the baby steps and giant steps.  Changing the square free multiplier $k$ for the discriminant $\Delta$ changes the class group, and in the new class group elements may have orders that are smoother (TODO: cite something).  As such, we trade off the number of ideal classes and multipliers $k$ against the largest prime used in the power primorial $E$.
 
 Furthermore, Schnorr and Lenstra \cite[p.293]{Schnorr1984} advise the use of smaller exponents $e'_i = \max \{v : {p_i}^v \le p_t \}$ for the first $t$ primes $p_i \le N^{1/2r}$ when computing the exponent $E$ in practice.  As the exponent $e_i$ in the prime power ${p_i}^{e_i}$ increases, the likelihood of a random integer being divisible by that prime power decreases.  As such, it is generally more useful to use larger primes in the exponent $E$ than larger prime powers.  For this reason, we bound the exponents $e_i$ of the prime powers ${p_i}^{e_i}$ separately from the bound on the largest prime used in $E$.
 
-Finally, we note that selecting a bound $b=mP_n$ for the primorial steps phase implies that the number of group operations performed during this phase of the algorithm dominates over the number of group operations required to exponentiate $\aclass^E$.  In addition to this, as $P_n$ grows, computing baby steps up to the bound $b$ becomes computational intractable.  Therefore, we select the bound $b$ on the largest baby step separately.  We point out that after taking $\phi(b)$ baby steps with each step coprime to $b$, followed by $\phi(b)$ giant steps with each step $2b$ in size, the final giant step may have an exponent less than $\ord(\cclass)$.  In which case, we will not find an ambiguous ideal from our initial ideal class $\aclass$ and we try again with a different ideal class $\aclass$ or multiplier $k$ on the discriminant $\Delta$.  Again, this trades off the number of group operations used when searching for an ambiguous ideal against the number of ideals tried per class group or the number of class groups used.
+Finally, we note that selecting a bound $b=mP_w$ for the primorial steps phase implies that the number of group operations performed during this phase of the algorithm dominates over the number of group operations required to exponentiate $\aclass^E$.  In addition to this, as $P_w$ grows, computing baby steps up to the bound $b$ becomes computational intractable.  Therefore, we select the bound $b$ on the largest baby step separately.  We point out that after taking $\phi(b)$ baby steps with each step coprime to $b$, followed by $\phi(b)$ giant steps with each step $2b$ in size, the final giant step may have an exponent less than $\ord(\cclass)$.  In which case, we will not find an ambiguous ideal from our initial ideal class $\aclass$ and we try again with a different ideal class $\aclass$ or multiplier $k$ on the discriminant $\Delta$.  Again, this trades off the number of group operations used when searching for an ambiguous ideal against the number of ideals tried per class group or the number of class groups used.
 
 Assuming we know good choices for each of the variables involved, we give the complete SuperSPAR algorithm in listing \ref{alg:superSpar}.
 
@@ -1238,24 +1252,6 @@ Assuming we know good choices for each of the variables involved, we give the co
 \end{algorithm}
 
 
-\subsection{SuperSPAR Complexity}
-
-
-For the purpose of discussing SuperSPAR, we treat the distribution on the order of random ideals as uniform.  Let $N$ be the odd integer we wish to factor.  For some square free integer $k$, choose a discriminant $\Delta = -kN$ or $\Delta = -4kN$ such that $\Delta \equiv 0, 1 \pmod 4$, and a random prime ideal class representative $\mathfrak a$ such that $\aclass \in Cl_\Delta$.  The idea is that for some real value $u$, we will perform $O(|\Delta|^{1/u})$ group operations on $\aclass$ in an attempt to find an ambiguous idea.  Treating the order $h = \ord(\aclass)$ as uniformly distributed, we can expect $h$ to be $|\Delta|^{1/u}$-smooth with probability $u^{-u}$.  As such, we can expect to try $u^u$ different discriminants. TODO: more rigour here.
-
-Sutherland notes \cite[p.84]{Sutherland2007} that the distribution of $\ord(\alpha_i)$ may not be uniform.
-
-
-TODO: Note that $M \approx \sqrt{N} \log N$ for the ideal class group which brings the expected running time down to $\exp \left( \left( 1 + o(1) \right) \sqrt{\log M \log \log M} \right)$.
-
-
-Ideally, we want to minimize the expected number of group operations that lead to a factorization of the integer $N$.  The parameters involved are the number of prime ideal classes $\aclass$ tried before switching multipliers and class groups, the bound on the largest prime in the exponent $E$, a bound on the exponents $e_i$ of the prime powers ${p_i}^{e_i}$ whose product is the exponents $E$, and a bound on the largest baby step $b$.
-
-
-%\subsection{How Do We Do It (Empirically)}
-%\subsection{Analysis for Generic Groups}
-%\subsection{Analysis for Class Group of Imaginary Quadratic Number Fields}
-%\subsection{Comparison with Original SPAR}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1416,7 +1412,7 @@ Since Lehmer's GCD performs the same operations as the Extended Euclidean Algori
 \subsection{Right-to-Left Binary GCD}
 \label{subsec:r2lBinGcd}
 
-The previous extended GCD algorithms use divide with remainder, which is often expensive.  Binary GCD algorithms emphasize bit shifting over multiplication and division.  Such algorithms may perform better than other GCD algorithms in practice (see Subsection \ref{subsec:gcdResults} for results).  Here we introduce a binary GCD algorithm that works from the least significant bit to the most significant bit.  We refer to this as right-to-left since this is the direction in which we process the written binary representation.  The concept was originally published by Stein \cite{Stein1967}.
+The previous extended GCD algorithms use divide with remainder, which is often expensive.  Binary GCD algorithms emphasize bit shifting over multiplication and division.  Such algorithms may perform better than other GCD algorithms in practice (see Subsection \ref{subsec:gcdResults} for results).  Here we describe a binary GCD algorithm that works from the least significant bit to the most significant bit.  We refer to this as right-to-left since this is the direction in which we process the written binary representation.  The concept was originally published by Stein \cite{Stein1967}.
 
 To compute the greatest common divisor of two positive numbers, we can repeatedly apply the following identities,
 \[
@@ -1744,7 +1740,7 @@ In the previous section, we demonstrated results that lead to practical improvem
 
 Throughout this thesis, we represent an ideal class $[\mathfrak a]$ using the $\ZZ$-module for the reduced ideal representative $\mathfrak a = [a, (b + \sqrt{\Delta})/2]$.  Ideal class multiplication and ideal reduction use the value $c = (b^2 - \Delta)/4a$, which is also useful in determining if an ideal is an ambiguous ideal\footnote{Recall that an ideal is ambiguous if $b=0$, $a=b$, or $a=c$.}.  For this reason, our implementation represents an ideal class using the triple $(a, b, c)$.  We also maintain a representation of the group\footnote{The group representation also includes all intermediate integers needed for use by the GMP library.  The reason for this is that GMP integers are managed on the heap, and preallocating them alongside the representation of the group reduces the overhead of managing them during ideal class group operations.}, which includes the discriminant $\Delta$.
 
-In Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and \ref{subsec:nucube} we introduced algorithms for fast ideal class multiplication, squaring, and cubing.  These compute a termination bound for the partial extended GCD useful for computing partially reduced coefficients of the product ideal class.  In all cases, the termination bound contains the coefficient $|\Delta/4|^{1/4}$.  Since the coefficients of the partial extended GCD are integers, we instead compute $\ceil{|\Delta/4|^{1/4}}$ as well as $\ceil{|\Delta/4|^{1/2}}$ and store both in our representation of the class group.  The reason we store $\ceil{|\Delta/4|^{1/2}}$ is that the termination bound for ideal multiplication is
+In Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and \ref{subsec:nucube} we gave algorithms for fast ideal class multiplication, squaring, and cubing.  These compute a termination bound for the partial extended GCD useful for computing partially reduced coefficients of the product ideal class.  In all cases, the termination bound contains the coefficient $|\Delta/4|^{1/4}$.  Since the coefficients of the partial extended GCD are integers, we instead compute $\ceil{|\Delta/4|^{1/4}}$ as well as $\ceil{|\Delta/4|^{1/2}}$ and store both in our representation of the class group.  The reason we store $\ceil{|\Delta/4|^{1/2}}$ is that the termination bound for ideal multiplication is
 \[
 \sqrt{a_1/a_2}|\Delta/4|^{1/4} = \sqrt{(a_1/a_2) |\Delta/4|^{1/2}} \approx \sqrt{(a_1/a_2) \ceil{|\Delta/4|^{1/2}}}.
 \]
@@ -1841,12 +1837,12 @@ In the previous Section, we discussed our implementations of ideal class arithme
 
 \subsection{Binary and Right-to-Left Non-Adjacent Form}
 
-In Sections \ref{sec:binaryExp} and \ref{sec:naf} we introduced binary exponentiation and non-adjacent form exponentiation.  Briefly again, binary exponentiation uses the binary representation of an exponent $n$.  The representation can be parsed from high-order to low-order or from low-order to high-order -- we typically refer to this difference as left-to-right or right-to-left respectively.  Using either approach, we use $\floor{\log_2n}$ squares and $\floor{\log_2n}/2$ multiplications on average.
+In Sections \ref{sec:binaryExp} and \ref{sec:naf} we discussed binary exponentiation and non-adjacent form exponentiation in detail.  Briefly again, binary exponentiation uses the binary representation of an exponent $n$.  The representation can be parsed from high-order to low-order or from low-order to high-order -- we typically refer to this difference as left-to-right or right-to-left respectively.  Using either approach, we use $\floor{\log_2n}$ squares and $\floor{\log_2n}/2$ multiplications on average.
 
 A non-adjacent form exponentiation uses a signed base 2 representation of the exponent such that no two non-zero terms are adjacent\footnote{Non-adjacent form is written as $n=\prod s_i2^i$ for $s_i \in \{0, -1, 1\}$. By ``non-adjacent'' we mean that $s_i \cdot s_{i+1} = 0$ for all $i$.}.  Similarly, when computing a non-adjacent form we can parse the exponent from left-to-right or from right-to-left.  Either direction, we use $\floor{\log_2n} + 1$ squares and $(\floor{\log_2n}+1)/3$ multiplications on average.   
 
 \subsection{Right-to-Left 2,3 Chains}
-In Subsection \ref{subsec:rtolChains}, we introduced a method for computing 2,3 chains from low-order to high-order that is a natural extension of the binary representation or non-adjacent form of an exponent.  In this method, we reduce the exponent $n$ by 2 while it is even, and by 3 while it is divisible by 3.  At which point either $n \equiv 1 \pmod 6$ or $n \equiv 5 \pmod 6$ and we add or subtract 1 so that $n$ is a multiple of 6.  The resulting partition of $n$ is then reversed such that the number of squares or cubes in successive terms is monotonically increasing and we can use Algorithm \ref{alg:expWithChain} from Chapter \ref{chap:exponentiation} to compute the exponentiation.
+In Subsection \ref{subsec:rtolChains}, we described a method for computing 2,3 chains from low-order to high-order that is a natural extension of the binary representation or non-adjacent form of an exponent.  In this method, we reduce the exponent $n$ by 2 while it is even, and by 3 while it is divisible by 3.  At which point either $n \equiv 1 \pmod 6$ or $n \equiv 5 \pmod 6$ and we add or subtract 1 so that $n$ is a multiple of 6.  The resulting partition of $n$ is then reversed such that the number of squares or cubes in successive terms is monotonically increasing and we can use Algorithm \ref{alg:expWithChain} from Chapter \ref{chap:exponentiation} to compute the exponentiation.
 
 Since this approach evaluates the exponent modulo 3 and may reduce the exponent by 3, efficient methods to compute $n \bmod 3$ and $n/3$ will speed the computation of the chain. Notice that $4 \equiv 1 \pmod 3$.  As such, we can write $n$ as
 \[
@@ -1895,7 +1891,7 @@ and recursively write $\floor{n/64} \pmod 9$.  To compute $n \bmod 9$, we partit
 \subsection{Left-to-Right 2,3 Representations and Chains}
 \label{subsec:ltorChains2}
 
-In Subsection \ref{subsec:ltorChains} we introduce a greedy algorithm for computing 2,3 representations from high-order to low-order.  Briefly, for a given exponent $n$ and for $a_i, b_i \in \ZZgez$ and \mbox{$s_i \in \{-1, 1\}$}, we compute the term $s_i2^{a_i}3^{b_i}$ such that $\left|n-s_i2^{a_i}3^{b_i}\right|$ is as small as possible.  We then recurse on the result $n - s_i2^{a_i}3^{b_i}$.  As is, this produces unchained representations, but a chain can be generated by restricting each $a_i$ and $b_i$ such that it is no greater than the $a_{i-1}$ and $b_{i-1}$ from the previous term.  Placing a bound on the number of squares and cubes can also be done globally, i.e.\ for every $a_i, b_i$ we have $0 \le a_i \le A$ and $0 \le b_i \le B$. When a bound is applied globally, the cost of a left-to-right chain or representation varies as the global bound varies.
+In Subsection \ref{subsec:ltorChains} we described a greedy algorithm for computing 2,3 representations from high-order to low-order.  Briefly, for a given exponent $n$ and for $a_i, b_i \in \ZZgez$ and \mbox{$s_i \in \{-1, 1\}$}, we compute the term $s_i2^{a_i}3^{b_i}$ such that $\left|n-s_i2^{a_i}3^{b_i}\right|$ is as small as possible.  We then recurse on the result $n - s_i2^{a_i}3^{b_i}$.  As is, this produces unchained representations, but a chain can be generated by restricting each $a_i$ and $b_i$ such that it is no greater than the $a_{i-1}$ and $b_{i-1}$ from the previous term.  Placing a bound on the number of squares and cubes can also be done globally, i.e.\ for every $a_i, b_i$ we have $0 \le a_i \le A$ and $0 \le b_i \le B$. When a bound is applied globally, the cost of a left-to-right chain or representation varies as the global bound varies.
 
 Figure \ref{fig:dbnsL2rVaryBounds} shows the time to exponentiate using a precomputed left-to-right representation for an exponent that is the product of the first 1000 primes (a number with 11271 bits).  The horizontal axis indicates a global bound $A$ such that all $a_i \le A$.  A global bound $B$ is chosen for the exponent $n$ such that $B = \ceil{\log_3(n/2^A)}$.  The end points of the graph correspond to a representation that uses only cubing and multiplication (on the left side) and a representation that uses only squaring and multiplication (on the right side).
 
@@ -2006,7 +2002,7 @@ where $0 \le b_i < 2^{16}$.  Assuming that we can exponentiate a group element $
 \end{algorithmic}
 \end{algorithm}
 
-Another way we can use 16-bit representations is when we know the prime factorization of the exponent $n$ and $n$ is the product of primes smaller than $2^{16}$.  Since we are interested in exponentiation by primorials (i.e.\ the product of the first $n$ primes), the prime factorization is trivial. Given a primorial $P_n = \prod_{i=1}^n p_i$ where $p_i$ is the $i^{\textrm{th}}$ prime, we can compute $g^{P_n}$ as $(((g^{p_1})^{p_2})^{\cdots})^{p_n}$ using a series of $n$ small exponentiations.
+Another way we can use 16-bit representations is when we know the prime factorization of the exponent $n$ and $n$ is the product of primes smaller than $2^{16}$.  Since we are interested in exponentiation by primorials (i.e.\ the product of the first $w$ primes), the prime factorization is trivial. Given a primorial $P_w = \prod_{i=1}^w p_i$ where $p_i$ is the $i^{\textrm{th}}$ prime, we can compute $g^{P_w}$ as $(((g^{p_1})^{p_2})^{\cdots})^{p_w}$ using a series of $w$ small exponentiations.
 
 \subsection{Experimental Results}
 
@@ -2151,6 +2147,7 @@ Only hash the pair $(a,c)$ so that $\aclass$ and $\aclass^{-1}$ hash to the same
 \subsection{Improvements}
 
 Time 2,3 representation generation vs 2,3 exponentiation.
+A rigorous analysis of the expected cost of each 2,3 representation generated.
 
 Windowed left-to-right GCD.
 2,3 base GCD.
