@@ -73,6 +73,7 @@
 \newcommand{\dclass}{[\mathfrak d]}
 \newcommand{\idclass}{[\mathcal O_\Delta]}
 
+\newcommand{\ith}{i^{\textrm{th}}}
 
 \newcommand{\mygraph}[3]{
 	\begin{figure}[H]
@@ -713,6 +714,8 @@ The binary representation has 10 terms, while the non-adjacent form has only 8 t
 \subsection{Chains}
 \label{subsec:dbnsChains}
 
+% TODO: Lower bound of O(log N) for number of group operations.  o(log N) is only for the number of terms.
+
 One way to classify algorithms that compute 2,3 representations is by the constraints placed on the partition of an integer $n$.
 
 \begin{defn}
@@ -1032,6 +1035,7 @@ According to \cite{Schnorr1984}, every reduced representative of an ambiguous cl
 	\Delta &= b(b - 4c) & \textrm{ when } & a = b, \textrm{ or} \\
 	\Delta &= (b - 2a)(b + 2a) & \textrm{ when } & a = c.
 \end{align*}
+TODO: describe how to use the $\gcd$ to compute the factor.
 Suppose we wish to find a factor of an odd integer $N$. Since $\Delta = b^2 - 4ac$ we must have $\Delta \equiv 0, 1 \pmod 4$.  Therefore, for some square free integer $k$, let $\Delta = -kN$ when $-kN \equiv 1 \pmod 4$ and $\Delta = -4kN$ otherwise.  Now, to find a factor of $N$ we find a reduced ambiguous class representative with discriminant $\Delta$.  If we are lucky, we get a proper factor of $N$.
 
 
@@ -1196,76 +1200,78 @@ Since the prime exponents $e_i$ in Stage 1 are bound by $\floor{\log_{p_i} {p_t}
 
 \subsection{SuperSPAR in Practice}
 
-In practice, balancing both stages of SuperSPAR to use $O(N^{1/2r})$ group operations for $r = \sqrt{\ln N / \ln \ln N}$ is often not ideal.  This is partly because the actual cost of multiplication, squaring, and cubing differ, but also because the success of each stage depends on different properties of the class number.  The exponentiation stage is successful when the order of a random ideal class is smooth with respect to some primorial $E$, while the search stage is successful when the non-smooth part of the order is sufficiently small.  In this sense, the efficiency of the factoring algorithm depends both on the smoothness of a random ideal class $\aclass$ with respect to the primorial $E$, but also on the size of its non-smooth part with respect to the size of the exponent reached in the search stage.
+In practice, balancing both stages of SuperSPAR to use $O(N^{1/2r})$ group operations for $r = \sqrt{\ln N / \ln \ln N}$ is often not ideal.  This is partly because the actual cost of multiplication, squaring, and cubing differ, but also because the success of the different stages depends on different properties of the class number.  The exponentiation stage is successful when the order of a random ideal class is smooth with respect to some primorial $E$, while the search stage is successful when the non-smooth part of the order is sufficiently small.  In this sense, the efficiency of the factoring algorithm depends both on the smoothness of a random ideal class $\aclass$ with respect to the primorial $E$, but also on the size of its non-smooth part with respect to the size of the exponent reached in the search stage.
 
-In both SPAR and SuperSPAR, the largest prime used by the exponentiation stage is $p_t \approx N^{1/2r}$.  This is chosen to theoretically minimize the total expected running time of the algorithm.  Using a larger value for $r$ will result in this stage being less successful.  As such, the algorithm is more likely to use the search phase, and more likely to use additional multipliers for the discriminant.  On the other hand, using a smaller value for $r$ means that this stage will be more likely to be successful, and ultimately fewer multipliers will be tried.  Since $r = \sqrt{\ln N / \ln \ln N}$ is chosen to minimize the expected running time in theory, in practice it may be more efficient to choose some other value for $r$, effectively trading off the number of ideal classes tried against the largest prime used in the primorial $E$.
+In both SPAR and SuperSPAR, the largest prime used by the exponentiation stage is $p_t \approx N^{1/2r}$.  This is chosen to theoretically minimize the total expected running time of the algorithm.  Using a larger value for $r$ means this stage is less successful, and the algorithm is more likely to use the search phase, and more likely to use additional multipliers for the discriminant.  On the other hand, using a smaller value for $r$ means this stage is more likely to be successful, and ultimately fewer multipliers are tried.  Since $r = \sqrt{\ln N / \ln \ln N}$ is chosen to minimize the expected running time in theory, in practice it may be more efficient to choose some other value for $r$, effectively trading off the number of ideal classes tried against the largest prime used in the primorial $E$.
 
 Furthermore, Schnorr and Lenstra \cite[p.293]{Schnorr1984} advise the use of smaller exponents $e'_i = \max \{v : {p_i}^v \le p_t \}$ for the first $t$ primes $p_i \le N^{1/2r}$ when computing the exponent $E$ in practice.  As the exponent $e_i$ in the prime power ${p_i}^{e_i}$ increases, the likelihood of a random integer being divisible by that prime power decreases.  As such, it is generally more useful to use larger primes in the exponent $E$ than larger prime powers.  For this reason, we bound the exponents $e_i$ of the prime powers ${p_i}^{e_i}$ separately from the bound on the largest prime used in $E$.
 
-Lastly, since balancing the number of operations between both stages is often not ideal, we choose the bound $b = m P_w$ for the baby steps separately.  Let $s$ be a function from some multiple $m$ of the primorial $P_w$ to the total number of baby steps and giant steps taken during the search stage of the algorithm.  We have
-\[
-	s(m, w) = 2 m \phi(P_w).
-\]
-Then, let
-\[
-	g(m, w) = 2 m^2 \phi(P_w) P_w
-\]
-be a function that computes the exponent of the final giant step before the algorithm tries a different multiplier.  In general, if there exists some $m'$ and $w'$ such that 
-\[
-g(m', w') > g(m, w) \textrm{ and } s(m', w') \le s(m, w)
-\]
-this means that by choosing a multiple $m'$ of the primorial $P_{w'}$, the search phase can search further using the same or fewer steps.  Let $S$ be the set of pairs $(m, w)$ from which we select the bound $b$ on the baby steps
-\[
-  S = \left\{ (m, w) ~:~ g(m, w) > g(m', w') \textrm{ for all }  \right\}
-\]
+In addition, since balancing the number of operations between both stages is often not ideal, we choose the bound $b = m P_w$ for the baby steps separately.  In section \ref{sec:expVsSearch} we discuss our approach to generating a set of bounds for the search stage.
 
-Assuming we know good choices for each of the variables involved, we give the complete SuperSPAR algorithm in listing \ref{alg:superSpar}.
+Section \ref{sec:idealsToMultipliers} studies sequential prime ideal representatives for fixed discriminants.  Let 
+\[
+	\left\{ [\mathfrak a_i] \in Cl_\Delta ~:~  \mathfrak a_i \in Cl_\Delta \textrm{ is the $\ith$ smallest prime ideal for } 1 \le i \le n \right\}
+\]
+be a set of the $n$ smallest prime ideal representatives for $Cl_\Delta$. Computing the order of each $[\mathfrak a_i]$ shows that typically the orders only differ by a small factor.  If the exponent $E$ is chosen to include such factors, then if either stage of SuperSPAR discovers some $h$ that is a multiple of $\ord([\mathfrak a_i])$, it is likely that $h$ is also a multiple of $\ord([\mathfrak a_j])$ for some other prime ideal $[\mathfrak a_j]$.  As such, once the algorithm discovers some multiple of the order of a random prime ideal, if the algorithm then fails to find an ambiguous form or find an ambiguous form that fails to lead to a factorization of $N$, the algorithm simply chooses another random prime ideal representative and tries again with the same value of $h$.  The exponentiation and search phases are skipped, since with high probability $h$ is a multiple of the order of several random prime ideal representatives.  If several random prime ideal representatives fail to lead to a factorization of $N$, the algorithm then starts over with a different multiplier $k$ for the discriminant.  As such, the final parameter, $t$, is the number of ideal classes to attempt before switching multipliers.
+
+Assuming good parameters are known, the complete SuperSPAR factoring algorithm is given in listing \ref{alg:superSpar}.  Chapter \ref{chap:superSparExperiments} discusses the experiments and results that lead to parameters that perform well in practice.
+
+TODO: Introduce $h_\Delta$.
 
 \begin{algorithm}[h]
 \caption{SuperSPAR Integer Factoring Algorithm.}
 \label{alg:superSpar}
 \begin{algorithmic}[1]
-\REQUIRE an integer $N \in \ZZgez$ to be factored, \\
-  $E, b, \ZZgtz$
-\STATE $k \gets 1$
-\STATE $\Delta \gets -kN$  \label{goto:newK}
-\IF {$\Delta \not\equiv 0,1 \pmod 4$}
-	\STATE $\Delta \gets 4\Delta$
-\ENDIF
-\STATE select $\aclass$ at random \COMMENT{typically a prime ideal representative}
-\STATE $\bclass \gets \aclass^E$ \COMMENT{big exponentiation by power primorial}
-\IF {$\bclass = \idclass$}
-	\STATE go to line \ref{goto:tryAgain} \COMMENT{no ambiguous ideal since $\ord(\aclass)$ is odd}
-\ENDIF
-\STATE $\cclass \gets \bclass$
+\REQUIRE $N \in \ZZgez$ odd and composite, \\
+  $E = \prod_{i=2}^t {p_i}^{e_i}$ for the exponentiation phase, \\
+  $m$ a multiplier of the primorial $P_w$ for the search phase, \\
+  $t \in \ZZgtz$ the number of ideal classes to try before switching multipliers.
+
+\STATE $b = mP_w$
+\STATE $k \gets 0$ \COMMENT{the next line sets $k$ to 1 on the first run}
+\STATE $k \gets $ smallest square free integer $> k$ \label{goto:newK}
+\STATE $\Delta \gets -kN$
+\STATE $\Delta \gets 4\Delta$ \textbf{if} $\Delta \not\equiv 0,1 \pmod 4$
+\STATE $[\mathfrak a_1], [\mathfrak a_2], ..., [\mathfrak a_t]$ are the first $t$ prime ideal classes in $Cl_\Delta$
+
+\STATE \{-- exponentiation stage --\}
+\STATE $\bclass \gets {[\mathfrak a_1]}^E$ \COMMENT{compute $\bclass^{\left(2^{\floor{\log_2 h_\Delta}}\right)}$ and test for an ambiguous ideal class}
 \FOR{$1 \le k \le \floor{\log_2 h_\Delta}$}
-	\STATE $\cclass \gets \cclass^2$ \COMMENT{compute $\cclass^{\left(2^{\floor{\log_2 h_\Delta}}\right)}$ by repeated squaring}
-	\IF {$\cclass$ is an ambiguous ideal}
-		\RETURN attempt to factor $\Delta$ using $\cclass$
+	\IF {$\bclass$ is an ambiguous ideal class}
+		\STATE $h \gets E$, then go to line \ref{goto:tryAmbiguous}
 	\ENDIF
+	\STATE $\bclass \gets \cclass^2$
 \ENDFOR
+
+\STATE \{-- search stage --\}
 \STATE clear the lookup table
-\FOR{$1 \le i \le b$ where $\gcd(i,b)=1$}
-	\STATE compute $\cclass^i$ and store $(\cclass^i, i)$ in the lookup table \COMMENT{coprime baby-steps}
-	\IF{$\cclass^i = \idclass$}
-		\STATE $h' \gets i$, then go to line \ref{goto:findAmbiguous} 
+\FOR{$1 \le i \le b$ where $\gcd(i,P_w)=1$}
+	\STATE compute $\bclass^i$ and store $(\bclass^i, i)$ in the lookup table \COMMENT{coprime baby-steps}
+	\IF{$\bclass^i = \idclass$}
+		\STATE $h \gets iE$, then go to line \ref{goto:tryAmbiguous}
 	\ENDIF
 \ENDFOR
-\FOR{$1 \le j \le \phi(b)$}
-	\IF{$\cclass^{2jb}$ is in the table}
-		\STATE $h' \gets 2jb - i$, then go to line \ref{goto:findAmbiguous}  \COMMENT{regular giant-step}
-	\ELSIF{$\cclass^{-2jb}$ is in the table}
-		\STATE $h' \gets 2jb + i$, then go to line \ref{goto:findAmbiguous} \COMMENT{inverted giant-step}
+\FOR{$1 \le j \le m\phi(P_w)$}
+	\IF{$\bclass^{2jb}$ is in the table}
+		\STATE $h \gets$ odd part of $E(2jb - i)$, then go to line \ref{goto:tryAmbiguous}  \COMMENT{positive giant-step}
+	\ELSIF{$\bclass^{-2jb}$ is in the table}
+		\STATE $h \gets$ odd part of $E(2jb + i)$, then go to line \ref{goto:tryAmbiguous} \COMMENT{inverted giant-step}
 	\ENDIF
 \ENDFOR
-\STATE $\dclass \gets \bclass^{h'}$ \label{goto:findAmbiguous}
-\FOR{$1 \le k \le \floor{\log_2 h_\Delta}$}
-	\STATE $\dclass \gets \dclass^2$
-	\IF{$\dclass$ is an ambiguous ideal}
-		\RETURN attempt to factor $\Delta$ using $\dclass$
-	\ENDIF
+
+\STATE \{-- attempt to factor $N$ by finding an ambiguous form --\} \label{goto:tryAmbiguous}
+\FOR{$1 \le i \le t$}
+	\STATE $\bclass \gets {[\mathfrak a_i]}^h$
+	\FOR{$1 \le k \le \floor{\log_2 h_\Delta}$ and $\bclass \neq \idclass$}
+		\IF{$\bclass$ is an ambiguous ideal and $\bclass$ leads to a factor of $N$}
+			\RETURN a factor of $N$
+		\ENDIF
+		\STATE $\bclass \gets \bclass^2$
+	\ENDFOR
 \ENDFOR
-\STATE choose a different ideal class $\aclass$ or a different multiplier $k$ and try again at line \ref{goto:newK} \label{goto:tryAgain}
+\STATE start over at line \ref{goto:newK}
+%\STATE attempt to factor $N$ using Algorithm \ref{alg:findAmbiguous} \label{goto:tryAmbiguous}
+%\STATE if successful, return a factor of $N$, otherwise start over at line \ref{goto:newK}
 \end{algorithmic}
 \end{algorithm}
 
@@ -2131,11 +2137,31 @@ In the next Chapter, we bring all of these improvements together in our implemen
 i.e. is it faster to use the product and one exponentiation or individual primes and many exponentations
 \subsection{Best primorial bound for n-bit integers}
 
-\section{Time spent on search vs powering}
+\section{Time Spent on Exponentiation vs. Search}
+\label{sec:expVsSearch}
+
+Let $s$ be a function from some multiple $m$ of the primorial $P_w$ to the total number of baby steps and giant steps taken during the search stage of the algorithm.  We have
+\[
+	s(m, w) = 2 m \phi(P_w).
+\]
+Then, let
+\[
+	g(m, w) = 2 m^2 \phi(P_w) P_w
+\]
+be a function that computes the exponent of the final giant step before the algorithm tries a different multiplier.  In general, if there exists some $m'$ and $w'$ such that 
+\[
+g(m', w') > g(m, w) \textrm{ and } s(m', w') \le s(m, w)
+\]
+this means that by choosing a multiple $m'$ of the primorial $P_{w'}$, the search phase can search further using the same or fewer steps.  Let $S$ be the set of pairs $(m, w)$ from which we select the bound $b$ on the baby steps
+\[
+  S = \left\{ (m, w) ~:~ g(m, w) > g(m', w') \textrm{ for all }  \right\}
+\]
+
 
 \section{Sequential prime ideals vs random prime ideals}
 
 \section{Ratio of prime ideals to multipliers}
+\label{sec:idealsToMultipliers}
 
 \section{Best multipliers to use}
 
