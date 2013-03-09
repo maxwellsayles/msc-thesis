@@ -1200,23 +1200,21 @@ Since the prime exponents $e_i$ in Stage 1 are bound by $\floor{\log_{p_i} {p_t}
 
 \subsection{SuperSPAR in Practice}
 
-In practice, balancing both stages of SuperSPAR to use $O(N^{1/2r})$ group operations for $r = \sqrt{\ln N / \ln \ln N}$ is often not ideal.  This is partly because the actual cost of multiplication, squaring, and cubing differ, but also because the success of the different stages depends on different properties of the class number.  The exponentiation stage is successful when the order of a random ideal class is smooth with respect to some primorial $E$, while the search stage is successful when the non-smooth part of the order is sufficiently small.  In this sense, the efficiency of the factoring algorithm depends both on the smoothness of a random ideal class $\aclass$ with respect to the primorial $E$, but also on the size of its non-smooth part with respect to the size of the exponent reached in the search stage.
+In practice, balancing both stages of SuperSPAR to use $O(N^{1/2r})$ group operations for $r = \sqrt{\ln N / \ln \ln N}$ is often not ideal.  This is partly because the actual cost of multiplication, squaring, and cubing differ, but also because the success of each stage depends on different properties of the class number.  The exponentiation stage is successful when the order of a random ideal class is smooth with respect to some primorial $E$, while the search stage is successful when the non-smooth part of the order is sufficiently small.  In this sense, the efficiency of the factoring algorithm depends both on the smoothness of a random ideal class $\aclass$ with respect to the primorial $E$, but also on the size of its non-smooth part with respect to the largest exponent reached in the search stage.  Selecting both the primorial $E$ for the exponentiation stage and the bound $b = mP_w$ for the search stage independently of $r$ will vary the time spent during each stage inversely to the probability of the success of that stage.  Section \ref{sec:superSparExponentiation} discusses our choice of the exponent $E$ for the exponentiation stage, and Section \ref{sec:expVsSearch} discusses our approach to generating a set of bounds for the search stage.
 
 In both SPAR and SuperSPAR, the largest prime used by the exponentiation stage is $p_t \approx N^{1/2r}$.  This is chosen to theoretically minimize the total expected running time of the algorithm.  Using a larger value for $r$ means this stage is less successful, and the algorithm is more likely to use the search phase, and more likely to use additional multipliers for the discriminant.  On the other hand, using a smaller value for $r$ means this stage is more likely to be successful, and ultimately fewer multipliers are tried.  Since $r = \sqrt{\ln N / \ln \ln N}$ is chosen to minimize the expected running time in theory, in practice it may be more efficient to choose some other value for $r$, effectively trading off the number of ideal classes tried against the largest prime used in the primorial $E$.
 
-Furthermore, Schnorr and Lenstra \cite[p.293]{Schnorr1984} advise the use of smaller exponents $e'_i = \max \{v : {p_i}^v \le p_t \}$ for the first $t$ primes $p_i \le N^{1/2r}$ when computing the exponent $E$ in practice.  As the exponent $e_i$ in the prime power ${p_i}^{e_i}$ increases, the likelihood of a random integer being divisible by that prime power decreases.  As such, it is generally more useful to use larger primes in the exponent $E$ than larger prime powers.  For this reason, we bound the exponents $e_i$ of the prime powers ${p_i}^{e_i}$ separately from the bound on the largest prime used in $E$.
-
-In addition, since balancing the number of operations between both stages is often not ideal, we choose the bound $b = m P_w$ for the baby steps separately.  In section \ref{sec:expVsSearch} we discuss our approach to generating a set of bounds for the search stage.
-
-Section \ref{sec:idealsToMultipliers} studies sequential prime ideal representatives for fixed discriminants.  Let 
+Furthermore, Schnorr and Lenstra \cite[p.293]{Schnorr1984} advise the use of smaller exponents $e'_i = \max \{v : {p_i}^v \le p_t \}$ for the first $t$ primes $p_i \le N^{1/2r}$ when computing the exponent $E$ in practice.  Section \ref{sec:idealsToMultipliers} of this thesis studies sequential prime ideal representatives for fixed discriminants.  Let 
 \[
-	\left\{ [\mathfrak a_i] \in Cl_\Delta ~:~  \mathfrak a_i \in Cl_\Delta \textrm{ is the $\ith$ smallest prime ideal for } 1 \le i \le n \right\}
+	\mathcal P_{\Delta, n} = \left\{ [\mathfrak a_i] \in Cl_\Delta ~:~  \mathfrak a_i \in Cl_\Delta \textrm{ is the $\ith$ smallest prime ideal for } 1 \le i \le n \right\}
 \]
-be a set of the $n$ smallest prime ideal representatives for $Cl_\Delta$. Computing the order of each $[\mathfrak a_i]$ shows that typically the orders only differ by a small factor.  If the exponent $E$ is chosen to include such factors, then if either stage of SuperSPAR discovers some $h$ that is a multiple of $\ord([\mathfrak a_i])$, it is likely that $h$ is also a multiple of $\ord([\mathfrak a_j])$ for some other prime ideal $[\mathfrak a_j]$.  As such, once the algorithm discovers some multiple of the order of a random prime ideal, if the algorithm then fails to find an ambiguous form or find an ambiguous form that fails to lead to a factorization of $N$, the algorithm simply chooses another random prime ideal representative and tries again with the same value of $h$.  The exponentiation and search phases are skipped, since with high probability $h$ is a multiple of the order of several random prime ideal representatives.  If several random prime ideal representatives fail to lead to a factorization of $N$, the algorithm then starts over with a different multiplier $k$ for the discriminant.  As such, the final parameter, $t$, is the number of ideal classes to attempt before switching multipliers.
+be the set of the $n$ smallest prime ideal representatives for $Cl_\Delta$. Computing the factorization of the order of each $[\mathfrak a_i]$ shows that most prime factors of the order are unique, but also that for a given ideal class $Cl_\Delta$, that the order of ideal classes from the set above only differ by a small factor from each other.  If the exponent $E$ is chosen to include sufficiently many small factors, then if either stage of the algorithm discovers some $h$ such that $[\mathfrak a_i]^h = \idclass$, then it is likely that $[\mathfrak a_j]^h = \idclass$ for some other prime ideal $[\mathfrak a_j] \in Cl_\Delta$.  As such, once the algorithm discovers some $h$ that is a multiple of the order of a prime ideal, the algorithm then tries to find an ambiguous form and attempts to factor $N$.  Failing this, the algorithm simply chooses the next prime ideal representative and tries again with the same value of $h$.  Once this fails for several prime ideal representatives, the algorithm then starts over with a different multiplier $k$ for the discriminant.  Let $t$ be the number of ideal classes attempted before switching multipliers.
 
-Assuming good parameters are known, the complete SuperSPAR factoring algorithm is given in listing \ref{alg:superSpar}.  Chapter \ref{chap:superSparExperiments} discusses the experiments and results that lead to parameters that perform well in practice.
+Assuming good parameters are known, the SuperSPAR factoring algorithm used in practice is given in listing \ref{alg:superSpar}.  Chapter \ref{chap:superSparExperiments} discusses the experiments and results that lead to parameters for this algorithm that perform well in practice.  Notice, that parameters can be selected based on the theoretical analysis of SuperSPAR from the previous section.
 
-TODO: Introduce $h_\Delta$.
+%TODO: Define $h_\Delta$ either in this section or in the section on complexity.
+%TODO: Give an algorithm to test for an ambiguous form.
+%TODO: Give an algorithm to attempt to factor $N$ from an ambiguous form.
 
 \begin{algorithm}[h]
 \caption{SuperSPAR Integer Factoring Algorithm.}
@@ -1270,12 +1268,8 @@ TODO: Introduce $h_\Delta$.
 	\ENDFOR
 \ENDFOR
 \STATE start over at line \ref{goto:newK}
-%\STATE attempt to factor $N$ using Algorithm \ref{alg:findAmbiguous} \label{goto:tryAmbiguous}
-%\STATE if successful, return a factor of $N$, otherwise start over at line \ref{goto:newK}
 \end{algorithmic}
 \end{algorithm}
-
-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2132,6 +2126,7 @@ In the next Chapter, we bring all of these improvements together in our implemen
 
 \bigbreak
 \section{Exponentiation}
+\label{sec:superSparExponentiation}
 \subsection{Bounds for primorial (bound for prime vs exponent)}
 \subsection{Primorial vs Prime Powers}
 i.e. is it faster to use the product and one exponentiation or individual primes and many exponentations
