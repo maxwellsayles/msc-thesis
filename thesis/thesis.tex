@@ -1051,7 +1051,7 @@ The SPAR algorithm works in two stages. The first stage is the exponentiation st
 An integer, $x$, is \emph{smooth} with respect to $y$ if all of the prime factors $p$ dividing $x$ are no larger than $y$.
 \end{defn}
 
-Following Schnorr and Lenstra \cite{Schnorr1984}, we take the first $t$ primes $p_1 = 2, p_2 = 3, ..., p_t \approx N^{1/2r}$ for $r = \sqrt{\ln N / \ln \ln N}$.  Let $e_i = \max \{ v : {p_i}^v \le {p_t}^2 \}$ and compute
+Following Schnorr and Lenstra \cite{Schnorr1984}, we take the first $t$ primes $p_1 = 2, p_2 = 3, ..., p_t \le N^{1/2r}$ for $r = \sqrt{\ln N / \ln \ln N}$.  Let $e_i = \max \{ v : {p_i}^v \le {p_t}^2 \}$ and compute
 \[
 	\bclass = \aclass^{\prod_{i=2}^t {p_i}^{e_i}}.
 \]
@@ -1067,11 +1067,13 @@ until there is some $j < k$ such that $[\mathfrak c_j] = [\mathfrak c_k]$.  By t
 
 \subsection{SPAR Complexity}
 
+%TODO: where does the little-oh come in?
+
 The original publication of SPAR by Schnorr and Lenstra \cite{Schnorr1984} claimed that every composite integer $N$ could be factored in $o\left(\exp\sqrt{\ln N \ln\ln N}\right)$ bit operations.  This was the first factoring algorithm for which this runtime had been conjectured, and it was also the first for which this conjecture had to be withdrawn \cite{Lenstra1992}.
 
-In the first stage of the algorithm, we exponentiate a random ideal class $\aclass \in Cl_\Delta$ to the product of primes $\prod_{i=2}^t {p_i}^{e_i}$ such that $p_t \approx N^{1/2r}$ where $r = \sqrt{\ln N / \ln \ln N}$.  Using binary exponentiation, this will take $O(p_t)$ group operations and for a random composite integer $m \in [0, N]$ will factor $m$ with probability $\ge r^{-r}$ \cite[p.290]{Schnorr1984}. Stage 2 performs a random walk of at most $O(p_t)$ group operations and with probability $\ge (r-2)^{-(r-2)}$ will factor $m$ \cite[p.290]{Schnorr1984}.  Their claim is that if Stage 1 is run on each integer $kN$ for $k \le r^r$, then every composite integer $N$ will be factored within $o\left(\exp \sqrt{ \ln N \ln\ln N } \right)$ bit operations.
+The first stage of the algorithm exponentiates a random ideal class $\aclass \in Cl_\Delta$ to the product $\prod_{i=2}^t {p_i}^{e_i}$ of the first $t$ primes where $e_i = \max \{ v : {p_i}^v \le {p_t}^2 \}$.  Using binary exponentiation, this takes $O(p_t)$ group operations since there are about $p_t / \log p_t$ prime powers in the product, each of which is at most $\ceil{2 \log_2 p_t}$ in size. According to \cite[p.290]{Schnorr1984}, for a random composite integer $m \in [0, N]$, this stage will factor $m$ with probability $\ge r^{-r}$. Stage 2 performs a random walk of at most $O(p_t)$ group operations and with probability $\ge (r-2)^{-(r-2)}$ will factor $m$ \cite[p.290]{Schnorr1984}.  Their claim is that if Stage 1 is run on each integer $kN$ for $k \le r^r$, then every composite integer $N$ will be factored within $o\left(\exp \sqrt{ \ln N \ln\ln N } \right)$ bit operations.
 
-This claim was based on a false assumption -- for a complete discussion, see Lenstra and Pomerance \cite[\S 11]{Lenstra1992}.  In short, the original assumption was that for fixed $N$ and variable $k$, that the class number ($h_\Delta$ for $\Delta = -kN$) was as likely to be smooth with respect to some largest prime $p_t$ as the class number associated with a random discriminant of approximately the same size.  This assumption meant that one could take both $k$ and $p_t$ to be no larger than $N^{1/2r} = \exp\left(\frac{1}{2}\sqrt{\ln N \ln \ln N}\right)$, leading to an upper bound of $\exp\left(\sqrt{\ln N \ln \ln N}\right)$ for the expected running time (TODO: where does the little-oh come in?).  However, as Lenstra and Pomerance show \cite[\S 11]{Lenstra1992}, this assumption is incorrect for a sufficiently dense sequence of integers.
+This claim was based on a false assumption -- for a complete discussion, see Lenstra and Pomerance \cite[\S 11]{Lenstra1992}.  In short, the original assumption was that for fixed $N$ and variable $k$, that the class number ($h_\Delta$ for $\Delta = -kN$) was as likely to be smooth with respect to some largest prime $p_t$ as the class number associated with a random discriminant of approximately the same size.  This assumption meant that one could take both $k$ and $p_t$ to be no larger than $N^{1/2r} = \exp\left(\frac{1}{2}\sqrt{\ln N \ln \ln N}\right)$, leading to an upper bound of $\exp\left(\sqrt{\ln N \ln \ln N}\right)$ for the expected running time.  However, as Lenstra and Pomerance show \cite[\S 11]{Lenstra1992}, this assumption is incorrect for a sufficiently dense sequence of integers.
 
 
 \bigbreak
@@ -1155,7 +1157,7 @@ Notice that the idea behind the SPAR factoring algorithm is to find an ambiguous
 
 Here we introduce SuperSPAR -- an integer factoring algorithm and our motivation for improving the performance of exponentiation in the ideal class group.  Let $N$ be the odd integer we wish to factor.  For some square free integer $k$, choose a discriminant $\Delta = -kN$ or $\Delta = -4kN$ such that $\Delta \equiv 0, 1 \pmod 4$.  Similar to SPAR, SuperSPAR attempts to find an ambiguous class in $Cl_\Delta$ that splits $N$.  SuperSPAR uses two stages, the first of which is the same as SPAR.
 
-Stage 1 takes the first $t$ primes $p_1 = 2, p_2 = 3, ..., p_t \approx N^{1/2r}$ for $r = \sqrt{\ln N / \ln \ln N}$, sets $e_i = \max \{ v : {p_i}^v \le {p_t}^2 \}$, lets $E = \prod_{i=2}^t {p_i}^{e_i}$ be the product of the odd prime powers, and then computes $\bclass = \aclass^E$ for a random ideal class $\aclass$.  Finally, it computes $\cclass = {\bclass}^{\left(2^k\right)}$ for $k=\floor{\log_2 \sqrt{|\Delta|}}$.  If $\bclass = \idclass$, then $\ord(\aclass)$ divides $E$ and is odd, and the algorithm tries again with a different random ideal class $\aclass$.  If the odd part of $\ord(\aclass)$ divides $E$ and the order of $\aclass$ is even, then there is some $\bclass^{\left( 2^j \right)}$ for $0 \le j < k$ that is an ambiguous ideal and we attempt to factor the discriminant $\Delta$.  Failing this, SuperSPAR continues with Stage 2.
+Stage 1 takes the first $t$ primes $p_1 = 2, p_2 = 3, ..., p_t \le N^{1/2r}$ for $r = \sqrt{\ln N / \ln \ln N}$, sets $e_i = \max \{ v : {p_i}^v \le {p_t}^2 \}$, lets $E = \prod_{i=2}^t {p_i}^{e_i}$ be the product of the odd prime powers, and then computes $\bclass = \aclass^E$ for a random ideal class $\aclass$.  Finally, it computes $\cclass = {\bclass}^{\left(2^k\right)}$ for $k=\floor{\log_2 \sqrt{|\Delta|}}$.  If $\bclass = \idclass$, then $\ord(\aclass)$ divides $E$ and is odd, and the algorithm tries again with a different random ideal class $\aclass$.  If the odd part of $\ord(\aclass)$ divides $E$ and the order of $\aclass$ is even, then there is some $\bclass^{\left( 2^j \right)}$ for $0 \le j < k$ that is an ambiguous ideal and we attempt to factor the discriminant $\Delta$.  Failing this, SuperSPAR continues with Stage 2.
 
 Stage 2 of SuperSPAR differs from that of SPAR.  SPAR attempts to find the order of $\cclass$ by performing a random walk and using $O(p_t)$ group operations.  Schnorr and Lenstra \cite[p.294]{Schnorr1984} suggest a Pollard-Brent Recursion \cite{Brent1980} based on Pollard's rho method \cite{Pollard1975}, but also remark \cite[p.298]{Schnorr1984} that Shanks' baby-step giant-step method \cite{Shanks1971} could be used to deterministically find $\ord(\cclass)$.  They point out that this approach could be made faster by exploiting the fact that $\ord(\cclass)$ is likely to have no prime divisors $p_1, ..., p_t$, and this is precisely what SuperSPAR does.
 
@@ -1166,6 +1168,26 @@ If Stage 2 successfully computes $h' = \ord(\cclass)$ and assuming that $\ord(\b
 
 \subsection{SuperSPAR Complexity}
 
+By \cite[Lemma 6.4]{Sutherland2007}, for the largest prime $p_t \le N^{1/2r}$ on the order, the ratio of the size of the giant steps to the number of baby steps is
+\[
+P_w / \phi(P_w) \sim e^\gamma \log \log p_t
+\]
+where $\gamma \approx 0.5772$ is Euler's constant and $e \approx 2.71828$.
+
+On page 81 of Drew's thesis he states that if $h=\ord(\alpha)$ is uniformly distributed over some appropriate range, the probability that $h$ is $h^{1/u}$-smooth is $u^{-u+o(1)}$.
+
+So if we treat the order of a random element from the ideal class group as uniformly distributed over an appropriate range then I understand the analysis of the original SPAR as follows.
+
+For some $r$, let $p_t$ be the largest prime $\le N^{1/2r}$. We spend $O(p_t)$ group operations on each multiplier with a probability of factoring being $\ge r^{-r}$ and so in expectation we use $r^r$ multipliers for an expected running time of $r^r N^{1/r}$.  This is minimized for $r = \sqrt{\ln N / \ln \ln N}$.
+
+I do not understand how the value of $r$ was determined.
+
+Now, to spend $O(p_t)$ operations on each multiplier, SPAR chooses the first $t$ primes $p_1, ..., p_t$, and computes $e_i = \max \{ v : {p_i}^v \le {p_t}^2 \}$.  Let $E = \prod {p_i}^{e_i}$.  We then exponentiate a random form $a$ to $E$.  Using binary exponentiation, this takes $O(\log E)$ operations, which is $O(p_t)$ since there are about $p_t / \log p_t$ operands in the product $E$, each of which is $2 \log p_t$ in size.  If this fails to find an ambiguous form, we do a random walk of $O(p_t)$ operations on the new form.
+
+One thing I'm unsure about is whether $\ord(a^E)$ is guaranteed to not have any primes $p_i \le p_t$ as divisors, since SPAR uses $e_i$ bound by ${p_t}^2$.  This does not seem like a high enough bound (maybe it is asymptotically?).
+
+
+Looking at Andrew's original SuperSPAR implementation, this is a little different.  We pick some $u$ (this was $r$ in SPAR).  Then compute all the primes up to $N^{1/u}$ and exponents $e_i = \max \{ v : {p_i}^v \le p_t \}$.  Here we use $p_t$ instead of ${p_t}^2$ but I don't think that matters too much.  Again, let $E$ be the product of all prime powers.
 
 For the purpose of discussing SuperSPAR, we treat the distribution on the order of random ideals as uniform.  Let $N$ be the odd integer we wish to factor.  For some square free integer $k$, choose a discriminant $\Delta = -kN$ or $\Delta = -4kN$ such that $\Delta \equiv 0, 1 \pmod 4$, and a random prime ideal class representative $\mathfrak a$ such that $\aclass \in Cl_\Delta$.  The idea is that for some real value $u$, we will perform $O(|\Delta|^{1/u})$ group operations on $\aclass$ in an attempt to find an ambiguous idea.  Treating the order $h = \ord(\aclass)$ as uniformly distributed, we can expect $h$ to be $|\Delta|^{1/u}$-smooth with probability $u^{-u}$.  As such, we can expect to try $u^u$ different discriminants. TODO: more rigour here.
 
@@ -1210,7 +1232,7 @@ Assuming good parameters are known, the SuperSPAR factoring algorithm used in pr
 
 %NOTE: We give a test for an ambiguous ideal and a method of factoring the discriminant in section 4.1.1
 
-\begin{algorithm}[h]
+\begin{algorithm}[htb]
 \caption{SuperSPAR Integer Factoring Algorithm.}
 \label{alg:superSpar}
 \begin{algorithmic}[1]
@@ -1265,6 +1287,10 @@ Assuming good parameters are known, the SuperSPAR factoring algorithm used in pr
 \end{algorithmic}
 \end{algorithm}
 
+\bigbreak
+\section{Summary}
+
+This chapter introduced SPAR, a factoring algorithm based on the ideal class group of imaginary quadratic number fields, and our motivation for practical improvements to the performance of arithmetic in the class group.  The next chapter discusses several techniques used to improve the performance of arithmetic in the class group, as well as our experiments and results.  Similarly, Chapter \ref{chap:ssparExperiments} discusses the techniques, experiments, and results we used to improve the performance of SuperSPAR in practice.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % CHAPTER 5                        %
@@ -2125,6 +2151,9 @@ In the next Chapter, we bring all of these improvements together in our implemen
 \subsection{Bounds for primorial (bound for prime vs exponent)}
 \subsection{Primorial vs Prime Powers}
 i.e. is it faster to use the product and one exponentiation or individual primes and many exponentations
+
+machine representation of 2,3 representation for primorials
+
 \subsection{Best primorial bound for n-bit integers}
 
 \section{Time Spent on Exponentiation vs. Search}
