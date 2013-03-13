@@ -1,0 +1,108 @@
+\documentclass[a4paper]{article}
+
+%\usepackage{algorithm}
+%\usepackage{algorithmic}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+%\usepackage{caption}
+\usepackage{comment}
+%\usepackage{eqparbox}
+\usepackage{float}
+%\usepackage{graphicx}
+%\usepackage{hyperref}
+%\usepackage{subfigure}
+
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator{\ord}{ord}
+\DeclareMathOperator{\sign}{sign}
+\newcommand{\CC}{\mathbb{C}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\KK}{\mathbb{K}}
+\newcommand{\MM}{\mathcal{M}}
+\newcommand{\OO}{\mathcal{O}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\QQ}{\mathbb{Q}}
+\newcommand{\NP}{\textrm{NP}}
+\newcommand{\RRgtz}{\mathbb{R}_{>0}}
+\newcommand{\ZZgtz}{\mathbb{Z}_{>0}}
+\newcommand{\ZZgez}{\mathbb{Z}_{\ge 0}}
+\newcommand{\QQgtz}{\mathbb{Q}_{>0}}
+\newcommand{\QQgez}{\mathbb{Q}_{\ge 0}}
+\newcommand{\matrixto}[2]{\left[ \begin{array}{rr} #1 & #2 \end{array} \right]}
+\newcommand{\matrixot}[2]{\left[ \begin{array}{r} #1 \\ #2 \end{array} \right]}
+\newcommand{\matrixtt}[4]{\left[ \begin{array}{rr} #1 & #2 \\ #3 & #4 \end{array} \right]}
+\newcommand{\matrixThreeOne}[3]{\left[ \begin{array}{rrr} #1 & #2 & #3 \end{array} \right]}
+\newcommand{\matrixThreeTwo}[6]{\left[ \begin{array}{rrr} #1 & #2 & #3 \\ #4 & #5 & #6 \end{array} \right]}
+\newcommand{\ntoinfty}{\lim_{n \rightarrow \infty}}
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
+\newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+
+\newcommand{\band}{~\texttt{and}_\texttt{2}~}
+\newcommand{\bor}{~\texttt{or}_\texttt{2}~}
+\newcommand{\bxor}{\oplus}
+\newcommand{\bnot}{\lnot}
+\newcommand{\binary}[1]{\texttt{#1}_\texttt{2}}
+
+\newcommand{\aclass}{[\mathfrak a]}
+\newcommand{\bclass}{[\mathfrak b]}
+\newcommand{\cclass}{[\mathfrak c]}
+\newcommand{\dclass}{[\mathfrak d]}
+\newcommand{\idclass}{[\mathcal O_\Delta]}
+
+\newcommand{\ith}{i^{\textrm{th}}}
+
+\begin{document}
+
+\subsection{SuperSPAR Complexity}
+
+This is an incomplete analysis of SuperSPAR.  It most likely contains errors and omissions and I am not sure how to proceed further.
+
+\bigbreak
+\noindent
+Lenstra and Pomerance \cite[Theorem 11.1]{Lenstra1992} show that for a given $x$ there exist some $N \le x$ such that for every negative discriminant $\Delta = kN$, the class number $h_\Delta$ has a prime factor exceeding $x^{1/9}$.  They state that SPAR will not be able to factor any such $N$ in less than $N^{1/9}$ group operations.  I think this applies to SuperSPAR as well, but I am not sure.
+
+\bigbreak
+\noindent
+Ignoring this, SuperSPAR works much like SPAR.  We pick some $r$ and compute the product of prime powers $E = \prod_{i=2}^t {p_i}^{e_i}$ for the $t$ primes $\le N^{1/2r}$ where $e_i = \floor{\log_{p_i} N^{1/2r}}$.  We then exponentiate a random ideal class $\aclass$ to this product.  On page 81 of Andrew's thesis \cite{Sutherland2007} he states that if $h=\ord(\alpha)$ is uniformly distributed over some appropriate range, the probability that $h$ is $h^{1/u}$-smooth is $u^{-u+o(1)}$ (here $r$ is used in place of $u$ and $\aclass$ in place of $\alpha$).  Therefore, with probability $r^{-r}$ the order of $\aclass$ will be $N^{1/2r}$-smooth and we can find an ambiguous ideal class after just the exponentiation stage.  If we discard the search stage of the algorithm, then the expected running time should be
+\[
+	r^r N^{1/2r}
+\]
+which is minimized for $r = \sqrt{\ln N / \ln \ln N}$ \cite{Schnorr1984} (How is this computed?) and gives an expected running time of
+\[
+	o\left(\exp\left(\sqrt{\ln N \ln \ln N} \right) \right)
+\]
+(Where does the little-oh come from?).
+
+\bigbreak
+\noindent
+Here I attempt to analyse the search stage of the algorithm.  Lemma 6.4 (p.88) in Andrew's thesis states that for $P_w \le x < P_{w+1}$, where $P_w$ is the product of the first $w$ primes, that the ratio of the size of the giant steps to the number of baby steps is
+\[
+P_w / \phi(P_w) \sim e^\gamma \log \log x
+\]
+where $\gamma \approx 0.5772$ is Euler's constant and $e \approx 2.71828$.
+
+We would like to take $N^{1/2r}$ baby steps so that the time spent in the search stage is the same as in the exponentiation stage.  Therefore, we would like to choose some baby step bound $b = mP_w$ such that $m\phi(P_w) \approx N^{1/2r}$.  The exponent of the final giant step is $ m^2 P_w \phi(P_w)$.  Since $m\phi(P_w) \approx N^{1/2r}$ and by Lemma 6.4 we have
+\begin{align*}
+m^2P_w\phi(P_w) &\approx {\left(N^{1/2r}\right)}^2 e^\gamma \log \log N^{1/2r} \\
+&= N^{1/r} e^\gamma \log \log N^{1/2r}
+\end{align*}
+Therefore, the search phase is successful if the non-smooth part of the order of $\aclass$ is $O(N^{1/r} \log \log N^{1/2r})$.
+
+\bigbreak
+\noindent
+I do not know how to compute the probability of this.  I would guess a first step is to use $O(N^{1/r})$ instead, and compute the probability of the non-smooth part being less than $O(N^{1/r})$.  If we follow the analysis in Schnorr and Lenstra \cite[pp.297--298]{Schnorr1984}, then the probability is $(r-2)^{-(r-2)}$ and we end up with the same runtime and analysis as SPAR (and most likely succumb to the same fallacy too). 
+
+\bigbreak
+\noindent
+Any feedback or improvements offered is greatly appreciated!  Thanks!
+
+\bibliographystyle{plain}
+\bibliography{Bibliography}
+
+
+\end{document}
