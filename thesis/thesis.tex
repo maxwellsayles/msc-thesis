@@ -1172,9 +1172,38 @@ Lenstra and Pomerance \cite[Theorem 11.1]{Lenstra1992} show that for all $x$ the
 
 By \cite[Lemma 6.4]{Sutherland2007}, for the largest prime $p_t \le N^{1/2r}$ on the order, the ratio of the size of the giant steps to the number of baby steps is
 \[
-P_w / \phi(P_w) \sim e^\gamma \log \log p_t
+P_w / \phi(P_w) \sim e^\gamma \log \log N^{1/2r}
 \]
-where $\gamma \approx 0.5772$ is Euler's constant and $e \approx 2.71828$.
+where $\gamma \approx 0.5772$ is Euler's constant and $e \approx 2.71828$. This simplifies to
+\begin{align*}
+	e^\gamma \log \log N^{1/2r} &= \log (\log(N)/2r) \\
+	&= \log \log N - \log(2r) \\
+	&= \log \log N - \log r - \log2 \\
+	&= \log \log N - \log(\sqrt{\log N / \log \log N}) - \log2 \\
+	&= \log \log N - \log(\log N / \log\log N) / 2 - \log2 \\
+	&= \log \log N - (\log\log N - \log\log\log N) / 2 - \log2 \\
+	&= (\log \log N + \log\log\log N) / 2 - \log2 \\
+	&\in O(\log \log N)
+\end{align*}
+
+Note that $m\phi(P_w) \approx N^{1/2r}$.  So the largest exponent discovered by the giant steps is
+\[
+	m^2P_w\phi(P_w) = N^{1/r} \log \log N \approx N^{1/r}.
+\]
+
+So we find the order of $\aclass$ if $\ord(\aclass)$ is $N^{1/r}$ smooth and this occurs with probability $(r/2)^{(r/2)}$.  So the expected running time is
+\[
+	(r/2)^{(r/2)} N^{1/r}.
+\]
+
+Substituting $r' = r/2$ in
+\[
+	r'^{r'} N^{1/2r'}
+\]
+which is minimized for $r' = \sqrt{\ln N / \ln \ln N}$ and the expected running time for $r = 2\sqrt{\ln N / \ln \ln N}$ is
+\[
+	\exp(\sqrt{\ln N \ln \ln N}).
+\]
 
 On page 81 of Drew's thesis he states that if $h=\ord(\alpha)$ is uniformly distributed over some appropriate range, the probability that $h$ is $h^{1/u}$-smooth is $u^{-u+o(1)}$.
 
