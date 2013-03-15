@@ -452,9 +452,9 @@ Equations \ref{eq:idealProductS}, \ref{eq:idealProductA}, and \ref{eq:idealProdu
 \]
 Following Jacobson and Williams \cite[pp.120-121]{Jacobson2009}, we develop the simple continued fraction expansion of $sU/a_1 = \langle q_0, q_1, \dots, q_i, \phi_{i+1} \rangle$ using the recurrences
 \begin{align}
-	q_i &= \floor{R_{i-2} ~/~ R_{i-1}} \nonumber \\
-	R_i &= R_{i-2} - q_i R_{i-1} \nonumber \\
-	C_i &= C_{i-2} - q_i C_{i-1} \label{eq:cNUCOMP}
+	q_i &= \floor{R_{i-2} ~/~ R_{i-1}} \label{eq:recurqNUCOMP} \\
+	R_i &= R_{i-2} - q_i R_{i-1} \label{eq:recurRNUCOMP} \\
+	C_i &= C_{i-2} - q_i C_{i-1} \label{eq:recurCNUCOMP}
 \end{align}
 until we have $R_i$ and $R_{i-1}$ such that
 \begin{equation}
@@ -472,9 +472,9 @@ We then compute
 	a &= (-1)^{i+1} (R_i M_1  - C_i M_2), \nonumber \\
 	b &= \left( \frac{2(R_i a_2 /s - C_{i-1} a)}{C_i} - b_2 \right) \bmod 2a \label{eq:bNUCOMP}
 \end{align}
-for the reduced or almost reduced product $\mathfrak a \mathfrak b = [a, (b + \sqrt\Delta)/2]$.  Note that this procedure assumes that $\mathcal N(\mathfrak a) \ge \mathcal N(\mathfrak b)$ and that if $a_1 < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4}$ then $R_{-1}$ and $R_{-2}$ satisfy Equation \ref{eq:nucompBound} and we compute the product $\mathfrak a \mathfrak b$ as in the previous subsection without expanding the simple continued fraction $sU/a_1$.  When $a_1 \ge \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4}$, at least one iteration of the recurrence \ref{eq:cNUCOMP} is performed and so $C_i \neq 0$ and there cannot be a divide by zero in Equation \ref{eq:bNUCOMP}.
+for the reduced or almost reduced product $\mathfrak a \mathfrak b = [a, (b + \sqrt\Delta)/2]$.  Note that this procedure assumes that $\mathcal N(\mathfrak a) \ge \mathcal N(\mathfrak b)$ and that if $a_1 < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4}$ then $R_{-1}$ and $R_{-2}$ satisfy Equation \ref{eq:nucompBound} and we compute the product $\mathfrak a \mathfrak b$ as in the previous subsection without expanding the simple continued fraction $sU/a_1$.  When $a_1 \ge \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4}$, at least one iteration of the recurrence \ref{eq:recurCNUCOMP} is performed and so $C_i \neq 0$ and there will not be a divide by zero in Equation \ref{eq:bNUCOMP}.
 
-Our implementation of fast ideal multiplication includes practical optimizations on the above technique.  For example, by Equation \ref{eq:idealProductS}, $s ~|~ a_1$ and $s ~|~ a_2$, so $a_1$ and $a_2$ are reduced modulo $s$ throughout the computation.  Also, Equation \ref{eq:idealProductS} computes \mbox{$\gcd(a_1, a_2, (b_1 + b_2)/2)$}. Following \cite[Algorithm~6]{Imbert2010}, this is separated into two parts: let $s = \gcd(a_1, a_2)$ and compute $\gcd(s, (b_1 + b_2)/2)$ only when $s \neq 1$.  Section \ref{sec:eea} discusses optimizations to this computation in practice.  Finally, the first coefficient, $Y$, from Equation \ref{eq:idealProductS} is never used, and so it is not computed.  See Section \ref{sec:idealArithmetic} for a more thorough treatment of our implementation of ideal class arithmetic.  Pseudo-code is given in Algorithm \ref{alg:nucomp}.
+Our implementation of fast ideal multiplication includes practical optimizations on the above technique.  For example, by Equation \ref{eq:idealProductS}, $s ~|~ a_1$ and $s ~|~ a_2$, so $a_1$ and $a_2$ are reduced modulo $s$ throughout the computation.  Also, Equation \ref{eq:idealProductS} computes \mbox{$\gcd(a_1, a_2, (b_1 + b_2)/2)$}. Following \cite[Algorithm~6]{Imbert2010}, this is separated into two parts: let $s = \gcd(a_1, a_2)$ and compute $\gcd(s, (b_1 + b_2)/2)$ only when $s \neq 1$.  Section \ref{sec:eea} discusses practical optimizations for computing the greatest common divisor and the recurrences \ref{eq:recurqNUCOMP}, \ref{eq:recurRNUCOMP}, and \ref{eq:recurCNUCOMP}.  Finally, the first coefficient, $Y$, from Equation \ref{eq:idealProductS} is never used, and so it is not computed.  See Section \ref{sec:idealArithmetic} for a more thorough treatment of our implementation of ideal class arithmetic.  Pseudo-code is given in Algorithm \ref{alg:nucomp}.
 
 
 \subsection{Fast Ideal Squaring (NUDUPL)}
@@ -530,33 +530,32 @@ Pseudo-code for our implementation is given in Algorithm \ref{alg:nudupl}.
 
 When we consider binary-ternary representations of exponents, cubing is required.  In general, if we want to compute ${\mathfrak a}^3$ for an ideal class representative $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$, we can take advantage of the simplification that happens when expanding the computation of ${\mathfrak a}^2 \mathfrak a$.  Here we provide a high level description of a technique for cubing based on similar ideas to NUCOMP and NUDUPL, namely that of computing the quotients of a continued fraction expansion.  A detailed description and analysis of this technique can be found in \cite{Imbert2010}.
 
-Similar to ideal squaring, we compute integers $s'$ and $Y'$ such that
+Similar to ideal squaring, compute integers $s'$ and $Y'$ such that
 \[
 s' = \gcd(a_1, b_1) = X'a_1 + Y'b_1.
 \]
-Note that $X'$ is unused. If $s' \neq 1$ we compute
+Note that $X'$ is unused. If $s' \neq 1$, compute
 \[
 s = \gcd(s'a_1, {b_1}^2 - a_1c_1) = Xs'a_1 + Y({b_1}^2 - a_1c_1)
 \]
-for $s, X, Y \in \ZZ$.  If $s' = 1$ then let $s = 1$ too.  We then compute $U$ using
+for $s, X, Y \in \ZZ$.  If $s' = 1$ then let $s = 1$ too.  Then compute $U$ using
 \[
 U = \begin{cases}
 		Y'c_1(Y'(b_1 - Y'c_1a_1) - 2) \bmod {a_1}^2 & \textrm{ if } s' = 1 \\
 		-c_1(XY'a_1+Yb_1) \bmod {a_1}^2/s & \textrm{ otherwise.}
     \end{cases}
 \]
-We then develop the simple continued fraction expansion of $sU/{a_1}^2$ until
+Next, develop the simple continued fraction expansion of $sU/{a_1}^2$ until
 \[
 	R_i < \sqrt{a_1}|\Delta/4|^{1/4} < R_{i-1}.
 \]
-Finally, we compute the representative $\mathfrak a^3 = [a, (b + \sqrt\Delta)/2]$ using the equations
+Finally, compute the representative $\mathfrak a^3 = [a, (b + \sqrt\Delta)/2]$ using the equations
 \begin{align*}
 	M_1 &= \frac{(R_ia_1 + C_iUa_1)}{{a_1}^2}, \\
 	M_2 &= \frac{R_i(b_1 + Ua_1) - sC_ic_1}{{a_1}^2}, \\
 	a &= (-1)^{i+1} R_i M_1 - C_i M_2, \\
 	b &= \left( \frac{2(R_ia_1/s - C_{i-1}a)}{C_i} - b_1 \right) \bmod 2a.
 \end{align*}
-
 By \cite[p.15~Theorem~5.1]{Imbert2010}, the ideal $[a, (b + \sqrt\Delta)/2]$ is at most two reduction steps from being reduced.  Pseudo-code for our implementation of fast ideal cubing is given in Algorithm \ref{alg:nucube}.
 
 % NUCUBE
