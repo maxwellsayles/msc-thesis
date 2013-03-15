@@ -208,29 +208,31 @@ The maximal order $\OO_\Delta = [1, \omega_0]$ of $\QQ(\sqrt\Delta)$ is the ring
 \section{Ideals of $\OO_\Delta$}
 
 \begin{defn}
-An \emph{ideal} $\mathfrak a$ is an additive subgroup of an order $\OO$ with the property that for any $a \in \mathfrak a$ and $\xi \in \OO$, it holds that $\xi a$ and $a \xi$ are both elements of the ideal $\mathfrak a$. When $\OO$ is a quadratic order, for $\alpha, \beta \in \OO$, the set $\ideal a = \{x \alpha + y \beta : x, y \in \OO\}$ is an ideal in the order $\OO$ and is denoted $(\alpha, \beta)$ \cite[p.16]{Ramachandran2006}.
+An \emph{ideal} $\mathfrak a$ is an additive subgroup of an order $\OO$ with the property that for any $a \in \mathfrak a$ and $\xi \in \OO$, it holds that $\xi a$ and $a \xi$ are both elements of the ideal $\mathfrak a$. When $\OO_\Delta$ is a quadratic order, for $\alpha, \beta \in \OO_\Delta$, the set $\ideal a = \{x \alpha + y \beta : x, y \in \OO_\Delta\}$ is an ideal in the order $\OO_\Delta$ and is denoted $(\alpha, \beta)$ \cite[p.16]{Ramachandran2006}.
 \end{defn}
 
-Every ideal of a quadratic order $\OO$ can be represented by at most two generators \cite[p.125, \S 10]{Cohn1980}, while some can be represented by a single generator.  An ideal represented by a single generator is a \emph{principal} ideal and is denoted $(\alpha) = \{ x \alpha : x \in \OO \}$ \cite[p.87]{Jacobson2009}.
+Every ideal of a quadratic order $\OO_\Delta$ can be represented by at most two generators \cite[p.125--126,~\S~10]{Cohn1980}, while some can be represented by a single generator.  An ideal represented by a single generator is a \emph{principal} ideal and is denoted $(\alpha) = \{ x \alpha : x \in \OO_\Delta \}$ \cite[p.87]{Jacobson2009}.
+
+For two ideals, $\ideal a = (\alpha_1, \beta_1)$ and $\ideal b = (\alpha_2, \beta_2)$, their product is
+\[
+	\ideal a \ideal b = (\alpha_1 \alpha_2, \alpha_1 \beta_2, \beta_1 \alpha_2, \beta_1 \beta_2) = (\alpha_3, \beta_3)
+\]
+for some $\alpha_3, \beta_3 \in \OO_\Delta$ and is an ideal in $\OO_\Delta$. The principal ideal $(1) = \OO_\Delta$ is the \emph{identity} ideal since $\ideal a = \ideal a \OO_\Delta = \OO_\Delta \ideal a$.  If there exists an ideal $\ideal c$ such that $\ideal b = \ideal a \ideal c$, then $\ideal a$ \emph{divides} $\ideal b$ and we write $\ideal a ~|~ \ideal b$.  If the ideal $\ideal a$ divides the identity ideal $(1)$, then $\ideal a$ has an \emph{inverse}, which is denoted $\ideal a^{-1}$.  An ideal $\ideal p \neq (1)$ is \emph{prime} when $\ideal p ~|~ \ideal a \ideal b$ implies that either $\ideal p ~|~ \ideal a$ or $\ideal p ~|~ \ideal b$.  As such, a prime ideal is divisible only by the identity ideal and itself.
 
 \begin{thm}
 \label{thm:idealZModule}
-\cite[p.13]{Jacobson1999} When $\OO_\Delta = [1, f\omega_0]$ is an order of a quadratic field, a non-zero ideal $\ideal a$ of $\OO_\Delta$ can be uniquely written as a two dimensional $\ZZ$-module 
+\cite[p.13]{Jacobson1999} When $\OO_\Delta = [1, f\omega_0]$ is an order of a quadratic field, a \mbox{non-zero} ideal $\ideal a$ of $\OO_\Delta$ can be uniquely written as a two dimensional $\ZZ$-module 
 \[
 	\ideal a = s\left[a, \frac{b+\sqrt{\Delta}}{2} \right]
 \]
-for $a, b \in \ZZ, s > 0, a > 0$, $\gcd(a, b, (b^2-\Delta)/4a)=1$, $b^2 \equiv \Delta \pmod{4a}$, and $b$ is unique $\bmod ~2a$. When $s \in \ZZ$, $\ideal a$ is an \emph{integral} ideal, and when $s \in \QQ$, $\ideal a$ is a \emph{fractional} ideal.  Finally, when $s = 1$, the ideal $\ideal a$ is \emph{primitive}.
+for $a, b \in \ZZ, s > 0, a > 0$, $\gcd(a, b, (b^2-\Delta)/4a)=1$, $b^2 \equiv \Delta \pmod{4a}$, and $b$ is unique $\bmod ~2a$.
 \end{thm}
 
-%TODO: Define multiplication before identity and inverse.  What that inverse doesn't use a fractional ideal. 
+\begin{defn}
+For an ideal $\ideal a = s [a, (b + \sqrt\Delta)/2]$, when $s \in \ZZ$, $\ideal a$ is an \emph{integral} ideal, and when $s \in \QQ$, $\ideal a$ is a \emph{fractional} ideal.  Finally, when $s = 1$, $\ideal a$ is a \emph{primitive} ideal.
+\end{defn}
 
-The \emph{identity} ideal is $\OO_\Delta = [1, f\omega_0]$ since $\ideal a = \ideal a \OO_\Delta = \OO_\Delta \ideal a$ \cite{Cohn1980}. An ideal $\ideal a = s[a, (b+\sqrt{\Delta})/2]$ is \emph{invertible} if there exists an ideal $\ideal b$ such that $\ideal a \ideal b = \OO_\Delta$, and an ideal $\ideal b$ exists when $\gcd(a, b, (b^2-\Delta)/(4a)) = 1$ \cite[p.14]{Jacobson1999}. The inverse is given by \cite[pp.14--15]{Jacobson1999}
-\[
-	{\mathfrak a}^{-1} = \frac{s}{\mathcal N(\mathfrak a)} \left[a, \frac{-b+\sqrt{\Delta}}{2} \right]
-\]
-where $\mathcal N(\mathfrak a) = s^2a$ is the norm of $\mathfrak a$ and is multiplicative. When $\OO_\Delta$ is maximal, all ideals of $\OO_\Delta$ are invertible. 
-
-Prime ideals allow us to easily create an ideal.  For a prime ideal $\mathfrak p \in \OO_\Delta$ it can be shown (\cite[p.19]{Jacobson1999}) that $\mathfrak p \cap \ZZ = p\ZZ$ for some prime integer $p \in \ZZ$. Let
+For a prime ideal $\mathfrak p \in \OO_\Delta$ it can be shown \cite[p.19]{Jacobson1999} that $\mathfrak p \cap \ZZ = p\ZZ$ for some prime integer $p \in \ZZ$. Let
 \[
 	\mathfrak p = s\left[a, \frac{b + \sqrt{\Delta}}{2}\right]
 \]
@@ -253,6 +255,13 @@ and it follows that either $s=p$ and $a=1$, or $s=1$ and $a=p$.  In the first ca
 \RETURN none
 \end{algorithmic}
 \end{algorithm}
+
+
+The inverse of an ideal $\ideal a = s[a, (b + \sqrt\Delta)/2]$ is given by \cite[pp.14--15]{Jacobson1999}
+\[
+	{\mathfrak a}^{-1} = \frac{s}{\mathcal N(\mathfrak a)} \left[a, \frac{-b+\sqrt{\Delta}}{2} \right]
+\]
+where $\mathcal N(\mathfrak a) = s^2a$ is the norm of $\mathfrak a$ and is multiplicative. Notice that the resulting ideal $\ideal a^{-1}$ may be a fractional ideal.  When $\OO_\Delta$ is maximal, all integral ideals of $\OO_\Delta$ have integral inverses.  The set of invertible ideals forms a group under ideal multiplication.
 
 \bigbreak
 \section{Ideal Class Group}
