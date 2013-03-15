@@ -412,6 +412,40 @@ which completes the derivation of Equation \ref{eq:idealProductB}.  Note that th
 
 Shanks \cite{Shanks1989} gives an algorithm for multiplying two ideal class representatives such that their product is reduced or almost reduced.  The algorithm is known as NUCOMP and stands for ``New COMPosition''.  This algorithm is often faster in practice as the intermediate numbers are smaller and the final product requires at most two\footnote{According to \cite[p.441]{Jacobson2009}, experiments show that 88\% of the time the resulting product requires no applications of the reduction operation, 12\% of the time only one application is required, and very infrequently are two applications necessary.} applications of the reduction operation to be converted to reduced form \cite[pp.439--441]{Jacobson2009}. The description of NUCOMP provided here is a high level description of the algorithm based on \cite[pp.119-123]{Jacobson2009}.
 
+\begin{algorithm}[htb]
+\caption{NUCOMP -- Fast Ideal Multiplication. Based on \cite[pp.441-443]{Jacobson2009}.}
+\label{alg:nucomp}
+\begin{algorithmic}[1]
+\REQUIRE Reduced representatives $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$, $\mathfrak b = [a_2, (b_2+\sqrt\Delta)/2]$ \\ with $c_1 = ({b_1}^2-\Delta)/4a_1$, $c_2 = ({b_2}^2-\Delta)/4a_2$, and discriminant $\Delta$.
+\ENSURE A reduced or almost reduced representative $\mathfrak a \mathfrak b$.
+\STATE ensure $\mathcal N(\mathfrak a) < \mathcal N(\mathfrak b)$ by swapping $\mathfrak a$ with $\mathfrak b$ if $a_1 < a_2$
+\STATE compute $s'$ and $V'$ such that $s' = \gcd(a_1, a_2) = Y'a_1 + V'a_2$ for $s', Y', V' \in \ZZ$
+\STATE $s \gets 1$
+\STATE $U \gets V'(b_1 - b_2)/2 \bmod a_1$
+\IF {$s' \neq 1$}
+	\STATE compute $s, V$, and $W$ \\
+	       such that $s = \gcd(s', (b_1 + b_2)/2) = Vs' + W(b_1 + b_2)/2$ for $V, W \in \ZZ$
+	\STATE $(a_1, a_2) \gets (a_1/s, a_2/s)$
+	\STATE $U \gets (VU - Wc_2) \bmod a_1$
+\ENDIF
+\IF {$a_1 < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4}$}
+	\STATE $a \gets a_1a_2$
+	\STATE $b \gets (2a_2U + b_2) \bmod{2a}$
+	\RETURN $[a, (b+\sqrt\Delta)/2]$
+\ENDIF
+\STATE $\matrixtt{R_{-2}}{R_{-1}}{C_{-2}}{C_{-1}} \gets \matrixtt{U}{a_1}{-1}{0}$
+\STATE find $i$ such that $R_i < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4} < R_{i-1}$ using the recurrences: \\
+$q_i = \floor{R_{i-2} ~/~ R_{i-1}}$ \\
+$R_i = R_{i-2}-q_i R_{i-1}$ \\
+$C_i=C_{i-2}-q_i C_{i-1}$
+\STATE $M_1 \gets (R_i a_2 + C_i(b_1-b_2)/2)/a_1$
+\STATE $M_2 \gets (R_i (b_1+b_2)/2 -sC_i c_2)/a_1$
+\STATE $a \gets (-1)^{i+1}(R_i M_1 - C_i M_2)$
+\STATE $b \gets ((2(R_i a_2 - C_{i-1} a)/C_i) - b_2) \bmod{2a}$
+\RETURN $[a, (b+\sqrt\Delta)/2]$
+\end{algorithmic}
+\end{algorithm}
+
 % TODO: Justify why we can drop the first term below.
 
 Equations \ref{eq:idealProductS}, \ref{eq:idealProductA}, and \ref{eq:idealProductB} from the previous subsection give a solution to the ideal product $\mathfrak a \mathfrak b = s[a, (b+\sqrt\Delta)/2]$.  We begin with the observation of Jacobson and Williams (\cite[p.119]{Jacobson2009}) that the fraction $(b/2)/a$ is roughly equal to the fraction $sU / a_1$ where $U$ is given by Equation \ref{eq:idealProductU}:
@@ -447,41 +481,7 @@ for the reduced or almost reduced product $\mathfrak a \mathfrak b = [a, (b + \s
 
 Our implementation of fast ideal multiplication includes practical optimizations on the above technique.  For example, by Equation \ref{eq:idealProductS}, $s ~|~ a_1$ and $s ~|~ a_2$, so $a_1$ and $a_2$ are reduced modulo $s$ throughout the computation.  Also, Equation \ref{eq:idealProductS} computes \mbox{$\gcd(a_1, a_2, (b_1 + b_2)/2)$}. Following \cite[Algorithm~6]{Imbert2010}, this is separated into two parts: let $s = \gcd(a_1, a_2)$ and compute $\gcd(s, (b_1 + b_2)/2)$ only when $s \neq 1$.  Section \ref{sec:eea} discusses optimizations to this computation in practice.  Finally, the first coefficient, $Y$, from Equation \ref{eq:idealProductS} is never used, and so it is not computed.  See Section \ref{sec:idealArithmetic} for a more thorough treatment of our implementation of ideal class arithmetic.  Pseudo-code is given in Algorithm \ref{alg:nucomp}.
 
-\begin{algorithm}[htb]
-\caption{NUCOMP -- Fast Ideal Multiplication. Based on \cite[pp.441-443]{Jacobson2009}.}
-\label{alg:nucomp}
-\begin{algorithmic}[1]
-\REQUIRE Reduced representatives $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$, $\mathfrak b = [a_2, (b_2+\sqrt\Delta)/2]$ \\ with $c_1 = ({b_1}^2-\Delta)/4a_1$, $c_2 = ({b_2}^2-\Delta)/4a_2$, and discriminant $\Delta$.
-\ENSURE A reduced or almost reduced representative $\mathfrak a \mathfrak b$.
-\STATE ensure $\mathcal N(\mathfrak a) < \mathcal N(\mathfrak b)$ by swapping $\mathfrak a$ with $\mathfrak b$ if $a_1 < a_2$
-\STATE compute $s'$ and $V'$ such that $s' = \gcd(a_1, a_2) = Y'a_1 + V'a_2$ for $s', Y', V' \in \ZZ$
-\STATE $s \gets 1$
-\STATE $U \gets V'(b_1 - b_2)/2 \bmod a_1$
-\IF {$s' \neq 1$}
-	\STATE compute $s, V$, and $W$ \\
-	       such that $s = \gcd(s', (b_1 + b_2)/2) = Vs' + W(b_1 + b_2)/2$ for $V, W \in \ZZ$
-	\STATE $(a_1, a_2) \gets (a_1/s, a_2/s)$
-	\STATE $U \gets (VU - Wc_2) \bmod a_1$
-\ENDIF
-\IF {$a_1 < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4}$}
-	\STATE $a \gets a_1a_2$
-	\STATE $b \gets (2a_2U + b_2) \bmod{2a}$
-	\RETURN $[a, (b+\sqrt\Delta)/2]$
-\ENDIF
-\STATE $\matrixtt{R_{-2}}{R_{-1}}{C_{-2}}{C_{-1}} \gets \matrixtt{U}{a_1}{-1}{0}$
-\STATE find $i$ such that $R_i < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4} < R_{i-1}$ using the recurrences: \\
-$q_i = \floor{R_{i-2} ~/~ R_{i-1}}$ \\
-$R_i = R_{i-2}-q_i R_{i-1}$ \\
-$C_i=C_{i-2}-q_i C_{i-1}$
-\STATE $M_1 \gets (R_i a_2 + C_i(b_1-b_2)/2)/a_1$
-\STATE $M_2 \gets (R_i (b_1+b_2)/2 -sC_i c_2)/a_1$
-\STATE $a \gets (-1)^{i+1}(R_i M_1 - C_i M_2)$
-\STATE $b \gets ((2(R_i a_2 - C_{i-1} a)/C_i) - b_2) \bmod{2a}$
-\RETURN $[a, (b+\sqrt\Delta)/2]$
-\end{algorithmic}
-\end{algorithm}
 
-\clearpage
 \subsection{Fast Ideal Squaring (NUDUPL)}
 \label{subsec:nudupl}
 
