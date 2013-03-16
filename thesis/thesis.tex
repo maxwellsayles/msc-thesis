@@ -405,8 +405,6 @@ which completes the derivation of Equation \ref{eq:idealProductB}.  Note that th
 \subsection{Fast Ideal Multiplication (NUCOMP)}
 \label{subsec:nucomp}
 
-% TODO: cite what is means to be reduced or almost reduced.
-
 Shanks \cite{Shanks1989} gives an algorithm for multiplying two ideal class representatives such that their product is reduced or almost reduced.  The algorithm is known as NUCOMP and stands for ``New COMPosition''.  This algorithm is often faster in practice as the intermediate numbers are smaller and the final product requires at most two\footnote{According to \cite[p.441]{Jacobson2009}, experiments show that 88\% of the time the resulting product requires no applications of the reduction operation, 12\% of the time only one application is required, and very infrequently are two applications necessary.} applications of the reduction operation to be converted to reduced form \cite[pp.439--441]{Jacobson2009}. The description of NUCOMP provided here is a high level description of the algorithm based on \cite[pp.119-123]{Jacobson2009}.
 
 \begin{algorithm}[htb]
@@ -603,7 +601,7 @@ In the next chapter, we'll discuss some exponentiation techniques that make use 
 
 Exponentiation has many applications. Diffie-Hellman key exchange uses exponentiation so that two parties may jointly establish a shared secret key over an insecure channel.  An application discussed in detail in this thesis is that of computing the order of a group element.  Our approach is to exponentiate a group element to the product, $P$, of several small primes.  The result is an element whose order is likely to not be divisible by any of these primes. We then compute the order using a variant of Shanks' baby-step giant-step algorithm where only powers relatively prime to $P$ are computed.  Determining the order of an element is useful in computing the structure of a group, and in factoring an integer associated with a group.  Faster exponentiation means the entire computation is faster.
 
-In Sections \ref{sec:binaryExp} and \ref{sec:naf} we discuss standard exponentiation techniques that rely on a base 2 representation of the exponent.  In Section \ref{sec:dbns} we describe double-base number systems, which, as the name implies, are number systems that make use of two bases in the representation of a number.  We are particularly interested in representations that use bases 2 and 3, since our implementation of ideal class group arithmetic provides multiplication, squaring, and cubing. In Section \ref{sec:dbnsMethods} we discuss some methods to compute double-base representations found in the literature.  Throughout this chapter, the running time and space complexities given are in terms of group operations and elements and, do not take into consideration the binary costs associated with each.
+In Sections \ref{sec:binaryExp} and \ref{sec:naf} we discuss standard exponentiation techniques that rely on a base 2 representation of the exponent.  In Section \ref{sec:dbns} we describe double-base number systems, which, as the name implies, are number systems that make use of two bases in the representation of a number.  We are particularly interested in representations that use bases 2 and 3, since our implementation of ideal class group arithmetic provides multiplication, squaring, and cubing. In Section \ref{sec:dbnsMethods} we discuss some methods to compute double-base representations found in the literature.  Throughout this chapter, the running time and space complexities are given in terms of the number of group operations and elements required. They do not take into consideration the binary costs associated with each.
 
 
 \section{Binary Exponentiation}
@@ -616,7 +614,7 @@ where $b_i \in \{0, 1\}$ such that $b_i$ represents the $i^{\textrm{th}}$ bit of
 \[
 	g^n = \prod_{i=0}^{\floor{\log_2 n}} g^{b_i 2^i}.
 \]
-and compute $g^{2^i}$ by repeated squaring of $g$.  The result $g^n$ is the product of each $g^{2^i}$ where $b_i = 1$.  This description is known as right-to-left binary exponentiation because the result is computed by generating the terms of the product from right to left in the written binary representation of $n$.  The left-to-right variant evaluates the bits of the exponent $n$ from high order to lower order by repeatedly squaring an accumulator and multiplying this with the base element $g$ when $b_i = 1$.  The left-to-right variant has the advantage that one of the values in each multiplication, namely $g$, remains fixed throughout the evaluation.  There also exist windowed variants where $g^w$ is precomputed for each $w$ in some window $0 \le w < 2^k$ for some $k$ (typically chosen to be cache efficient). The exponent $n$ is then expressed in base $2^k$.  For further discussion of windowed techniques, see \cite{Cohen2006}.
+and compute $g^{2^i}$ by repeated squaring of $g$.  The result, $g^n$, is the product of each $g^{2^i}$ where $b_i = 1$.  This description is known as right-to-left binary exponentiation because the result is computed by generating the terms of the product from right to left in the written binary representation of $n$.  The left-to-right variant evaluates the bits of the exponent $n$ from high order to lower order by repeatedly squaring an accumulator and multiplying this with the base element $g$ when $b_i = 1$.  The left-to-right variant has the advantage that one of the values in each multiplication, namely $g$, remains fixed throughout the evaluation.  There also exist windowed variants where $g^w$ is precomputed for each $w$ in some window $0 \le w < 2^k$ for some $k$ (typically chosen to be cache efficient). The exponent $n$ is then expressed in base $2^k$.  For further discussion of windowed techniques, see \cite{Cohen2006}.
 
 Binary exponentiation algorithms require $\floor{\log_2 n}$ squarings and $\left(\floor{\log_2~n} + 1 \right)/2$ multiplications on average, since a multiplication is only necessary when $b_i = 1$ and the probability of $b_i = 1$ is 1/2.
 
@@ -648,9 +646,9 @@ When computing in the ideal class group, the cost of inversion is negligible, bu
 \]
 which requires at most one inversion (but this is not necessary for our purposes).
 
-To compute the non-adjacent form of an integer $n$, we inspect $n$ two bits at a time from least significant to most significant.  Let $n=\sum b_i2^i$ be the binary representation of $n$ and let $j=0$.  If the bit pattern $\langle b_{j+1}, b_j \rangle = \binary{01}$ then let $s_j = 1$ and subtract $2^j$ from $n$.  If $\langle b_{j+1}, b_j \rangle = \binary{11}$ then let $s_j = -1$ and add $2^j$ to $n$.  When the bit pattern $\langle b_{j+1}, b_j \rangle$ is $\binary{00}$ or $\binary{10}$, let $s_j = 0$. Next, increment $j$ and repeat while $n \ne 0$.
+To compute the non-adjacent form of an integer $n$, inspect $n$ two bits at a time from least significant to most significant.  Let $n=\sum b_i2^i$ be the binary representation of $n$ and let $j=0$.  If the bit pattern $\langle b_{j+1}, b_j \rangle = \binary{01}$ then let $s_j = 1$ and subtract $2^j$ from $n$.  If $\langle b_{j+1}, b_j \rangle = \binary{11}$ then let $s_j = -1$ and add $2^j$ to $n$.  When the bit pattern $\langle b_{j+1}, b_j \rangle$ is $\binary{00}$ or $\binary{10}$, let $s_j = 0$. Next, increment $j$ and repeat while $n \ne 0$.
 
-In our experiments, we use a variation of the above, originally due to Reitwiesner \cite{reitwiesner1960}, that maintains a carry flag $c$ (see Algorithm \ref{alg:nafR2LImmutable}).  Instead of adding $2^i$ to $n$, we set $c = 1$, and instead of subtracting $2^i$ from $n$, we set $c = 0$.  When inspecting $n$ two bits at a time, we consider the bit pattern $(m+c) \bmod 4$ where $m = 2 b_{i+1} + b_i$.  This technique is faster since addition and subtraction is performed with constant sized integers.
+In our experiments, we use a variation of the above, originally due to Reitwiesner \cite{reitwiesner1960}, that maintains a carry flag $c$ (see Algorithm \ref{alg:nafR2LImmutable}).  Instead of adding $2^i$ to $n$, set $c = 1$, and instead of subtracting $2^i$ from $n$, set $c = 0$.  When inspecting $n$ two bits at a time, we consider the bit pattern $(m+c) \bmod 4$ where $m = 2 b_{i+1} + b_i$.  This technique is faster since addition and subtraction is performed with constant sized integers.
 
 \begin{algorithm}[h]
 \caption{Computes $g^n$ using right-to-left non-adjacent form (Reitwiesner \cite{reitwiesner1960}).}
@@ -687,17 +685,19 @@ Binary representation and non-adjacent form use only a single base, namely base 
 \begin{equation}\label{eq:generalDbnsForm}
 	n = \sum_{i=1}^k s_i p^{a_i} q^{b_i}
 \end{equation}
-where $s_i \in \{-1, 1\}$ and $a_i, b_i, k \in \ZZgez$. We are particularly interested in bases $p=2$ and $q=3$ and representations of $n$ such that $n = \sum s_i 2^{a_i} 3^{b_i}$.  We refer to such representations as \emph{2,3 representations}.
+where $s_i \in \{-1, 1\}$ and $a_i, b_i, k \in \ZZgez$. We are particularly interested in bases $p=2$ and $q=3$ and representations of $n$ such that $n = \sum s_i 2^{a_i} 3^{b_i}$.  Such representations are referred to as \emph{2,3 representations}.
 
 As an example of a 2,3 representation, consider the number $n=23814216$ again.  Given the bases $p=2$ and $q=3$, \emph{one} possible representation of $n$ is
-\begin{equation}\label{eq:chainedEg1}
-	23814216 = 2^3 3^3 - 2^4 3^5 + 2^5 3^6  + 2^7 3^7  + 2^9 3^8 + 2^{10} 3^9.
+\begin{equation}
+\label{eq:chainedEg1}
+	23814216 = 2^3 3^3 - 2^4 3^5 + 2^5 3^6  + 2^7 3^7 + 2^9 3^8 + 2^{10} 3^9.
 \end{equation}
 Another possible representation is
-\begin{equation}\label{eq:chainedEg2}
+\begin{equation}
+\label{eq:chainedEg2}
 	23814216 = 2^3 3^2 -2^{13} 3^2 +2^{15} 3^6.
 \end{equation}
-There may be many possible 2,3 representations for a given number, and different representations will trade off between cubings, squarings, and the number of terms.  The best representation depends on the needs of the application.  Later, we shall see some algorithms that take this into account, but many are designed to either find representations quickly, of a special form, or with few terms.
+There may be many possible 2,3 representations for a given number, and different representations will trade off between cubings, squarings, and the number of terms.  Notice that Equation \ref{eq:chainedEg1} requires 10 squarings, 9 cubings, 1 inverse, and 5 terms, while Equation \ref{eq:chainedEg2} requires 15 squarings, 6 cubings, 1 inverse, and 3 terms.  The best representation will depend on the needs of the application.  Later, we shall see some algorithms that take this into account (see Section \ref{sec:exponentiation}), but many are designed to either find representations quickly, of a special form, or with few terms.
 
 Recall, the binary representation \eqref{eq:binaryEg}, non-adjacent form \eqref{eq:nafEg}, and a 2,3 double-base representation \eqref{eq:chainedEg2} of 23814216 were
 \begin{align*}
@@ -1883,7 +1883,7 @@ In this Section we discussed methods to improve the performance of arithmetic in
 \section{Exponentiation Experiments}
 \label{sec:exponentiation}
 
-% TODO: Come up with expamples for each.
+% TODO: Come up with examples for each.
 % TODO: We might need to use 23814216 as an example everywhere since Yao's graph uses that and it was a lot of work.
 
 In this Section, we discuss several approaches to exponentiating an ideal class representative to a large exponent.  In particular, we consider large exponents that are the product of all primes less than some bound\footnote{The product of all primes less than a bound $B$ is a \emph{primorial}.  See Section \ref{sec:primorial} for the definition and our motivation for using them.}.  We assume the exponent is known in advance, which allows us to precompute the sequence of operations for the exponentiation.
