@@ -1006,9 +1006,9 @@ The description of SPAR uses binary quadratic forms. A binary quadratic form is 
 \[
 	f(x, y) = ax^2 + bxy + cy^2
 \]
-where $a$, $b$, and $c$ are integer coefficients.  For a given form there is a set of integers represented by $f(x, y)$ for integers $x$ and $y$. Two forms are equivalent if the sets of integers they represent are identical \cite[pp.239-240]{Crandall2001}.  In which case, there exists an invertible integral linear change of variables that transforms one form into the other.  Necessarily, two equivalent forms have the same discriminant, which is given as $\Delta = b^2 - 4ac$.  The set of all forms equivalent to a given form comprises an equivalence class, and as shown by Gau\ss, representatives of equivalence classes of forms can be multiplied together to form a group.  In the case of a negative discriminant, each form is equivalent to a unique reduced form \cite[p.241]{Crandall2001}.  
+where $a$, $b$, and $c$ are integer coefficients.  For a given form there is a set of integers represented by $f(x, y)$ for integers $x$ and $y$. Two forms are equivalent if the sets of integers they represent are identical \cite[pp.239-240]{Crandall2001}.  In which case, there exists an invertible integral linear change of variables that transforms one form into the other.  Necessarily, two equivalent forms have the same discriminant, which is $\Delta = b^2 - 4ac$.  The set of all forms equivalent to a given form comprises an equivalence class, and as shown by Gau\ss, representatives of equivalence classes of forms can be multiplied together to form a group.  In the case of a negative discriminant, each form is equivalent to a unique reduced form \cite[p.241]{Crandall2001}.  
 
-The group of equivalence classes of binary quadratic forms is isomorphic to the ideal class group of imaginary quadratic fields (see for example Fr{\"o}lich and Taylor \cite{Frolich1993}).  Throughout this thesis, we represent elements of the ideal class group using reduced representatives.  We denote the equivalence class $[\mathfrak a]$ for a reduced representative $\mathfrak a$ using the $\ZZ$\mbox{-}module $\mathfrak a = [a, (b + \sqrt\Delta)/2]$.  In our  implementation we also maintain a third term $c = (b^2 - \Delta)/4a$.  We note that the variables $a$ and $b$ are the same as the representative binary quadratic form $ax^2 + bxy + cy^2$ with discriminant $\Delta$. Furthermore, both necessarily share the same value $c$.  As such, we adapt our discussion of the SPAR factoring algorithm to the language of ideal classes.
+The group of equivalence classes of binary quadratic forms is isomorphic to the ideal class group of imaginary quadratic fields (see Fr{\"o}lich and Taylor \cite{Frolich1993}).  This thesis uses reduced representatives for elements of the ideal class group, and the equivalence class $[\mathfrak a]$ for a reduced representative $\mathfrak a$ is denoted using the $\ZZ$\mbox{-}module $\mathfrak a = [a, (b + \sqrt\Delta)/2]$.  In our implementation we also maintain a third term $c = (b^2 - \Delta)/4a$.  We note that the variables $a$, $b$, and $c$ correspond to the representative binary quadratic form $ax^2 + bxy + cy^2$ with discriminant $\Delta$. As such, we adapt our discussion of the SPAR factoring algorithm to the language of ideal classes.
 
 \begin{defn}
 The \emph{ambiguous classes} are the classes $[\mathfrak a]$ such that ${[\mathfrak a]}^2$ is the identity class \cite[p.302]{Schnorr1984}.  Notice that the identity ideal class $[\mathcal O_\Delta] \in Cl_\Delta$ is an ambiguous class.
@@ -1021,24 +1021,24 @@ According to \cite[p.303]{Schnorr1984}, every reduced representative of an ambig
 	\Delta &= (b - 2a)(b + 2a) & \textrm{ when } & a = c.
 \end{align*}
 
-Suppose we wish to find a factor of an odd integer $N$. Since $\Delta = b^2 - 4ac$ we must have $\Delta \equiv 0, 1 \pmod 4$.  Therefore, for some square free integer $k$, let $\Delta = -kN$ when $-kN \equiv 1 \pmod 4$ and $\Delta = -4kN$ otherwise.  Now, to find a factor of $N$ we find a reduced ambiguous class representative with discriminant $\Delta$.  For a reduced ambiguous class representative, compute $d = \gcd(a, N)$ if $b = 0$ or $a = b$, and $d = \gcd(b-2a, N)$ otherwise.  If we are lucky, $d$ is a proper factor of $N$. See Section \ref{sec:eea} for a discussion on how to compute $\gcd(N, m)$.
+Suppose we wish to find a factor of an odd integer $N$. Since $\Delta = b^2 - 4ac$ we must have $\Delta \equiv 0, 1 \pmod 4$.  Therefore, for some square free integer $k$, let $\Delta = -kN$ when $-kN \equiv 1 \pmod 4$ and $\Delta = -4kN$ otherwise.  Now to find a factor of $N$, we find a reduced ambiguous class representative with discriminant $\Delta$.  For a reduced ambiguous class representative, compute $d = \gcd(a, N)$ if $b = 0$ or $a = b$, and $d = \gcd(b-2a, N)$ otherwise.  If we are lucky, $d$ is a proper factor of $N$. See Section \ref{sec:eea} for a discussion on how to compute $\gcd(N, m)$.
 
 
 \subsection{SPAR Algorithm}
 
 Subsection \ref{subsec:classNumber} states that for a negative discriminant $\Delta$, the ideal class group $Cl_\Delta$ has a finite number of elements.  This means that for a random ideal class $\aclass$, there exists an integer $m$ such that $\aclass^m = \idclass$. We say that $m$ is the \emph{order} of the element $\aclass$ and denote this by $m = \ord(\aclass)$.  When the order is even, then $\bclass = \aclass^{m/2}$ is an ambiguous ideal class.  This follows from the fact that $\bclass^2 = \idclass$.  Therefore, factoring an integer $N$ reduces to the problem of determining the order of a random ideal class $\aclass \in Cl_\Delta$ for $\Delta$ a square free multiple of $-N$ or $-4N$.
 
-The SPAR algorithm works in two stages. The first stage is the exponentiation stage, where a random ideal class $\aclass \in Cl_\Delta$ is exponentiated to the product of many small odd prime powers $E$, such that $\bclass = \aclass^E$.  Assuming the order of $\bclass$ is even, the algorithm then attempts to find an ambiguous ideal by repeated squaring of $\bclass$.  If this fails, the second stage is to perform a random walk on the group generated by the ideal class computed in the first stage.  This is the search stage.  We limit the number of group operations performed by each stage, and if both stages fail to find a factorization of $N$, we try again with a different square free multiple $\Delta = -kN$ or $\Delta = -4kN$.  The use of a multiplier $k$ changes the group structure and order of elements -- the hope is to find a group with smooth order.
-
 \begin{defn}
-An integer, $x$, is \emph{smooth} with respect to $y$ if all of the prime factors $p$ dividing $x$ are no larger than $y$.
+An integer, $x$, is \emph{smooth} with respect to $y$ if all of the prime factors dividing $x$ are no larger than $y$.
 \end{defn}
+
+The SPAR algorithm works in two stages. The first stage is the exponentiation stage, where a random ideal class $\aclass \in Cl_\Delta$ is exponentiated to the product of many small odd prime powers $E$, such that $\bclass = \aclass^E$.  Assuming the order of $\bclass$ is even and smooth with respect to the exponent $E$, the algorithm then attempts to find an ambiguous ideal by repeated squaring of $\bclass$.  If this fails, the second stage is to perform a random walk on the group generated by the ideal class computed in the first stage.  This is the search stage.  We limit the number of group operations performed by each stage, and if both stages fail to find a factorization of $N$, we try again with a different square free multiple $\Delta = -kN$ or $\Delta = -4kN$.  The use of a multiplier $k$ changes the group structure and order of elements, and the hope is to find a group with smooth order.
 
 Following Schnorr and Lenstra \cite{Schnorr1984}, we take the first $t$ primes $p_1 = 2, p_2 = 3, ..., p_t \le N^{1/2r}$ for $r = \sqrt{\ln N / \ln \ln N}$.  Let $e_i = \max \{ v : {p_i}^v \le {p_t}^2 \}$ and compute
 \[
 	\bclass = \aclass^{\prod_{i=2}^t {p_i}^{e_i}}.
 \]
-Notice that we exponentiate $\aclass$ to the product of only \emph{odd} prime powers.  The reason for this is that if $\ord(\aclass)$ is smooth with respect to $p_t$, then we can compute $\bclass^{\left(2^k\right)}$ for the smallest $k$ such that $\bclass^{\left(2^k\right)} = \idclass$.  It follows that $\bclass^{\left(2^{k-1}\right)}$ is an ambiguous ideal class and we can attempt to factor $N$.
+Notice that we exponentiate $\aclass$ to the product of only \emph{odd} prime powers.  The reason for this is that if $\ord(\aclass)$ is smooth with respect to $p_t$, then we can compute $\bclass^{\left(2^k\right)}$ for the smallest $k$ such that $\bclass^{\left(2^k\right)} = \idclass$.  It follows that $\bclass^{\left(2^{k-1}\right)}$ is an ambiguous ideal class and we attempt to factor $N$.
 
 Since we do not know if $\ord(\aclass)$ is smooth, we instead bound $k$ such that $2^k$ is no larger than the number of elements in the class group.  Schnorr and Lenstra \cite[p.291]{Schnorr1984} use $k = \floor{\log_2{\sqrt N}}$.  As such, we only need to compute $\bclass^{\left(2^k\right)}$ for the smallest $k \le \floor{\log_2{\sqrt N}}$ such that $\bclass^{\left(2^k\right)} = \idclass$ if such a $k$ exists. If such a $k$ does not exist, then the algorithm continues with the second stage.
 
@@ -1046,11 +1046,11 @@ In the first stage, we compute $\bclass = \aclass^{\prod_{i=2}^t {p_i}^{e_i}}$ a
 \[
 	[\mathfrak c_{i+1}] = f([\mathfrak c_i])
 \]
-until there is some $j < k$ such that $[\mathfrak c_j] = [\mathfrak c_k]$.  By the function $f$, we compute $u$ and $v$ such that $[\mathfrak c_j]=\cclass^u$ and $[\mathfrak c_k]=\cclass^v$.  The order of $\cclass$ is then a multiple of $h = v - u$.  We compute an ambiguous class representative by computing $\dclass = \bclass^h$ and then computing $\dclass^{\left(2^k\right)}$ for the smallest $k \le \floor{\log_2{\sqrt N}}$ as before.  Assuming that such a $k$ exists, then $\dclass^{\left(2^{k-1}\right)}$ is an ambiguous class representative and we attempt to factor $N$.
+until there is some $j < k$ such that $[\mathfrak c_j] = [\mathfrak c_k]$.  By the function $f$, we compute $u$ and $v$ such that $[\mathfrak c_j]=\cclass^u$ and $[\mathfrak c_k]=\cclass^v$.  The order of $\cclass$ is then a multiple of $h = v - u$.  We compute an ambiguous class representative by computing $\dclass = \bclass^h$ and then compute $\dclass^{\left(2^k\right)}$ for the smallest $k \le \floor{\log_2{\sqrt N}}$ as before.  Assuming that such a $k$ exists, then $\dclass^{\left(2^{k-1}\right)}$ is an ambiguous class representative and we attempt to factor $N$.
 
 \subsection{SPAR Complexity}
 
-%TODO: where does the little-oh come in?
+% NOTE: See Andrew's e-mail on complexity notes.
 
 The original publication of SPAR by Schnorr and Lenstra \cite{Schnorr1984} claimed that every composite integer $N$ could be factored in $o\left(\exp\sqrt{\ln N \ln\ln N}\right)$ bit operations.  This was the first factoring algorithm for which this runtime had been conjectured, and it was also the first for which this conjecture had to be withdrawn \cite{Lenstra1992}.
 
@@ -1115,7 +1115,7 @@ where $p_i$ is the $i^{\textrm{th}}$ prime.  Let $e_i = \floor{\log_{p_i} M}$ fo
 \end{equation}
 The bound on the largest baby step $b$ is $b = m P_w$.  We then compute $h' = \ord(\beta)$ and use a fast order finding algorithm $\mathcal A(\alpha^{h'}, E)$ to compute $h = \ord(\alpha)$.  Pseudo-code for the bounded Primorial Steps technique is given in Algorithm \ref{alg:primorial}.
 
-One fast order finding algorithm $\mathcal A(\alpha^{h'}, E)$ uses the factorization of $E=\prod {p_i}^{e_i}$.  Notice that $\alpha^{Eh'} = \beta^{h'} = 1_G$.  The idea is to iterate on the factors of $E$, removing each factor $p$ before computing $\gamma = \alpha^{E'h'}$ for the product $E' = E/p$. If $\gamma \neq 1_G$, then $\ord(\alpha)$ does not divide $E'h'$ and $p$ must be a factor of the order of $\alpha$.  The algorithm then continues with the next prime factor of $E'$.  More fast order finding algorithms are given in \cite[Chapter 7]{Sutherland2007}.
+One fast order finding algorithm $\mathcal A(\alpha^{h'}, E)$ uses the factorization of $E=\prod {p_i}^{e_i}$.  Notice that $\alpha^{Eh'} = \beta^{h'} = 1_G$.  The idea is to iterate on the factors of $E$, removing each factor $p$ before computing $\gamma = \alpha^{E'h'}$ for the product $E' = E/p$. If $\gamma \neq 1_G$, then $\ord(\alpha)$ does not divide $E'h'$ and $p$ must be a factor of the order of $\alpha$.  The algorithm then continues with the next prime factor of $E'$.  Additional fast order finding algorithms are given in \cite[Chapter~7]{Sutherland2007}.
 
 \subsection{Primorial Steps for a Set}
 
@@ -1310,9 +1310,12 @@ This chapter introduced SPAR, a factoring algorithm based on the ideal class gro
 \chapter{Ideal Experiments}
 \label{chap:idealExperiments}
 
-A significant contribution of this thesis is to improve the performance of exponentiation in the ideal class group of imaginary quadratic number fields.  This chapter focuses on the techniques and experimental data that lead us to our implementation.  We specialized much of our implementation for the x64 architecture.  Many of our routines benefit when the input is bounded by a single machine word, i.e.\ 64-bits, but we were also able to take advantage of integers that fit within two machine words by implementing a custom library for 128-bit arithmetic.  When integers are larger than 128-bits, we use the GNU Multiple Precision (GMP) arithmetic library.
+One contribution of this thesis is an efficient implementation of arithmetic in the ideal class group of imaginary quadratic number fields.  An efficient implementation improves the performance of exponentiation within this group in practice (see Chapter \ref{chap:powExperiments}) and efficient exponentiation within this group speeds our implementation of the integer factoring algorithm SuperSPAR (see Chapter \ref{chap:ssparExperiments}).
 
-Improvements to ideal arithmetic also lead to improvements in ideal exponentiation, and so we start there. Arithmetic in the ideal class group uses solutions to equations of the form $s = Ua + Vb$ where $s$ is the largest integer dividing both $a$ and $b$. In Section \ref{sec:eea}, we introduce several algorithms for computing such solutions and look at their performance in practice. To make arithmetic in the ideal class group as efficient as possible, we specialized our implementation and discuss this implementation in Section \ref{sec:idealArithmetic}. In Chapter \ref{chap:powExperiments}, we compare methods to exponentiate ideal representatives to large fixed exponents that are the product of many primes, including several novel approaches to computing double-base representations.
+This chapter focuses on the techniques and experimental data that lead us to our implementation of arithmetic in the ideal class group.  We specialized much of our implementation for the x64 architecture.  Many of our routines benefit when the input is bounded by a single machine word, i.e.\ 64-bits, but we were also able to take advantage of integers that fit within two machine words by implementing a custom library for 128-bit arithmetic.  When integers are larger than 128-bits, we use the GNU Multiple Precision (GMP) arithmetic library.
+
+Arithmetic in the ideal class group uses solutions to equations of the form $s = Ua + Vb$ where $s$ is the largest integer dividing both $a$ and $b$. Section \ref{sec:eea} discusses several algorithms for computing such solutions and studies their performance in practice. To make arithmetic in the ideal class group as efficient as possible, we specialized our implementation and discuss this implementation in Section \ref{sec:idealArithmetic}.
+
 
 \section{Extended Greatest Common Divisor}
 \label{sec:eea}
@@ -1868,7 +1871,11 @@ In Figures \ref{fig:cubingVs64}, \ref{fig:cubingVs128}, and \ref{fig:cubingVsMpz
 \mygraph{cube-vs-128}{fig:cubingVs128}{Time to compute $[\mathfrak a^3]$ in our 128-bit implementation.}
 \mygraph{cube-vs-mpz}{fig:cubingVsMpz}{Time to compute $[\mathfrak a^3]$ in our GMP implementation.}
 
-In this Section we discussed methods to improve the performance of arithmetic in the ideal class group and compared the average time of multiplication, squaring, and cubing.  In the next section, we look at several methods for exponentiating that we have not discussed previously -- many of which take the average time of multiplication, squaring, and cubing into consideration.
+
+\section{Summary}
+
+This chapter discussed methods that lead to practical performance improvements of arithmetic in the ideal class group, including that of computing the extended greatest common divisor.  Having a practical implementation of arithmetic in the ideal class group, the next Chapter, discusses several methods for exponentiating that we have not discussed previously -- many of which take the average time to multiply, square, and cube into consideration.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % EXPONENTIATION EXPERIMENTS %
@@ -1878,6 +1885,11 @@ In this Section we discussed methods to improve the performance of arithmetic in
 
 % TODO: Come up with examples for each.
 % TODO: We might need to use 23814216 as an example everywhere since Yao's graph uses that and it was a lot of work.
+
+One motivation for our implementation of ideal class group arithmetic is to improve the performance of exponentiation within this group.  In Chapter \ref{chap:powExperiments}, we compare methods to exponentiate ideal representatives to large fixed exponents that are the product of many primes, including several novel approaches to computing double-base representations.
+
+
+Improvements to ideal arithmetic also lead to improvements in ideal exponentiation, and so we start there. 
 
 This chapter discusses several approaches to exponentiating an ideal class representative to a large exponent.  In particular, we consider large exponents that are the product of all primes less than some bound\footnote{The product of all primes less than a bound $B$ is a \emph{primorial}.  See Section \ref{sec:primorial} for the definition and our motivation for using them.}.  We assume the exponent is known in advance, which allows us to precompute the sequence of operations for the exponentiation.
 
