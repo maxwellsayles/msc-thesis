@@ -599,7 +599,7 @@ In the next chapter, we'll discuss some exponentiation techniques that make use 
 \chapter{Exponentiation}
 \label{chap:exponentiation}
 
-Exponentiation has many applications. Diffie-Hellman key exchange uses exponentiation so that two parties may jointly establish a shared secret key over an insecure channel.  An application discussed in detail in this thesis is that of computing the order of a group element.  Our approach is to exponentiate a group element to the product, $P$, of several small primes.  The result is an element whose order is likely to not be divisible by any of these primes. We then compute the order using a variant of Shanks' baby-step giant-step algorithm where only powers relatively prime to $P$ are computed.  Determining the order of an element is useful in computing the structure of a group, and in factoring an integer associated with a group.  Faster exponentiation means the entire computation is faster.
+Exponentiation has many applications. Diffie-Hellman key exchange uses exponentiation so that two parties may jointly establish a shared secret key over an insecure channel.  An application discussed in detail in this thesis is that of computing the order of a group element (see Sections \ref{sec:spar} and \ref{sec:superSpar}).  Our approach is to exponentiate a group element to the product, $P$, of several small primes.  The result is an element whose order is likely to not be divisible by any of these primes. We then compute the order using a variant of Shanks' baby-step giant-step algorithm where only powers relatively prime to $P$ are computed.  Determining the order of an element is useful in computing the structure of a group, and in factoring an integer associated with a group.  Faster exponentiation means the entire computation is faster.
 
 In Sections \ref{sec:binaryExp} and \ref{sec:naf} we discuss standard exponentiation techniques that rely on a base 2 representation of the exponent.  In Section \ref{sec:dbns} we describe double-base number systems, which, as the name implies, are number systems that make use of two bases in the representation of a number.  We are particularly interested in representations that use bases 2 and 3, since our implementation of ideal class group arithmetic provides multiplication, squaring, and cubing. In Section \ref{sec:dbnsMethods} we discuss some methods to compute double-base representations found in the literature.  Throughout this chapter, the running time and space complexities are given in terms of the number of group operations and elements required. They do not take into consideration the binary costs associated with each.
 
@@ -685,7 +685,7 @@ Binary representation and non-adjacent form use only a single base, namely base 
 \begin{equation}\label{eq:generalDbnsForm}
 	n = \sum_{i=1}^k s_i p^{a_i} q^{b_i}
 \end{equation}
-where $s_i \in \{-1, 1\}$ and $a_i, b_i, k \in \ZZgez$. Of particular interest are bases $p=2$ and $q=3$ and representations of $n$ such that $n = \sum s_i 2^{a_i} 3^{b_i}$.  Such representations are referred to as \emph{2,3 representations}.
+where $s_i \in \{-1, 1\}$ and $a_i, b_i, k \in \ZZgez$. This thesis pays particular attention to representations using bases $p=2$ and $q=3$ such that $n = \sum s_i 2^{a_i} 3^{b_i}$.  Such representations are referred to as \emph{2,3 representations}.
 
 As an example of a 2,3 representation, consider the number $n=23814216$ again.  Given the bases $p=2$ and $q=3$, \emph{one} possible representation of $n$ is
 \begin{equation}
@@ -697,7 +697,7 @@ Another possible representation is
 \label{eq:chainedEg2}
 	23814216 = 2^3 3^2 -2^{13} 3^2 +2^{15} 3^6.
 \end{equation}
-There may be many possible 2,3 representations for a given number, and different representations will trade off between cubings, squarings, and the number of terms.  Exponentiation using Equation \ref{eq:chainedEg1} requires 10 squarings, 9 cubings, 1 inverse, and 5 multiplications, while Equation \ref{eq:chainedEg2} requires 15 squarings, 6 cubings, 1 inverse, and 3 multiplications.  Contrast this with the binary representation (\ref{eq:binaryEg}), which requires 24 squarings, 0 inverses, and 9 multiplications, and the non-adjacent form (\ref{eq:nafEg}), which requires 25 squarings, 5 inverses, and 7 multiplications.  The best representation will depend on the needs of the application and the cost of each operation.  Later, we shall see some algorithms that take this into account (see Section \ref{sec:exponentiation}), but many are designed to either find representations quickly, of a special form, or with few terms.
+There may be many possible 2,3 representations for a given number, and different representations will trade off between cubings, squarings, and the number of terms.  Exponentiation using Equation \ref{eq:chainedEg1} requires 10 squarings, 9 cubings, 1 inverse, and 5 multiplications, while Equation \ref{eq:chainedEg2} requires 15 squarings, 6 cubings, 1 inverse, and 3 multiplications.  Contrast this with the binary representation (\ref{eq:binaryEg}), which requires 24 squarings, 0 inverses, and 9 multiplications, and the non-adjacent form (\ref{eq:nafEg}), which requires 25 squarings, 5 inverses, and 7 multiplications.  The best representation will depend on the needs of the application and the cost of each operation.  Later, we shall see some algorithms that take this into account (see Chapter \ref{chap:powExperiments}), but many are designed to either find representations quickly, of a special form, or with few terms.
 
 
 \subsection{Chained 2,3 Representations}
@@ -720,6 +720,8 @@ A partition of an integer $n = x_1 \pm x_2 \pm \cdots \pm x_k$ is \emph{chained}
 
 \noindent
 Binary and non-adjacent form are special types of strictly chained partitions, since for any two non-zero terms where $i < j$, we have $x_i = 2^i$, $x_j = 2^j$, $ x_i ~|~ x_j$, and $x_i < x_j$.  The 2,3 representation of $23814216 = 2^3 3^2 - 2^{13} 3^2 + 2^{15} 3^6$ is another example of a strictly chained partition, since $2^3 3^2 ~|~ 2^{13} 3^2 ~|~ 2^{15} 3^6$.
+
+The benefit of restricting 2,3 representations to chained representations is the ease with which one can compute $g^n$ when $n$ is given as a chain.  For example $g^{23814216} = g^{2^3 3^2 - 2^{13} 3^2 + 2^{15} 3^6}$ can be computed by first computing $x_0 = g$, $x_1 = g^{2^3 3^2}$, $x_2 = {x_1}^{2^{10}}$, $x_3 = {x_2}^{2^2 3^4}$, each term being computed by repeated squaring and cubing from the previous term.  Finally $g^{23814216} = x_1 \cdot {x_2}^{-1} \cdot x_3$.  When $n$ is given as a chained 2,3 representation, Algorithm \ref{alg:expWithChain} will compute $g^n$ using exactly $a_k$ squares, $b_k$  cubes, $k-1$ multiplications, and at most $k$ inverses\footnote{Recall that when inversion is expensive, the product of terms with negative exponents can be computed separately from terms with positive exponents -- the inverse is then computed only once for this product.  Since computing inverses is negligible in the ideal class group, we instead compute the product of all terms directly.}.  Since $x_i ~|~ x_{i+1}$, an implementation need only retain $x_i$ in order to compute $x_{i+1}$, and so only requires storage of a constant number of group elements.
 
 \begin{algorithm}[h]
 \caption{Computes $g^n$ given $n$ as a chained 2,3 partition. Adapted from \cite{Dimitrov2005}.}
@@ -748,8 +750,6 @@ $0 \le b_1 \le ... \le b_k \in \ZZ.$
 \RETURN $R$
 \end{algorithmic}
 \end{algorithm}
-
-The benefit of restricting 2,3 representations to chained representations is the ease with which one can compute $g^n$ when $n$ is given as a chain.  For example $g^{23814216} = g^{2^3 3^2 - 2^{13} 3^2 + 2^{15} 3^6}$ can be computed by first computing $x_1 = g^{2^3 3^2}$, $x_2 = {x_1}^{2^{10}}$, $x_3 = {x_2}^{2^2 3^4}$, and finally $g^{23814216} = x_1 \cdot {x_2}^{-1} \cdot x_3$. When $n$ is given as a chained 2,3 representation, Algorithm \ref{alg:expWithChain} can be used to compute $g^n$ using exactly $a_k$ squares, $b_k$  cubes, $k-1$ multiplications, and at most $k$ inverses\footnote{Recall that when inversion is expensive, the product of terms with negative exponents can be computed separately from terms with positive exponents -- the inverse is then computed only once for this product.  Since computing inverses is negligible in the ideal class group, we instead compute the product of all terms directly.}.  Since $x_i ~|~ x_{i+1}$, an implementation need only retain $x_i$ in order to compute $x_{i+1}$, and so requires storage of only a constant number of group elements.  
 
 
 \subsection{Unchained 2,3 Representations}
@@ -803,9 +803,9 @@ using 15 squares, 6 cubes, 2 inverses, and 3 multiplications.  The result of the
 \section{Methods for Computing 2,3 Chains/Representations}
 \label{sec:dbnsMethods}
 
-In this section, we discuss some of the methods from the literature for computing 2,3 representations. The first method generates strict chains from low order to high order (right-to-left), while the second method generates representations (both chained and unchained) from high order to low order (left-to-right).  The third technique generates strict chains using a tree-based approach, and the final method computes additive only strict chains of shortest length in a manner similar to chains generated from low order to high order.  
+The section discusses some of the methods from the literature for computing 2,3 representations. The first method generates strict chains from low order to high order (right-to-left), while the second method generates representations (both chained and unchained) from high order to low order (left-to-right).  The third technique generates strict chains using a tree-based approach, while the final method computes additive only strict chains of shortest length in a manner similar to chains generated from low order to high order.  
 
-These methods trade off the time to compute a representation against the time to exponentiate using that representation.  When the exponent is known in advance, we can precompute the chain or representation.  None of the methods presented here take into account the relative cost of multiplying, squaring, or cubing ideals.  In Chapter \ref{chap:idealPowExperiments} we will look at some variations of these algorithms that attempt to minimize the cost of exponentiation given the average costs of group operations.
+These methods trade off the time to compute a representation against the time to exponentiate using that representation.  When the exponent is known in advance, one can precompute the chain or representation best suited to the application.  Chapter \ref{chap:superspar} discusses two factoring algorithms that use precomputed representations of exponents to speed their computations.  While none of the methods presented in this Chapter take into account the relative cost of multiplying, squaring, or cubing ideals, Chapter \ref{chap:powExperiments} looks at some variations that attempt to minimize the cost of exponentiation given the average costs of group operations.  
 
 \subsection{Right-to-Left Chains (from low-order to high-order)}
 \label{subsec:rtolChains}
@@ -820,7 +820,7 @@ The first method we present computes a strictly chained 2,3 partition that is ge
 \end{align*}
 will compute the binary exponentiation of $g^n$ from low order to high order. This algorithm repeatedly removes factors of 2 from $n$.  When $n$ is not divisible by 2, it subtracts 1 such that the input to the recursive call will be divisible by 2.  The recursion terminates with the base case of $n=0$.
 
-We extend this concept to a 2,3 number system by repeatedly removing factors of 2 from $n$, and then factors of 3 from $n$.  At this point, either $n \equiv 1 \pmod 6$ or $n \equiv 5 \pmod 6$.  When $n \equiv 1 \pmod 6$, we recurse on $n-1$ and the input will be divisible by both 2 and 3.  When $n \equiv 5 \pmod 6$, we recurse on $n+1$.  Again, the input to the recursive call will be divisible by both 2 and by 3.  Using this idea, we perform a 2,3 exponentiation recursively as
+This concept is extended to a 2,3 number system by repeatedly removing factors of 2 from $n$, and then factors of 3 from $n$.  At this point, either $n \equiv 1 \pmod 6$ or $n \equiv 5 \pmod 6$.  When $n \equiv 1 \pmod 6$, we recurse on $n-1$ and the input will be divisible by both 2 and 3.  When $n \equiv 5 \pmod 6$, we recurse on $n+1$.  Again, the input to the recursive call will be divisible by both 2 and by 3.  Using this idea, we perform a 2,3 exponentiation recursively as
 %\newcommand{\rtol}{\textrm{r}_2\textrm{l}}
 \newcommand{\rtol}{\textrm{rtl}}
 \begin{align*}
@@ -930,7 +930,7 @@ V = \{2^a3^b, 2^{a+1}3^b : 0 \le b \le B \le \ceil{\log_3|n|}, a=\floor{\log_2|n
 \]
 Then take the element $v \in V$ that is closest to $|n|$, and take $s \in \{-1, 1\}$ based on the sign of $n$. Since the set $V$ contains $O(\log |n|)$ elements, computing the term closest to $n$ by this method takes $\Omega(\log |n|)$ steps.  When $a$ and $b$ are not constrained (i.e. $A \ge \ceil{\log_2|n|}$ and $B \ge \ceil{\log_3|n|}$), and we simply want to compute the 2,3 term closest to $n$, Berth\'{e} and Imbert \cite{Berthe2009} present a method that requires at most $O(\log \log |n|)$ steps. 
 
-They also found that applying a global bound $A^*$ and $B^*$ such that $0 \le a \le A^*$ and $0 \le b \le B^*$ often lead to representations with a lower density.  In the unchained case, recursive calls to $\greedychain$ use the global values of $A^*$ and $B^*$ rather than the values $a$ and $b$ generated by $\closest'$.  Finding the best greedy representation is then a matter of iterating over the global bounds $A^*$ and $B^*$ to compute 2,3 representations constrained appropriately.  We discuss some of the results of this in Chapter \ref{chap:idealPowExperiments}.
+They also found that applying a global bound $A^*$ and $B^*$ such that $0 \le a \le A^*$ and $0 \le b \le B^*$ often lead to representations with a lower density.  In the unchained case, recursive calls to $\greedychain$ use the global values of $A^*$ and $B^*$ rather than the values $a$ and $b$ generated by $\closest'$.  Finding the best greedy representation is then a matter of iterating over the global bounds $A^*$ and $B^*$ to compute 2,3 representations constrained appropriately.  We discuss some of the results of this in Chapter \ref{chap:powExperiments}.
 
 
 \subsection{Pruned Tree of $\pm1$ Nodes}
@@ -980,9 +980,9 @@ The corresponding 2,3 chain is computed by memoizing a shortest chain for each s
 
 \section{Coming up}
 
-In this chapter, we outlined some exponentiation techniques from the literature.  We started with binary exponentiation based on a binary representation of the exponent.  Next we describe non-adjacent form that uses a signed base 2 encoding of the exponent.  Since cubing is often faster than combined multiplication with squaring, we discussed 2,3 number systems where an integer can have many representations as the sum of the products of 2 and 3.  Exponentiation based on 2,3 representations fall under two classes: chained and unchained.  Chained representations can typically be computed while interleaved with the exponentiation operation.  They also require only a constant number of group elements in addition to the input arguments.  Unchained representations often have fewer terms or operations in their representation.  Exponentiation of a group element using an unchained representation of the exponent can be performed using a linear number of group elements in the size of the exponent.
+This chapter outlined some exponentiation techniques from the literature.  We started with binary exponentiation based on a binary representation of the exponent.  Next we described non-adjacent form using a signed base 2 encoding of the exponent.  Since cubing is often faster than combined multiplication with squaring, we discussed 2,3 number systems where an integer can have many representations as the sum of the products of 2 and 3.  Exponentiation based on 2,3 representations fall under two classes: chained and unchained.  Chained representations can typically be computed while interleaved with the exponentiation operation.  They also require storage of only a constant number of group elements in addition to the input arguments.  Unchained representations often have fewer terms or operations in their representation.  Exponentiation of a group element using an unchained representation of the exponent can be performed using a linear number of group elements in the size of the exponent.
 
-Coming up in Chapter \ref{chap:idealPowExperiments}, we introduce several variations of chained and unchained 2,3 representations, many of which take into account the average time to multiply, square, and cube elements from the ideal class group.  We let the actual performance of these variations guide our implementation of a factoring algorithm called ``SuperSPAR''.  In the next chapter, we provide the background for SPAR and the SuperSPAR factoring algorithm.
+Coming up, Chapter \ref{chap:powExperiments} discusses several variations of chained and unchained 2,3 representations, many of which take into account the average time to multiply, square, and cube elements from the ideal class group.  The actual performance of these variations guide our implementation of a factoring algorithm called ``SuperSPAR''.  In the next chapter, we provide the background for SPAR and the SuperSPAR factoring algorithm.
 
 
 %%%%%%%%%%%%%
@@ -1303,16 +1303,16 @@ Assuming good parameters are known, the SuperSPAR factoring algorithm used in pr
 
 This chapter introduced SPAR, a factoring algorithm based on the ideal class group  and our motivation for practical improvements to the performance of arithmetic in the class group.  The next chapter discusses several techniques used to improve performance, as well as our experiments and results.  Following that, Chapter \ref{chap:ssparExperiments} discusses techniques, experiments, and results used to improve the performance of SuperSPAR in practice.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% CHAPTER 5                        %
-% IDEAL EXPONENTIATION EXPERIMENTS %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Ideal Exponentiation Experiments}
-\label{chap:idealPowExperiments}
+%%%%%%%%%%%%%%%%%%%%%
+% CHAPTER 5         %
+% IDEAL EXPERIMENTS %
+%%%%%%%%%%%%%%%%%%%%%
+\chapter{Ideal Experiments}
+\label{chap:idealExperiments}
 
 A significant contribution of this thesis is to improve the performance of exponentiation in the ideal class group of imaginary quadratic number fields.  This chapter focuses on the techniques and experimental data that lead us to our implementation.  We specialized much of our implementation for the x64 architecture.  Many of our routines benefit when the input is bounded by a single machine word, i.e.\ 64-bits, but we were also able to take advantage of integers that fit within two machine words by implementing a custom library for 128-bit arithmetic.  When integers are larger than 128-bits, we use the GNU Multiple Precision (GMP) arithmetic library.
 
-Improvements to ideal arithmetic also lead to improvements in ideal exponentiation, and so we start there. Arithmetic in the ideal class group uses solutions to equations of the form $s = Ua + Vb$ where $s$ is the largest integer dividing both $a$ and $b$. In Section \ref{sec:eea}, we introduce several algorithms for computing such solutions and look at their performance in practice. To make arithmetic in the ideal class group as efficient as possible, we specialized our implementation and discuss this implementation in Section \ref{sec:idealArithmetic}. In Section \ref{sec:exponentiation}, we compare methods to exponentiate ideal representatives to large fixed exponents that are the product of many primes, including several novel approaches to computing double-base representations.
+Improvements to ideal arithmetic also lead to improvements in ideal exponentiation, and so we start there. Arithmetic in the ideal class group uses solutions to equations of the form $s = Ua + Vb$ where $s$ is the largest integer dividing both $a$ and $b$. In Section \ref{sec:eea}, we introduce several algorithms for computing such solutions and look at their performance in practice. To make arithmetic in the ideal class group as efficient as possible, we specialized our implementation and discuss this implementation in Section \ref{sec:idealArithmetic}. In Chapter \ref{chap:powExperiments}, we compare methods to exponentiate ideal representatives to large fixed exponents that are the product of many primes, including several novel approaches to computing double-base representations.
 
 \section{Extended Greatest Common Divisor}
 \label{sec:eea}
@@ -1870,14 +1870,16 @@ In Figures \ref{fig:cubingVs64}, \ref{fig:cubingVs128}, and \ref{fig:cubingVsMpz
 
 In this Section we discussed methods to improve the performance of arithmetic in the ideal class group and compared the average time of multiplication, squaring, and cubing.  In the next section, we look at several methods for exponentiating that we have not discussed previously -- many of which take the average time of multiplication, squaring, and cubing into consideration.
 
-
-\section{Exponentiation Experiments}
-\label{sec:exponentiation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% EXPONENTIATION EXPERIMENTS %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Exponentiation Experiments}
+\label{chap:powExperiments}
 
 % TODO: Come up with examples for each.
 % TODO: We might need to use 23814216 as an example everywhere since Yao's graph uses that and it was a lot of work.
 
-In this Section, we discuss several approaches to exponentiating an ideal class representative to a large exponent.  In particular, we consider large exponents that are the product of all primes less than some bound\footnote{The product of all primes less than a bound $B$ is a \emph{primorial}.  See Section \ref{sec:primorial} for the definition and our motivation for using them.}.  We assume the exponent is known in advance, which allows us to precompute the sequence of operations for the exponentiation.
+This chapter discusses several approaches to exponentiating an ideal class representative to a large exponent.  In particular, we consider large exponents that are the product of all primes less than some bound\footnote{The product of all primes less than a bound $B$ is a \emph{primorial}.  See Section \ref{sec:primorial} for the definition and our motivation for using them.}.  We assume the exponent is known in advance, which allows us to precompute the sequence of operations for the exponentiation.
 
 We begin by recalling exponentiation techniques from Chapter \ref{chap:exponentiation}.  These include techniques that use signed and unsigned base 2 representations, greedy right-to-left and left-to-right double base representations (for bases 2 and 3), and a tree-based approach. We also consider several extensions to these.  For small exponents (16-bits or less), we are able to exhaustively compute all representations under certain constraints.  This allows us to use larger exponents by partitioning the large exponent into 16-bit blocks or by using its factorization. Finally, we compare each method on a sequence of primorials to find the best method in practice.
 
