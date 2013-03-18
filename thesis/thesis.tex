@@ -978,7 +978,7 @@ where the base cases are handled by $s(n) = 1$ when $n \le 2$.
 The corresponding 2,3 chain is computed by memoizing a shortest chain for each solution to $s(n)$ encountered. When a recursive call uses $n/2$, the chain for $n$ is the chain for $n/2$ with each term multiplied by 2.  Similarly, if the recursion uses $n/3$, each term is multiplied by 3.  When the recursion uses $n-1$, we simply add the term 1 to the chain representing $n-1$.
 
 
-\section{Coming up}
+\section{Summary}
 
 This chapter outlined some exponentiation techniques from the literature.  We started with binary exponentiation based on a binary representation of the exponent.  Next we described non-adjacent form using a signed base 2 encoding of the exponent.  Since cubing is often faster than combined multiplication with squaring, we discussed 2,3 number systems where an integer can have many representations as the sum of the products of 2 and 3.  Exponentiation based on 2,3 representations fall under two classes: chained and unchained.  Chained representations can typically be computed while interleaved with the exponentiation operation.  They also require storage of only a constant number of group elements in addition to the input arguments.  Unchained representations often have fewer terms or operations in their representation.  Exponentiation of a group element using an unchained representation of the exponent can be performed using a linear number of group elements in the size of the exponent.
 
@@ -1874,10 +1874,15 @@ In Figures \ref{fig:cubingVs64}, \ref{fig:cubingVs128}, and \ref{fig:cubingVsMpz
 
 \section{Summary}
 
-This chapter discussed methods that lead to practical performance improvements of arithmetic in the ideal class group, including that of computing the extended greatest common divisor.  Having a practical implementation of arithmetic in the ideal class group, the next Chapter, discusses several methods for exponentiating that we have not discussed previously -- many of which take the average time to multiply, square, and cube into consideration.
+This chapter discussed methods that lead to practical improvements for arithmetic in the ideal class group.  We began with several methods for computing solutions to equations of the form $s=Ua + Vb$ where $s$ is the greatest common divisor of both $a$ and $b$, since arithmetic in the ideal class group is dominated by this operation.  We found that when the inputs $a$ and $b$ are bound by $2^{32}$, that the standard Extended Euclidean Algorithm performs best.  When $2^{32} \le a,b < 2^{64}$, a left-to-right binary GCD computation is fastest.  Finally, for $a,b \ge 2^{64}$ we defer to the implementation in the GNU Multiple Precision (GMP) library.
+
+Following this, we discussed specialized implementations of ideal arithmetic using 64-bit, 128-bit, and unbound arithmetic.  Our 64-bit implementation is known to work correctly for negative discriminants $-2^{60} < \Delta < 0$, while our 128-bit implementation works with negative discriminants $-2^{119} < \Delta < 0$. We discussed several low-level optimizations and showed an improvement in the performance of ideal class arithmetic over our reference implementation using GMP.
+
+Lastly, this Chapter measured the average cost of multiplication, squaring, and cubing for varying discriminant sizes.  The next Chapter uses our implementation of arithmetic in the ideal class group in order to determine fast methods of exponentiation in practice.  We discuss methods for exponentiating not discussed previously in this thesis -- many of which take the average time to multiply, square, and cube into consideration.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CHAPTER 6                  %
 % EXPONENTIATION EXPERIMENTS %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Exponentiation Experiments}
@@ -1886,24 +1891,21 @@ This chapter discussed methods that lead to practical performance improvements o
 % TODO: Come up with examples for each.
 % TODO: We might need to use 23814216 as an example everywhere since Yao's graph uses that and it was a lot of work.
 
-One motivation for our implementation of ideal class group arithmetic is to improve the performance of exponentiation within this group.  In Chapter \ref{chap:powExperiments}, we compare methods to exponentiate ideal representatives to large fixed exponents that are the product of many primes, including several novel approaches to computing double-base representations.
+Section \ref{sec:primorial} discussed the bounded primorial steps algorithm -- an algorithm that finds the order of an element by exponentiating it to the product of many primes.  Since this exponent is determined by a given bound, the algorithm benefits from precomputation of representations that lead to efficient exponentiation in practice.  Section \ref{sec:superSpar} introduced the SuperSPAR integer factoring algorithm, for which a bound on the group size and the order of an element lead to the factorization of an integer.  Representations that lead to efficient exponentiation in practice improve the performance of the SuperSPAR factoring algorithm, as well any algorithm based on the bounded primorial steps algorithm, or one that uses exponentiation for fixed exponents.
 
+This chapter discusses several approaches to exponentiating an ideal class representative to a large exponent, and in particular, large exponents that are the product of all primes less than some bound\footnote{Such products are called \emph{primorials} and are discussed in Section \ref{sec:primorial}.} and are known in advance.  We begin by recalling exponentiation techniques from Chapter \ref{chap:exponentiation}.  These include techniques that use signed and unsigned base 2 representations, greedy right-to-left and left-to-right double base representations (for bases 2 and 3), and a tree-based approach. We also consider several extensions to these.  For small exponents (16-bits or less), we are able to exhaustively compute all representations under certain constraints.  This allows us to use larger exponents by partitioning the large exponent into 16-bit blocks or by using its factorization. Finally, we compare each method on a sequence of primorials to find the best method in practice.
 
-Improvements to ideal arithmetic also lead to improvements in ideal exponentiation, and so we start there. 
+In the previous Chapter, we discussed our implementations of ideal class arithmetic using 64-bit and 128-bit operations.  For our 64-bit implementation, the largest discriminants supported are those that fit within 59-bits, and for our 128-bit implementation, the largest discriminants fit within 118-bits.  These represent an upper bound on the average cost of arithmetic operations within each implementation. As such, our exponentiation experiments focus on improving the time to exponentiate assuming the average cost of operations for 59-bit and 118-bit discriminants.
 
-This chapter discusses several approaches to exponentiating an ideal class representative to a large exponent.  In particular, we consider large exponents that are the product of all primes less than some bound\footnote{The product of all primes less than a bound $B$ is a \emph{primorial}.  See Section \ref{sec:primorial} for the definition and our motivation for using them.}.  We assume the exponent is known in advance, which allows us to precompute the sequence of operations for the exponentiation.
-
-We begin by recalling exponentiation techniques from Chapter \ref{chap:exponentiation}.  These include techniques that use signed and unsigned base 2 representations, greedy right-to-left and left-to-right double base representations (for bases 2 and 3), and a tree-based approach. We also consider several extensions to these.  For small exponents (16-bits or less), we are able to exhaustively compute all representations under certain constraints.  This allows us to use larger exponents by partitioning the large exponent into 16-bit blocks or by using its factorization. Finally, we compare each method on a sequence of primorials to find the best method in practice.
-
-In the previous Section, we discussed our implementations of ideal class arithmetic using 64-bit and 128-bit operations.  For our 64-bit implementation, the largest discriminants supported are those that fit within 59-bits, and for our 128-bit implementation, the largest discriminants fit within 118-bits.  These represent an upper bound on the average cost of arithmetic operations within each implementation. As such, our exponentiation experiments focus on improving the time to exponentiate assuming the average cost of operations for 59-bit and 118-bit discriminants.
-
-\subsection{Binary and Right-to-Left Non-Adjacent Form}
+\section{Binary and Right-to-Left Non-Adjacent Form}
 
 In Sections \ref{sec:binaryExp} and \ref{sec:naf} we discussed binary exponentiation and non-adjacent form exponentiation in detail.  Briefly again, binary exponentiation uses the binary representation of an exponent $n$.  The representation can be parsed from high-order to low-order or from low-order to high-order -- we typically refer to this difference as left-to-right or right-to-left respectively.  Using either approach, we use $\floor{\log_2n}$ squares and $\floor{\log_2n}/2$ multiplications on average.
 
 A non-adjacent form exponentiation uses a signed base 2 representation of the exponent such that no two non-zero terms are adjacent\footnote{Non-adjacent form is written as $n=\prod s_i2^i$ for $s_i \in \{0, -1, 1\}$. By ``non-adjacent'' we mean that $s_i \cdot s_{i+1} = 0$ for all $i$.}.  Similarly, when computing a non-adjacent form we can parse the exponent from left-to-right or from right-to-left.  Either direction, we use $\floor{\log_2n} + 1$ squares and $(\floor{\log_2n}+1)/3$ multiplications on average.   
 
-\subsection{Right-to-Left 2,3 Chains}
+
+\section{Right-to-Left 2,3 Chains}
+
 In Subsection \ref{subsec:rtolChains}, we described a method for computing 2,3 chains from low-order to high-order that is a natural extension of the binary representation or non-adjacent form of an exponent.  In this method, we reduce the exponent $n$ by 2 while it is even, and by 3 while it is divisible by 3.  At which point either $n \equiv 1 \pmod 6$ or $n \equiv 5 \pmod 6$ and we add or subtract 1 so that $n$ is a multiple of 6.  The resulting partition of $n$ is then reversed such that the number of squares or cubes in successive terms is monotonically increasing and we can use Algorithm \ref{alg:expWithChain} from Chapter \ref{chap:exponentiation} to compute the exponentiation.
 
 Since this approach evaluates the exponent modulo 3 and may reduce the exponent by 3, efficient methods to compute $n \bmod 3$ and $n/3$ will speed the computation of the chain. Notice that $4 \equiv 1 \pmod 3$.  As such, we can write $n$ as
@@ -1933,7 +1935,7 @@ and then recursively write $\floor{n/4} \pmod 3$ the same way. This provides us 
 Division by 3 is relatively expensive when compared to computing the remainder.  A common approach is to precompute a single word approximation of the inverse of 3, and then to use multiplication by an approximation of the inverse and then to adjust the result (see \cite{Granlund1994,Warren2002,Moller2011} for additional information).  As the GNU Multiple Precision (GMP) library implements exact division by 3, we use this.
 
 
-\subsection{Windowed Right-to-Left Chains}
+\section{Windowed Right-to-Left Chains}
 
 Windowing improves the performance of right-to-left binary exponentiation and right-to-left binary GCD computations.  Similarly, we use windowing to improve the performance of a right-to-left 2,3 chain.  Specifically, we experimented with a window size of $2^2 3^2$.  Again, while the exponent is even, we reduce it by 2, and while it is divisible by 3, we reduce it by 3.  In a non-windowed variant, we add or subtract 1 to make the remainder a multiple of 6.  In the windowed variant, we evaluate the exponent $n$ modulo the window $2^2 3^2 = 36$, which gives us $n \equiv 1, 5, 7, 11, 13, 17, 19, 23, 25, 29, 31, 35 \pmod {36}$.  As there are 12 different residue classes, and for each residue class we could either add or subtract 1 from $n$, we have $2^{12}$ different strategies to evaluate.  For each strategy, we measured the cost to exponentiate the primorials $P_{100k}$ for $1 \le k \le 50$. For 48 out of 50 of the primorials tested, the same strategy lead to the cheapest cost of exponentiation\footnote{For the primorial $P_{200}$, this strategy was the third most efficient, and for $P_{500}$ it was the second most efficient.}, which was to subtract 1 from $n$ when $n \equiv 1, 5, 13, 17, 25, 29 \pmod{36}$ and to add 1 otherwise.
 
@@ -1950,8 +1952,8 @@ and recursively write $\floor{n/64} \pmod 9$.  To compute $n \bmod 9$, we partit
 
 
 
-\subsection{Left-to-Right 2,3 Representations and Chains}
-\label{subsec:ltorChains2}
+\section{Left-to-Right 2,3 Representations and Chains}
+\label{sec:ltorChains2}
 
 In Subsection \ref{subsec:ltorChains} we described a greedy algorithm for computing 2,3 representations from high-order to low-order.  Briefly, for a given exponent $n$ and for $a_i, b_i \in \ZZgez$ and \mbox{$s_i \in \{-1, 1\}$}, we compute the term $s_i2^{a_i}3^{b_i}$ such that $\left|n-s_i2^{a_i}3^{b_i}\right|$ is as small as possible.  We then recurse on the result $n - s_i2^{a_i}3^{b_i}$.  As is, this produces unchained representations, but a chain can be generated by restricting each $a_i$ and $b_i$ such that it is no greater than the $a_{i-1}$ and $b_{i-1}$ from the previous term.  Placing a bound on the number of squares and cubes can also be done globally, i.e.\ for every $a_i, b_i$ we have $0 \le a_i \le A$ and $0 \le b_i \le B$. When a bound is applied globally, the cost of a left-to-right chain or representation varies as the global bound varies.
 
@@ -1966,7 +1968,7 @@ Figure \ref{fig:dbnsL2rVaryBounds} shows the time to exponentiate using a precom
 
 In general, bounding the maximum number of squares and cubes give representations that lead to faster exponentiation in the ideal class group than representations where the number of squares or cubes is left unbound.  For this particular exponent, a representation generated without a global bound takes approximately 7.3 milliseconds for a 59-bit discriminant and 17.2 milliseconds for a 118-bit discriminant.  This is slower than all bounded representations for both implementations.
 
-\subsection{Greedy Pruned Trees}
+\section{Greedy Pruned Trees}
 
 A right-to-left 2,3 chain can be generated by repeatedly reducing the exponent by 2 and 3 and then either adding or subtracting 1 and repeating this process until the exponent is 1.  In the windowed variant, after reducing the exponent by 2 and 3, we had 12 residues modulo $2^2 3^2$ and this lead to $2^{12}$ different strategies for adding or subtracting 1 from the residue.
 
@@ -1978,13 +1980,12 @@ Here we consider two variations to the approach of maintaining the $L$ best\foot
 For both variations, we bound $a$ and $b$ such that $0 \le a \le U$ and $0 \le b \le U$.  Figure \ref{fig:pm2a3bVaryMax} shows the average time to exponentiate by the $1000^{\textrm{th}}$ primorial as the bound $U$ increases (using the $k=4$ best partial representations).  As $U$ increases, computing representations using this approach quickly becomes intractable.  We found that for our purposes, $U=16$ is an acceptable trade off between the average time to exponentiate and the time to generate the 2,3 representation.
 
 
-\subsection{The $L$ Best Approximations}
+\section{The $L$ Best Approximations}
 
-The approach of maintaining a set of the $L$ best partial representations of an exponent can be adapted to that of the left-to-right 2,3 representation from Subsections \ref{subsec:ltorChains} and \ref{subsec:ltorChains2}.  For an integer $x$ we say that $2^a3^b$ is a best approximation of $|x|$ when $\left||x| - 2^a3^b \right|$ is minimal.  The algorithm for the left-to-right representation (Subsection \ref{subsec:ltorChains}) finds a best approximation for $x$ and then repeats on the positive difference. However, instead of only iterating on the best approximation, each value from the set of partial representations generates new values of the form $\left||x| - 2^a3^b\right|$ (being careful to record the sign of $x$), and the $L$ best partial representations are retained.  In this case, we iterate $b$ from $0 \le b \le B$ and let $a_1 = \floor{\log_2 (x/3^b)}$ and $a_2 = \ceil{\log_2 (x/3^b)}$ bounding both $a_1, a_2 \le A$.  Note that using $a_2 = a_1 + 1$ is sufficient since either $\ceil{\log_2 (x/3^b)} = \floor{\log_2 (x/3^b)}$ or $\ceil{\log_2 (x/3^b)} = \floor{\log_2 (x/3^b)} + 1$.  We then use $\left||x|-2^{a_1}3^b\right|$ and $\left||x|-2^{a_2}3^b\right|$ as candidates for the new set.  As before, iterating the bound on the number of squares and cubes varies the cost of the representations generated.  
+The approach of maintaining a set of the $L$ best partial representations of an exponent can be adapted to that of the left-to-right 2,3 representation from Subsections \ref{subsec:ltorChains} and \ref{sec:ltorChains2}.  For an integer $x$ we say that $2^a3^b$ is a best approximation of $|x|$ when $\left||x| - 2^a3^b \right|$ is minimal.  The algorithm for the left-to-right representation (Subsection \ref{subsec:ltorChains}) finds a best approximation for $x$ and then repeats on the positive difference. However, instead of only iterating on the best approximation, each value from the set of partial representations generates new values of the form $\left||x| - 2^a3^b\right|$ (being careful to record the sign of $x$), and the $L$ best partial representations are retained.  In this case, we iterate $b$ from $0 \le b \le B$ and let $a_1 = \floor{\log_2 (x/3^b)}$ and $a_2 = \ceil{\log_2 (x/3^b)}$ bounding both $a_1, a_2 \le A$.  Note that using $a_2 = a_1 + 1$ is sufficient since either $\ceil{\log_2 (x/3^b)} = \floor{\log_2 (x/3^b)}$ or $\ceil{\log_2 (x/3^b)} = \floor{\log_2 (x/3^b)} + 1$.  We then use $\left||x|-2^{a_1}3^b\right|$ and $\left||x|-2^{a_2}3^b\right|$ as candidates for the new set.  As before, iterating the bound on the number of squares and cubes varies the cost of the representations generated.  
 
 
-\subsection{Additive 2,3 Chains}
-\label{subsec:addChains}
+\section{Additive 2,3 Chains}
 
 Imbert and Philippe \cite{Imbert2010b} give a method (see Subsection \ref{subsec:shortAddChains}) to compute the shortest additive strictly chained 2,3 partition, suitable for smaller integers.  Such partitions do not permit subtraction and every term is strictly less than and divides all subsequent terms. They take the form
 \[
@@ -2020,8 +2021,7 @@ f(n) = \begin{cases}
 \end{equation*}
 again, where $f(1) = 0$, $f(2) = S$, and $f(3) = C$ are the base cases.  One thing to notice is that the function $s'$ computes a subset of the representations computed by the function $f$.  As such, we expect the average cost to exponentiate using a representation computed by $f$ to be no worse than the average cost to exponentiate using a representation computed by $s$.
 
-\subsection{Incremental Searching}
-\label{subsec:incrementalSearching}
+\section{Incremental Searching}
 
 For small inputs, the number of additive 2,3 chains is sufficiently reduced that we can compute all such chains in order to find the fastest.  Here we consider a different approach to searching for representations -- for a function generating a set of representations, we record the cheapest representation for each integer represented by the set.
 
@@ -2141,18 +2141,14 @@ Figures \ref{fig:expBinNaf64} and \ref{fig:expBinNaf128} compare binary exponent
 
 \section{Summary}
 
-This Chapter presented the approach and results we used to improve exponentiation in the ideal class group of imaginary quadratic number fields.  We began with several methods for computing solutions to equations of the form $s=Ua + Vb$ where $s$ is the greatest common divisor of both $a$ and $b$, since arithmetic in the ideal class group is dominated by this operation.  We found that when the inputs $a$ and $b$ are bound by $2^{32}$, that the standard Extended Euclidean Algorithm performs best.  When $2^{32} \le a,b < 2^{64}$, a left-to-right binary GCD computation is fastest.  Finally, for $a,b \ge 2^{64}$ we defer to the implementation in the GNU Multiple Precision (GMP) library.
+This Chapter presented the approach and results we used to improve exponentiation in the ideal class group of imaginary quadratic number fields.  Several methods for exponentiation including novel extensions to methods for computing 2,3 chains and representations were explored.  We found that for 16-bit exponents, the method of iterating on the $L$ best partial representations $x + \sum s_i2^{a_i}3^{b_i}$ such that each $x$ generates new terms of the form $(x \pm 2^a 3^b)/(2^c3^d) \in \ZZ$ gives the fastest representation on average.  For large primorial exponents, generating new terms of the form $\left||x|-2^a3^b\right|$ gave the fastest representations on average.
 
-Following this, we discussed specialized implementations of ideal arithmetic using 64-bit, 128-bit, and unbound arithmetic.  Our 64-bit implementation is known to work correctly for negative discriminants $-2^{58} < \Delta < 0$, while our 128-bit implementation works with negative discriminants $-2^{118} < \Delta < 0$. We discussed several low-level optimizations and showed an improvement in the performance of ideal class arithmetic over our reference implementation using GMP.
-
-In the last section, we explored several methods for exponentiation including novel extensions of methods for computing 2,3 chains and representations.  We found that for 16-bit exponents, the method of iterating on the $L$ best partial representations $x + \sum s_i2^{a_i}3^{b_i}$ such that each $x$ generates new terms of the form $(x \pm 2^a 3^b)/(2^c3^d) \in \ZZ$ gives the fastest representation on average.  For large primorial exponents, we found that generating new terms of the form $\left||x|-2^a3^b\right|$ gave the fastest representations on average.
-
-In the next Chapter, we bring all of these improvements together in our implementation of SuperSPAR -- an algorithm with the fastest average time to factors integers $n$ in the range $2^{54} \le n < 2^{63}$ of the integer factoring algorithms that we tested.
+In the next Chapter, we bring all of these improvements to ideal arithmetic and exponentiation together in our implementation of SuperSPAR -- an algorithm with the fastest average time to factor integers $n$ in the range $2^{54} \le n < 2^{63}$ of the integer factoring algorithms that we tested.
 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
-% CHAPTER 6             %
+% CHAPTER 7             %
 % SUPERSPAR EXPERIMENTS %
 %%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{SuperSPAR Experiments}
@@ -2226,6 +2222,11 @@ Only hash the pair $(a,c)$ so that $\aclass$ and $\aclass^{-1}$ hash to the same
 \item Maple
 \end{itemize}
 
+
+%%%%%%%%%%%%%%%%%%%%
+% CHAPTER 8        %
+% FURTHER RESEARCH %
+%%%%%%%%%%%%%%%%%%%%
 \chapter{Further Research}
 
 \subsection{Improvements}
