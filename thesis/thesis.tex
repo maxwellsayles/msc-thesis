@@ -1327,13 +1327,14 @@ In the Subsection on Fast Ideal Multiplication (\ref{subsec:nucomp}) we describe
 \[
 	s = Ua + Vb
 \]
-where $a$ and $b$ are fixed integers given as input, and $s$ is the greatest common divisor (GCD) of both $a$ and $b$.  We refer to this computation as the \emph{Extended GCD}.
+where $a$ and $b$ are fixed integers given as input, and $s$ is the greatest common divisor (GCD) of both $a$ and $b$.  Solutions to this equation are referred to as the \emph{extended greatest common divisor} (or extended GCD for short).
 
 \subsection{The Euclidean Algorithm}
+\label{subsec:euclideanAlgorithm}
 
-The Euclidean Algorithm is an algorithm for computing the greatest common divisor of two integers and is due to Euclid.  We start with two positive integers $a$ and $b$.  At each iteration of the algorithm, we subtract the smaller of the two numbers from the larger, until one of them is 0. At this point, the non-zero number is the largest divisor of $a$ and $b$.  Since the smaller number may still be smaller after a single iteration, we can reduce the number of steps of this algorithm by subtracting an integer multiple of the smaller number from the larger one.
+The Euclidean Algorithm is an algorithm for computing the greatest common divisor of two integers and is due to Euclid.  We start with two positive integers $a$ and $b$.  At each iteration of the algorithm, we subtract the smaller of the two numbers from the larger, until one of them is 0. At this point, the non-zero number is the largest divisor of $a$ and $b$.  Since the smaller number may still be smaller after a single iteration, we use fewer steps by subtracting an integer multiple of the smaller number from the larger one.
 
-We can extend the Euclidean Algorithm by using a system of equations of the form
+The Euclidean Algorithm is extended by using a system of equations of the form
 \begin{align}
 s &= Ua + Vb \label{eq:initialGcd1} \\
 t &= Xa + Yb. \label{eq:initialGcd2}
@@ -1342,7 +1343,7 @@ Initially, let
 \[
 \matrixThreeTwo{s}{U}{V}{t}{X}{Y} = \matrixThreeTwo{a}{1}{0}{b}{0}{1}
 \]
-and Equations \ref{eq:initialGcd1} and \ref{eq:initialGcd2} hold.  We maintain the invariant that $s \ge t$.  When $s < t$, simply swap the rows in the matrix representation above.  At each iteration, subtract $q = \floor{s/t}$ times the second row from the first, and then swap rows to maintain the invariant.  When $t=0$, the first row of the matrix is a solution such that $s$ is the largest positive divisor of $a$ and $b$.  The algorithm is given in Algorithm \ref{alg:EeaDivRem}.  We handle negative $a$ and $b$ by using $a' = |a|$ and $b' = |b|$ as inputs and modifying the output such that $U' = U \cdot \sign(a)$ and $V' = V \cdot \sign(b)$ where
+and Equations \ref{eq:initialGcd1} and \ref{eq:initialGcd2} hold.  We maintain the invariant that $s \ge t$.  When $s < t$, simply swap the rows in the matrix representation above.  At each iteration, subtract $q = \floor{s/t}$ times the second row from the first, and then swap rows to maintain the invariant.  When $t=0$, the first row of the matrix is a solution such that $s$ is the largest positive divisor of $a$ and $b$.  The algorithm is given in Algorithm \ref{alg:EeaDivRem}.  Negative inputs $a$ and $b$ are handled by using $a' = |a|$ and $b' = |b|$ as inputs instead and modifying the output such that $U' = U \cdot \sign(a)$ and $V' = V \cdot \sign(b)$ where
 \[
 	\sign(x) = \begin{cases}
 		-1 & \textrm{ when } x < 0 \\
@@ -1372,66 +1373,32 @@ and Equations \ref{eq:initialGcd1} and \ref{eq:initialGcd2} hold.  We maintain t
 \end{algorithmic}
 \end{algorithm}
 
-In practice, these operations are performed by manipulating each variable directly, rather than by using matrix arithmetic.  Furthermore, we typically implement division with remainder, which solves $s = qt + r$ for $q,r \in \ZZ$ and $|r| < |t|$.  Notice that $r = s - qt$ is the target value of $t$ for each iteration of the Euclidean Algorithm.  
-
-To compute the partially reduced coefficients of the product ideal from the Fast Ideal Multiplication Algorithm (\ref{alg:nucomp}), we compute the continued fraction expansion of $a/b$ using the recurrences
-\begin{align*}
-	q_i &= \floor{R_{i-2} ~/~ R_{i-1}} \\
-	R_i &= R_{i-2} - q_i R_{i-1} \\
-	C_i &= C_{i-2} - q_i C_{i-1}.
-\end{align*}
-Notice that these recurrences perform the same operation as a single step in the Extended Euclidean Algorithm, but that the initial and stopping conditions are different.  As such, we call this the \emph{Partial Extended Euclidean Algorithm}.    The algorithm is listed in Algorithm \ref{alg:PartialEeaDivRem}.
-
-\begin{algorithm}[h]
-\caption{Partial Extended Euclidean Algorithm.}
-\label{alg:PartialEeaDivRem}
-\begin{algorithmic}[1]
-\REQUIRE $a,b, \in \ZZ$ and a termination bound $B \in \ZZ$.
-\STATE $\matrixtt{R_0}{C_0}{R_1}{C_1} = \matrixtt{a}{0}{b}{-1}$
-\IF {$R_1 > R_0$}
-	\STATE $\matrixtt{R_0}{C_0}{R_1}{C_1} \gets
-	        \matrixtt{0}{1}{1}{0} \cdot \matrixtt{R_0}{C_0}{R_1}{C_1}$
-	        \COMMENT{Swap rows. Maintain $s \ge t$.}
-\ENDIF
-\WHILE {$R_1 > B$}
-	\STATE $q \gets \floor{R_0 / R_1}$
-	\STATE $\matrixtt{R_0}{C_0}{R_1}{C_1} \gets \matrixtt{0}{1}{1}{-q} \cdot
-		    \matrixtt{R_0}{C_0}{R_1}{C_1}$ \COMMENT{Subtract $q$ times $2^{\textrm{nd}}$ row and swap.}
-\ENDWHILE
-\RETURN $(R_0, R_1, C_0, C_1)$
-\end{algorithmic}
-\end{algorithm}
-
-All the operations performed on the matrix
-\[
-\matrixtt{R_0}{C_0}{R_1}{C_1}
-\]
-during the Partial Extended Euclidean Algorithm can be represented by an invertible $2 \times 2$ matrix with determinant $\pm 1$ (known as a \emph{unimodular} matrix).  This is necessarily the case since each operation relates one representative of an ideal equivalence class to another representative\footnote{Recall our discussion of binary quadratic forms (see subsection \ref{subsec:forms}). Two forms are related if there exists an invertible linear transformation of variables.}. This turns out to be critical as some variations of the Extended Euclidean Algorithm use operations that cannot be represented by an invertible $2 \times 2$ matrix and so cannot be used to compute the partially reduced coefficients for ideal multiplication.
+In practice, these operations are performed by manipulating each variable directly, rather than by using matrix arithmetic.  Furthermore, we typically implement division with remainder, which solves $s = qt + r$ for $q,r \in \ZZ$ and $|r| < |t|$.  Notice that $r = s - qt$ is the target value of $t$ for each iteration of the Euclidean Algorithm.
 
 \subsection{Lehmer's GCD}
 
 In the previous section, each iteration subtracts a multiple, $q = \floor{s / t}$, of the smaller number from the larger number.  Derrick Henry Lehmer noticed that most of the quotients, $q$, were small and that those small quotients could be computed from the leading digits (or machine word) of the numerator and denominator \cite{Lehmer1938}.
 
-The idea is similar to the Extended Euclidean Algorithm, only that we have an inner loop that performs an Extended GCD computation using values that fit within a single machine word.  As before, start by letting
+The idea is similar to the Extended Euclidean Algorithm, only that there is an inner loop that performs an Extended GCD computation using values that fit within a single machine word.  As before, start by letting
 \[
 	\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixThreeTwo{a}{1}{0}{b}{0}{1}
 \]
-for positive integers $a$ and $b$.  Assume that $s \ge t$ (if this is not the case, then swap the rows of the matrix).  Compute $s'=\floor{s/2^k}$ for some $k$ such that $s'$ fits within a single machine word and is as large as possible (if $s$ already fits within a single machine word, then let $k=0$).  Then compute $t' = \floor{t/2^k}$ for the same value $k$.  We then perform an Extended GCD computation on the values $s'$ and $t'$ but only for as long as the quotients $q'=\floor{s'/t'}$, generated by each step of the single precision GCD computation, are equal to the quotients $q=\floor{s/t}$, generated by a full precision GCD computation.  Let
+for positive integers $a$ and $b$.  Assume that $s \ge t$ (if this is not the case, then swap the rows of the matrix).  Compute $s'=\floor{s/2^k}$ for some $k$ such that $s'$ fits within a single machine word and is as large as possible (if $s$ already fits within a single machine word, then let $k=0$), and compute $t' = \floor{t/2^k}$ for the same value $k$.  Then perform an Extended GCD computation on the values $s'$ and $t'$ but only for as long as the quotients $q'=\floor{s'/t'}$, generated by each step of the single precision GCD computation, are equal to the quotients $q=\floor{s/t}$, generated by a full precision GCD computation.  To determine when the quotients $q'$ differ from the quotients $q$, compute $q_1 = \floor{(s'+A)/(t'+C)}$ and $q_2 = \floor{(s'+B)/(t'+D)}$.  Let $q' = q_1$ and when $q_1 = q_2$ it follows that $q' = q$ \cite[p.229,~Theorem~A]{Lehmer1938}.
+
+Let
 \[
 \matrixThreeTwo{s'}{A}{B}{t'}{C}{D} \gets \matrixThreeTwo{s'}{1}{0}{t'}{0}{1}
 \]
-be our initial matrix for the single precision GCD computation.  We can determine when the quotients $q'$ differ from the quotients $q$ by computing $q_1 = \floor{(s'+A)/(t'+C)}$ and $q_2 = \floor{(s'+B)/(t'+D)}$.  Simply let $q' = q_1$ and $q'$ equals $q$ when $q_1$ equals $q_2$.
-
-Once $q_1 \neq q_2$, the matrix
+be the initial matrix consisting of single precision integers.  Then perform the extended Euclidean Algorithm until $q_1 \neq q_2$ and the resulting matrix
 \[
 \matrixtt{A}{B}{C}{D}
 \]
-represents the concatenation of the operations performed during the single precision GCD.  If $B \neq 0$, we combine these operation with the outer loop of the larger GCD by computing
+represents the concatenation of the operations performed during the single precision GCD.  If $B \neq 0$, these operations are combined with the outer loop of the larger GCD by computing
 \[
 \matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{A}{B}{C}{D}
 		        \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}.
 \]
-We then continue with the outer loop of the computation until $t = 0$.  In the event that $B=0$, then $s$ and $t$ differ in length by more than a machine word, and we use a step of the full precision GCD computation to adjust their lengths.  The complete algorithm is given in Algorithm \ref{alg:lehmerGcd}.
+Then continue with the outer loop of the computation until $t = 0$.  In the event that $B=0$, then $s$ and $t$ differ in length by more than a machine word, and we use a step of the full precision GCD computation to adjust their lengths.  The complete algorithm is given in Algorithm \ref{alg:lehmerGcd}.
 
 \begin{algorithm}[h]
 \caption{Lehmer's GCD (\cite{Lehmer1938}).}
@@ -1462,14 +1429,13 @@ We then continue with the outer loop of the computation until $t = 0$.  In the e
 \end{algorithmic}
 \end{algorithm}
 
-Since Lehmer's GCD performs the same operations as the Extended Euclidean Algorithm, both on full precision values and on single precision values, each operation is unimodular, and as such, Lehmer's GCD can be adapted in a straightforward manner to a Partial Extended GCD computation.
 
 \subsection{Right-to-Left Binary GCD}
 \label{subsec:r2lBinGcd}
 
 The previous extended GCD algorithms use divide with remainder, which is often expensive.  Binary GCD algorithms emphasize bit shifting over multiplication and division.  Such algorithms may perform better than other GCD algorithms in practice (see Subsection \ref{subsec:gcdResults} for results).  Here we describe a binary GCD algorithm that works from the least significant bit to the most significant bit.  We refer to this as right-to-left since this is the direction in which we process the written binary representation.  The concept was originally published by Stein \cite{Stein1967}.
 
-To compute the greatest common divisor of two positive numbers, we can repeatedly apply the following identities,
+To compute the greatest common divisor of two positive numbers, repeatedly apply the following identities,
 \[
 	\gcd(a, b) = \begin{cases}
 		2 \cdot \gcd(a/2, b/2) & \textrm{ when both $a$ and $b$ are even} \\
@@ -1479,17 +1445,15 @@ To compute the greatest common divisor of two positive numbers, we can repeatedl
 		\gcd((b-a)/2, a) & \textrm{ when $a < b$ and both are odd}.
 	\end{cases}
 \]
-In the case that only $a$ is even, we can divide $a$ by 2 since 2 is not a common divisor of both.  The same is true when only $b$ is even.  When both $a$ and $b$ are odd, their difference is even and so can be further reduced by 2.  Notice that each relation reduces at least one of the arguments and so the recursion terminates with either $\gcd(a, 0) = a$ or $\gcd(0, b) = b$.
+In the case that only $a$ is even, we divide $a$ by 2 since 2 is not a common divisor of both.  The same is true when only $b$ is even.  When both $a$ and $b$ are odd, their difference is even and so is further reduced by 2.  Notice that each relation reduces at least one of the arguments and so the recursion terminates with either $\gcd(a, 0) = a$ or $\gcd(0, b) = b$.
 
-When both $a$ and $b$ are even, we have $\gcd(a, b) = 2 \cdot \gcd(a/2, b/2)$.  So the first step of our binary GCD algorithm is to remove all common powers of two from $a$ and $b$.  Let $r$ be the number of times 2 is removed from both.  Now either $a$ or $b$ or both are odd.  If $a$ is not odd, then swap $a$ and $b$ so that $a$ is guaranteed to be odd.  We will compute the GCD of the reduced $a$ and $b$.  As such, the final solution to the original input is $s2^r = Ua2^r + Vb2^r$.
+When both $a$ and $b$ are even, $\gcd(a, b) = 2 \cdot \gcd(a/2, b/2)$.  So the first step of our binary GCD algorithm is to remove all common powers of two from $a$ and $b$.  Let $r$ be the number of times 2 is removed from both.  Now either $a$ or $b$ or both are odd.  If $a$ is not odd, then swap $a$ and $b$ so that $a$ is guaranteed to be odd.  We will compute the GCD of the reduced $a$ and $b$.  As such, the final solution to the original input is $s2^r = Ua2^r + Vb2^r$.
 
-As before, we begin with the matrix representation
+As before, begin with the matrix representation
 \[
 	\matrixThreeTwo{s}{U}{V}{t}{X}{Y} = \matrixThreeTwo{a}{1}{0}{b}{0}{1}.
 \]
-Since we chose $a$ to be odd, $s$ is odd.  An invariant of our algorithm will be that $s$ is odd at the beginning of each iteration.  As previously, we iterate until $t=0$.
-
-Since $s$ is odd, we first remove any powers of 2 from $t$.  While $t$ is even, we would like to apply the operation
+An invariant of the algorithm is that $s$ is odd at the beginning of each iteration.  Since $a$ was chosen to be odd, $s$ is initially odd.  First remove any powers of 2 from $t$.  While $t$ is even, we would like to apply the operation
 \[
 (t, X, Y) \gets \left( \frac{t}{2}, \frac{X}{2}, \frac{Y}{2} \right)
 \]
@@ -1544,7 +1508,7 @@ otherwise let
 \[
 	\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{0}{1}{-1}{1} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}.
 \]
-This ensures that $s$ is odd, $t$ is even, and that both $s$ and $t$ are positive.  We repeat the steps of reducing $t$ by powers of 2 and then subtracting one row from the other until $t=0$.  The complete algorithm is given in Algorithm \ref{alg:r2lBinGcd}.  Note that in practice, integer division by 2 is performed using a bit shift right.
+This ensures that $s$ is odd, $t$ is even, and that both $s$ and $t$ are positive.  Repeat the steps of reducing $t$ by powers of 2 and then subtracting one row from the other until $t=0$.  The complete algorithm is given in Algorithm \ref{alg:r2lBinGcd}.  Note that in practice, integer division by 2 is performed using a bit shift right.
 
 \begin{algorithm}[h]
 \caption{Right-to-left Binary GCD (Based on \cite{Stein1967}).}
@@ -1572,15 +1536,14 @@ This ensures that $s$ is odd, $t$ is even, and that both $s$ and $t$ are positiv
 \end{algorithmic}
 \end{algorithm}
 
-Even though this algorithm performs well in practice (see Subsection \ref{subsec:gcdResults}), the operation of dividing $t$, $X$, and $Y$ by 2 and of transforming $X+b$ and $Y-a$ to make them even cannot be expressed as unimodular matrix operations.  Therefore, we cannot extend this method to computing the partially reduced coefficients for ideal multiplication.
 
 \subsection{Windowed Right-to-Left Binary GCD}
 
 Windowing is a common technique used to extend the base of an algorithm.  We saw this earlier in our discussion of binary exponentiation in Section \ref{sec:binaryExp}.  The idea there was to precompute $g^w$ for each $w$ in some window $0 \le w < 2^k$ for some $k$ and then to iterate over the exponent $k$ bits at a time.  We can apply this technique to the right-to-left extended binary GCD.
 
-In the algorithm in the previous section, we repeatedly reduce either the equation $t=Xa+Yb$ or the equation $t=(X+b)a+(Y-a)b$ by 2. When $Y$ is odd, we can simultaneously add $b$ to $X$ and subtract $a$ from $Y$ in order to make both $X$ and $Y$ even.  Suppose that $t$ was a multiple of 4.  We could simultaneously add $b$ to $X$ and subtract $a$ from $Y$ repeatedly until both $X$ and $Y$ were divisible by 4.  Choose $m$ such that $ma \equiv Y \pmod 4$, and then $t = (X+mb)a + (Y-ma)b$ is evenly divisible by 4 when $t$ is divisible by 4.
+The algorithm in the previous subsection repeatedly reduces either the equation $t=Xa+Yb$ or the equation $t=(X+b)a+(Y-a)b$ by 2. When $Y$ is odd, we simultaneously add $b$ to $X$ and subtract $a$ from $Y$ in order to make both $X$ and $Y$ even.  Suppose that $t$ was a multiple of 4.  We could simultaneously add $b$ to $X$ and subtract $a$ from $Y$ repeatedly until both $X$ and $Y$ were divisible by 4.  Choose $m$ such that $ma \equiv Y \pmod 4$, and then $t = (X+mb)a + (Y-ma)b$ is evenly divisible by 4 when $t$ is divisible by 4.
 
-This is easily extended for any $2^k$ where $k$ is a positive integer.  The algorithm first computes $x_j = mb$ and $y_j = ma$ for $0 \le m < 2^k$ where $j = ma \bmod 2^k$.  While $t$ is divisible by $2^h$ for some $h \le k$, we look up $x_j$ and $y_j$ for $j = Y \bmod 2^h$ and compute $(X + x_j) / 2^h$ and $(Y - y_j) / 2^h$.  We give the complete algorithm in Algorithm \ref{alg:windowedR2lBinGcd}.
+This is easily extended for any $2^k$ where $k$ is a positive integer.  The algorithm first computes $x_j = mb$ and $y_j = ma$ for $0 \le m < 2^k$ where $j = ma \bmod 2^k$.  While $t$ is divisible by $2^h$ for some $h \le k$, we look up $x_j$ and $y_j$ for $j = Y \bmod 2^h$ and compute $(X + x_j) / 2^h$ and $(Y - y_j) / 2^h$.  The complete Algorithm is given in listing \ref{alg:windowedR2lBinGcd}.
 
 \begin{algorithm}[h]
 \caption{Windowed Right-to-left Binary GCD.}
@@ -1614,21 +1577,21 @@ This is easily extended for any $2^k$ where $k$ is a positive integer.  The algo
 
 \subsection{Left-to-Right Binary GCD}
 
-Just as exponentiation can be performed from high-order to low-order, so too can an extended binary GCD computation.  We term this a left-to-right binary GCD, since it works from the left most bit to the right most bit of the written binary representation of the inputs.
+Just as exponentiation can be performed from high-order to low-order, so too can an extended binary GCD computation.  This is termed a left-to-right binary GCD, since it works from the left most bit to the right most bit of the written binary representation of the inputs.
 
 Recall that at each iteration of the extended Euclidean Algorithm, we subtract $q = \floor{s/t}$ times the equation $t = Xa + Yb$ from the equation $s = Ua + Vb$ and then swap $(s, U, V)$ with $(t, X, Y)$.  Computing $q=\floor{s/t}$ uses integer division, and then subtracting $q$ times one equation from the other uses multiplication.  Since it is not necessary to subtract exactly $q$ times the equation, the idea is instead to use a value $q' = 2^k$ such that $q'$ is \emph{close} in some sense to $q$.  Subtracting $q'$ times the second equation from the first can then be done using a binary shift left by $k$ bits.
 
-Shallit and Sorenson \cite{Shallit1994} propose to select $q'=2^k$ such that $q't \le s < 2q't$.  If $s - q't < 2q't - s$, we compute
+Shallit and Sorenson \cite{Shallit1994} propose to select $q'=2^k$ such that $q't \le s < 2q't$.  If $s - q't < 2q't - s$, compute
 \[
 	\matrixThreeTwo{s}{U}{V}{t}{X}{Y} =
 		\matrixtt{0}{1}{1}{-q'} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y},
 \]
-otherwise, we compute
+otherwise, compute
 \[
 	\matrixThreeTwo{s}{U}{V}{t}{X}{Y} =
 		\matrixtt{0}{1}{-1}{2q'} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}.
 \]
-Notice that after this step $s$ has the previous value of $t$ and that the binary representation of $t$ is one digit shorter than the binary representation of the previous value of $s$, i.e.\ the the left most set bit of the previous value of $s$ is now cleared.  As with the extended Euclidean Algorithm, we maintain the invariant that $s \ge t$; if after the above operation we have $s < t$, we then swap the rows of the matrix to restore the invariant. The complete algorithm is given in Algorithm \ref{alg:shallitGcd}.
+Notice that after this step $s$ has the previous value of $t$ and that the binary representation of $t$ is one digit shorter than the binary representation of the previous value of $s$, i.e.\ the the left most set bit of the previous value of $s$ is now cleared.  As with the extended Euclidean Algorithm, maintain the invariant that $s \ge t$; if after the above operation $s < t$, then swap the rows of the matrix to restore the invariant. The complete algorithm is given in Algorithm \ref{alg:shallitGcd}.
 
 \begin{algorithm}[h]
 \caption{Shallit and Sorenson Left-to-Right binary GCD \cite{Shallit1994}.}
@@ -1669,13 +1632,66 @@ This approach requires us to first compare $t2^{k'}$ to $s$ and then compare one
 \]
 If $qt > s$ then the resulting value for $s-qt$ is negative, and so we negate the first row of the product matrix to ensure that the new value for $s$ is positive.  The result is fewer comparisons for the inner loop of the GCD overall.
 
-Unlike the right-to-left binary GCD in Subsection \ref{subsec:r2lBinGcd}, all of the operations in the left-to-right binary GCD are unimodular and so can be used to generate the partially reduced coefficients in the partial extended GCD for fast ideal multiplication.
+
+
+\subsection{Partial Extended GCD}
+
+Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and \ref{subsec:nucube} give algorithms to compute the partially reduced coefficients of ideal representatives for multiplication, squaring, and cubing respectively.  In each case, a continued fraction expansion is computed using the recurrences
+\begin{align*}
+	q_i &= \floor{R_{i-2} ~/~ R_{i-1}} \\
+	R_i &= R_{i-2} - q_i R_{i-1} \\
+	C_i &= C_{i-2} - q_i C_{i-1}.
+\end{align*}
+These recurrences perform the same operation as a single step in the Extended Euclidean Algorithm of Subsection \ref{subsec:euclideanAlgorithm}, but the initial and stopping conditions are different.  As such, this is referred to as the \emph{Partial Extended Euclidean Algorithm}.  The algorithm is listed in Algorithm \ref{alg:PartialEeaDivRem}.
+
+\begin{algorithm}[h]
+\caption{Partial Extended Euclidean Algorithm.}
+\label{alg:PartialEeaDivRem}
+\begin{algorithmic}[1]
+\REQUIRE $a,b, \in \ZZ$ and a termination bound $B \in \ZZ$.
+\STATE $\matrixtt{R_0}{C_0}{R_1}{C_1} = \matrixtt{a}{0}{b}{-1}$
+\IF {$R_1 > R_0$}
+	\STATE $\matrixtt{R_0}{C_0}{R_1}{C_1} \gets
+	        \matrixtt{0}{1}{1}{0} \cdot \matrixtt{R_0}{C_0}{R_1}{C_1}$
+	        \COMMENT{Swap rows. Maintain $s \ge t$.}
+\ENDIF
+\WHILE {$R_1 > B$}
+	\STATE $q \gets \floor{R_0 / R_1}$
+	\STATE $\matrixtt{R_0}{C_0}{R_1}{C_1} \gets \matrixtt{0}{1}{1}{-q} \cdot
+		    \matrixtt{R_0}{C_0}{R_1}{C_1}$ \COMMENT{Subtract $q$ times $2^{\textrm{nd}}$ row and swap.}
+\ENDWHILE
+\RETURN $(R_0, R_1, C_0, C_1)$
+\end{algorithmic}
+\end{algorithm}
+
+All the operations performed on the matrix
+\[
+\matrixtt{R_0}{C_0}{R_1}{C_1}
+\]
+during the Partial Extended Euclidean Algorithm can be represented by an invertible $2 \times 2$ matrix with determinant $\pm 1$ (known as a \emph{unimodular} matrix).  This is necessarily the case since each operation relates one representative of an ideal equivalence class to another representative\footnote{Recall our discussion of binary quadratic forms (see subsection \ref{subsec:forms}). Two forms are related if there exists an invertible linear transformation of variables.}.  This is critical since only extended GCD computations that are restricted to operations representable using invertible $2 \times 2$ matrices can be used for the partial extended GCD.
+
+Of the extended GCD algorithms in this section, only the right-to-left binary GCD of Subsection \ref{subsec:r2lBinGcd} cannot be adapted to the partial extended GCD.  The reason is due to the step where $t$ is reduced by 2.  The Algorithm uses the computation
+\[
+	(t, X, Y) \gets \begin{cases}
+		\left( \frac{t}{2}, \frac{X}{2}, \frac{Y}{2} \right) &
+			\textrm{ if $Y$ is even} \\
+		(t, X, Y) \gets \left( \frac{t}{2}, \frac{X+b}{2}, \frac{Y-a}{2} \right) & 
+			\textrm{ otherwise.}
+	\end{cases}
+\]
+The step $(t, X, Y) \gets (t/2, (X+b)/2, (Y-a)/2)$ cannot be expressed as a unimodular matrix.
+
+The other extended GCD algorithms of this section can be adapted to the partial extended GCD by letting
+\[
+	\matrixtt{R_0}{C_0}{R_1}{C_1} = \matrixtt{s}{U}{t}{X}
+\]
+and dropping the terms $V$ and $Y$ from the computation.
 
 
 \subsection{Specialized Implementations of the Extended GCD}
 \label{subsec:gcdImpl}
 
-To further improve performance, we specialized implementations of each of the GCD algorithms discussed in this section for the x64 architecture.  All algorithms are implemented in C99 for the GNU C compiler and often benefit from hand optimized x64 assembler.  The use of assembly language is done in line and is conditionally compiled based on the target platform.  For each of the GCD algorithms presented here, we implemented 32-bit and 64-bit versions, and when arithmetic overflows did not require us to use GMP, we also implemented 128-bit versions.  For appropriately sized inputs, we use these specialized implementations, otherwise we use GMP for the extended GCD computation.
+To further improve performance, we specialized implementations of each of the GCD algorithms discussed in this section for the x64 architecture.  All algorithms are implemented for the GNU C compiler\footnote{The source code was compiled using GCC 4.7.2 using the default dialect, which is the GNU dialect of ISO C90.} and often benefit from hand optimized x64 assembler.  The use of assembly language is done in line and is conditionally compiled based on the target platform\footnote{For time critical paths and to take advantage of special instructions, x64 assembly language is used when \textrm{\_\_x86\_64} is defined, otherwise 80386 assembly language is used when \textrm{\_\_i386} is defined, and when neither are defined, C is used.}.  For each of the GCD algorithms presented here, we implemented 32-bit and 64-bit versions, and when arithmetic overflows do not require us to use GMP, we also implemented 128-bit versions.  For appropriately sized inputs, we use these specialized implementations, otherwise we use GMP for the extended GCD computation.
 
 Many of the techniques we use are described in the book ``Hacker's Delight'' \cite{Warren2002}.  We use $\band$ to denote bitwise `and', $\bor$ for bitwise `or', `$\bxor$' for bitwise `exclusive or', and lastly `$\bnot$' for bitwise negation.  Computing $x2^k$ corresponds to shifting $x$ left by $k$ bits, while computing the integer $\floor{x / 2^k}$ corresponds to shifting $x$ right by $k$ bits.  When we want $x \bmod 2^k$, we use $x \band (2^k-1)$.
 
