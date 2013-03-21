@@ -1691,17 +1691,17 @@ and dropping the terms $V$ and $Y$ from the computation.
 \subsection{Specialized Implementations of the Extended GCD}
 \label{subsec:gcdImpl}
 
-To further improve performance, we specialized implementations of each of the GCD algorithms discussed in this section for the x64 architecture.  All algorithms are implemented for the GNU C compiler\footnote{The source code was compiled using GCC 4.7.2 using the default dialect, which is the GNU dialect of ISO C90.} and often benefit from hand optimized x64 assembler.  The use of assembly language is done in line and is conditionally compiled based on the target platform\footnote{For time critical paths and to take advantage of special instructions, x64 assembly language is used when \textrm{\_\_x86\_64} is defined, otherwise 80386 assembly language is used when \textrm{\_\_i386} is defined, and when neither are defined, C is used.}.  For each of the GCD algorithms presented here, we implemented 32-bit and 64-bit versions, and when arithmetic overflows do not require us to use GMP, we also implemented 128-bit versions.  For appropriately sized inputs, we use these specialized implementations, otherwise we use GMP for the extended GCD computation.
+To further improve performance, we specialized implementations of each of the GCD algorithms discussed in this section for the x64 architecture.  All algorithms are implemented for the GNU C compiler\footnote{The source code was compiled using GCC 4.7.2 with the default dialect, which is the GNU dialect of ISO C90.} and often benefit from hand optimized x64 assembler.  Assembly language is used in line and is conditionally compiled based on the target platform\footnote{For time critical paths and to take advantage of special instructions, x64 assembly language is used when \textrm{\_\_x86\_64} is defined, otherwise 80386 assembly language is used when \textrm{\_\_i386} is defined, and when neither are defined, C is used.}.  For each of the GCD algorithms presented here, we implemented 32-bit and 64-bit versions, and when arithmetic overflows do not require us to use GMP, we also implemented 128-bit versions.  For appropriately sized inputs, we use these specialized implementations, otherwise we use GMP for the extended GCD computation.
 
-Many of the techniques we use are described in the book ``Hacker's Delight'' \cite{Warren2002}.  We use $\band$ to denote bitwise `and', $\bor$ for bitwise `or', `$\bxor$' for bitwise `exclusive or', and lastly `$\bnot$' for bitwise negation.  Computing $x2^k$ corresponds to shifting $x$ left by $k$ bits, while computing the integer $\floor{x / 2^k}$ corresponds to shifting $x$ right by $k$ bits.  When we want $x \bmod 2^k$, we use $x \band (2^k-1)$.
+Many of the techniques used here are described in the book ``Hacker's Delight'' \cite{Warren2002}.  We use $\band$ to denote bitwise `and', $\bor$ for bitwise `or', `$\bxor$' for bitwise `exclusive or', and `$\bnot$' for bitwise negation.  Computing $x2^k$ corresponds to shifting $x$ left by $k$ bits, while computing the integer $\floor{x / 2^k}$ corresponds to shifting $x$ right by $k$ bits.  To compute $x \bmod 2^k$ use $x \band (2^k-1)$.
 
 Assuming a two's complement representation of machine words, the most significant bit of a machine word $x$ is set if $x < 0$ and clear otherwise.  Let $m$ denote the number of bits in a machine word; then the result of an arithmetic shift right on $x$ by $m-1$ bits is either a word with $m$ set bits when $x < 0$ or a word with $m$ clear bits otherwise.  Let $\texttt{sign\_mask}(x)$ denote this operation.  Notice that a word with $m$ set bits, corresponds to the integer $-1$ under a signed two's complement representation.
 
 Using these operations, the absolute value of a signed machine word $x$ can be computed without using any conditional statements.  Let $y = \texttt{sign\_mask}(x)$ and the absolute value of $x$ is $(x \bxor y) - y$.  To see this, suppose $x \ge 0$.  Then $y$ is 0 and so $(x \bxor y) - y = x$.  When $x < 0$, $y$ has all of its bits set (and is also $-1$).  Therefore, $(x \bxor y) - y = \bnot x + 1 = -x$.
 
-Similarly, a word $x$ can be conditionally negated depending on a bit-mask $y$.  This is useful since the extended GCD algorithms described previously expect their input, $a$ and $b$, to be positive integers.  We first compute the absolute value of $a$ and $b$ by computing their signed masks and then conditionally negate each respectively.  Since the extended GCD algorithm computes a solution to $s = Ua + Vb$, where $a$ and $b$ have been made positive, the solution for our original inputs is to conditionally negate $U$ based on the signed mask of $a$ and $V$ based on the signed mask of $b$.
+Similarly, a word $x$ can be conditionally negated depending on a bit-mask $y$.  This is useful since the extended GCD algorithms described previously expect their input, $a$ and $b$, to be positive integers.  First compute the absolute value of $a$ and $b$ by computing a signed mask for each and then conditionally negate each.  Since the extended GCD algorithm computes a solution to $s = Ua + Vb$, where $a$ and $b$ have been made positive, the solution for the original inputs is to conditionally negate $U$ based on the signed mask of $a$, and $V$ based on the signed mask of $b$.
 
-Furthermore, many of the algorithms maintain the invariant that $s > t$ and that both are positive.  To that effect, when an algorithm computes
+Furthermore, many of the algorithms maintain the invariant that $s > t$ and that both are positive.  Suppose the algorithm computes
 \[
  \matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{0}{1}{1}{-q} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}
 \]
@@ -1709,7 +1709,11 @@ when $s \ge t$ and
 \[
 \matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{0}{1}{-1}{q} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}
 \]
-otherwise, we remove the conditional instructions simply by computing the first form and then performing a conditional negation on the triple $(t, X, Y)$ based on the signed mask of $s-t$ from before the operation.
+otherwise.  The conditional instruction is removed by first computing $m = \texttt{sign\_mask}(s - t)$ and then 
+\[
+ \matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{0}{1}{1}{-q} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}
+\]
+and conditionally negating the triple $(t, X, Y)$ based on the signed mask $m$.
 
 To swap two machine words, $x_0$ and $y_0$, without using additional words, compute $x_1 = x_0 \bxor y_0$, $y_1 = x_1 \bxor y_0$, and then $x_2 = x_1 \bxor y_1$.  Notice that $x_2$ expands to
 \[
@@ -2160,9 +2164,9 @@ Figures \ref{fig:expBinNaf64} and \ref{fig:expBinNaf128} compare binary exponent
 
 \section{Summary}
 
-This Chapter presented the approach and results we used to improve exponentiation in the ideal class group of imaginary quadratic number fields.  Several methods for exponentiation including novel extensions to methods for computing 2,3 chains and representations were explored.  We found that for 16-bit exponents, the method of iterating on the $L$ best partial representations $x + \sum s_i2^{a_i}3^{b_i}$ such that each $x$ generates new terms of the form $(x \pm 2^a 3^b)/(2^c3^d) \in \ZZ$ gives the fastest representation on average.  For large primorial exponents, generating new terms of the form $\left||x|-2^a3^b\right|$ gave the fastest representations on average.
+This Chapter presented the approach and results used to improve exponentiation in the ideal class group of imaginary quadratic number fields.  Several methods for exponentiation including novel extensions to methods for computing 2,3 chains and representations were explored.  We found that for 16-bit exponents, the method of iterating on the $L$ best partial representations $x + \sum s_i2^{a_i}3^{b_i}$ such that each $x$ generates new terms of the form $(x \pm 2^a 3^b)/(2^c3^d) \in \ZZ$ gives the fastest representation on average.  For large primorial exponents, generating new terms of the form $\left||x|-2^a3^b\right|$ gave the fastest representations on average.
 
-In the next Chapter, we bring all of these improvements to ideal arithmetic and exponentiation together in our implementation of SuperSPAR -- an algorithm with the fastest average time to factor integers $n$ in the range $2^{54} \le n < 2^{63}$ of the integer factoring algorithms that we tested.
+The next Chapter brings together the improvements to ideal arithmetic and exponentiation in our implementation of SuperSPAR -- an algorithm with the fastest average time to factor integers $n$ in the range $2^{54} \le n < 2^{63}$ of the integer factoring algorithms that we tested.
 
 
 
