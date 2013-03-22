@@ -1077,6 +1077,8 @@ Following Sutherland \cite[p.50]{Sutherland2007}, we point out that if computing
 \subsection{Bounded Primorial Steps Algorithm}
 \label{subsec:boundedPrimorialSteps}
 
+% TODO: Is the actual running time $O(\sqrt{M / \log \log M})$ ?
+
 Sutherland observed \cite[p.56]{Sutherland2007} that if $h = \ord(\alpha)$ is odd, then computing only odd powers $\alpha^1, \alpha^3, ..., \alpha^{b-1}$ for the baby steps is sufficient.  We still need to compute giant steps $\alpha^{2b}, \alpha^{3b}, ...,$ for some $b$ that is even since we want to find some $\alpha^{jb} = \alpha^i$ where $jb - i$ is odd.  In this case, $b = \ceil{\sqrt{2M}}$ so that after roughly $\sqrt{M/2}$ baby steps and $\sqrt{M/2}$ giant steps, the last giant step has exponent $\ge M$.
 
 The problem is that $\ord(\alpha)$ may not be odd.  However, by repeated squaring of $\alpha$ it is easy to find an element whose order is guaranteed to be even \cite[p.56]{Sutherland2007}.  Given a bound $M$ on the group order, compute $\beta = \alpha^{2^\ell}$ where $\ell = \floor{\log_2 M}$ and now run the modified algorithm on $\beta$ to find $h' = \ord(\beta)$.  The order of $\alpha$ can be found by computing $\gamma = \alpha^{h'}$ and then repeatedly squaring $\gamma$ until $\gamma^{2^k} = 1_G$ for some $k$.  The order of $\alpha$ is then $2^k h'$.
@@ -1235,12 +1237,13 @@ Since the prime exponents $e_i$ in Stage 1 are bound by $\floor{\log_{p_i} {p_t}
 \end{comment}
 
 \subsection{SuperSPAR in Practice}
+\label{subsec:ssparInPractice}
 
 In both SPAR and SuperSPAR, each stage uses $O(p_t)$ group operations where $p_t \approx N^{1/2r}$ and $r = \sqrt{\ln N / \ln \ln N}$.  The value for $r$ is chosen to theoretically minimize the expected running time of the algorithm.  However, the value for $r$ relates to the likelihood that the algorithm will find an ambiguous ideal class for a given discriminant\footnote{The assumption is that the order of a random ideal class is $N^{1/2r}$ smooth with probability $r^{-r}$.}.  Since $r$ is chosen to minimize the expected running time in theory, in practice other values may be more efficient, effectively trading off the number of group operations used for each class group against the number of class groups tried.
 
 Furthermore, balancing both stages of SuperSPAR to use $O(N^{1/2r})$ group operations is not ideal.  This is partly because the actual cost of multiplication, squaring, and cubing differ, but also because the success of each stage depends on different properties of the class number.  The exponentiation stage is successful when the order of a random ideal class is smooth with respect to some primorial $E$, while the search stage is successful when the non-smooth part of the order is sufficiently small.  In this sense, the efficiency of the factoring algorithm depends both on the smoothness of the order of a random ideal class $\aclass$ with respect to the primorial $E$, but also on the size of its non-smooth part with respect to the largest exponent reached by the search stage.  Selecting bounds for each stage independently of $r$ varies the time spent during each stage inversely to the probability of its success.
 
-Experimentally we found that the prime factorization of the order of ideal classes consists of prime powers with exponents that are typically 1 for all but the smallest primes (see Section \ref{sec:ssparExp}).  Schnorr and Lenstra \cite[p.293]{Schnorr1984} also advise the use of smaller exponents in practice.  Additionally, we found that the order of an ideal class $[\mathfrak a_1]$ was, with high probability (about 96.9\% in our experiments), either the same as or a multiple of the order of some other ideal class $[\mathfrak a_2]$ in the same class group (see Section \ref{sec:ssparIdealsToMultipliers}).  For this reason, if the algorithm finds some $h'$ such that ${[\mathfrak a_1]^{h'}}^{\left(2^j\right)}$ is an ambiguous class for some $j$, but is unsuccessful at factoring $N$, the algorithm simply attempts to find an ambiguous class by repeated squaring of $[\mathfrak a_i]^{h'}$ for several $[\mathfrak a_i]$.  If this fails for several ideal classes, the algorithm then starts over with a different multiplier $k$ for the discriminant.  Let $c$ be the maximum number of ideal classes tried.
+Experimentally we found that the prime factorization of the order of ideal classes consists of prime powers with exponents that are typically 1 for all but the smallest primes (see Subsection \ref{subsec:ssparPrimePowerBound}).  Schnorr and Lenstra \cite[p.293]{Schnorr1984} also advise the use of smaller exponents in practice.  Additionally, we found that the order of an ideal class $[\mathfrak a_1]$ was, with high probability (about 96.9\% in our experiments), either the same as or a multiple of the order of some other ideal class $[\mathfrak a_2]$ in the same class group (see Subsection~\ref{subsec:ssparDiffBtwOrder}).  For this reason, if the algorithm finds some $h'$ such that ${[\mathfrak a_1]^{h'}}^{\left(2^j\right)}$ is an ambiguous class for some $j$, but is unsuccessful at factoring $N$, the algorithm simply attempts to find an ambiguous class by repeated squaring of $[\mathfrak a_i]^{h'}$ for several $[\mathfrak a_i]$.  If this fails for several ideal classes, the algorithm then starts over with a different multiplier $k$ for the discriminant.  Let $c$ be the maximum number of ideal classes tried.
 
 Assuming good parameters are known, the SuperSPAR factoring algorithm used in practice is given in listing \ref{alg:superSpar}.  Chapter \ref{chap:ssparExperiments} discusses the experiments and results that lead to parameters for this algorithm that perform well in practice.  Notice, that parameters for Algorithm \ref{alg:superSpar} can be selected based on the theoretical analysis of SuperSPAR from the previous section.
 
@@ -2177,27 +2180,78 @@ The next Chapter brings together the improvements to ideal arithmetic and expone
 \chapter{SuperSPAR Experiments}
 \label{chap:ssparExperiments}
 
-\section{Motivation: How fast can we make SuperSPAR}
+This Chapter discusses the experiments and results that directed our implementation of the SuperSPAR integer factoring algorithm, introduced in Section \ref{sec:superSpar}.  The algorithm is based on the ideal class group, discussed in Chapter \ref{chap:idealArithmetic}, and the experiments and results leading to our implementation of arithmetic in the ideal class group is discussed in Chapter \ref{chap:idealExperiments}.  SuperSPAR is an adaptation of the SPAR factoring algorithm, discussed in Section \ref{sec:spar}.  The algorithms differ in how they search for the order of a group element -- SuperSPAR uses the bounded primorial steps algorithm discussed in Section \ref{sec:primorial} -- but both algorithms first exponentiate a random ideal class to the product of many primes.  Chapter \ref{chap:exponentiation} discusses several methods for exponentiation in generic groups and Chapter \ref{chap:powExperiments} discusses experiments and results of exponentiation in the ideal class group.  Practical improvements to each of these areas result in practical improvements to the SuperSPAR algorithm.
+
+Use of the bounded primorial steps algorithm for the search stage is the fundamental way in which SuperSPAR differs from SPAR.  A key property to the improved running time of the bounded primorial steps algorithm over other generic order finding algorithms is the ability to step to exponents of a group element that are coprime to some primorial.  Section \ref{sec:ssparCoprimeFinding}  discusses techniques to find integers coprime to a primorial in a given range.
+
+Subsection \ref{subsec:ssparInPractice}
+
+
 
 \section{Coprime Finding}
-\begin{itemize}
-\item Wheeling
-\item Sieving
-\item Delta Tables
-\end{itemize}
+\label{sec:ssparCoprimeFinding}
 
-\section{Exponentiation}
-\label{sec:ssparExp}
-\subsection{Bounds for primorial (bound for prime vs exponent)}
-\subsection{Primorial vs Prime Powers}
-i.e. is it faster to use the product and one exponentiation or individual primes and many exponentations
+The bounded primorial steps algorithm from Section \ref{sec:primorial} and used by the SuperSPAR factoring algorithm (Section \ref{sec:superSpar}) computes baby-steps $\aclass^i$ for $1 \le i \le b$ where $i$ is coprime to some primorial $P_w$.  This section discusses three methods used in practice: sieving, wheeling, and precomputed deltas.  Our implementation of the SuperSPAR factoring algorithm uses precomputed deltas to compute values of $i$ for the coprime baby steps.
 
-machine representation of 2,3 representation for primorials
+\subsection{Coprime Sieve}
 
-\subsection{Best primorial bound for n-bit integers}
+\subsection{Coprime Wheel}
 
-\section{Time Spent on Exponentiation vs. Search}
-\label{sec:ssparExpVsSearch}
+For some primorial $P_w$, there is a table of values 1 through $P_w$ inclusive.  Mark all entries coprime to $P_w$ with 1 and all other entries with 0.  This is extended to $P_{w+1}$ by creating copies of the $P_w$ wheel into a table of $P_{w+1}$ values and indexes that start at multiples of $P_w$.  There are $p_{w+1} - 1$ copies in total.  Then set each index that is a multiple of $p_{w+1}$ to 0.  The remaining indices with a value of 1 are coprime to $P_{w+1}$.
+
+The idea is to do this with deltas.  We have a list of deltas that take us from one coprime value to another for some primorial $P_w$.  Starting at index $P_w$, we move to each coprime candidate in the larger wheel.  If the candidate is not a multiple of $p_{w+1}$, then the index is coprime to $P_{w+1}$ and we write out the delta to the new delta list, reset the delta counter, and continue with the next coprime delta from the list for $P_w$.  If the index is a multiple of $p_{w+1}$, then the index is not coprime to $P_{w+1}$ and we do not output it to the list, do not clear the delta counter, and continue with the next coprime.
+
+\begin{algorithm}[h]
+\caption{Compute deltas for $P_{w+1}$ given deltas for $P_w$.}
+\label{alg:deltaWheel}
+\begin{algorithmic}[1]
+\REQUIRE A primorial $P_w$, \\
+$\phi(P_w)$ deltas $d_1, d_2, ...$ such that $d_i = c_{i+1} - c_i$ for consecutive values $c_i$ and $c_{i+1}$ coprime to $P_w$ where $c_1 = 1$, \\
+and the next prime $p_{w+1}$. \\
+Let $P_{w+1} = p_{w+1} P_w$ and $\phi(P_{w+1}) = (p_{w+1}-1)\phi(P_w)$.
+\ENSURE $\phi(P_{w+1})$ deltas $d'_1, d'_2, ...$ such that $d_j' = c'_{j+1} - c'_j$ for consecutive values $c'_j$ and $c'_{j+1}$ coprime to $P_{w+1}$ where $c'_1 = 1$.
+\STATE $i \gets 1, j \gets 1, c \gets 1, d \gets 0$
+\WHILE{$j \le \phi(P_{w+1})$}
+	\STATE $c \gets c + d_i$ \COMMENT{each $c$ is coprime to $P_w$}
+	\STATE $d \gets d + d_i$
+	\IF{$c \not\equiv 0 \pmod{p_{w+1}}$}
+		\STATE $d'_j \gets d, d \gets 0, j \gets j + 1$ \COMMENT{output $d$ when $c$ is coprime to $P_{w+1}$}
+	\ENDIF
+	\STATE $i \gets i + 1$
+	\STATE \textbf{if} $i > \phi(P_w)$ \textbf{then} $i \gets 1$ \textbf{end if}
+\ENDWHILE
+\RETURN $d'_1, ..., d'_{j-1}$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Precomputed Coprime Deltas}
+
+
+
+
+\section{Factorization of the Order of Ideal Classes}
+
+\subsection{Difference between the Order of Two Ideal Classes}
+\label{subsec:ssparDiffBtwOrder}
+
+i.e.\ Data the lead us to the strategy where once we know some $e$ such that $\aclass^e = \idclass$, we reuse $e$ on other ideal classes.
+
+\subsection{Prime Power Bound}
+\label{subsec:ssparPrimePowerBound}
+i.e.\ $3^3 5^2 7^2 \prod p_i$ such that all $p_i \ge 11$ have an exponent of 11. This covers 96.9\% of the order of all elements.
+
+\subsection{Best Multipliers}
+\label{subsec:ssparBestMultipliers}
+i.e.\ Statistically how many ideal classes do we need to try before successfully factoring.  If we go over some threshold, we switch multiplier instead.  Splitting this by $N \pmod 4$ and by multipliers, show that the expected number of ideal classes to try is distinct by multiplier and that some multipliers should be preferred.
+
+
+\section{Chained Hashing vs.\ Open Address Hashing}
+
+Only hash the pair $(a,c)$ so that $\aclass$ and $\aclass^{-1}$ hash to the same value.
+
+
+\section{Baby-Step Bounds}
+\label{sec:ssparBabyStepBounds}
 
 Let $s$ be a function from some multiple $m$ of the primorial $P_w$ to the total number of baby steps and giant steps taken during the search stage of the algorithm.  We have
 \[
@@ -2216,19 +2270,10 @@ this means that by choosing a multiple $m'$ of the primorial $P_{w'}$, the searc
   S = \left\{ (m, w) ~:~ g(m, w) > g(m', w') \textrm{ for all }  \right\}
 \]
 
-
-\section{Sequential prime ideals vs random prime ideals}
-
-\section{Ratio of prime ideals to multipliers}
-\label{sec:ssparIdealsToMultipliers}
-
-\section{Best multipliers to use}
-
-\section{Chained Hashing vs Open Address Hashing}
-
-Only hash the pair $(a,c)$ so that $\aclass$ and $\aclass^{-1}$ hash to the same value.
-
 \section{Empirical search for primorial and step count}
+
+\subsection{Sequential Prime Ideals vs.\ Random Prime Ideals}
+
 \begin{itemize}
 \item Linear, grid, 2d quadratic, 1d grid + binary search on step count.
 \item (Quadratic samples at 1/3 and 2/3 and throws away the larger third)
