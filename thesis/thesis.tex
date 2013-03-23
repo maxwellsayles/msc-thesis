@@ -2193,6 +2193,9 @@ Subsection \ref{subsec:ssparInPractice}
 \label{sec:ssparCoprimeFinding}
 
 % TODO: Should this section be a subsection of bounded primorial steps instead?
+% TODO: Cite something from literature?
+% TODO: State why it's called a "Wheel"?
+% TODO: Give a table showing the growth of $\phi(P_w)$ and how sieving is tractable for small $b$ and large $P_w$, while wheeling should be faster.
 
 The bounded primorial steps algorithm from Section \ref{sec:primorial} and used by the SuperSPAR factoring algorithm (Section \ref{sec:superSpar}) computes baby-steps $\aclass^i$ for $1 \le i \le b$ where $i$ is coprime to some primorial $P_w$ and $b$ is a multiple of $P_w$.  By considering only values coprime to $P_w$ the running time complexity of the bounded primorial steps algorithm achieves an upper bound of $O(\sqrt{M/\log \log M})$.  If an implementation has to test whether each $i$ from $1$ to $P_w$ is coprime to $P_w$, the algorithm cannot achieve this.  As such, the algorithm assumes a set of values coprime to $P_w$ is readily available.  Of course, one can iterate $i$ from $1$ to $P_w$ and compute $d = \gcd(i, P_w)$ and when $d = 1$, add $i$ to the set, but this can be slow.
 
