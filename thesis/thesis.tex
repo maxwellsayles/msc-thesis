@@ -1107,16 +1107,16 @@ The problem is that $\ord(\alpha)$ may not be odd.  However, by repeated squarin
 \end{algorithmic}
 \end{algorithm}
 
-This approach can be extended to computing $\beta = \alpha^E$ where $E = 2^{\floor{\log_2 M}} 3^{\floor{\log_3 M}}$ and the order of $\beta$ is coprime to both 2 and 3.  In this case, we compute baby steps with exponents coprime to 6 and giant steps that are a multiple of 6.  More generally, this works for any primorial $P_w$ such that
+This approach is extended to computing $\beta = \alpha^E$ where $E = 2^{\floor{\log_2 M}} 3^{\floor{\log_3 M}}$ and the order of $\beta$ is coprime to both 2 and 3.  In this case, compute baby steps with exponents coprime to 6 and giant steps that are a multiple of 6.  More generally, this works for any primorial $P_w$ such that
 \[
 	P_w = 2 \times 3 \times \cdots \times p_w = \prod_{i=1}^w p_i
 \]
-where $p_i$ is the $i^{\textrm{th}}$ prime.  Following Sutherland \cite[p.57]{Sutherland2007}, select the largest $P_w \le \sqrt{M}$ and then maximize $m$ such that $m^2P_w \phi(P_w) \le M$ where $\phi(P_w)$ is the number of integers coprime to $P_w$ given as
+where $p_i$ is the $i^{\textrm{th}}$ prime.  Following Sutherland \cite[p.57]{Sutherland2007}, select the largest $P_w \le \sqrt{M}$ and then maximize $m$ such that $m^2P_w \phi(P_w) \le M$, where $\phi(P_w)$ is the number of integers coprime to $P_w$ given as
 \begin{equation}
 \label{eq:phiPrimorial}
 	\phi(P_w) = (2-1) \times (3-1) \times \cdots \times (p_w - 1) = \prod_{i=1}^w (p_i - 1).
 \end{equation}
-Let $e_i = \floor{\log_{p_i} M}$ for $1 \le i \le w$ and $E = 2^{e_2} \times 3^{e_3} \times \cdots \times {p_w}^{e_w}$.  Then compute $\beta = \alpha^E$.  The bound on the largest baby step is $b = m P_w$, and we compute $h' = \ord(\beta)$ by taking at most $m \phi(P_w)$ baby steps coprime to $P_w$ and at most $m \phi(P_w)$ giant steps of size $m P_w$.  Pseudo-code for the bounded Primorial Steps technique is given in Algorithm \ref{alg:primorial}.  By \cite[p.59~Proposition~4.2]{Sutherland2007}, the running time in the worst case is $O(\sqrt{M / \log \log M})$.
+Let $e_i = \floor{\log_{p_i} M}$ for $1 \le i \le w$ and $E = 2^{e_2} \times 3^{e_3} \times \cdots \times {p_w}^{e_w}$.  Then compute $\beta = \alpha^E$.  The bound on the largest baby step is $b = m P_w$, and we compute $h' = \ord(\beta)$ by taking at most $m \phi(P_w)$ baby steps coprime to $P_w$ and at most $m \phi(P_w)$ giant steps of size $m P_w$.  Pseudo-code for the bounded Primorial Steps technique is given in Algorithm \ref{alg:primorial}.  By \cite[p.59~Proposition~4.2]{Sutherland2007}, the number of group operations in the worst case is bound by $O(\sqrt{M / \log \log M})$.
 
 To compute $h = \ord(\alpha)$ given $h' = \ord(\beta)$, one uses a fast order finding algorithm.  One fast order finding algorithm, $\mathcal A(\alpha^{h'}, E)$, uses the factorization of $E=\prod {p_i}^{e_i}$.  Notice that $\alpha^{Eh'} = \beta^{h'} = 1_G$.  The idea is to iterate on the factors of $E$, removing each factor $p$ before computing $\zeta = \alpha^{E'h'}$ for the product $E' = E/p$. If $\zeta \neq 1_G$, then $\ord(\alpha)$ does not divide $E'h'$ and $p$ must be a factor of the order of $\alpha$.  The algorithm then continues with the next prime factor of $E'$.  Additional fast order finding algorithms are given in \mbox{\cite[Chapter~7]{Sutherland2007}}.
 
