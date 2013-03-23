@@ -2195,7 +2195,6 @@ Subsection \ref{subsec:ssparInPractice}
 % TODO: Should this section be a subsection of bounded primorial steps instead?
 % TODO: Cite something from literature?
 % TODO: State why it's called a "Wheel"?
-% TODO: Give a table showing the growth of $\phi(P_w)$ and how sieving is tractable for small $b$ and large $P_w$, while wheeling should be faster.
 
 The bounded primorial steps algorithm from Section \ref{sec:primorial} and used by the SuperSPAR factoring algorithm (Section \ref{sec:superSpar}) computes baby-steps $\aclass^i$ for $1 \le i \le b$ where $i$ is coprime to some primorial $P_w$ and $b$ is a multiple of $P_w$.  By considering only values coprime to $P_w$ the running time complexity of the bounded primorial steps algorithm achieves an upper bound of $O(\sqrt{M/\log \log M})$ group operations in the worst case.  If an implementation has to test whether each $i$ from $1$ to $P_w$ is coprime to $P_w$, the algorithm cannot achieve this.  As such, the algorithm assumes a set of values coprime to $P_w$ is globally available.  Of course, one can generate such a set by testing whether $\gcd(i, P_w) = 1$ for $i$ from $1$ to $P_w$, but there are more efficient methods.  This section discusses two such methods, namely sieving and wheeling.  
 
@@ -2316,6 +2315,10 @@ and it holds that for all $w$ that
 \end{comment}
 
 \section{Factorization of the Order of Ideal Classes}
+
+To determine 
+
+For $k \in \{32, 40, 48, 56, 64, 72, 80\}$, 250,000 unique values of $2^{k-1} \le N < 2^k$, 7 mutipliers (1, 2, 3, 5, 6, 7, 10), and the first 5 prime ideal representatives.  This is a total of 8,750,000 ideal representatives for each bit size.
 
 \subsection{Difference between the Order of Two Ideal Classes}
 \label{subsec:ssparDiffBtwOrder}
