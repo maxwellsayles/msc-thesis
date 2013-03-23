@@ -2197,9 +2197,9 @@ Subsection \ref{subsec:ssparInPractice}
 % TODO: State why it's called a "Wheel"?
 % TODO: Give a table showing the growth of $\phi(P_w)$ and how sieving is tractable for small $b$ and large $P_w$, while wheeling should be faster.
 
-The bounded primorial steps algorithm from Section \ref{sec:primorial} and used by the SuperSPAR factoring algorithm (Section \ref{sec:superSpar}) computes baby-steps $\aclass^i$ for $1 \le i \le b$ where $i$ is coprime to some primorial $P_w$ and $b$ is a multiple of $P_w$.  By considering only values coprime to $P_w$ the running time complexity of the bounded primorial steps algorithm achieves an upper bound of $O(\sqrt{M/\log \log M})$.  If an implementation has to test whether each $i$ from $1$ to $P_w$ is coprime to $P_w$, the algorithm cannot achieve this.  As such, the algorithm assumes a set of values coprime to $P_w$ is readily available.  Of course, one can iterate $i$ from $1$ to $P_w$ and compute $d = \gcd(i, P_w)$ and when $d = 1$, add $i$ to the set, but this can be slow.
+The bounded primorial steps algorithm from Section \ref{sec:primorial} and used by the SuperSPAR factoring algorithm (Section \ref{sec:superSpar}) computes baby-steps $\aclass^i$ for $1 \le i \le b$ where $i$ is coprime to some primorial $P_w$ and $b$ is a multiple of $P_w$.  By considering only values coprime to $P_w$ the running time complexity of the bounded primorial steps algorithm achieves an upper bound of $O(\sqrt{M/\log \log M})$ group operations in the worst case.  If an implementation has to test whether each $i$ from $1$ to $P_w$ is coprime to $P_w$, the algorithm cannot achieve this.  As such, the algorithm assumes a set of values coprime to $P_w$ is globally available.  Of course, one can generate such a set by testing whether $\gcd(i, P_w) = 1$ for $i$ from $1$ to $P_w$, but there are more efficient methods.  This section discusses two such methods, namely sieving and wheeling.  
 
-This section discusses two methods to compute the set of values coprime to some primorial $P_w$, namely sieving and wheeling.  This set is precomputed separately from the bounded primorial steps algorithm, and so is available as input to the algorithm.  The runtime complexity of computing the set of coprime values is separate from the runtime complexity of the bounded primorial steps algorithm.  Since a practical method for computing baby-steps $\aclass^i$ for $1 \le i \le b$ is to iterate $i$ over consecutive coprime values, computing the delta between neighbouring coprime values is sufficient.  An implementation then iterates $i$ by adding the next delta to the current value of $i$ in order to move it to the next coprime value.
+%Since a practical method for computing baby-steps $\aclass^i$ for $1 \le i \le b$ is to iterate $i$ over consecutive coprime values, computing the delta between neighbouring coprime values is sufficient.  An implementation then iterates $i$ by adding the next delta to the current value of $i$ in order to move it to the next coprime value.
 
 \subsection{Coprime Sieve}
 
@@ -2211,9 +2211,9 @@ Sieving the values coprime to some primorial $P_w$ is straightforward since the 
 
 Suppose for some primorial $P_w$, that the set of all integers $1 \le x < P_w$ coprime to $P_w$ is already known.  More formally, let
 \[
-	\coprimeset_w = \left\{x ~:~ \gcd(x, P_w) = 1, 1 \le x < P_w \right\}
+	\coprimeset_w = \left\{x ~:~ \gcd(x, P_w) = 1, 1 \le x < P_w \right\}.
 \]
-and there is no $x \in \coprimeset_w$ that is divisible by any prime $p_j$ that divides $P_w$.  The values $x + mP_w$ for $x \in \coprimeset_w$ and $m \in \ZZ$ are coprime to $P_w$.  Let $\coprimeset_w + mP_w$ denote the set $\{x + mP_w : x \in \coprimeset_w\}$.  Computing
+As such, there is no $x \in \coprimeset_w$ that is divisible by any prime $p_j$ that divides $P_w$.  The values $x + mP_w$ for $x \in \coprimeset_w$ and $m \in \ZZ$ are also coprime to $P_w$, and so act as a set of representatives of the integers modulo $P_w$ that are coprime to $P_w$.  Let $\coprimeset_w + mP_w$ denote the set $\{x + mP_w : x \in \coprimeset_w\}$.  Computing
 \[
 	\bigcup_{0 \le m < p_{w+1}} \mathcal \coprimeset_w + mP_w
 \]
@@ -2231,7 +2231,7 @@ Since our implementation of SuperSPAR iterates baby steps for consecutive intege
 \[
 	\coprimelist_w = d_1, ..., d_{\phi(P_w)}
 \]
-such that $d_i = c_{i+1} - c_i$ for consecutive values $c_i$ and $c_{i+1}$ coprime to $P_w$ where $c_1 = 1$.
+such that $d_i = c_{i+1} - c_i$ for consecutive integers $c_i$ and $c_{i+1}$ coprime to $P_w$ where $c_1 = 1$. The list $\coprimelist_1$ consists of the single value 2.
 
 \begin{algorithm}[h]
 \caption{Compute deltas for $P_{w+1}$ given deltas for $P_w$.}
@@ -2254,8 +2254,66 @@ Let $P_{w+1} = p_{w+1} P_w$ and $\phi(P_{w+1}) = (p_{w+1}-1)\phi(P_w)$.
 \end{algorithmic}
 \end{algorithm}
 
-Algorithm \ref{alg:deltaWheel} computes $\coprimelist_{w+1}$ given $\coprimelist_w$, $P_w$, and the next prime $p_{w+1}$.  The algorithm starts with the current candidate integer, $c$, coprime to $P_{w+1}$ and a delta counter $d = 0$.  The algorithm cycles through the delta list $\coprimelist_w$ adding each element encountered to $c$.  On each iteration, if $c$ is not a multiple of $p_{w+1}$, then the delta counter $d$ is appended to the output list $\coprimelist_{w+1}$ and then set to 0.  Otherwise, the algorithm continues with the next delta from the input list (cycling to the beginning of the list when the end is reached).  Once $\phi(P_{w+1})$ deltas have been appended to the output list, the algorithm finishes.
+Algorithm \ref{alg:deltaWheel} computes $\coprimelist_{w+1}$ given $\coprimelist_w$, $P_w$, and the next prime $p_{w+1}$.  The algorithm starts with the current candidate integer, $c$, coprime to $P_{w+1}$ and a delta counter $d = 0$.  The algorithm cycles through the delta list $\coprimelist_w$ adding each element encountered to $c$.  On each iteration, if $c$ is not a multiple of $p_{w+1}$, then the delta counter $d$ is appended to the output list $\coprimelist_{w+1}$ and then set to 0.  Otherwise, the algorithm continues with the next delta from the input list (cycling to the beginning of the list when the end is reached).  Once $\phi(P_{w+1})$ deltas have been appended to the output list, the algorithm terminates.
 
+\subsection{Sieve vs. Wheel}
+
+The coprime sieve requires $b$ bits of memory, while the coprime wheel requires $O(\phi(P_w))$ integers for the list of deltas.  Table \ref{tab:primorialRateOfGrowth} shows the values of $\phi(P_w)$ for the first 12 primorials.  The delta list for the tenth primorial, $\phi(P_{10}) = 1021870080$, requires over a billion integers.  As such, the coprime sieve is preferred when the primorial is large, while the coprime wheel may be more efficient for large values of $b$.  This is because the coprime wheel generates deltas directly, whereas each entry in the sieve must be inspected to find integers coprime to the primorial.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{| r | r | r | r |}
+	\hline
+	$w$ & $p_w$ & $P_w = \prod_{p \le p_w} p$ & $\phi(P_w) = \prod_{p \le p_w} (p-1)$ \\
+	\hline
+1 & 2 & 2 & 1 \\
+2 & 3 & 6 & 2 \\
+3 & 5 & 30 & 8 \\
+4 & 7 & 210 & 48 \\
+5 & 11 & 2310 & 480 \\
+6 & 13 & 30030 & 5760 \\
+7 & 17 & 510510 & 92160 \\
+8 & 19 & 9699690 & 1658880 \\
+9 & 23 & 223092870 & 36495360 \\
+10 & 29 & 6469693230 & 1021870080 \\
+11 & 31 & 200560490130 & 30656102400 \\
+12 & 37 & 7420738134810 & 1103619686400 \\
+	\hline
+\end{tabular}
+\caption{The first 12 primorials.}
+\label{tab:primorialRateOfGrowth}
+\end{table}
+
+SuperSPAR computes baby steps coprime to a multiple of a primorial, and so $b$ is at least $\phi(P_w)$.  This means that in practice, the algorithm is restricted to primorials that fit within the available memory.  The coprime wheel is used to generate the list of coprime deltas, however, this list is only generated once and then compiled directly into the bytecode our implementation.
+
+
+\begin{comment}
+The sieve algorithm iterates for each prime $2 \le p_j \le p_w$ and performs $b / p_j$ arithmetic operations.  This gives a bound of
+\[
+	\sum_{p_j \in \{2, 3, 5, ..., p_w\}} \frac{b}{p_j}
+	\le \sum_{i=1}^{p_w} \frac{b}{i}
+	= bp_w \sum_{i=1}^{p_w} \frac{1}{i}
+	\in O(b p_w \ln p_w)
+\]
+arithmetic operations.  On the other hand, the coprime wheel iterates 
+
+Assume for the inductive hypothesis that
+\[
+	\sum_{i=1}^w \phi(P_i) \le \frac{3}{2} \phi(P_w).
+\]
+The base case $\phi(P_2) + \phi(P_1) = 3 \le \frac{3}{2} \phi(P_2)$.  The inductive step is
+\begin{align*}
+	\sum_{i=1}^{w+1} \phi(P_i) &= \phi(P_{w+1}) + \sum_{i=1}^w \phi(P_i) \\
+	&\le \phi(P_{w+1}) + \frac{3}{2} \phi(P_w) & \textrm{\{By the inductive hypothesis.\}} \\
+	&\le \phi(P_{w+1}) + (p_{w+1}-1)\frac{1}{2} \phi(P_w) & \textrm{\{True for all $p_w \ge 3$.\}} \\
+	&= \phi(P_{w+1}) + \frac{1}{2} \phi(P_{w+1}) & \textrm{\{Since $(p_{w+1}\phi(P_w) = \phi(P_{w+1}$.\}} \\
+	&= \frac{3}{2} \phi(P_{w+1}),
+\end{align*}
+and it holds that for all $w$ that
+\[
+	\sum_{i=1}^w \phi(P_i) \le \frac{3}{2} \phi(P_w).
+\]
+\end{comment}
 
 \section{Factorization of the Order of Ideal Classes}
 
