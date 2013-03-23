@@ -2192,27 +2192,51 @@ Subsection \ref{subsec:ssparInPractice}
 \section{Coprime Finding}
 \label{sec:ssparCoprimeFinding}
 
-The bounded primorial steps algorithm from Section \ref{sec:primorial} and used by the SuperSPAR factoring algorithm (Section \ref{sec:superSpar}) computes baby-steps $\aclass^i$ for $1 \le i \le b$ where $i$ is coprime to some primorial $P_w$ and $b$ is a multiple of $P_w$.  By considering only values coprime to $P_w$ the running time complexity of the bounded primorial steps algorithm achieves an upper bound of $O(\sqrt{M/\log \log M})$.  If an implementation has to test whether each $i$ from $1$ to $P_w$ is coprime to $P_w$, the algorithm cannot achieve this.
+% TODO: Should this section be a subsection of bounded primorial steps instead?
+
+The bounded primorial steps algorithm from Section \ref{sec:primorial} and used by the SuperSPAR factoring algorithm (Section \ref{sec:superSpar}) computes baby-steps $\aclass^i$ for $1 \le i \le b$ where $i$ is coprime to some primorial $P_w$ and $b$ is a multiple of $P_w$.  By considering only values coprime to $P_w$ the running time complexity of the bounded primorial steps algorithm achieves an upper bound of $O(\sqrt{M/\log \log M})$.  If an implementation has to test whether each $i$ from $1$ to $P_w$ is coprime to $P_w$, the algorithm cannot achieve this.  As such, the algorithm assumes a set of values coprime to $P_w$ is readily available.  Of course, one can iterate $i$ from $1$ to $P_w$ and compute $d = \gcd(i, P_w)$ and when $d = 1$, add $i$ to the set, but this can be slow.
 
 This section discusses two methods to compute the set of values coprime to some primorial $P_w$, namely sieving and wheeling.  This set is precomputed separately from the bounded primorial steps algorithm, and so is available as input to the algorithm.  The runtime complexity of computing the set of coprime values is separate from the runtime complexity of the bounded primorial steps algorithm.  Since a practical method for computing baby-steps $\aclass^i$ for $1 \le i \le b$ is to iterate $i$ over consecutive coprime values, computing the delta between neighbouring coprime values is sufficient.  An implementation then iterates $i$ by adding the next delta to the current value of $i$ in order to move it to the next coprime value.
 
 \subsection{Coprime Sieve}
 
+Sieving the values coprime to some primorial $P_w$ is straightforward since the factorization $P_w = 2 \times 3 \times \cdots \times p_w$ is known.  Let $[1,b]$ denote the range such that the sieve will determine all values $1 \le x \le b$ such that $x$ is coprime to $P_w$.  First, create a table mapping the values $1$ through $b$ to \emph{true}.  Then for each prime factor $p_j$ of $P_w$, and for every multiple $mp_j$ such that $1 \le mp_j \le b$, set the table entry at index $mp_j$ to \emph{false}.  At this point, each index with a \emph{true} value is coprime to $P_w$.  To see this, note that an index $x$ is \emph{false} when there was some multiple $m$ of a prime $p_j$ dividing $P_w$ such that $mp_j = x$.  As such, the value of $x$ is false if and only if $x$ and $P_w$ share a common factor, namely $p_j$.
+
 \subsection{Coprime Wheel}
+\newcommand{\coprimeset}{\mathcal C}
+\newcommand{\coprimelist}{\mathcal D}
 
-For some primorial $P_w$, there is a table of values 1 through $P_w$ inclusive.  Mark all entries coprime to $P_w$ with 1 and all other entries with 0.  This is extended to $P_{w+1}$ by creating copies of the $P_w$ wheel into a table of $P_{w+1}$ values and indexes that start at multiples of $P_w$.  There are $p_{w+1} - 1$ copies in total.  Then set each index that is a multiple of $p_{w+1}$ to 0.  The remaining indices with a value of 1 are coprime to $P_{w+1}$.
+Suppose for some primorial $P_w$, that the set of all integers $1 \le x < P_w$ coprime to $P_w$ is already known.  More formally, let
+\[
+	\coprimeset_w = \left\{x ~:~ \gcd(x, P_w) = 1, 1 \le x < P_w \right\}
+\]
+and there is no $x \in \coprimeset_w$ that is divisible by any prime $p_j$ that divides $P_w$.  The values $x + mP_w$ for $x \in \coprimeset_w$ and $m \in \ZZ$ are coprime to $P_w$.  Let $\coprimeset_w + mP_w$ denote the set $\{x + mP_w : x \in \coprimeset_w\}$.  Computing
+\[
+	\bigcup_{0 \le m < p_{w+1}} \mathcal \coprimeset_w + mP_w
+\]
+generates the set of all positive integers less than $P_{w+1}$ that are coprime to $P_w$.  Removing all multiples of $p_{w+1}$ from this set implies that no element is divisible by a prime $p_j \le p_{w+1}$.  As such, the set
+\[
+	\coprimeset_{w+1} =
+		\left[ \bigcup_{0 \le m < p_{w+1}} \coprimeset_w + mP_w \right]
+	    \setminus \{ m' p_{w+1} : 1 \le m' < P_w \}
+\]
+is the set of all values $1 \le x < P_{w+1}$ that are coprime to $P_{w+1}$.
 
-The idea is to do this with deltas.  We have a list of deltas that take us from one coprime value to another for some primorial $P_w$.  Starting at index $P_w$, we move to each coprime candidate in the larger wheel.  If the candidate is not a multiple of $p_{w+1}$, then the index is coprime to $P_{w+1}$ and we write out the delta to the new delta list, reset the delta counter, and continue with the next coprime delta from the list for $P_w$.  If the index is a multiple of $p_{w+1}$, then the index is not coprime to $P_{w+1}$ and we do not output it to the list, do not clear the delta counter, and continue with the next coprime.
+The primorial $P_1 = 2$ has the set $\coprimeset_1 = \{1\}$ of integers coprime to 2.  This acts as a base case, from which the representative set of integers coprime to primorials $P_2, P_3, ..., P_w$ are computed by recursive application of the above steps.
+
+Since our implementation of SuperSPAR iterates baby steps for consecutive integers coprime to some primorial $P_w$, computing the difference between coprime integers is beneficial.  The above technique is adapted to work with lists of deltas between consecutive coprime integers.  Each list begins with the difference from the first coprime integer 1 (which is coprime to all integers) to the next integer coprime to some primorial $P_w$. Let
+\[
+	\coprimelist_w = d_1, ..., d_{\phi(P_w)}
+\]
+such that $d_i = c_{i+1} - c_i$ for consecutive values $c_i$ and $c_{i+1}$ coprime to $P_w$ where $c_1 = 1$.
 
 \begin{algorithm}[h]
 \caption{Compute deltas for $P_{w+1}$ given deltas for $P_w$.}
 \label{alg:deltaWheel}
 \begin{algorithmic}[1]
-\REQUIRE A primorial $P_w$, \\
-deltas $d_1, ..., d_{\phi(P_w)}$ such that $d_i = c_{i+1} - c_i$ for consecutive values $c_i$ and $c_{i+1}$ coprime to $P_w$ where $c_1 = 1$, \\
-and the next prime $p_{w+1}$. \\
+\REQUIRE A primorial $P_w$, the delta list $\coprimelist_w$, and the next prime $p_{w+1}$. \\
 Let $P_{w+1} = p_{w+1} P_w$ and $\phi(P_{w+1}) = (p_{w+1}-1)\phi(P_w)$.
-\ENSURE deltas $d'_1, ..., d'_{\phi(P_{w+1})}$ such that $d_j' = c'_{j+1} - c'_j$ for consecutive values $c'_j$ and $c'_{j+1}$ coprime to $P_{w+1}$ where $c'_1 = 1$.
+\ENSURE The delta list $\coprimelist_{w+1}$.
 \STATE $i \gets 1, j \gets 1, c \gets 1, d \gets 0$
 \WHILE{$j \le \phi(P_{w+1})$}
 	\STATE $c \gets c + d_i$ \COMMENT{each $c$ is coprime to $P_w$}
@@ -2227,7 +2251,7 @@ Let $P_{w+1} = p_{w+1} P_w$ and $\phi(P_{w+1}) = (p_{w+1}-1)\phi(P_w)$.
 \end{algorithmic}
 \end{algorithm}
 
-
+Algorithm \ref{alg:deltaWheel} computes $\coprimelist_{w+1}$ given $\coprimelist_w$, $P_w$, and the next prime $p_{w+1}$.  The algorithm starts with the current candidate integer, $c$, coprime to $P_{w+1}$ and a delta counter $d = 0$.  The algorithm cycles through the delta list $\coprimelist_w$ adding each element encountered to $c$.  On each iteration, if $c$ is not a multiple of $p_{w+1}$, then the delta counter $d$ is appended to the output list $\coprimelist_{w+1}$ and then set to 0.  Otherwise, the algorithm continues with the next delta from the input list (cycling to the beginning of the list when the end is reached).  Once $\phi(P_{w+1})$ deltas have been appended to the output list, the algorithm finishes.
 
 
 \section{Factorization of the Order of Ideal Classes}
