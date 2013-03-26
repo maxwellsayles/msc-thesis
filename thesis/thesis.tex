@@ -2324,6 +2324,27 @@ For bit sizes $n \in \{32, 40, 48, 56, 64, 72, 80\}$, roughly 250,000 unique int
 \subsection{Difference between the Order of Two Ideal Classes}
 \label{subsec:ssparDiffBtwOrder}
 
+TODO: Describe how we generated this table.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{| r | r | r | r | r | r |}
+	\hline
+	n & $|\mathcal P| = 0$ & $|\mathcal P| = 1$ & $|\mathcal P| = 2$ & $|\mathcal P| = 3$ & $|\mathcal P| = 4$ \\
+	\hline
+32 & 0.97003 & 0.02956 & 0.00041 & 0.00000 & 0.00000 \\
+40 & 0.96992 & 0.02958 & 0.00049 & 0.00001 & 0.00000 \\
+48 & 0.96983 & 0.02963 & 0.00052 & 0.00001 & 0.00000 \\
+56 & 0.96974 & 0.02973 & 0.00052 & 0.00001 & 0.00000 \\
+64 & 0.96979 & 0.02968 & 0.00053 & 0.00001 & 0.00000 \\
+72 & 0.96976 & 0.02971 & 0.00052 & 0.00001 & 0.00000 \\
+80 & 0.96980 & 0.02967 & 0.00052 & 0.00001 & 0.00000 \\
+	\hline
+\end{tabular}
+\caption{If the order $h_{\aclass}$ of an ideal class $\aclass \in Cl_\Delta$ is known, this table shows the probability that for $h_{\bclass} = \ord(\bclass)$ for some other ideal class $\bclass \in Cl_\Delta$ that $h_{\bclass}$ divides $h_{\aclass} \cdot \prod_{p \in \mathcal P} p$ for a set of primes $\mathcal P$ of given size.}
+\label{tab:diffOfOrderOfTwoIdeals}
+\end{table}
+
 i.e.\ Data the lead us to the strategy where once we know some $e$ such that $\aclass^e = \idclass$, we reuse $e$ on other ideal classes.
 
 \subsection{Prime Power Bound}
