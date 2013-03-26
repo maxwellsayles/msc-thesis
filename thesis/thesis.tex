@@ -68,10 +68,11 @@
 \newcommand{\binary}[1]{\texttt{#1}_\texttt{2}}
 
 \newcommand{\ideal}{\mathfrak}
-\newcommand{\aclass}{[\ideal a]}
-\newcommand{\bclass}{[\ideal b]}
-\newcommand{\cclass}{[\ideal c]}
-\newcommand{\dclass}{[\ideal d]}
+\newcommand{\idealclass}[1]{\left[ \ideal #1 \right]}
+\newcommand{\aclass}{\idealclass a}
+\newcommand{\bclass}{\idealclass b}
+\newcommand{\cclass}{\idealclass c}
+\newcommand{\dclass}{\idealclass d}
 \newcommand{\idclass}{[\mathcal O_\Delta]}
 
 \newcommand{\ith}{i^{\textrm{th}}}
@@ -1241,7 +1242,7 @@ In both SPAR and SuperSPAR, each stage uses $O(p_t)$ group operations where $p_t
 
 Furthermore, balancing both stages of SuperSPAR to use $O(N^{1/2r})$ group operations is not ideal.  This is partly because the actual cost of multiplication, squaring, and cubing differ, but also because the success of each stage depends on different properties of the class number.  The exponentiation stage is successful when the order of a random ideal class is smooth with respect to some primorial $E$, while the search stage is successful when the non-smooth part of the order is sufficiently small.  In this sense, the efficiency of the factoring algorithm depends both on the smoothness of the order of a random ideal class $\aclass$ with respect to the primorial $E$, but also on the size of its non-smooth part with respect to the largest exponent reached by the search stage.  Selecting bounds for each stage independently of $r$ varies the time spent during each stage inversely to the probability of its success.
 
-Experimentally we found that the prime factorization of the order of ideal classes consists of prime powers with exponents that are typically 1 for all but the smallest primes (see Subsection \ref{subsec:ssparPrimePowerBound}).  Schnorr and Lenstra \cite[p.293]{Schnorr1984} also advise the use of smaller exponents in practice.  Additionally, we found that the order of an ideal class $[\mathfrak a_1]$ was, with high probability (about 96.9\% in our experiments), either the same as or a multiple of the order of some other ideal class $[\mathfrak a_2]$ in the same class group (see Subsection~\ref{subsec:ssparDiffBtwOrder}).  For this reason, if the algorithm finds some $h'$ such that ${[\mathfrak a_1]^{h'}}^{\left(2^j\right)}$ is an ambiguous class for some $j$, but is unsuccessful at factoring $N$, the algorithm simply attempts to find an ambiguous class by repeated squaring of $[\mathfrak a_i]^{h'}$ for several $[\mathfrak a_i]$.  If this fails for several ideal classes, the algorithm then starts over with a different multiplier $k$ for the discriminant.  Let $c$ be the maximum number of ideal classes tried.
+Experimentally we found that the prime factorization of the order of ideal classes consists of prime powers with exponents that are typically 1 for all but the smallest primes (see Subsection \ref{subsec:ssparPrimePowerBound}).  Schnorr and Lenstra \cite[p.293]{Schnorr1984} also advise the use of smaller exponents in practice.  Additionally, we found that the order of an ideal class $[\ideal a_1]$ was, with high probability (about 96.9\% in our experiments), either the same as or a multiple of the order of some other ideal class $[\mathfrak a_2]$ in the same class group (see Subsection~\ref{subsec:ssparDiffBtwOrder}).  For this reason, if the algorithm finds some $h'$ such that ${[\mathfrak a_1]^{h'}}^{\left(2^j\right)}$ is an ambiguous class for some $j$, but is unsuccessful at factoring $N$, the algorithm simply attempts to find an ambiguous class by repeated squaring of $[\mathfrak a_i]^{h'}$ for several $[\mathfrak a_i]$.  If this fails for several ideal classes, the algorithm then starts over with a different multiplier $k$ for the discriminant.  Let $c$ be the maximum number of ideal classes tried.
 
 Assuming good parameters are known, the SuperSPAR factoring algorithm used in practice is given in listing \ref{alg:superSpar}.  Chapter \ref{chap:ssparExperiments} discusses the experiments and results that lead to parameters for this algorithm that perform well in practice.  Notice, that parameters for Algorithm \ref{alg:superSpar} can be selected based on the theoretical analysis of SuperSPAR from the previous section.
 
@@ -2196,7 +2197,7 @@ Subsection \ref{subsec:ssparInPractice}
 % TODO: Cite something from literature?
 % TODO: State why it's called a "Wheel"?
 
-The bounded primorial steps algorithm from Section \ref{sec:primorial} and used by the SuperSPAR factoring algorithm (Section \ref{sec:superSpar}) computes baby-steps $\aclass^i$ for $1 \le i \le b$ where $i$ is coprime to some primorial $P_w$ and $b$ is a multiple of $P_w$.  By considering only values coprime to $P_w$ the running time complexity of the bounded primorial steps algorithm achieves an upper bound of $O(\sqrt{M/\log \log M})$ group operations in the worst case.  If an implementation has to test whether each $i$ from $1$ to $P_w$ is coprime to $P_w$, the algorithm cannot achieve this.  As such, the algorithm assumes a set of values coprime to $P_w$ is globally available.  Of course, one can generate such a set by testing whether $\gcd(i, P_w) = 1$ for $i$ from $1$ to $P_w$, but there are more efficient methods.  This section discusses two such methods, namely sieving and wheeling.  
+The bounded primorial steps algorithm from Section \ref{sec:primorial} and used by the SuperSPAR factoring algorithm (Section \ref{sec:superSpar}) computes baby-steps $\aclass^i$ for $1 \le i \le b$ where $i$ is coprime to some primorial $P_w$ and $b$ is a multiple of $P_w$.  By considering only values coprime to $P_w$ the running time complexity of the bounded primorial steps algorithm achieves an upper bound of $O(\sqrt{M/\log \log M})$ group operations in the worst case.  If an implementation has to test whether each $i$ from $1$ to $P_w$ is coprime to $P_w$, the algorithm cannot achieve this.  As such, the algorithm assumes a set of values coprime to $P_w$ is globally available.  Of course, one can generate such a set by testing whether $\gcd(i, P_w) = 1$ for $i$ from $1$ to $P_w$, but there are more efficient methods.  This section discusses two such methods, namely sieving and wheeling.  Additional information on each technique can be found in \cite[pp.117--127]{Crandall2001} and \cite[p.494]{Sutherland2009}.
 
 %Since a practical method for computing baby-steps $\aclass^i$ for $1 \le i \le b$ is to iterate $i$ over consecutive coprime values, computing the delta between neighbouring coprime values is sufficient.  An implementation then iterates $i$ by adding the next delta to the current value of $i$ in order to move it to the next coprime value.
 
@@ -2316,9 +2317,9 @@ and it holds that for all $w$ that
 
 \section{Factorization of the Order of Ideal Classes}
 
-To determine 
+Subsection \ref{subsec:ssparInPractice} discusses some practical considerations of our implementation of SuperSPAR.  This Section provides numerical evidence in support of some of those considerations.  From a set of roughly 6 million ideals, the factorization of the order of each ideal was computed.  Based on this factorization, a strategy of reusing a known multiple of the order of an ideal class for several ideal classes in the same group is adopted (Subsection \ref{subsec:ssparDiffBtwOrder}).  In addition, this data lead to bounds on the exponents $e_i$ in the product $E = \prod {p_i}^{e_i}$ used in the exponentiation stage (Subsection \ref{subsec:ssparPrimePowerBound}), as well as the number of ideal classes to use before switching multipliers and that certain multipliers require fewer ideal classes to achieve a factorization in expectation (Subsection \ref{subsec:ssparBestMultipliers}).
 
-For $k \in \{32, 40, 48, 56, 64, 72, 80\}$, 250,000 unique values of $2^{k-1} \le N < 2^k$, 7 mutipliers (1, 2, 3, 5, 6, 7, 10), and the first 5 prime ideal representatives.  This is a total of 8,750,000 ideal representatives for each bit size.
+For bit sizes $n \in \{32, 40, 48, 56, 64, 72, 80\}$, roughly 250,000 unique integers $N = p \cdot q$ were generated such that $p$ and $q$ are prime and half the size of $N$, while $N$ is $n$ bits in size.  Then for each of 7 multipliers $k \in \{1, 2, 3, 5, 6, 7, 10\}$, discriminants $\Delta = -kN$ or $\Delta = -4kN$ such that $\Delta \equiv 0, 1 \pmod 4$ were generated.  For each corresponding ideal class group $Cl_\Delta$, the smallest 5 prime numbers with ideal class representatives $\idealclass p = [p, (b+\sqrt\Delta)/2]$ with $p$ prime were generated.  Finally, for each ideal class $\idealclass p$, the order $h = \ord(\idealclass p)$, its corresponding prime factorization, and whether it lead to to a successful splitting of the integer $N$ were recorded.
 
 \subsection{Difference between the Order of Two Ideal Classes}
 \label{subsec:ssparDiffBtwOrder}
