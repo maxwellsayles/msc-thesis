@@ -2317,14 +2317,18 @@ and it holds that for all $w$ that
 
 \section{Factorization of the Order of Ideal Classes}
 
-Subsection \ref{subsec:ssparInPractice} discusses some practical considerations of our implementation of SuperSPAR.  This Section provides numerical evidence in support of some of those considerations.  From a set of roughly 6 million ideals, the factorization of the order of each ideal was computed.  Based on this factorization, a strategy of reusing a known multiple of the order of an ideal class for several ideal classes in the same group is adopted (Subsection \ref{subsec:ssparDiffBtwOrder}).  In addition, this data lead to bounds on the exponents $e_i$ in the product $E = \prod {p_i}^{e_i}$ used in the exponentiation stage (Subsection \ref{subsec:ssparPrimePowerBound}), as well as the number of ideal classes to use before switching multipliers and that certain multipliers require fewer ideal classes to achieve a factorization in expectation (Subsection \ref{subsec:ssparBestMultipliers}).
+Subsection \ref{subsec:ssparInPractice} discusses some practical considerations of our implementation of SuperSPAR.  This Section provides numerical evidence in support of some of those considerations.  From a set of roughly 6 million ideals, the factorization of the order of each ideal was computed.  Based on this factorization, a strategy of reusing a known multiple of the order of an ideal class for several ideal classes in the same group is adopted (Subsection \ref{subsec:ssparDiffBtwOrder}).  This data lead to bounds on the exponents $e_i$ in the product $E = \prod {p_i}^{e_i}$ used in the exponentiation stage (Subsection \ref{subsec:ssparPrimePowerBound}), as well as the number of ideal classes to try for each multiplier (Subsection \ref{subsec:ssparExpIdeals}).  In addition, there is evidence, at least for the integer range studied, that ideal classes from groups associated with certain multipliers are more likely to lead to factorizations (Subsection \ref{subsec:ssparBestMultipliers}).
 
-For bit sizes $n \in \{32, 40, 48, 56, 64, 72, 80\}$, roughly 250,000 unique integers $N = p \cdot q$ were generated such that $p$ and $q$ are prime and half the size of $N$, while $N$ is $n$ bits in size.  Then for each of 7 multipliers $k \in \{1, 2, 3, 5, 6, 7, 10\}$, discriminants $\Delta = -kN$ or $\Delta = -4kN$ such that $\Delta \equiv 0, 1 \pmod 4$ were generated.  For each corresponding ideal class group $Cl_\Delta$, the smallest 5 prime numbers with ideal class representatives $\idealclass p = [p, (b+\sqrt\Delta)/2]$ with $p$ prime were generated.  Finally, for each ideal class $\idealclass p$, the order $h = \ord(\idealclass p)$, its corresponding prime factorization, and whether it lead to to a successful splitting of the integer $N$ were recorded.
+This Chapter is concerned with the performance of SuperSPAR in practice.  As such, the following parameters are selected to highlight the range in which SuperSPAR is competitive with other factoring algorithms.  For bit sizes $n \in \{32, 40, 48, 56, 64, 72, 80\}$, roughly 250,000 unique semiprime integers $N = p \cdot q$ were generated such that $p$ and $q$ are prime and half the size of $N$, while $N$ is $n$ bits in size.  Then for each of 7 multipliers $k \in \{1, 2, 3, 5, 6, 7, 10\}$, discriminants $\Delta = -kN$ or $\Delta = -4kN$ such that $\Delta \equiv 0, 1 \pmod 4$ were generated.  For each corresponding ideal class group $Cl_\Delta$, ideal class representatives $\idealclass p \in Cl_\Delta$ with $\ideal p = [p, (b+\sqrt\Delta)/2]$ and $p$ prime were generated for the 5 smallest suitable values of $p$.  Finally, for each ideal class $\idealclass p$, the order of $\idealclass p$, its corresponding prime factorization, and whether it lead to to a successful splitting of the integer $N$ were recorded.
+
+% TODO: Might need to justify that 250,000 is enough.
 
 \subsection{Difference between the Order of Two Ideal Classes}
 \label{subsec:ssparDiffBtwOrder}
 
-TODO: Describe how we generated this table.
+\newcommand{\idelta}{\mathcal I_\Delta}
+
+For each bit size $n$, fix the integer to be factored $N$ and the multiplier $k$. Let $\idelta$ be the subset of ideal classes associated with the discriminant $\Delta = -kN$ or $\Delta = -4kN$ from our data set.  Note that $|\idelta| = 5$ since exactly 5 ideal classes were generated for each class group in the data set.  Then for each pair of distinct ideal classes $\aclass, \bclass \in \idelta$, there exists some set of primes $\mathcal P$ such that $\ord(\bclass)$ divides $\ord(\aclass) \cdot \prod_{p \in \mathcal P} p$.  Let $x = |\mathcal P|$.  For each $x \ge 0$, sum the number of pairs such that $\ord(\bclass)$ divides $\ord(\aclass) \cdot \prod_{p \in \mathcal P} p$ and $|\mathcal P| = x$.  This is done for each multiplier $k$ and each integer $N$, and the sum is divided by the total number of ideal class pairs.  The result is the probability that if the order $h$ of an ideal class $\aclass \in \idelta$ is known, that the order $h'$ of the ideal class $\bclass^h$ will have exactly $x$ prime factors.  In some sense, this is a measurement of the utility that a multiple of the order of one ideal class has towards finding the order of some other ideal class in the same group.  Table \ref{tab:diffOfOrderOfTwoIdeals} shows the results of this calculation.
 
 \begin{table}[h]
 \centering
@@ -2341,11 +2345,13 @@ TODO: Describe how we generated this table.
 80 & 0.96980 & 0.02967 & 0.00052 & 0.00001 & 0.00000 \\
 	\hline
 \end{tabular}
-\caption{If the order $h_{\aclass}$ of an ideal class $\aclass \in Cl_\Delta$ is known, this table shows the probability that for $h_{\bclass} = \ord(\bclass)$ for some other ideal class $\bclass \in Cl_\Delta$ that $h_{\bclass}$ divides $h_{\aclass} \cdot \prod_{p \in \mathcal P} p$ for a set of primes $\mathcal P$ of given size.}
+\caption{If the order $h$ of an ideal class $\aclass \in \idelta$ is known, this table shows the probability that the order $h'$ of the ideal class $\bclass^h$ for some other ideal class $\bclass \in \idelta$ has exactly $|\mathcal P|$ prime factors.}
 \label{tab:diffOfOrderOfTwoIdeals}
 \end{table}
 
-i.e.\ Data the lead us to the strategy where once we know some $e$ such that $\aclass^e = \idclass$, we reuse $e$ on other ideal classes.
+Of the ideal class groups studied, roughly 97\% of the time, knowing the order $h$ of an ideal class $\aclass$ means that $h$ is a multiple of the order of some other ideal class $\bclass$ in the same class group.  For SuperSPAR, this means that once the order $h$ of an ideal class $\aclass$ is discovered, if this does not lead to a splitting of $N$, then with high probability, $h$ is a multiple of the order of some other ideal class $\bclass$ in the same group.  Rather than starting over with the ideal class $\bclass$, let $h'$ be the odd part of $h$ and compute $\bclass^{h'}$.  SuperSPAR then tries to find an ambiguous class by repeated squaring of $\bclass^{h'}$ and, if successful, then attempts to split $N$.  This process may be repeated for several different ideal classes in the same group.
+
+This process may be unlucky, and as we shall see in Subsection \ref{subsec:ssparExpIdeals}, if the algorithm has been unsuccessful for more than an expected number of ideal classes within the same class group, the algorithm then changes multipliers and starts over with a different class group.
 
 \subsection{Prime Power Bound}
 \label{subsec:ssparPrimePowerBound}
@@ -2354,6 +2360,11 @@ i.e.\ $3^3 5^2 7^2 \prod p_i$ such that all $p_i \ge 11$ have an exponent of 11.
 \subsection{Best Multipliers}
 \label{subsec:ssparBestMultipliers}
 i.e.\ Statistically how many ideal classes do we need to try before successfully factoring.  If we go over some threshold, we switch multiplier instead.  Splitting this by $N \pmod 4$ and by multipliers, show that the expected number of ideal classes to try is distinct by multiplier and that some multipliers should be preferred.
+
+\subsection{Expected Number of Ideal Classes}
+\label{subsec:ssparExpIdeals}
+i.e.\ A table showing the number of multipliers used when the number of ideal classes tried is fixed.
+
 
 
 \section{Chained Hashing vs.\ Open Address Hashing}
@@ -2424,6 +2435,9 @@ This might be interesting to try a discrete log record too.
 
 Large differences in exponents show general trends to 2,3 representations, however, when we look close up, the variation in 2, 3 representations between $n$ and $n+1$ varies greatly.  It might be interesting to measure how much they vary.  
 
+\section{Rigorous Analysis of the Factorization of the Order of Ideal Classes}
+
+We should be able to compute theoretical probabilities of divisors of the order of ideal classes.
 
 \section{Other types of Ideal Arithmetic}
 For example, the ideal ring of algebraic integers of real quadratic fields.
