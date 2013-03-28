@@ -1272,7 +1272,7 @@ Assuming good parameters are known, the SuperSPAR factoring algorithm used in pr
 	\IF {$\bclass$ is an ambiguous ideal class}
 		\STATE $h \gets E$, then go to line \ref{goto:tryAmbiguous}
 	\ENDIF
-	\STATE $\bclass \gets \cclass^2$
+	\STATE $\bclass \gets \bclass^2$
 \ENDFOR
 
 \STATE \{-- search stage --\}
@@ -1284,10 +1284,10 @@ Assuming good parameters are known, the SuperSPAR factoring algorithm used in pr
 	\ENDIF
 \ENDFOR
 \FOR{$1 \le j \le m\phi(P_w)$}
-	\IF{$\bclass^{2jb}$ is in the table, first lookup $i$}
-		\STATE $h \gets$ odd part of $E(2jb - i)$, then go to line \ref{goto:tryAmbiguous}  \COMMENT{positive giant-step}
-	\ELSIF{$\bclass^{-2jb}$ is in the table, first lookup $i$}
-		\STATE $h \gets$ odd part of $E(2jb + i)$, then go to line \ref{goto:tryAmbiguous} \COMMENT{inverted giant-step}
+	\IF{$\bclass^{2bj}$ is in the table, first lookup $i$}
+		\STATE $h \gets$ odd part of $(2bj - i)E$, then go to line \ref{goto:tryAmbiguous}  \COMMENT{positive giant-step}
+	\ELSIF{$\bclass^{-2bj}$ is in the table, first lookup $i$}
+		\STATE $h \gets$ odd part of $(2bj + i)E$, then go to line \ref{goto:tryAmbiguous} \COMMENT{inverted giant-step}
 	\ENDIF
 \ENDFOR
 
@@ -2331,9 +2331,32 @@ Since this Chapter is concerned with the performance of SuperSPAR in practice, t
 
 In theory, SPAR (Section \ref{sec:spar}) exponentiates an ideal class $\aclass$ to an exponent $E$ where $E = \prod_{i=2}^t {p_i}^{e_i}$, $p_i$ are prime, and $e_i = \max \{ v : {p_i}^v \le {p_t}^2 \}$ for some appropriately chosen prime $p_t$ \cite[p.290]{Schnorr1984}.  In practice however, Schnorr and Lenstra recommend choosing smaller exponents $e_i$ such that $e_i = \max \{ v : {p_i}^v \le p_t \}$ \cite[p.293]{Schnorr1984}.  Here we consider bounds for the exponents $e_i$ for use with our implementation of SuperSPAR, assuming the range in which it is a competitive integer factoring tool.
 
-The exponentiation stage of SuperSPAR computes $\bclass = \aclass ^E$.  The search stage then computes baby steps $\bclass^i$ for $i$ coprime to some primorial $P_w$.  However, if $\ord(\bclass)$ and $P_w$ have a common factor $p$, then $p$ is not coprime to $P_w$ and $\bclass^p$ will not be added to the lookup table used by the coprime baby steps.  If this is the case, the search phase is guaranteed to fail since it cannot find any $\bclass^i$ such that $i \equiv 0 \pmod p$ in the lookup table.  For this reason, the exponent $E$ is chosen in order to remove (at least with high probability) all of the factors from the order of $\aclass$ that are common to the primorial $P_w$ used by the search stage.
+The exponentiation stage of SuperSPAR computes $\bclass = \aclass ^{2^\ell E}$ with $\ell = \floor{\log_2 h_\Delta}$.  The search stage then computes baby steps $\bclass^i$ for $i$ coprime to some primorial $P_w$.  However, if $\ord(\bclass)$ and $P_w$ have a common factor $x$, then $x$ is not coprime to $P_w$ and $\bclass^x$ will not be added to the lookup table used by the coprime baby steps.  If this is the case, the search phase is guaranteed to fail since it cannot find any $\bclass^i$ such that $i \equiv 0 \pmod x$ in the lookup table.  For this reason, the exponent $E$ is chosen in order to remove (at least with high probability) all of the factors from the order of $\aclass$ that are common to the primorial $P_w$ used by the search stage.
 
-Table \ref{tab:primePowerBound} represents the probability that an ideal class $\aclass$ associated with an integer $N$ of $n$ bits, with order $\ord(\aclass) = \prod {p_i}^{e_i}$ for primes $p_i$ is such that $e_i \le \floor{\log_{p_i} B}$ for primes $3 \le p_i \le 11$, $e_i = 1$ for all $p_i > 11$, and $e_1 \le \floor{\log_2 h_\Delta}$ for $p_1 = 2$.  In other words, this table represents the probability that choosing some exponent $E$ with the above constraints implies that the ideal class $\bclass = \aclass ^E$ will have order $\ord(\bclass)$ coprime to the exponent $E$.
+For each ideal in our data set, let the factorization of the order be represented by $\ord(\aclass) = \prod {p_i}^{e_i}$ for $p_i$ prime.  For each prime power factor $3^{e_2}$, $5^{e_3}$, $7^{e_4}$, $11^{e_5}$, $13^{e_6}$, and $17^{e_7}$, more than 99\% of the ideals studied had either $e_2 \le 4$, $e_3 \le 2$, $e_4 \le 2$, $e_5 \le 1$, $e_6 \le 1$, or $e_7 \le 1$.  This is not to say that more than 99\% of the ideals in the data set were such that $\ord(\aclass^{3^4 5^2 7^2 11^1 13^1 17^1})$ is coprime to $3 \times 5 \times 7 \times 11 \times 13 \times 17$, but only that $\ord(\aclass^{3^4})$ is coprime to 3, and so on.  Table \ref{tab:ninetyNine} gives the probability that for each $e_i$ for $2 \le i \le 7$, that $\ord(\aclass^{{p_i}^{e_i}})$ is coprime to $p_i$ when $e_i$ is chosen such that $e_2 = 4$, $e_3 = 2$, $e_4 = 2$, $e_5 = 1$, $e_6 = 1$, and $e_7 = 1$.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{| r | r | r | r | r | r | r |}
+	\hline
+	$n$ & $e_2 = 4$ & $e_3 = 2$ & $e_4 = 2$ & $e_5 = 1$ & $e_6 = 1$ & $e_7 = 1$ \\
+	\hline
+32 & 0.99598 & 0.99195 & 0.99713 & 0.99177 & 0.99419 & 0.99659 \\
+40 & 0.99594 & 0.99193 & 0.99709 & 0.99166 & 0.99404 & 0.99660 \\
+48 & 0.99593 & 0.99193 & 0.99713 & 0.99162 & 0.99406 & 0.99655 \\
+56 & 0.99593 & 0.99194 & 0.99709 & 0.99170 & 0.99404 & 0.99648 \\
+64 & 0.99584 & 0.99211 & 0.99713 & 0.99170 & 0.99412 & 0.99652 \\
+72 & 0.99586 & 0.99201 & 0.99707 & 0.99163 & 0.99415 & 0.99650 \\
+80 & 0.99580 & 0.99190 & 0.99719 & 0.99169 & 0.99404 & 0.99645 \\
+	\hline
+\end{tabular}
+\caption{The probability that $\ord(\aclass^{{p_i}^{e_i}})$ is coprime to $p_i$.}
+\label{tab:ninetyNine}
+\end{table}
+
+This is evidence that the exponent $E$ for the exponentiation stage can be chosen with $e_i = 1$ for $i \ge 5$ and $e_2 = 4$, $e_3 = 2$, and $e_4 = 2$, and that with high probability, the order of the resulting ideal, after exponentiation, will be coprime to $E$.
+
+To provide additional evidence of this position, Table \ref{tab:primePowerBound} represents the probability that an ideal class $\aclass$ associated with an integer $N$ of $n$ bits, with order $\ord(\aclass) = \prod {p_i}^{e_i}$ for primes $p_i$ is such that $e_i \le \floor{\log_{p_i} B}$ for primes $3 \le p_i \le 11$ and $e_i = 1$ for all $p_i > 11$\footnote{For the prime 2, the exponent $e_1 \le \floor{\log_2 h_\Delta}$ is bound by the class number since this is handle separately when searching for ambiguous ideal class.}.  In other words, this table represents the probability that choosing some exponent $E$ with the above constraints implies that the ideal class $\bclass = \aclass ^E$ will have order $\ord(\bclass)$ coprime to the exponent $E$.
 
 \begin{table}[h]
 \centering
@@ -2353,6 +2376,9 @@ Table \ref{tab:primePowerBound} represents the probability that an ideal class $
 \caption{The probability that the order of an ideal class $\bclass = \aclass ^ E$ is coprime to the product $E = \prod {p_i}^{e_i}$ for primes $p_i$ where $e_i \le \floor{\log_{p_i} B}$ for $3 \le p_i \le 11$, $e_i = 1$ for all $p_i > 11$, and $e_1 \le \floor{\log_2 h_\Delta}$ for $p_1 = 2$.}
 \label{tab:primePowerBound}
 \end{table}
+
+
+Since the goal is to improve the performance of SuperSPAR in practice, bounds on the exponents of the prime powers in the 
 
 Since in practice, the largest primorial used for the search phase of SuperSPAR is $P_5 = 2 \times 3 \times 5 \times 7 \times 11$ (see Section \ref{sec:ssparEmpirical}), Table \ref{tab:primePowerBound} uses prime power bounds for primes up to 11.  This table provides evidence that even smaller exponents than those suggested by Schnorr and Lenstra will be sufficient with high probability.
 
