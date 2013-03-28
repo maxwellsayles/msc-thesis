@@ -73,6 +73,8 @@
 \newcommand{\bclass}{\idealclass b}
 \newcommand{\cclass}{\idealclass c}
 \newcommand{\dclass}{\idealclass d}
+\newcommand{\pclass}{\idealclass p}
+\newcommand{\qclass}{\idealclass q}
 \newcommand{\idclass}{[\mathcal O_\Delta]}
 
 \newcommand{\ith}{i^{\textrm{th}}}
@@ -2331,7 +2333,7 @@ In theory, SPAR (Section \ref{sec:spar}) exponentiates an ideal class $\aclass$ 
 
 The exponentiation stage of SuperSPAR computes $\bclass = \aclass ^E$.  The search stage then computes baby steps $\bclass^i$ for $i$ coprime to some primorial $P_w$.  However, if $\ord(\bclass)$ and $P_w$ have a common factor $p$, then $p$ is not coprime to $P_w$ and $\bclass^p$ will not be added to the lookup table used by the coprime baby steps.  If this is the case, the search phase is guaranteed to fail since it cannot find any $\bclass^i$ such that $i \equiv 0 \pmod p$ in the lookup table.  For this reason, the exponent $E$ is chosen in order to remove (at least with high probability) all of the factors from the order of $\aclass$ that are common to the primorial $P_w$ used by the search stage.
 
-Table \ref{tab:primePowerBound} represents the probability that an ideal class $\aclass$ associated with an integer $N$ of $n$ bits, with order $\ord(\aclass) = \prod {p_i}^{e_i}$ for primes $p_i$ is such that $e_i \le \floor{\log_{p_i} B}$ for primes $3 \le p_i \le 11$ and $e_i = \floor{\log_{p_i} h_\Delta}$ for all other primes.  In other words, this table represents the probability that choosing some exponent $E$ with the above constraints implies that the ideal class $\bclass = \aclass ^E$ will have order $\ord(\bclass)$ coprime to the exponent $E$.
+Table \ref{tab:primePowerBound} represents the probability that an ideal class $\aclass$ associated with an integer $N$ of $n$ bits, with order $\ord(\aclass) = \prod {p_i}^{e_i}$ for primes $p_i$ is such that $e_i \le \floor{\log_{p_i} B}$ for primes $3 \le p_i \le 11$, $e_i = 1$ for all $p_i > 11$, and $e_1 \le \floor{\log_2 h_\Delta}$ for $p_1 = 2$.  In other words, this table represents the probability that choosing some exponent $E$ with the above constraints implies that the ideal class $\bclass = \aclass ^E$ will have order $\ord(\bclass)$ coprime to the exponent $E$.
 
 \begin{table}[h]
 \centering
@@ -2339,52 +2341,58 @@ Table \ref{tab:primePowerBound} represents the probability that an ideal class $
 	\hline
 	$n$ & $B=1$ & $B=3^2$ & $B=5^2$ & $B=3^3$ & $B=7^2$ & $B=3^4$ & $B=11^2$ & $B=5^3$ \\
 	\hline
-32 & 0.44922 & 0.88666 & 0.91639 & 0.93984 & 0.95680 & 0.96486 & 0.96486 & 0.97131 \\
-40 & 0.44755 & 0.88545 & 0.91502 & 0.93845 & 0.95535 & 0.96332 & 0.96332 & 0.96963 \\
-48 & 0.44705 & 0.88554 & 0.91485 & 0.93855 & 0.95519 & 0.96317 & 0.96317 & 0.96941 \\
-56 & 0.44693 & 0.88528 & 0.91479 & 0.93846 & 0.95517 & 0.96310 & 0.96310 & 0.96938 \\
-64 & 0.44697 & 0.88534 & 0.91483 & 0.93836 & 0.95514 & 0.96318 & 0.96318 & 0.96934 \\
-72 & 0.44707 & 0.88515 & 0.91480 & 0.93853 & 0.95533 & 0.96327 & 0.96327 & 0.96949 \\
-80 & 0.44728 & 0.88556 & 0.91499 & 0.93831 & 0.95516 & 0.96301 & 0.96301 & 0.96930 \\	
+32 & 0.40826 & 0.80574 & 0.90863 & 0.93187 & 0.94869 & 0.95669 & 0.96418 & 0.97062 \\
+40 & 0.40693 & 0.80473 & 0.90739 & 0.93061 & 0.94735 & 0.95525 & 0.96256 & 0.96887 \\
+48 & 0.40649 & 0.80484 & 0.90720 & 0.93071 & 0.94720 & 0.95511 & 0.96246 & 0.96871 \\
+56 & 0.40598 & 0.80438 & 0.90718 & 0.93067 & 0.94724 & 0.95510 & 0.96238 & 0.96866 \\
+64 & 0.40638 & 0.80500 & 0.90722 & 0.93057 & 0.94720 & 0.95518 & 0.96243 & 0.96858 \\
+72 & 0.40624 & 0.80436 & 0.90714 & 0.93066 & 0.94734 & 0.95520 & 0.96255 & 0.96877 \\
+80 & 0.40664 & 0.80502 & 0.90738 & 0.93051 & 0.94722 & 0.95499 & 0.96228 & 0.96856 \\
 	\hline
 \end{tabular}
-\caption{The probability that the order of an ideal class divides the product $\prod {p_i}^{e_i}$ for primes $p_i$ where $e_i = \max \left\{ 1, \floor{\log_{p_i} B} \right\}$ and $e_1 = \floor{\log_2 h_\Delta}$.}
+\caption{The probability that the order of an ideal class $\bclass = \aclass ^ E$ is coprime to the product $E = \prod {p_i}^{e_i}$ for primes $p_i$ where $e_i \le \floor{\log_{p_i} B}$ for $3 \le p_i \le 11$, $e_i = 1$ for all $p_i > 11$, and $e_1 \le \floor{\log_2 h_\Delta}$ for $p_1 = 2$.}
 \label{tab:primePowerBound}
 \end{table}
 
-Since in practice, the largest primorial used for the search phase of SuperSPAR is $P_5$ (Section \ref{sec:ssparEmpirical}), this table only considers odd primes up to 11.  The column ``$B=1$'' shows that the order of roughly 45\% of the ideal classes studied is not divisible by any power of 3, 5, 7, or 11 greater than 1.  The column ``$B=7^2$'' shows that for about 95\% of the ideal classes studied, the order of the ideal class $\bclass = \aclass^{3^2 5^2 7^2 11}$ will not have 3, 5, 7, or 11 as a factor.  
+Since in practice, the largest primorial used for the search phase of SuperSPAR is $P_5 = 2 \times 3 \times 5 \times 7 \times 11$ (see Section \ref{sec:ssparEmpirical}), Table \ref{tab:primePowerBound} uses prime power bounds for primes up to 11.  This table provides evidence that even smaller exponents than those suggested by Schnorr and Lenstra will be sufficient with high probability.
+
+% TODO: Roughly 99.2\% of all factorizations of the order have $11^{e_5}$ with $e_5 \le 1$.  Do this for 3, 5, and 7?
 
 % TODO: Section \ref{sec:ssparEmpirical} shows that selecting exponents $E = \prod {p_i}^{e_i}$ such that $e_i = \max \{1, \floor{\log_{p_i} 49} \}$ performs slightly better in practice.
 
 \subsection{Difference between the Order of Two Ideal Classes}
 \label{subsec:ssparDiffBtwOrder}
 
+% TODO: Show how repeatable the order is if the exponent $E$ is chosen to remove all factors $\le B$ for some bound $B$.
+
 \newcommand{\idelta}{\mathcal I_\Delta}
 
-For each bit size $n$, fix the integer to be factored $N$ and the multiplier $k$. Let $\idelta$ be the subset of ideal classes associated with the discriminant $\Delta = -kN$ or $\Delta = -4kN$ from our data set.  Note that $|\idelta| = 5$ since exactly 5 ideal classes were generated for each class group in the data set.  Then for each pair of distinct ideal classes $\aclass, \bclass \in \idelta$, there exists some set of primes $\mathcal P$ such that $\ord(\bclass)$ divides $\ord(\aclass) \cdot \prod_{p \in \mathcal P} p$.  Let $x = |\mathcal P|$.  For each $x \ge 0$, sum the number of pairs such that $\ord(\bclass)$ divides $\ord(\aclass) \cdot \prod_{p \in \mathcal P} p$ and $|\mathcal P| = x$.  This is done for each multiplier $k$ and each integer $N$, and the sum is divided by the total number of ideal class pairs.  The result is the probability that if the order $h$ of an ideal class $\aclass \in \idelta$ is known, that the order $h'$ of the ideal class $\bclass^h$ will have exactly $x$ prime factors.  In some sense, this is a measurement of the utility that a multiple of the order of one ideal class has towards finding the order of some other ideal class in the same group.  Table \ref{tab:diffOfOrderOfTwoIdeals} shows the results of this calculation.
+This Subsection assumes that an exponent $E$ is chosen such that for each ideal class in our data set, the order of the ideal class $\aclass^E$ is coprime to $3 \times 5 \times 7 \times 11$.  For each bit size $n$, fix the integer to be factored $N$ and the multiplier $k$. Let $\idelta$ be the subset of ideal classes associated with the discriminant $\Delta = -kN$ or $\Delta = -4kN$ from our data set.  Then for each pair of distinct ideal classes $\aclass, \bclass \in \idelta$, there exists some set $\mathcal P = \{ p ~:~ p \textrm{ is prime}, p > 11 \}$ such that $\ord(\bclass^E)$ divides $\ord(\aclass^E) \cdot \prod_{p \in \mathcal P} p$.  Let $x = |\mathcal P|$.  For each $x \ge 0$, sum the number of pairs such that $\ord(\bclass^E)$ divides $\ord(\aclass^E) \cdot \prod_{p \in \mathcal P} p$ and $|\mathcal P| = x$.  This is done for each multiplier $k$ and each integer $N$, and the sum is divided by the total number of ideal class pairs.  The result is the probability that if $h'$, a multiple of the order of an ideal class $\aclass \in \idelta$ is known, that the order $h''$ of the ideal class $\bclass^{Eh'}$ will have exactly $x$ prime factors greater than 11.  In some sense, this is a measurement of the utility that a multiple of the order of one ideal class has towards finding the order of some other ideal class in the same group.  Table \ref{tab:diffOfOrderOfTwoIdeals} shows the results of this calculation.
 
 \begin{table}[h]
 \centering
-\begin{tabular}{| r | r | r | r | r | r |}
+\begin{tabular}{| r | r | r | r | r |}
 	\hline
-	n & $|\mathcal P| = 0$ & $|\mathcal P| = 1$ & $|\mathcal P| = 2$ & $|\mathcal P| = 3$ & $|\mathcal P| = 4$ \\
+	n & $|\mathcal P| = 0$ & $|\mathcal P| = 1$ & $|\mathcal P| = 2$ & $|\mathcal P| = 3$ \\
 	\hline
-32 & 0.97003 & 0.02956 & 0.00041 & 0.00000 & 0.00000 \\
-40 & 0.96992 & 0.02958 & 0.00049 & 0.00001 & 0.00000 \\
-48 & 0.96983 & 0.02963 & 0.00052 & 0.00001 & 0.00000 \\
-56 & 0.96974 & 0.02973 & 0.00052 & 0.00001 & 0.00000 \\
-64 & 0.96979 & 0.02968 & 0.00053 & 0.00001 & 0.00000 \\
-72 & 0.96976 & 0.02971 & 0.00052 & 0.00001 & 0.00000 \\
-80 & 0.96980 & 0.02967 & 0.00052 & 0.00001 & 0.00000 \\
+32 & 0.97804 & 0.02177 & 0.00020 & 0.00000 \\
+40 & 0.97791 & 0.02183 & 0.00026 & 0.00000 \\
+48 & 0.97785 & 0.02187 & 0.00028 & 0.00000 \\
+56 & 0.97776 & 0.02196 & 0.00028 & 0.00000 \\
+64 & 0.97779 & 0.02193 & 0.00028 & 0.00000 \\
+72 & 0.97782 & 0.02190 & 0.00027 & 0.00000 \\
+80 & 0.97781 & 0.02191 & 0.00028 & 0.00000 \\
 	\hline
 \end{tabular}
 \caption{If the order $h$ of an ideal class $\aclass \in \idelta$ is known, this table shows the probability that the order $h'$ of the ideal class $\bclass^h$ for some other ideal class $\bclass \in \idelta$ has exactly $|\mathcal P|$ prime factors.}
 \label{tab:diffOfOrderOfTwoIdeals}
 \end{table}
 
-Of the ideal class groups studied, roughly 97\% of the time, knowing the order $h$ of an ideal class $\aclass$ means that $h$ is a multiple of the order of some other ideal class $\bclass$ in the same class group.  For SuperSPAR, this means that once the order $h$ of an ideal class $\aclass$ is discovered, if this does not lead to a splitting of $N$, then with high probability, $h$ is a multiple of the order of some other ideal class $\bclass$ in the same group.  Rather than starting over with the ideal class $\bclass$, let $h'$ be the odd part of $h$ and compute $\bclass^{h'}$.  SuperSPAR then tries to find an ambiguous class by repeated squaring of $\bclass^{h'}$ and, if successful, then attempts to split $N$.  This process may be repeated for several different ideal classes in the same group.
+Of the ideal class groups studied, almost 97.8\% of the time, knowing the order $h$ of an ideal class $\aclass$ means that $h$ is a multiple of the order of some other ideal class $\bclass$ in the same class group.  For SuperSPAR, this means that once the order $h$ of an ideal class $\aclass$ is discovered, if this does not lead to a splitting of $N$, then with high probability, $h$ is a multiple of the order of some other ideal class $\bclass$ in the same group.  Rather than starting over with the ideal class $\bclass$, let $h'$ be the odd part of $h$ and compute $\bclass^{h'}$.  SuperSPAR then tries to find an ambiguous class by repeated squaring of $\bclass^{h'}$ and, if successful, then attempts to split $N$.  This process may be repeated for several different ideal classes in the same group.
 
 This process may be unlucky, and as Subsection \ref{subsec:ssparExpIdeals} shows, if the algorithm is unsuccessful for more than an fixed number of ideal classes within the same class group, changing class groups by changing multipliers is beneficial.
+
+TODO: Table showing that if we assume an exponent is known that removes all factors $\le B$, then the order of some ideal class is a multiple of the order of some other ideal class with what probability?
 
 
 \subsection{Best Multipliers}
@@ -2395,6 +2403,7 @@ i.e.\ Statistically how many ideal classes do we need to try before successfully
 \label{subsec:ssparExpIdeals}
 i.e.\ A table showing the number of multipliers used when the number of ideal classes tried is fixed.
 
+% TODO: This might make more sense to do experimentally.
 
 
 \section{Chained Hashing vs.\ Open Address Hashing}
