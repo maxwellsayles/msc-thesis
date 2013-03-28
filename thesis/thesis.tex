@@ -2284,7 +2284,7 @@ The coprime sieve requires $b$ bits of memory, while the coprime wheel requires 
 \label{tab:primorialRateOfGrowth}
 \end{table}
 
-SuperSPAR computes baby steps coprime to a multiple of a primorial, and so $b$ is at least $\phi(P_w)$.  This means that in practice, the algorithm is restricted to primorials that fit within the available memory.  The coprime wheel is used to generate the list of coprime deltas, however, this list is only generated once and then compiled directly into the bytecode our implementation.
+SuperSPAR computes baby steps coprime to a multiple of a primorial, and so $b$ is at least $\phi(P_w)$.  This means that in practice, the algorithm is restricted to primorials that fit within the available memory.  The coprime wheel is used to generate the list of coprime deltas, however, this list is only generated once and then compiled directly into the bytecode of our implementation.  In practice, the largest primorial used is $P_5 = 2310$ (see Section \ref{sec:ssparEmpirical} for details).
 
 
 \begin{comment}
@@ -2317,11 +2317,44 @@ and it holds that for all $w$ that
 
 \section{Factorization of the Order of Ideal Classes}
 
-Subsection \ref{subsec:ssparInPractice} discusses some practical considerations of our implementation of SuperSPAR.  This Section provides numerical evidence in support of some of those considerations.  From a set of roughly 6 million ideals, the factorization of the order of each ideal was computed.  Based on this factorization, a strategy of reusing a known multiple of the order of an ideal class for several ideal classes in the same group is adopted (Subsection \ref{subsec:ssparDiffBtwOrder}).  This data lead to bounds on the exponents $e_i$ in the product $E = \prod {p_i}^{e_i}$ used in the exponentiation stage (Subsection \ref{subsec:ssparPrimePowerBound}), as well as the number of ideal classes to try for each multiplier (Subsection \ref{subsec:ssparExpIdeals}).  In addition, there is evidence, at least for the integer range studied, that ideal classes from groups associated with certain multipliers are more likely to lead to factorizations (Subsection \ref{subsec:ssparBestMultipliers}).
+Subsection \ref{subsec:ssparInPractice} discusses some practical considerations of our implementation of SuperSPAR.  As such, this Section provides numerical evidence in support of some of those considerations.  From a set of roughly 6 million ideals, the factorization of the order of each ideal was computed.  Based on this factorization, a strategy of reusing a known multiple of the order of an ideal class for several ideal classes in the same group is adopted (Subsection \ref{subsec:ssparDiffBtwOrder}).  This data lead to bounds on the exponents $e_i$ in the product $E = \prod {p_i}^{e_i}$ used in the exponentiation stage (Subsection \ref{subsec:ssparPrimePowerBound}), as well as the number of ideal classes to try for each multiplier (Subsection \ref{subsec:ssparExpIdeals}).  In addition, there is evidence, at least for the integer range studied, that ideal classes from groups associated with certain multipliers are more likely to lead to factorizations (Subsection \ref{subsec:ssparBestMultipliers}).
 
-This Chapter is concerned with the performance of SuperSPAR in practice.  As such, the following parameters are selected to highlight the range in which SuperSPAR is competitive with other factoring algorithms.  For bit sizes $n \in \{32, 40, 48, 56, 64, 72, 80\}$, roughly 250,000 unique semiprime integers $N = p \cdot q$ were generated such that $p$ and $q$ are prime and half the size of $N$, while $N$ is $n$ bits in size.  Then for each of 7 multipliers $k \in \{1, 2, 3, 5, 6, 7, 10\}$, discriminants $\Delta = -kN$ or $\Delta = -4kN$ such that $\Delta \equiv 0, 1 \pmod 4$ were generated.  For each corresponding ideal class group $Cl_\Delta$, ideal class representatives $\idealclass p \in Cl_\Delta$ with $\ideal p = [p, (b+\sqrt\Delta)/2]$ and $p$ prime were generated for the 5 smallest suitable values of $p$.  Finally, for each ideal class $\idealclass p$, the order of $\idealclass p$, its corresponding prime factorization, and whether it lead to to a successful splitting of the integer $N$ were recorded.
+Since this Chapter is concerned with the performance of SuperSPAR in practice, the following parameters were selected to highlight the range in which SuperSPAR is competitive with other factoring algorithms, but also in order to minimize the size of operands.  Pari/GP was used to generate as large a data set as possible, but one that still fit within the available memory (8Gb) and could be processed within a few days time.  For bit sizes $n \in \{32, 40, 48, 56, 64, 72, 80\}$, roughly 250,000 unique semiprime integers $N = p \cdot q$ were generated such that $p$ and $q$ are prime and half the size of $N$, while $N$ is $n$ bits in size.  Then for each square free multiplier $k \in \{1, 2, 3, 5, 6, 7, 10\}$, discriminants $\Delta = -kN$ or $\Delta = -4kN$ such that $\Delta \equiv 0, 1 \pmod 4$ were generated.  For each corresponding ideal class group $Cl_\Delta$, ideal class representatives $\idealclass p \in Cl_\Delta$ with $\ideal p = [p, (b+\sqrt\Delta)/2]$ and $p$ prime were generated for the 5 smallest suitable values of $p$.  Finally, for each ideal class $\idealclass p$, the order of $\idealclass p$, its corresponding prime factorization, and whether it lead to to a successful splitting of the integer $N$ were recorded.  This data set is used throughout the computations in Subsections \ref{subsec:ssparPrimePowerBound}, \ref{subsec:ssparDiffBtwOrder}, \ref{subsec:ssparBestMultipliers}, and \ref{subsec:ssparExpIdeals}.
 
-% TODO: Might need to justify that 250,000 is enough.
+% NOTE: 250,000 was as big as could fit in memory and be processed in a reasonable amount of time.
+
+
+\subsection{Prime Power Bound}
+\label{subsec:ssparPrimePowerBound}
+
+In theory, SPAR (Section \ref{sec:spar}) exponentiates an ideal class $\aclass$ to an exponent $E$ where $E = \prod_{i=2}^t {p_i}^{e_i}$, $p_i$ are prime, and $e_i = \max \{ v : {p_i}^v \le {p_t}^2 \}$ for some appropriately chosen prime $p_t$ \cite[p.290]{Schnorr1984}.  In practice however, Schnorr and Lenstra recommend choosing smaller exponents $e_i$ such that $e_i = \max \{ v : {p_i}^v \le p_t \}$ \cite[p.293]{Schnorr1984}.  Here we consider bounds for the exponents $e_i$ for use with our implementation of SuperSPAR, assuming the range in which it is a competitive integer factoring tool.
+
+The exponentiation stage of SuperSPAR computes $\bclass = \aclass ^E$.  The search stage then computes baby steps $\bclass^i$ for $i$ coprime to some primorial $P_w$.  However, if $\ord(\bclass)$ and $P_w$ have a common factor $p$, then $p$ is not coprime to $P_w$ and $\bclass^p$ will not be added to the lookup table used by the coprime baby steps.  If this is the case, the search phase is guaranteed to fail since it cannot find any $\bclass^i$ such that $i \equiv 0 \pmod p$ in the lookup table.  For this reason, the exponent $E$ is chosen in order to remove (at least with high probability) all of the factors from the order of $\aclass$ that are common to the primorial $P_w$ used by the search stage.
+
+Table \ref{tab:primePowerBound} represents the probability that an ideal class $\aclass$ associated with an integer $N$ of $n$ bits, with order $\ord(\aclass) = \prod {p_i}^{e_i}$ for primes $p_i$ is such that $e_i \le \floor{\log_{p_i} B}$ for primes $3 \le p_i \le 11$ and $e_i = \floor{\log_{p_i} h_\Delta}$ for all other primes.  In other words, this table represents the probability that choosing some exponent $E$ with the above constraints implies that the ideal class $\bclass = \aclass ^E$ will have order $\ord(\bclass)$ coprime to the exponent $E$.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{| r | r | r | r | r | r | r | r | r |}
+	\hline
+	$n$ & $B=1$ & $B=3^2$ & $B=5^2$ & $B=3^3$ & $B=7^2$ & $B=3^4$ & $B=11^2$ & $B=5^3$ \\
+	\hline
+32 & 0.44922 & 0.88666 & 0.91639 & 0.93984 & 0.95680 & 0.96486 & 0.96486 & 0.97131 \\
+40 & 0.44755 & 0.88545 & 0.91502 & 0.93845 & 0.95535 & 0.96332 & 0.96332 & 0.96963 \\
+48 & 0.44705 & 0.88554 & 0.91485 & 0.93855 & 0.95519 & 0.96317 & 0.96317 & 0.96941 \\
+56 & 0.44693 & 0.88528 & 0.91479 & 0.93846 & 0.95517 & 0.96310 & 0.96310 & 0.96938 \\
+64 & 0.44697 & 0.88534 & 0.91483 & 0.93836 & 0.95514 & 0.96318 & 0.96318 & 0.96934 \\
+72 & 0.44707 & 0.88515 & 0.91480 & 0.93853 & 0.95533 & 0.96327 & 0.96327 & 0.96949 \\
+80 & 0.44728 & 0.88556 & 0.91499 & 0.93831 & 0.95516 & 0.96301 & 0.96301 & 0.96930 \\	
+	\hline
+\end{tabular}
+\caption{The probability that the order of an ideal class divides the product $\prod {p_i}^{e_i}$ for primes $p_i$ where $e_i = \max \left\{ 1, \floor{\log_{p_i} B} \right\}$ and $e_1 = \floor{\log_2 h_\Delta}$.}
+\label{tab:primePowerBound}
+\end{table}
+
+Since in practice, the largest primorial used for the search phase of SuperSPAR is $P_5$ (Section \ref{sec:ssparEmpirical}), this table only considers odd primes up to 11.  The column ``$B=1$'' shows that the order of roughly 45\% of the ideal classes studied is not divisible by any power of 3, 5, 7, or 11 greater than 1.  The column ``$B=7^2$'' shows that for about 95\% of the ideal classes studied, the order of the ideal class $\bclass = \aclass^{3^2 5^2 7^2 11}$ will not have 3, 5, 7, or 11 as a factor.  
+
+% TODO: Section \ref{sec:ssparEmpirical} shows that selecting exponents $E = \prod {p_i}^{e_i}$ such that $e_i = \max \{1, \floor{\log_{p_i} 49} \}$ performs slightly better in practice.
 
 \subsection{Difference between the Order of Two Ideal Classes}
 \label{subsec:ssparDiffBtwOrder}
@@ -2351,11 +2384,8 @@ For each bit size $n$, fix the integer to be factored $N$ and the multiplier $k$
 
 Of the ideal class groups studied, roughly 97\% of the time, knowing the order $h$ of an ideal class $\aclass$ means that $h$ is a multiple of the order of some other ideal class $\bclass$ in the same class group.  For SuperSPAR, this means that once the order $h$ of an ideal class $\aclass$ is discovered, if this does not lead to a splitting of $N$, then with high probability, $h$ is a multiple of the order of some other ideal class $\bclass$ in the same group.  Rather than starting over with the ideal class $\bclass$, let $h'$ be the odd part of $h$ and compute $\bclass^{h'}$.  SuperSPAR then tries to find an ambiguous class by repeated squaring of $\bclass^{h'}$ and, if successful, then attempts to split $N$.  This process may be repeated for several different ideal classes in the same group.
 
-This process may be unlucky, and as we shall see in Subsection \ref{subsec:ssparExpIdeals}, if the algorithm has been unsuccessful for more than an expected number of ideal classes within the same class group, the algorithm then changes multipliers and starts over with a different class group.
+This process may be unlucky, and as Subsection \ref{subsec:ssparExpIdeals} shows, if the algorithm is unsuccessful for more than an fixed number of ideal classes within the same class group, changing class groups by changing multipliers is beneficial.
 
-\subsection{Prime Power Bound}
-\label{subsec:ssparPrimePowerBound}
-i.e.\ $3^3 5^2 7^2 \prod p_i$ such that all $p_i \ge 11$ have an exponent of 11. This covers 96.9\% of the order of all elements.
 
 \subsection{Best Multipliers}
 \label{subsec:ssparBestMultipliers}
@@ -2392,7 +2422,11 @@ this means that by choosing a multiple $m'$ of the primorial $P_{w'}$, the searc
   S = \left\{ (m, w) ~:~ g(m, w) > g(m', w') \textrm{ for all }  \right\}
 \]
 
-\section{Empirical search for primorial and step count}
+\section{Empirical Search for Exponent and Step Count}
+\label{sec:ssparEmpirical}
+
+% TODO: show that the largest primorial used for searching is $P_5$.
+% TODO: show that a prime power bound of $B=49$ is a good choice.
 
 \subsection{Sequential Prime Ideals vs.\ Random Prime Ideals}
 
