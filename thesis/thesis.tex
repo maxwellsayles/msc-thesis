@@ -2008,6 +2008,7 @@ For both variations, we bound $a$ and $b$ such that $0 \le a \le U$ and $0 \le b
 
 
 \section{The $L$ Best Approximations}
+\label{sec:expBestApproximations}
 
 The approach of maintaining a set of the $L$ best partial representations of an exponent can be adapted to that of the left-to-right 2,3 representation from Subsections \ref{subsec:ltorChains} and \ref{sec:ltorChains2}.  For an integer $x$ we say that $2^a3^b$ is a best approximation of $|x|$ when $\left||x| - 2^a3^b \right|$ is minimal.  The algorithm for the left-to-right representation (Subsection \ref{subsec:ltorChains}) finds a best approximation for $x$ and then repeats on the positive difference. However, instead of only iterating on the best approximation, each value from the set of partial representations generates new values of the form $\left||x| - 2^a3^b\right|$ (being careful to record the sign of $x$), and the $L$ best partial representations are retained.  In this case, we iterate $b$ from $0 \le b \le B$ and let $a_1 = \floor{\log_2 (x/3^b)}$ and $a_2 = \ceil{\log_2 (x/3^b)}$ bounding both $a_1, a_2 \le A$.  Note that using $a_2 = a_1 + 1$ is sufficient since either $\ceil{\log_2 (x/3^b)} = \floor{\log_2 (x/3^b)}$ or $\ceil{\log_2 (x/3^b)} = \floor{\log_2 (x/3^b)} + 1$.  We then use $\left||x|-2^{a_1}3^b\right|$ and $\left||x|-2^{a_2}3^b\right|$ as candidates for the new set.  As before, iterating the bound on the number of squares and cubes varies the cost of the representations generated.  
 
@@ -2382,6 +2383,30 @@ Since the goal is to improve the performance of SuperSPAR in practice, bounds on
 
 Since in practice, the largest primorial used for the search phase of SuperSPAR is $P_5 = 2 \times 3 \times 5 \times 7 \times 11$ (see Section \ref{sec:ssparEmpirical}), Table \ref{tab:primePowerBound} uses prime power bounds for primes up to 11.  This table provides evidence that even smaller exponents than those suggested by Schnorr and Lenstra will be sufficient with high probability.
 
+Primorial 45, Steps 40. 
+\begin{table}[h]
+\centering
+\begin{tabular}{| r | r |}
+	\hline
+	$E'$ & Milliseconds \\
+	\hline
+      $3^3 5^2 7^2 11^1$ & 1.86944 \\
+      $3^4 5^2 7^2 11^1$ & 1.83744 \\
+      $3^4 5^2 7^2 11^2$ & 1.83737 \\
+      $3^4 5^3 7^2 11^2$ & 1.80073 \\
+      $3^5 5^3 7^3 11^2$ & 1.77602 \\
+      $3^5 5^4 7^3 11^2$ & 1.78133 \\
+      $3^6 5^4 7^3 11^2$ & 1.78861 \\
+      $3^7 5^4 7^3 11^2$ & 1.79033 \\
+      $3^7 5^4 7^4 11^2$ & 1.79266 \\
+      $\cdots$ & $\cdots$ \\
+      $3^{59} 5^{40} 7^{33} 11^{27}$ & 2.54599 \\
+	\hline
+\end{tabular}
+\caption{Average time to factor a semiprime integer $2^{63} \le N < 2^{64}$ using the exponent $E = E'\prod_{6 \le i \le 41} p_i$ for the exponentiation stage, and the primorial $2 \times 3 \times 5 \times 7$ with a multiplier of 6 for the search stage.}
+\label{tab:actualPrimePowerBound}
+\end{table}
+
 % TODO: Roughly 99.2\% of all factorizations of the order have $11^{e_5}$ with $e_5 \le 1$.  Do this for 3, 5, and 7?
 
 % TODO: Section \ref{sec:ssparEmpirical} shows that selecting exponents $E = \prod {p_i}^{e_i}$ such that $e_i = \max \{1, \floor{\log_{p_i} 49} \}$ performs slightly better in practice.
@@ -2459,6 +2484,8 @@ this means that by choosing a multiple $m'$ of the primorial $P_{w'}$, the searc
 
 \section{Empirical Search for Exponent and Step Count}
 \label{sec:ssparEmpirical}
+
+Exponents for the exponentiation stage were generated using the $L$ best approximations technique of Section \ref{sec:expBestApproximations}.  The number of candidates $L=2^k$ was selected such that using $L'=2^{k+1}$ did not produce a 2,3 representation with lower cost.  The value in practice was $L=2048$.
 
 % TODO: show that the largest primorial used for searching is $P_5$.
 % TODO: show that a prime power bound of $B=49$ is a good choice.
