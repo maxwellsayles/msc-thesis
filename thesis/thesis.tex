@@ -2411,11 +2411,7 @@ While such bounds do work well in practice, the purpose of this Section is to op
 \subsection{Difference between the Order of Two Ideal Classes}
 \label{subsec:ssparDiffBtwOrder}
 
-% TODO: Show how repeatable the order is if the exponent $E$ is chosen to remove all factors $\le B$ for some bound $B$.
-
-\newcommand{\idelta}{\mathcal I_\Delta}
-
-This Subsection assumes that an exponent $E$ is chosen such that for each ideal class in our data set, the order of the ideal class $\aclass^E$ is coprime to $3 \times 5 \times 7 \times 11$.  For each bit size $n$, fix the integer to be factored $N$ and the multiplier $k$. Let $\idelta$ be the subset of ideal classes associated with the discriminant $\Delta = -kN$ or $\Delta = -4kN$ from our data set.  Then for each pair of distinct ideal classes $\aclass, \bclass \in \idelta$, there exists some set $\mathcal P = \{ p ~:~ p \textrm{ is prime}, p > 11 \}$ such that $\ord(\bclass^E)$ divides $\ord(\aclass^E) \cdot \prod_{p \in \mathcal P} p$.  Let $x = |\mathcal P|$.  For each $x \ge 0$, sum the number of pairs such that $\ord(\bclass^E)$ divides $\ord(\aclass^E) \cdot \prod_{p \in \mathcal P} p$ and $|\mathcal P| = x$.  This is done for each multiplier $k$ and each integer $N$, and the sum is divided by the total number of ideal class pairs.  The result is the probability that if $h'$, a multiple of the order of an ideal class $\aclass \in \idelta$ is known, that the order $h''$ of the ideal class $\bclass^{Eh'}$ will have exactly $x$ prime factors greater than 11.  In some sense, this is a measurement of the utility that a multiple of the order of one ideal class has towards finding the order of some other ideal class in the same group.  Table \ref{tab:diffOfOrderOfTwoIdeals} shows the results of this calculation.
+Suppose the search stage of SuperSPAR determines $h'$, a multiple of the order of an ideal class $\bclass = \aclass^{2^\ell E}$ for $\ell = \floor{\log_2 h_\Delta}$.  Then for some other ideal class $\idealclass{a'}$ in the same group, there exists a set of primes $\mathcal P$ such that the order of $\idealclass{a'}^{2^\ell E}$ divides $h' \prod_{p \in \mathcal P} p$, where the product of the empty set is taken to be 1.  Also suppose that an exponent $E$ was chosen for the exponentiation phase such that $\ord(\aclass^E)$ is coprime to $E$.  Since in practice our implementation of SuperSPAR does not step coprime to a primorial larger than $2 \times 3 \times 5 \times 7 \times 11$ (see Section \ref{sec:ssparEmpirical}), this Subsection assumes that the exponent $E$ is chosen such that for each ideal class in our data set, the order of the ideal class $\aclass^{2^\ell E}$ is coprime to $2 \times 3 \times 5 \times 7 \times 11$.  Assuming the above constraints on our data set, for two ideal classes from the same group $\idealclass u, \idealclass v \in Cl_\Delta$, Table \ref{tab:diffOfOrderOfTwoIdeals} shows the probability that the smallest set of primes $\mathcal P = \{ p ~:~ p \textrm{ is prime}, p > 11 \}$ with $\ord({\idealclass v}^{2^\ell E})$ dividing $\ord({\idealclass u}^{2^\ell E}) \cdot \prod_{p \in \mathcal P} p$ is of a given size.
 
 \begin{table}[h]
 \centering
@@ -2432,16 +2428,23 @@ This Subsection assumes that an exponent $E$ is chosen such that for each ideal 
 80 & 0.97781 & 0.02191 & 0.00028 & 0.00000 \\
 	\hline
 \end{tabular}
-\caption{If the order $h$ of an ideal class $\aclass \in \idelta$ is known, this table shows the probability that the order $h'$ of the ideal class $\bclass^h$ for some other ideal class $\bclass \in \idelta$ has exactly $|\mathcal P|$ prime factors.}
+\caption{If $h'$, a multiple of the order of an ideal class $\idealclass u$ is known, this table shows the probability that the order of the ideal class ${\idealclass v}^{h'}$, for some other ideal class $\idealclass v$ in the same group, has exactly $|\mathcal P|$ prime factors larger than 11.}
 \label{tab:diffOfOrderOfTwoIdeals}
 \end{table}
 
-Of the ideal class groups studied, almost 97.8\% of the time, knowing the order $h$ of an ideal class $\aclass$ means that $h$ is a multiple of the order of some other ideal class $\bclass$ in the same class group.  For SuperSPAR, this means that once the order $h$ of an ideal class $\aclass$ is discovered, if this does not lead to a splitting of $N$, then with high probability, $h$ is a multiple of the order of some other ideal class $\bclass$ in the same group.  Rather than starting over with the ideal class $\bclass$, let $h'$ be the odd part of $h$ and compute $\bclass^{h'}$.  SuperSPAR then tries to find an ambiguous class by repeated squaring of $\bclass^{h'}$ and, if successful, then attempts to split $N$.  This process may be repeated for several different ideal classes in the same group.
+Of the ideal class groups studied, more than 97.7\% of the time, a multiple of the order of an ideal class is also a multiple of the order of some other ideal class in the same group.  For SuperSPAR, this means that once a multiple of the order of an ideal class is discovered, if this does not lead to a splitting of $N$, then with high probability, it is also a multiple of the order of some other ideal class in the same group.  Rather than starting over with a different ideal class, let $h'$ be the odd part of the multiple of the order and compute $\bclass^{h'}$ for some other ideal class $\bclass$.  SuperSPAR then tries to find an ambiguous class by repeated squaring of $\bclass^{h'}$ and, if successful, attempts to split $N$.  This process may be repeated for several different ideal classes in the same group.
 
 This process may be unlucky, and as Subsection \ref{subsec:ssparExpIdeals} shows, if the algorithm is unsuccessful for more than an fixed number of ideal classes within the same class group, changing class groups by changing multipliers is beneficial.
 
-TODO: Table showing that if we assume an exponent is known that removes all factors $\le B$, then the order of some ideal class is a multiple of the order of some other ideal class with what probability?
+% NOTE: Selecting the exponent E for the exponentiation phase to remove all primes $\le B$ from the order of an ideal class, changes the probability that a multiple of the order is also a multiple of the order of some other ideal class in the same group.
 
+%32, 0.82395, 0.91403, 0.95060, 0.97003, 0.97804
+%40, 0.82294, 0.91388, 0.95054, 0.96992, 0.97791
+%48, 0.82265, 0.91389, 0.95050, 0.96983, 0.97785
+%56, 0.82229, 0.91373, 0.95033, 0.96974, 0.97776
+%64, 0.82249, 0.91382, 0.95036, 0.96979, 0.97779
+%72, 0.82245, 0.91387, 0.95037, 0.96976, 0.97782
+%80, 0.82252, 0.91384, 0.95037, 0.96980, 0.97781
 
 \subsection{Best Multipliers}
 \label{subsec:ssparBestMultipliers}
