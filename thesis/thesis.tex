@@ -4,7 +4,7 @@
 \fancyhead{}
 \fancyfoot{}
 \renewcommand{\headrulewidth}{0pt}
-\fancyhead[RO,LE]{\thepage}  
+\fancyhead[RO,LE]{\thepage}
 
 \usepackage{algorithm}
 \usepackage{algorithmic}
@@ -2330,11 +2330,11 @@ Since this Chapter is concerned with the performance of SuperSPAR in practice, t
 \subsection{Prime Power Bound}
 \label{subsec:ssparPrimePowerBound}
 
-In theory, SPAR (Section \ref{sec:spar}) exponentiates an ideal class $\aclass$ to an exponent $E$ where $E = \prod_{i=2}^t {p_i}^{e_i}$, $p_i$ are prime, and $e_i = \max \{ v : {p_i}^v \le {p_t}^2 \}$ for some appropriately chosen prime $p_t$ \cite[p.290]{Schnorr1984}.  In practice however, Schnorr and Lenstra recommend choosing smaller exponents $e_i$ such that $e_i = \max \{ v : {p_i}^v \le p_t \}$ \cite[p.293]{Schnorr1984}.  Here we consider bounds for the exponents $e_i$ for use with our implementation of SuperSPAR, assuming the range in which it is a competitive integer factoring tool.
+SPAR (Section \ref{sec:spar}) exponentiates an ideal class $\aclass$ to an exponent $E$ where $E = \prod_{i=2}^t {p_i}^{e_i}$, $p_i$ are prime, and $e_i = \max \{ v : {p_i}^v \le {p_t}^2 \}$ for some appropriately chosen prime $p_t$ \cite[p.290]{Schnorr1984}.  In practice however, Schnorr and Lenstra recommend using smaller exponents $e_i$ such that $e_i = \max \{ v : {p_i}^v \le p_t \}$ \cite[p.293]{Schnorr1984}.  Here we consider bounds for the exponents $e_i$ for use with our implementation of SuperSPAR, assuming the range in which it is a competitive integer factoring tool.
 
-The exponentiation stage of SuperSPAR computes $\bclass = \aclass ^{2^\ell E}$ with $\ell = \floor{\log_2 h_\Delta}$.  The search stage then computes baby steps $\bclass^i$ for $i$ coprime to some primorial $P_w$.  However, if $\ord(\bclass)$ and $P_w$ have a common factor $x$, then $x$ is not coprime to $P_w$ and $\bclass^x$ will not be added to the lookup table used by the coprime baby steps.  If this is the case, the search phase is guaranteed to fail since it cannot find any $\bclass^i$ such that $i \equiv 0 \pmod x$ in the lookup table.  For this reason, the exponent $E$ is chosen in order to remove (at least with high probability) all of the factors from the order of $\aclass$ that are common to the primorial $P_w$ used by the search stage.
+The exponentiation stage of SuperSPAR computes $\bclass = \aclass ^{2^\ell E}$ with $\ell = \floor{\log_2 h_\Delta}$.  The search stage then computes baby steps $\bclass^i$ for $i$ coprime to some primorial $P_w$.  However, if $\ord(\bclass)$ and $P_w$ have a common factor $x$, then $x$ is not coprime to $P_w$ and $\bclass^x$ will not be added to the lookup table used by the coprime baby steps.  If this is the case, the search phase is guaranteed to fail since it cannot find any $\bclass^i$ such that $i \equiv 0 \pmod x$ in the lookup table.  When this happens, the algorithm must start over with a different multiplier for the discriminant of the class group.  In order to ensure that the order of $\bclass$ is coprime to $E$, the exponents in $E$ would have to be chosen such that $e_i = \floor{\log_{p_i} h_\Delta}$, however, in practice it is more efficient to choose smaller values of $e_i$ at the risk that additional class groups are tried.  For this reason, the exponent $E$ is chosen to remove, with high probability, the factors from the order of $\aclass$ that are common with the primorial $P_w$ used by the search stage.
 
-For each ideal in our data set, let the factorization of the order be represented by $\ord(\aclass) = \prod {p_i}^{e_i}$ for $p_i$ prime.  For each prime power factor $3^{e_2}$, $5^{e_3}$, $7^{e_4}$, $11^{e_5}$, $13^{e_6}$, and $17^{e_7}$, more than 99\% of the ideals studied had either $e_2 \le 4$, $e_3 \le 2$, $e_4 \le 2$, $e_5 \le 1$, $e_6 \le 1$, or $e_7 \le 1$.  This is not to say that more than 99\% of the ideals in the data set were such that $\ord(\aclass^{3^4 5^2 7^2 11^1 13^1 17^1})$ is coprime to $3 \times 5 \times 7 \times 11 \times 13 \times 17$, but only that $\ord(\aclass^{3^4})$ is coprime to 3, and so on.  Table \ref{tab:ninetyNine} gives the probability that for each $e_i$ for $2 \le i \le 7$, that $\ord(\aclass^{{p_i}^{e_i}})$ is coprime to $p_i$ when $e_i$ is chosen such that $e_2 = 4$, $e_3 = 2$, $e_4 = 2$, $e_5 = 1$, $e_6 = 1$, and $e_7 = 1$.
+For each ideal in our data set, let the factorization of the order be represented by $\ord(\aclass) = \prod {p_i}^{e_i}$ for $p_i$ prime.  For each prime power factor $3^{e_2}$, $5^{e_3}$, $7^{e_4}$, $11^{e_5}$, $13^{e_6}$, and $17^{e_7}$, more than 99\% of the ideals studied had either $e_2 \le 4$, $e_3 \le 2$, $e_4 \le 2$, $e_5 \le 1$, $e_6 \le 1$, or $e_7 \le 1$.  This is not to say that more than 99\% of the ideals in the data set were such that $\ord(\aclass^{3^4 5^2 7^2 11^1 13^1 17^1})$ is coprime to $3 \times 5 \times 7 \times 11 \times 13 \times 17$, but only that $\ord(\aclass^{3^4})$ is coprime to 3, and so on.  Table \ref{tab:ninetyNine} gives the probability that for each $e_i$ for $2 \le i \le 7$, that $\ord(\aclass^{{p_i}^{e_i}})$ is coprime to $p_i$ when $e_i$ is chosen such that $e_2 = 4$, $e_3 = 2$, $e_4 = 2$, $e_5 = 1$, $e_6 = 1$, and $e_7 = 1$.  This is evidence that the exponent $E$ for the exponentiation stage can be chosen with $e_i = 1$ for $i \ge 5$ and $e_2 = 4$, $e_3 = 2$, and $e_4 = 2$, and that with high probability, the order of the resulting ideal, after exponentiation, will be coprime to $E$.
 
 \begin{table}[h]
 \centering
@@ -2354,8 +2354,6 @@ For each ideal in our data set, let the factorization of the order be represente
 \caption{The probability that $\ord(\aclass^{{p_i}^{e_i}})$ is coprime to $p_i$.}
 \label{tab:ninetyNine}
 \end{table}
-
-This is evidence that the exponent $E$ for the exponentiation stage can be chosen with $e_i = 1$ for $i \ge 5$ and $e_2 = 4$, $e_3 = 2$, and $e_4 = 2$, and that with high probability, the order of the resulting ideal, after exponentiation, will be coprime to $E$.
 
 To provide additional evidence of this position, Table \ref{tab:primePowerBound} represents the probability that an ideal class $\aclass$ associated with an integer $N$ of $n$ bits, with order $\ord(\aclass) = \prod {p_i}^{e_i}$ for primes $p_i$ is such that $e_i \le \floor{\log_{p_i} B}$ for primes $3 \le p_i \le 11$ and $e_i = 1$ for all $p_i > 11$\footnote{For the prime 2, the exponent $e_1 \le \floor{\log_2 h_\Delta}$ is bound by the class number since this is handle separately when searching for ambiguous ideal class.}.  In other words, this table represents the probability that choosing some exponent $E$ with the above constraints implies that the ideal class $\bclass = \aclass ^E$ will have order $\ord(\bclass)$ coprime to the exponent $E$.
 
@@ -2378,38 +2376,34 @@ To provide additional evidence of this position, Table \ref{tab:primePowerBound}
 \label{tab:primePowerBound}
 \end{table}
 
+However, the purpose of this Section is to optimize the performance of SuperSPAR in practice.  As such, Table \ref{tab:actualPrimePowerBound} shows the average time to factor semiprime integers\footnote{The sample set consisted of 10,000 semiprime integers of each bit size, such that each integer was the product of two primes of equal size.} choosing the exponent $E$ such that odd primes $p_i \le B$ have $e_i = \floor{\log_{p_i} B}$ and $p_i > B$ have $e_i = 1$.  The primorial and multiplier in the search phase are chosen to give good performance on average and are fixed for each integer bit size.  Our implementation of SuperSPAR uses exponents with prime power bounds that correspond to the best times for each bit range.
 
-Since the goal is to improve the performance of SuperSPAR in practice, bounds on the exponents of the prime powers in the 
-
-Since in practice, the largest primorial used for the search phase of SuperSPAR is $P_5 = 2 \times 3 \times 5 \times 7 \times 11$ (see Section \ref{sec:ssparEmpirical}), Table \ref{tab:primePowerBound} uses prime power bounds for primes up to 11.  This table provides evidence that even smaller exponents than those suggested by Schnorr and Lenstra will be sufficient with high probability.
-
-Primorial 45, Steps 40. 
 \begin{table}[h]
 \centering
-\begin{tabular}{| r | r |}
+\begin{tabular}{| r c r | r | r | r | r | r | r | r |}
 	\hline
-	$E'$ & Milliseconds \\
+\multicolumn{3}{|r|}{Power bound $B$} & 32 bits & 40 bits & 48 bits & 56 bits & 64 bits & 72 bits & 80 bits \\
 	\hline
-      $3^3 5^2 7^2 11^1$ & 1.86944 \\
-      $3^4 5^2 7^2 11^1$ & 1.83744 \\
-      $3^4 5^2 7^2 11^2$ & 1.83737 \\
-      $3^4 5^3 7^2 11^2$ & 1.80073 \\
-      $3^5 5^3 7^3 11^2$ & 1.77602 \\
-      $3^5 5^4 7^3 11^2$ & 1.78133 \\
-      $3^6 5^4 7^3 11^2$ & 1.78861 \\
-      $3^7 5^4 7^3 11^2$ & 1.79033 \\
-      $3^7 5^4 7^4 11^2$ & 1.79266 \\
-      $\cdots$ & $\cdots$ \\
-      $3^{59} 5^{40} 7^{33} 11^{27}$ & 2.54599 \\
+9 & = & $3^2$ & 0.04483 & 0.09538 & 0.24576 & 0.74423 & 2.13834 & 5.14941 & 11.81556 \\
+25 & = & $5^2$ & 0.04469 & 0.09332 & 0.23505 & 0.70051 & 2.00290 & 4.82805 & 11.09770 \\
+27 & = & $3^3$ & \underline{0.04453} & \underline{0.08980} & 0.22673 & 0.67292 & 1.90503 & 4.58491 & 10.51262 \\
+49 & = & $7^2$ & 0.04550 & 0.09202 & 0.21968 & 0.65496 & 1.84011 & 4.42733 & 10.08651 \\
+81 & = & $3^4$ & 0.04794 & 0.09219 & \underline{0.21840} & 0.64810 & 1.80854 & 4.32226 & 9.88501 \\
+121 & = & $11^2$ & 0.04988 & 0.09499 & 0.22151 & 0.64957 & 1.79549 & 4.27838 & 9.81882 \\
+125 & = & $5^3$ & 0.04861 & 0.09505 & 0.22084 & 0.64985 & 1.79609 & 4.28010 & 9.80192 \\
+169 & = & $13^2$ & 0.05103 & 0.09783 & 0.22195 & 0.64568 & 1.76646 & 4.21067 & 9.60217 \\
+243 & = & $3^5$ & 0.05126 & 0.09871 & 0.22307 & \underline{0.64527} & \underline{1.75882} & 4.17222 & 9.50603 \\
+343 & = & $7^3$ & 0.05415 & 0.10083 & 0.22761 & 0.64718 & 1.76139 & 4.17266 & 9.47648 \\
+625 & = & $5^4$ & 0.05966 & 0.10620 & 0.23601 & 0.65786 & 1.76363 & 4.13652 & 9.31960 \\
+729 & = & $3^6$ & 0.06031 & 0.11030 & 0.23750 & 0.65964 & 1.76242 & \underline{4.12565} & 9.28392 \\
+1331 & = & $11^3$ & 0.06028 & 0.10836 & 0.24391 & 0.66904 & 1.78810 & 4.13952 & \underline{9.28274} \\
+2187 & = & $3^7$ & 0.06274 & 0.11096 & 0.25596 & 0.69223 & 1.82186 & 4.18447 & 9.34884 \\
 	\hline
 \end{tabular}
-\caption{Average time to factor a semiprime integer $2^{63} \le N < 2^{64}$ using the exponent $E = E'\prod_{6 \le i \le 41} p_i$ for the exponentiation stage, and the primorial $2 \times 3 \times 5 \times 7$ with a multiplier of 6 for the search stage.}
+\caption{Average time to factor semiprime integers using the exponent $E = \prod_{p_i > 2} {p_i}^{e_i}$ with $e_i = \floor{\log_{p_i} B}$ when $p_i \le B$ and $e_i = 1$ otherwise.  The lowest time for each integer range is underlined.}
 \label{tab:actualPrimePowerBound}
 \end{table}
 
-% TODO: Roughly 99.2\% of all factorizations of the order have $11^{e_5}$ with $e_5 \le 1$.  Do this for 3, 5, and 7?
-
-% TODO: Section \ref{sec:ssparEmpirical} shows that selecting exponents $E = \prod {p_i}^{e_i}$ such that $e_i = \max \{1, \floor{\log_{p_i} 49} \}$ performs slightly better in practice.
 
 \subsection{Difference between the Order of Two Ideal Classes}
 \label{subsec:ssparDiffBtwOrder}
