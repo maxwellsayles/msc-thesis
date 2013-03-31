@@ -2379,7 +2379,7 @@ This is not to say that more than 99\% of the ideals in the data set were such t
 \label{tab:primePowerBound}
 \end{table}
 
-While such bounds do work well in practice, the purpose of this Section is to optimize the performance of our implementation of SuperSPAR.  As such, we iterated the bound $B$ for the exponentiation phase and timed the algorithm in practice. Table \ref{tab:actualPrimePowerBound} shows the average time to factor semiprime integers\footnote{The sample set consisted of 10,000 semiprime integers of each bit size, such that each integer was the product of two primes of equal size.} choosing the exponent $E$ such that odd primes $p_i \le B$ have $e_i = \floor{\log_{p_i} B}$ and $p_i > B$ have $e_i = 1$.  The primorial and multiplier in the search phase are chosen to give good performance on average and are fixed for each integer bit size.  Our implementation of SuperSPAR uses exponents with prime power bounds that correspond to the best times for each bit range.
+While such bounds do work well in practice, the purpose of this Section is to optimize the performance of our implementation of SuperSPAR.  As such, we iterated the bound $B$ for the exponentiation phase and timed the algorithm in practice. Table \ref{tab:actualPrimePowerBound} shows the average time to split semiprime integers\footnote{The sample set consists of 10,000 semiprime integers of each bit size, such that each integer was the product of two primes of equal size.} choosing the exponent $E$ such that odd primes $p_i \le B$ have $e_i = \floor{\log_{p_i} B}$ and $p_i > B$ have $e_i = 1$.  The primorial and multiplier in the search phase are chosen to give good performance on average and are fixed for each integer bit size.  Our implementation of SuperSPAR uses exponents with prime power bounds that correspond to the best times for each bit range.
 
 \begin{table}[h]
 \centering
@@ -2463,31 +2463,40 @@ Figure \ref{fig:ssparIdealAttempts} also indicates that for most multipliers, if
 \section{Expected Number of Ideal Classes}
 \label{sec:ssparExpIdeals}
 
-Subsection \ref{subsec:ssparBestMultipliers} indicates that each multiplier is associated with a class group that has a distinct probability that knowing a multiple of the order of an ideal class in the group will lead to a successful splitting of the integer $N$ associated with the discriminant of the class group.  The Subsection also indicates that the expected number of ideas to try is often less than 2.  However, once a multiple of the order of an ideal class is known, our implementation of SuperSPAR is more efficient in practice if many ideal classes are tried before switching multipliers and class groups.  This is likely due to the associated cost of the search phase of the algorithm (since the exponentiation stage is executed for each ideal class tried).  Table \ref{tab:attemptedIdealClasses} shows the average time to split an integer of the associated bit size with an upper limit on the number of ideal classes tried before switching multipliers.  The best time for each bit range is underlined.
+Subsection \ref{subsec:ssparBestMultipliers} indicates that for each multiplier, in expectation, SuperSPAR will try a unique number of ideal classes in order to split the integer associated with the discriminant of the class group.  The Subsection also indicates that the expected number of ideals to try is often less than 2.  However, once a multiple of the order of an ideal class is known, our implementation of SuperSPAR is more efficient in practice if many ideal classes are tried before switching multipliers and class groups.  This is likely due to the cost of the search phase of the algorithm, which is executed with each class group\footnote{This is in contrast to the exponentiation stage, which is executed for each ideal class tried.}.  Table \ref{tab:attemptedIdealClasses} shows the average time to split integers\footnote{This uses the same set of semiprime integers as in Table \ref{tab:actualPrimePowerBound}.  Again, the exponent for the exponentiation stage, and the primorial and multiplier for the search stage where chosen to give good performance on average.} given an upper bound on the number of ideal classes tried before switching multipliers.  Our implementation of SuperSPAR bounds the number of ideal classes tried before switching class groups to the lowest time for each integer range.
 
-% TODO: This table data is make believe.
+% TODO: This table is being regenerated for a much larger sample set of semiprimes.
 \begin{table}[h]
 \centering
-\begin{tabular}{| r | r | r | r | r |}
+\begin{tabular}{| r | r | r | r | r | r | r | r |}
 	\hline
-	n & $|\set P| = 0$ & $|\set P| = 1$ & $|\set P| = 2$ & $|\set P| = 3$ \\
+Class/Group & 32 bits & 40 bits & 48 bits & 56 bits & 64 bits & 72 bits & 80 bits \\
 	\hline
-32 & 0.97804 & 0.02177 & 0.00020 & 0.00000 \\
-40 & 0.97791 & 0.02183 & 0.00026 & 0.00000 \\
-48 & 0.97785 & 0.02187 & 0.00028 & 0.00000 \\
-56 & 0.97776 & 0.02196 & 0.00028 & 0.00000 \\
-64 & 0.97779 & 0.02193 & 0.00028 & 0.00000 \\
-72 & 0.97782 & 0.02190 & 0.00027 & 0.00000 \\
-80 & 0.97781 & 0.02191 & 0.00028 & 0.00000 \\
+1 & 0.05669 & 0.12586 & 0.31393 & 0.90168 & 2.65201 & 6.41482 & 14.73430 \\
+2 & 0.04488 & 0.09482 & 0.23508 & 0.67550 & 1.99473 & 4.84331 & 11.10967 \\
+3 & 0.04182 & 0.08674 & 0.21384 & 0.61542 & 1.80344 & 4.37676 & 10.02194 \\
+4 & 0.04114 & 0.08389 & 0.20679 & 0.58835 & 1.72181 & 4.18477 & 9.61368 \\
+5 & 0.04089 & 0.08291 & 0.20168 & 0.57706 & 1.68910 & 4.07417 & 9.38258 \\
+6 & \underline{0.04084} & 0.08243 & 0.20061 & 0.57188 & 1.67511 & 4.02721 & 9.27883 \\
+7 & 0.04102 & \underline{0.08234} & 0.20007 & 0.57049 & 1.66400 & 3.99241 & 9.18222 \\
+8 & 0.04110 & 0.08240 & 0.20014 & 0.56954 & 1.65719 & 3.96884 & 9.12512 \\
+9 & 0.04123 & 0.08249 & 0.20031 & 0.56966 & 1.64767 & 3.95671 & 9.09879 \\
+10 & 0.04133 & 0.08292 & 0.20012 & 0.56845 & 1.64522 & 3.93694 & 9.08888 \\
+11 & 0.04158 & 0.08315 & 0.20006 & \underline{0.56825} & 1.64639 & 3.93999 & 9.04356 \\
+12 & 0.04164 & 0.08336 & 0.20004 & 0.56898 & \underline{1.64218} & 3.93908 & 9.04330 \\
+13 & 0.04187 & 0.08357 & 0.20055 & 0.56890 & 1.64567 & \underline{3.93371} & 9.04336 \\
+14 & 0.04216 & 0.08372 & 0.20099 & 0.57009 & 1.64677 & 3.93461 & 9.04562 \\
+15 & 0.04210 & 0.08406 & 0.20144 & 0.57205 & 1.64735 & 3.93918 & 9.04398 \\
+16 & 0.04222 & 0.08417 & 0.20191 & 0.57268 & 1.64491 & 3.94718 & \underline{9.03907} \\
+17 & 0.04267 & 0.08682 & 0.20385 & 0.59098 & 1.66331 & 3.96735 & 9.08379 \\
+18 & 0.04270 & 0.09250 & 0.20496 & 0.57741 & 1.65169 & 3.96841 & 9.07962 \\
+19 & 0.04306 & 0.08711 & 0.21191 & 0.58522 & 1.65478 & 3.96953 & 9.08516 \\	
 	\hline
 \end{tabular}
-\caption{The average time (in milliseconds) to split an integer $N$ using no more than a fixed number of ideal classes for each class group.}
+\caption{The average time (in milliseconds) to split an integer $N$ using no more than a fixed number of ideal classes for each class group.  The lowest time for each integer range is underlined.}
 \label{tab:attemptedIdealClasses}
 \end{table}
 
-i.e.\ A table showing the number of multipliers used when the number of ideal classes tried is fixed.
-
-% TODO: This might make more sense to do experimentally.
 
 
 \section{Chained Hashing vs.\ Open Address Hashing}
