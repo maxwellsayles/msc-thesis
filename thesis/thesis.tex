@@ -722,7 +722,6 @@ There may be many possible 2,3 representations for a given number, and different
 \subsection{Chained 2,3 Representations}
 \label{subsec:dbnsChains}
 
-
 One way to classify algorithms that compute 2,3 representations is by the constraints placed on the partition of an integer $n$.
 
 \begin{defn}
@@ -1087,16 +1086,16 @@ The Bounded Primorial Steps algorithm \cite{Sutherland2007} is an order finding 
 
 \subsection{Shank's Baby-Step Giant-Step Method}
 
-The idea is similar to Shanks' baby-step giant-step method, which is as follows.  For some element $\alpha$ in a group $G$ and some bound $M$ on the order of the element $\alpha$, let $b = \ceil{\sqrt{M}}$ and compute $\alpha^1, \alpha^2, ..., \alpha^b$ storing each $\alpha^i \mapsto i$ in a table\footnote{The table maps group elements $\alpha^i$ to exponents $i$.} -- these are the baby steps.  If any $\alpha^i = 1_G$, then $\ord(\alpha) = i$ and we are finished.  Otherwise compute $\alpha^{2b}, \alpha^{3b}, ...$ and for each $\alpha^{jb}$, if $\alpha^{jb}$ is in the table then $\alpha^{jb} = \alpha^i$ for some $i$ and $jb - i$ is a multiple of the order of $\alpha$.  These are the giant steps.  Notice that $b$ is chosen such that after an equal number of baby steps and giant steps, the last giant step has an exponent $b^2 \ge M$.
+The idea is similar to Shanks' baby-step giant-step method, which is as follows.  For some element $\alpha$ in a group $G$ and some bound $M$ on the order of the element $\alpha$, let $s = \ceil{\sqrt{M}}$ and compute $\alpha^1, \alpha^2, ..., \alpha^s$ storing each $\alpha^i \mapsto i$ in a table\footnote{The table maps group elements $\alpha^i$ to exponents $i$.} -- these are the baby steps.  If any $\alpha^i = 1_G$, then $\ord(\alpha) = i$ and we are finished.  Otherwise compute $\alpha^{2s}, \alpha^{3s}, ...$ and for each $\alpha^{js}$, if $\alpha^{js}$ is in the table then $\alpha^{js} = \alpha^i$ for some $i$ and $js - i$ is a multiple of the order of $\alpha$.  These are the giant steps.  Notice that $s$ is chosen such that after an equal number of baby steps and giant steps, the last giant step has an exponent $s^2 \ge M$.
 
-To see that this works, consider the order of the element $\alpha$.  Let $h = \ord(\alpha)$.  If $h \le b$ then the algorithm finds some $\alpha^i = 1_G$ with $i \le b$ during the baby steps.  Otherwise, $h = jb + i$ for some integer $j$ and $i < b$, in which case the algorithm finds $\alpha^{jb} = \alpha^i$ for some $j$, which implies $\alpha^{jb-i} = 1_G$.
+To see that this works, consider the order of the element $\alpha$.  Let $h = \ord(\alpha)$.  If $h \le s$ then the algorithm finds some $\alpha^i = 1_G$ with $i \le s$ during the baby steps.  Otherwise, $h = js + i$ for some integer $j$ and $i < s$, in which case the algorithm finds $\alpha^{js} = \alpha^i$ for some $j$, which implies $\alpha^{js-i} = 1_G$.
 
-Following Sutherland \cite[p.50]{Sutherland2007}, we point out that if computing the inverse of an element is cheaper than multiplication, we can reduce the number of group operations by letting $b = \ceil{\sqrt{M/2}}$ and computing the giant steps $\alpha^{2b}, \alpha^{-2b}, \alpha^{4b}, \alpha^{-4b}, ...$ instead.  Again, if the order $h \le b$, we find some $\alpha^i = 1_G$ during the baby steps.  Otherwise, either $h = 2jb - i$ or $h = 2jb + i$ for $i \le b$.  In the first case, there is some $\alpha^{2jb} = \alpha^i$, which implies $\alpha^{2jb-i} = 1_G$, and in the second case, there is some $\alpha^{-2jb} = \alpha^i$, which implies $\alpha^{2jb+i} = 1_G$. 
+Following Sutherland \cite[p.50]{Sutherland2007}, we point out that if computing the inverse of an element is cheaper than multiplication, the number of multiplications is reduced by letting $s = \ceil{\sqrt{M/2}}$ and computing the giant steps $\alpha^{2s}, \alpha^{-2s}, \alpha^{4s}, \alpha^{-4s}, ...$ instead.  Again, if the order $h \le s$, we find some $\alpha^i = 1_G$ during the baby steps.  Otherwise, either $h = 2js - i$ or $h = 2js + i$ for $i \le s$.  In the first case, there is some $\alpha^{2js} = \alpha^i$, which implies $\alpha^{2js-i} = 1_G$, and in the second case, there is some $\alpha^{-2js} = \alpha^i$, which implies $\alpha^{2js+i} = 1_G$.
 
 \subsection{Bounded Primorial Steps Algorithm}
 \label{subsec:boundedPrimorialSteps}
 
-Sutherland observed \cite[p.56]{Sutherland2007} that if $h = \ord(\alpha)$ is odd, then computing only odd powers $\alpha^1, \alpha^3, ..., \alpha^{b-1}$ for the baby steps is sufficient.  We still need to compute giant steps $\alpha^{2b}, \alpha^{3b}, ...,$ for some $b$ that is even since we want to find some $\alpha^{jb} = \alpha^i$ where $jb - i$ is odd.  In this case, $b = \ceil{\sqrt{2M}}$ so that after roughly $\sqrt{M/2}$ baby steps and $\sqrt{M/2}$ giant steps, the last giant step has exponent $\ge M$.
+Sutherland observed \cite[p.56]{Sutherland2007} that if $h = \ord(\alpha)$ is odd, then computing only odd powers $\alpha^1, \alpha^3, ..., \alpha^{s-1}$ for the baby steps is sufficient.  We still need to compute giant steps $\alpha^{2s}, \alpha^{3s}, ...,$ for some $s$ that is even since we want to find some $\alpha^{js} = \alpha^i$ where $js - i$ is odd.  In this case, $s = \ceil{\sqrt{2M}}$ so that after roughly $\sqrt{M/2}$ baby steps and $\sqrt{M/2}$ giant steps, the last giant step has exponent $\ge M$.
 
 The problem is that $\ord(\alpha)$ may not be odd.  However, by repeated squaring of $\alpha$ it is easy to find an element whose order is guaranteed to be even \cite[p.56]{Sutherland2007}.  Given a bound $M$ on the group order, compute $\beta = \alpha^{2^\ell}$ where $\ell = \floor{\log_2 M}$ and now run the modified algorithm on $\beta$ to find $h' = \ord(\beta)$.  The order of $\alpha$ can be found by computing $\zeta = \alpha^{h'}$ and then repeatedly squaring $\zeta$ until $\zeta^{2^k} = 1_G$ for some $k$.  The order of $\alpha$ is then $2^k h'$.
 
@@ -1107,18 +1106,18 @@ The problem is that $\ord(\alpha)$ may not be odd.  However, by repeated squarin
 \REQUIRE $\alpha \in G$, a bound $M \ge \ord(\alpha)$, and a fast order algorithm $\mathcal A(\alpha, E)$.
 \STATE maximize $w$ such that $P_w \le \sqrt{M}$
 \STATE maximize $m$ such that $m^2P_w\phi(P_w) \le M$
-\STATE $b = mP_w$
+\STATE $s = mP_w$
 \STATE $E = \prod_{i=1}^n p_i^{\floor{\log_{p_i} M}}$
 \STATE $\beta \gets \alpha^E$
-\FOR{$i$ from 1 to $b$ where $i$ is coprime to $P_w$}
+\FOR{$i$ from 1 to $s$ where $i$ is coprime to $P_w$}
 	\STATE compute $\beta^i$ and store $\beta^i \mapsto i$ in the table \COMMENT{baby steps}
 	\IF {$\beta^i = 1_G$}
 		\RETURN $i \cdot \mathcal A(\alpha^i, E)$
 	\ENDIF
 \ENDFOR
-\FOR{$j=2b, 3b, ...$}
+\FOR{$j=2s, 3s, ...$}
 	\IF{$\beta^j$ is in the table}
-		\STATE lookup $i$ from the table using $\beta^j$ \COMMENT{giant steps}
+		\STATE lookup $\beta^j \mapsto i$ from the table \COMMENT{giant steps}
 		\STATE $h' = j - i$
 		\RETURN $h' \cdot \mathcal A(\alpha^{h'}, E)$
 	\ENDIF
@@ -1135,7 +1134,7 @@ where $p_i$ is the $i^{\textrm{th}}$ prime.  Following Sutherland \cite[p.57]{Su
 \label{eq:phiPrimorial}
 	\phi(P_w) = (2-1) \times (3-1) \times \cdots \times (p_w - 1) = \prod_{i=1}^w (p_i - 1).
 \end{equation}
-Let $e_i = \floor{\log_{p_i} M}$ for $1 \le i \le w$ and $E = 2^{e_2} \times 3^{e_3} \times \cdots \times {p_w}^{e_w}$.  Then compute $\beta = \alpha^E$.  The bound on the largest baby step is $b = m P_w$, and we compute $h' = \ord(\beta)$ by taking at most $m \phi(P_w)$ baby steps coprime to $P_w$ and at most $m \phi(P_w)$ giant steps of size $m P_w$.  Pseudo-code for the bounded Primorial Steps technique is given in Algorithm \ref{alg:primorialSteps}.  By \cite[p.59~Proposition~4.2]{Sutherland2007}, the number of group operations in the worst case is bound by $O(\sqrt{M / \log \log M})$.
+Let $e_i = \floor{\log_{p_i} M}$ for $1 \le i \le w$ and $E = 2^{e_2} \times 3^{e_3} \times \cdots \times {p_w}^{e_w}$.  Then compute $\beta = \alpha^E$.  The bound on the largest baby step is $s = m P_w$, and we compute $h' = \ord(\beta)$ by taking at most $m \phi(P_w)$ baby steps coprime to $P_w$ and at most $m \phi(P_w)$ giant steps of size $m P_w$.  Pseudo-code for the bounded Primorial Steps technique is given in Algorithm \ref{alg:primorialSteps}.  By \cite[p.59~Proposition~4.2]{Sutherland2007}, the number of group operations in the worst case is bound by $O(\sqrt{M / \log \log M})$.
 
 To compute $h = \ord(\alpha)$ given $h' = \ord(\beta)$, one uses a fast order finding algorithm.  One fast order finding algorithm, $\mathcal A(\alpha^{h'}, E)$, uses the factorization of $E=\prod {p_i}^{e_i}$.  Notice that $\alpha^{Eh'} = \beta^{h'} = 1_G$.  The idea is to iterate on the factors of $E$, removing each factor $p$ before computing $\zeta = \alpha^{E'h'}$ for the product $E' = E/p$. If $\zeta \neq 1_G$, then $\ord(\alpha)$ does not divide $E'h'$ and $p$ must be a factor of the order of $\alpha$.  The algorithm then continues with the next prime factor of $E'$.  Additional fast order finding algorithms are given in \mbox{\cite[Chapter~7]{Sutherland2007}}.
 
@@ -1165,7 +1164,7 @@ Stage 1 takes the first $t$ primes $p_1 = 2, p_2 = 3, ..., p_t \le N^{1/2r}$ for
 
 Stage 2 of SuperSPAR differs from that of SPAR.  SPAR attempts to find the order of $\cclass$ by performing a random walk and using $O(p_t)$ group operations.  Schnorr and Lenstra \cite[p.294]{Schnorr1984} suggest a Pollard-Brent Recursion \cite{Brent1980} based on Pollard's rho method \cite{Pollard1975}, but also remark \cite[p.298]{Schnorr1984} that Shanks' baby-step giant-step method \cite{Shanks1971} could be used to deterministically find $\ord(\cclass)$.  They point out that this approach could be made faster by exploiting the fact that $\ord(\cclass)$ is likely to have no prime divisors $p_1, ..., p_t$, and this is precisely what SuperSPAR does.
 
-Stage 2 of SuperSPAR attempts to find the order of $\cclass$ by taking baby steps coprime to some primorial, and then giant steps that are a multiple of that primorial.  First maximize $w$ such that $\phi(P_w) \le p_t$, then let $m = \floor{p_t / \phi(P_w)}$ and $b = mP_w$.  Notice that $b$ is a multiple of the primorial $P_w$ and that the number of baby steps is $s = m \phi(P_w) \le p_t$.  Then take baby steps $\cclass^i$ for $1 \le i \le b$ with $i$ coprime to $P_w$, followed by giant steps $\cclass^j$ for $j=2b,-2b,4b,-4b,...,2sb,-2sb$\footnote{We use this sequence of giant steps since computing the inverse in the ideal class group is essentially free.}.  Taking an equal number of giant steps as baby steps means that this stage of SuperSPAR uses $O(p_t)$ group operations (not counting inversions).
+Stage 2 of SuperSPAR attempts to find the order of $\cclass$ by taking baby steps coprime to some primorial, and then giant steps that are a multiple of that primorial.  First maximize $w$ such that $\phi(P_w) \le p_t$, then let $m = \floor{p_t / \phi(P_w)}$ and $s = mP_w$.  Notice that $s$ is a multiple of the primorial $P_w$ and that the number of baby steps is $d = m \phi(P_w) \le p_t$.  Then take baby steps $\cclass^i$ for $1 \le i \le s$ with $i$ coprime to $P_w$, followed by giant steps $\cclass^j$ for $j=2s,-2s,4s,-4s,...,2sd,-2sd$\footnote{We use this sequence of giant steps since computing the inverse in the ideal class group is essentially free.}.  Taking an equal number of giant steps as baby steps means that this stage of SuperSPAR uses $O(p_t)$ group operations (not counting inversions).
 
 If Stage 2 successfully computes $h' = \ord(\cclass)$ and assuming that $\ord(\bclass)$ is even, we compute an ambiguous ideal by repeated squaring of $\bclass^{h'}$ and then attempt to factor the integer associated with the discriminant.  If the order is odd, however, then the algorithm runs Stage 1 again with a different random ideal class $\aclass$.  If Stage 2 fails to compute the order of $\cclass$, the algorithm tries again with a different square free multiplier $k$.
 
@@ -1234,7 +1233,7 @@ For the purpose of discussing SuperSPAR, we treat the distribution on the order 
 
 Sutherland notes \cite[p.84]{Sutherland2007} that the distribution of $\ord(\alpha_i)$ may not be uniform.
 
-Ideally, we want to minimize the expected number of group operations that lead to a factorization of the integer $N$.  The parameters involved are the number of prime ideal classes $\aclass$ tried before switching multipliers and class groups, the bound on the largest prime in the exponent $E$, a bound on the exponents $e_i$ of the prime powers ${p_i}^{e_i}$ whose product is the exponents $E$, and a bound on the largest baby step $b$.
+Ideally, we want to minimize the expected number of group operations that lead to a factorization of the integer $N$.  The parameters involved are the number of prime ideal classes $\aclass$ tried before switching multipliers and class groups, the bound on the largest prime in the exponent $E$, a bound on the exponents $e_i$ of the prime powers ${p_i}^{e_i}$ whose product is the exponents $E$, and a bound on the largest baby step $s$.
 
 
 Cohen \cite[p.295]{Cohen1993} states a bound on the number of elements in the class group $Cl_\Delta$ as
@@ -1275,7 +1274,7 @@ Experimentally we found that the prime factorization of the order of ideal class
   $m$ a multiplier of the primorial $P_w$ for the search phase, \\
   $c \in \ZZgtz$ the number of ideal classes to try before switching multipliers.
 
-\STATE $b = mP_w$
+\STATE $s = mP_w$
 \STATE $k \gets 0$ \COMMENT{the next line sets $k$ to 1 on the first run}
 \STATE $k \gets $ smallest square free integer $> k$ \label{goto:newK}
 \STATE $\Delta \gets -kN$
@@ -1293,17 +1292,17 @@ Experimentally we found that the prime factorization of the order of ideal class
 
 \STATE \{-- search stage --\}
 \STATE clear the lookup table
-\FOR{$1 \le i \le b$ where $\gcd(i,P_w)=1$}
+\FOR{$1 \le i \le s$ where $\gcd(i,P_w)=1$}
 	\STATE compute $\bclass^i$ and store $\bclass^i \mapsto i$ in the lookup table \COMMENT{coprime baby-steps}
 	\IF{$\bclass^i = \idclass$}
 		\STATE $h \gets iE$, then go to line \ref{goto:tryAmbiguous}
 	\ENDIF
 \ENDFOR
 \FOR{$1 \le j \le m\phi(P_w)$}
-	\IF{$\bclass^{2bj}$ is in the table, first lookup $i$}
-		\STATE $h \gets$ odd part of $(2bj - i)E$, then go to line \ref{goto:tryAmbiguous}  \COMMENT{positive giant-step}
-	\ELSIF{$\bclass^{-2bj}$ is in the table, first lookup $i$}
-		\STATE $h \gets$ odd part of $(2bj + i)E$, then go to line \ref{goto:tryAmbiguous} \COMMENT{inverted giant-step}
+	\IF{$\bclass^{2js}$ is in the table, first lookup $i$}
+		\STATE $h \gets$ odd part of $(2js - i)E$, then go to line \ref{goto:tryAmbiguous}  \COMMENT{positive giant-step}
+	\ELSIF{$\bclass^{-2js}$ is in the table, first lookup $i$}
+		\STATE $h \gets$ odd part of $(2js + i)E$, then go to line \ref{goto:tryAmbiguous} \COMMENT{inverted giant-step}
 	\ENDIF
 \ENDFOR
 
@@ -2220,7 +2219,7 @@ Subsection \ref{subsec:ssparInPractice}
 % TODO: Cite something from literature?
 % TODO: State why it's called a "Wheel"?
 
-The bounded primorial steps algorithm from Section \ref{sec:primorial} and used by the SuperSPAR factoring algorithm (Section \ref{sec:superSpar}) computes baby-steps $\aclass^i$ for $1 \le i \le b$ where $i$ is coprime to some primorial $P_w$ and $b$ is a multiple of $P_w$.  By considering only values coprime to $P_w$ the running time complexity of the bounded primorial steps algorithm achieves an upper bound of $O(\sqrt{M/\log \log M})$ group operations in the worst case.  If an implementation has to test whether each $i$ from $1$ to $P_w$ is coprime to $P_w$, the algorithm cannot achieve this.  As such, the algorithm assumes a set of values coprime to $P_w$ is globally available.  Of course, one can generate such a set by testing whether $\gcd(i, P_w) = 1$ for $i$ from $1$ to $P_w$, but there are more efficient methods.  This section discusses two such methods, namely sieving and wheeling.  Additional information on each technique can be found in \cite[pp.117--127]{Crandall2001} and \cite[p.494]{Sutherland2009}.
+The bounded primorial steps algorithm from Section \ref{sec:primorial} and used by the SuperSPAR factoring algorithm (Section \ref{sec:superSpar}) computes baby-steps $\aclass^i$ for $1 \le i \le s$ where $i$ is coprime to some primorial $P_w$ and $s$ is a multiple of $P_w$.  By considering only values coprime to $P_w$ the running time complexity of the bounded primorial steps algorithm achieves an upper bound of $O(\sqrt{M/\log \log M})$ group operations in the worst case.  If an implementation has to test whether each $i$ from $1$ to $P_w$ is coprime to $P_w$, the algorithm cannot achieve this.  As such, the algorithm assumes a set of values coprime to $P_w$ is globally available.  Of course, one can generate such a set by testing whether $\gcd(i, P_w) = 1$ for $i$ from $1$ to $P_w$, but there are more efficient methods.  This section discusses two such methods, namely sieving and wheeling.  Additional information on each technique can be found in \cite[pp.117--127]{Crandall2001} and \cite[p.494]{Sutherland2009}.
 
 %Since a practical method for computing baby-steps $\aclass^i$ for $1 \le i \le b$ is to iterate $i$ over consecutive coprime values, computing the delta between neighbouring coprime values is sufficient.  An implementation then iterates $i$ by adding the next delta to the current value of $i$ in order to move it to the next coprime value.
 
@@ -2519,9 +2518,9 @@ Classes/Group & 32 bits & 40 bits & 48 bits & 56 bits & 64 bits & 72 bits & 80 b
 
 \section{Chained Hashing vs.\ Open Address Hashing}
 
-The SuperSPAR Algorithm \ref{alg:superSpar} (and more generally, the bounded primorial steps algorithm \ref{alg:primorialSteps}) requires a lookup table\footnote{The lookup table maps group elements $\bclass^i$ to exponents $i$.}.  The baby steps generate a mapping from group elements $\bclass^i$ to exponents $i$ coprime to some primorial $P_w$ and store this mapping in the lookup table. The giant steps lookup group elements $\bclass^{2bj}$ and $\bclass^{-2bj}$ from the lookup table.  As such, the performance of the algorithm directly corresponds to the performance of the lookup table.  This Section describes the experimental results for SuperSPAR using two different implementations of lookup tables, as well as the method used to map group elements to exponents in our implementation.
+The SuperSPAR Algorithm \ref{alg:superSpar} (and more generally, the bounded primorial steps algorithm \ref{alg:primorialSteps}) requires a lookup table\footnote{The lookup table maps group elements $\bclass^i$ to exponents $i$.}.  The baby steps generate a mapping from group elements $\bclass^i$ to exponents $i$ coprime to some primorial $P_w$ and store this mapping in the lookup table. The giant steps lookup group elements $\bclass^{2js}$ and $\bclass^{-2js}$ from the lookup table.  As such, the performance of the algorithm directly corresponds to the performance of the lookup table.  This Section describes the experimental results for SuperSPAR using two different implementations of lookup tables, as well as the method used to map group elements to exponents in our implementation.
 
-Our implementation of idea class arithmetic represents an ideal class $\aclass \in Cl_\Delta$ using the triple $(a, b, c)$ where $\ideal a = [a, (b + \sqrt\Delta)/2]$ is a reduced representative for the ideal class and $c = (b^2 - \Delta)/4a$ (see Subsection \ref{subsec:implementationOfIdealArithmetic}).  Since inversion of ideal classes is virtually free, SuperSPAR computes giant steps for ideal classes $\bclass^{2bj}$ and $\bclass^{-2bj}$, but rather than perform two table lookups, we take advantage of the way in which the inverse of an ideal class is computed.  Recall form Subsection \ref{subsec:idealClassInverse} that the inverse of an ideal class for a representative $[a, (b + \sqrt\Delta)/2]$ is given by the representative $[a, (-b + \sqrt\Delta)]$.  Since $|b| = \pm \sqrt{\Delta +4ac}$, by using the pair $(a, c)$ for the key, our implementation is able to look up both $\bclass^{2bj}$ and $\bclass^{-2bj}$ using a single table lookup.  However, once a giant step finds a corresponding $\bclass^i$ in the table, both the exponents $i-2bj$ and $i+2bj$ must be tested to determine which one is a multiple of the order of $\bclass$.  Figure \ref{fig:ssparSingleLookup} shows the advantage of performing a single lookup for each giant step over two lookups per giant step\footnote{The method proposed here is to use the pair $(a, b)$ for the hash key.  This distinguishes between $\bclass^{2bj}$ and $\bclass^{-2bj}$.  As such, both must be looked up during the giant steps.  Then when some $\bclass^i = \bclass^{2bj}$ or $\bclass^i = \bclass^{-2bj}$ is found, a multiple of the order is known.}, even when this requires extra exponentiations once a candidate for a multiple of the order is found.
+Our implementation of idea class arithmetic represents an ideal class $\aclass \in Cl_\Delta$ using the triple $(a, b, c)$ where $\ideal a = [a, (b + \sqrt\Delta)/2]$ is a reduced representative for the ideal class and $c = (b^2 - \Delta)/4a$ (see Subsection \ref{subsec:implementationOfIdealArithmetic}).  Since inversion of ideal classes is virtually free, SuperSPAR computes giant steps for ideal classes $\bclass^{2js}$ and $\bclass^{-2js}$, but rather than perform two table lookups, we take advantage of the way in which the inverse of an ideal class is computed.  Recall form Subsection \ref{subsec:idealClassInverse} that the inverse of an ideal class for a representative $[a, (b + \sqrt\Delta)/2]$ is given by the representative $[a, (-b + \sqrt\Delta)]$.  Since $|b| = \pm \sqrt{\Delta +4ac}$, by using the pair $(a, c)$ for the key, our implementation is able to look up both $\bclass^{2sj}$ and $\bclass^{-2js}$ using a single table lookup.  However, once a giant step finds a corresponding $\bclass^i$ in the table, both the exponents $2js-i$ and $2js+i$ must be tested to determine which one is a multiple of the order of $\bclass$.  Figure \ref{fig:ssparSingleLookup} shows the advantage of performing a single lookup for each giant step over two lookups per giant step\footnote{The method proposed here is to use the pair $(a, b)$ for the hash key.  This distinguishes between $\bclass^{2js}$ and $\bclass^{-2js}$.  As such, both must be looked up during the giant steps.  Then when some $\bclass^i = \bclass^{2js}$ or $\bclass^i = \bclass^{-2js}$ is found, a multiple of the order is known.}, even when this requires extra exponentiations once a candidate for a multiple of the order is found.
 
 \mygraph{hashing-single-vs-double}{fig:ssparSingleLookup}{Average time to split an integer either by using a single lookup for each giant step, with exponentiation to verify a multiple of the order, or two lookups for each giant step, but without the need to verify a multiple of the order.}
 
