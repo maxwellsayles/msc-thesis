@@ -173,7 +173,7 @@ We call $\Delta$ the \emph{radicand} of $\KK$.  Notice that $\Delta \equiv 0, 1 
 
 \section{Quadratic Integers}
 
-A polynomial with a leading coefficient of 1 is a \emph{monic} polynomial, and the root $\alpha$ of a monic polynomial $f(x)$ with integer coefficients is an \emph{algebraic integer}. The rational numbers are degree 1 algebraic numbers since they are roots of degree 1 polynomials $bx-a$.  The roots of monic degree 1 polynomials with integer coefficients are the integers, $\ZZ$.  When $f(x)$ is a monic quadratic polynomial with integer coefficients, the root $\alpha$ is a \emph{quadratic integer}.
+A polynomial with a leading coefficient of 1 is a \emph{monic} polynomial, and the root $\alpha$ of a monic polynomial $f(x)$ with integer coefficients is an \emph{algebraic integer}. The rational numbers are degree 1 algebraic numbers since they are roots of degree 1 polynomials $bx-a$, and the roots of monic degree 1 polynomials with integer coefficients are the integers, $\ZZ$, sometimes called the \emph{rational integers}.  When $f(x)$ is a monic quadratic polynomial with integer coefficients, the root $\alpha$ is a \emph{quadratic integer}.
 
 \begin{thm}
 \cite[Theorem 4.10]{Jacobson2009} A quadratic integer $\alpha$ is an algebraic integer of $\QQ(\sqrt{\Delta_0})$ where $\alpha$ can be written as $\alpha = x + y \omega_0$ for $x, y \in \ZZ$ where
@@ -188,7 +188,7 @@ A polynomial with a leading coefficient of 1 is a \emph{monic} polynomial, and t
 
 \section{Maximal Order of Algebraic Integers}
 
-The \emph{maximal order} of a field $\KK$ is the set of all algebraic integers contained within $\KK$ and can be characterized using a $\ZZ$-module.
+The \emph{maximal order} of a field $\KK$ is the set of all algebraic integers contained within $\KK$ and is characterized using a $\ZZ$-module.
 
 \begin{defn}
 Let $X = \{ \xi_1, \xi_2, \xi_3, ..., \xi_n \}$ be a subset of a number field $\KK$.  In this case, a \emph{$\ZZ$\mbox{-}module}, $\MM$, is an additive Abelian group such that
@@ -204,7 +204,7 @@ A \emph{quadratic order} $\OO$ of $\QQ(\sqrt\Delta)$ is a sub-ring of the quadra
 \[
 	\left[ 1, \frac{\Delta + \sqrt{\Delta}}{2} \right] = [1, f\omega_0].
 \]
-The maximal order $\OO_\Delta = [1, \omega_0]$ of $\QQ(\sqrt\Delta)$ is the ring of all quadratic integers in $\QQ(\sqrt\Delta)$.  This order is maximal since any order $\OO = [1, f\omega_0]$ is a sub-ring of $\OO_\Delta$.
+The maximal order $\OO_\Delta = [1, \omega_0]$ of $\QQ(\sqrt\Delta)$ is the ring of all quadratic integers in $\QQ(\sqrt\Delta)$, and is maximal since any order $\OO = [1, f\omega_0]$ is a sub-ring of $\OO_\Delta$.
 \end{defn}
 
 
@@ -2633,9 +2633,9 @@ and Algorithm \ref{alg:stepBounds} can be used to generate such a set.
 
 First the algorithm generates all pairs $(m, w)$ such that $\stepCount(m, w) \le B$.  There is a finite number of these pairs, since there are a finite number of primorials no larger than $B$, and for a given $w$ there are $\floor{B / 2\phi(P_w)}$ possible values of $m$.  The algorithm then sorts these pairs in ascending order by the total number of steps $\stepCount(m, w)$, breaking ties by sorting in descending order of the search range $\lastStep(m, w)$.  The first pair in the list is chosen as a candidate $(m, w)$ for the set $\stepBounds_B$.  This pair is always in the solution set since by Equation \ref{eq:stepBounds} and the ordering imposed on the list, all other pairs either take more steps, or an equal number of steps, but have a smaller search range.  The algorithm then iterates over the remaining pairs, and the search range of each pair is compared with that of the candidate pair.  If the search range is greater, then the candidate pair is output to the set $\stepBounds_B$ and the current pair becomes the next candidate pair.  The correctness of this follows the fact that pairs in the list are monotonically increasing by the total number of steps, and successive candidate pairs are strictly increasing in their search range.  As such, when the candidate pair $(m, w)$ is compared with the pair $(m_i, w_i)$ from the list, if the search range of the list pair is less than that of the candidate pair, the the list pair uses at least as many steps, but does not search as far, and therefore is not a member of the set $\stepBounds_B$.  Otherwise, when the list pair has a larger search range, this implies that it uses more steps (since ties are broken by sorting in descending order of search range), and the candidate pair is guaranteed to be a member of the set $\stepBounds_B$.  This holds since all the pairs remaining in the list use more steps, and all the previous pairs from the list either had a smaller search range, or were rejected because they required more steps.
 
-For example, the set $\stepBounds_{500}$ restricted to pairs using no more than 500 steps is
+For example, the set $\stepBounds_{512}$ restricted to pairs using no more than 512 steps is
 \begin{align*}
-\stepBounds_{500} = \{&(1,1),(1,2),(3,1),(2,2),(5,1),(3,2),(1,3),(5,2),(6,2),(7,2),(2,3),(9,2), \\
+\stepBounds_{512} = \{&(1,1),(1,2),(3,1),(2,2),(5,1),(3,2),(1,3),(5,2),(6,2),(7,2),(2,3),(9,2), \\
 &(10,2),(11,2),(3,3),(14,2),(15,2),(4,3),(18,2),(19,2),(5,3),(23,2),(1,4), \\
 &(7,3),(8,3),(9,3),(10,3),(11,3),(2,4),(13,3),(14,3),(15,3),(16,3),(17,3), \\
 &(3,4),(20,3),(21,3),(22,3),(23,3),(4,4),(26,3),(27,3),(28,3),(29,3),(5,4)\}.
@@ -2645,14 +2645,15 @@ The set is ordered according to Algorithm \ref{alg:stepBounds}.  The number of s
 &2,4,6,8,10,12,16,20,24,28,32,36,40,44,48,56,60,64,72,76,80,92,96,112,128,144,\\
 &160,176,192,208,224,240,256,272,288,320,336,352,368,384,416,432,448,464,480,
 \end{align*}
-and the search reach for each corresponding pair is
+and the search reach, i.e.\ the value of the largest exponent generated by the giant steps, for each corresponding pair is
 \begin{align*}
 &4,24,36,96,100,216,480,600,864,1176,1920,1944,2400,2904,4320,4704,5400,7680,\\
 &7776,8664,12000,12696,20160,23520,30720,38880,48000,58080,80640,81120,94080,\\
 &108000,122880,138720,181440,192000,211680,232320,253920,322560,324480,349920,\\
 &376320,403680,504000.
 \end{align*}
-These bounds are u
+
+This technique of generating candidate bounds for the search phase of SuperSPAR is used in the next section where we search for an exponent to use in the exponentiation stage and a corresponding bound for the search stage that perform well in practice for integers of various sizes.
 
 \section{Empirical Search for Exponent and Step Count}
 \label{sec:ssparEmpirical}
