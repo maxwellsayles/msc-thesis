@@ -2202,23 +2202,15 @@ The next Chapter brings together the improvements to ideal arithmetic and expone
 \chapter{SuperSPAR Experiments}
 \label{chap:ssparExperiments}
 
-This Chapter discusses the experiments and results that directed our implementation of the SuperSPAR integer factoring algorithm, introduced in Section \ref{sec:superSpar}.  The algorithm is based on the ideal class group, discussed in Chapter \ref{chap:idealArithmetic}, and the experiments and results leading to our implementation of arithmetic in the ideal class group is discussed in Chapter \ref{chap:idealExperiments}.  SuperSPAR is an adaptation of the SPAR factoring algorithm, discussed in Section \ref{sec:spar}.  The algorithms differ in how they search for the order of a group element -- SuperSPAR uses the bounded primorial steps algorithm discussed in Section \ref{sec:primorial} -- but both algorithms first exponentiate a random ideal class to the product of many primes.  Chapter \ref{chap:exponentiation} discusses several methods for exponentiation in generic groups and Chapter \ref{chap:powExperiments} discusses experiments and results of exponentiation in the ideal class group.  Practical improvements to each of these areas result in practical improvements to the SuperSPAR algorithm.
+This Chapter discusses the experiments and results that directed our implementation of the SuperSPAR integer factoring algorithm, introduced in Section \ref{sec:superSpar}.  The algorithm is based on the ideal class group, discussed in Chapter \ref{chap:idealArithmetic}, and the experiments and results leading to our implementation of arithmetic in the ideal class group is discussed in Chapter \ref{chap:idealExperiments}.  SuperSPAR is an adaptation of the SPAR factoring algorithm, discussed in Section \ref{sec:spar}.  The algorithms differ in how they search for the order of a group element -- SuperSPAR uses the bounded primorial steps algorithm discussed in Section \ref{sec:primorial} -- but both algorithms first exponentiate a random ideal class to the product of many primes.  Chapter \ref{chap:exponentiation} discusses several methods for exponentiation in generic groups and Chapter \ref{chap:powExperiments} discusses our experiments and results of exponentiation in the ideal class group.  Practical improvements to each of these areas lead to practical improvements to our implementation of SuperSPAR.
 
-
-TODO: Introduce each section coming up.
-
-Use of the bounded primorial steps algorithm for the search stage is the fundamental way in which SuperSPAR differs from SPAR.  A key property to the improved running time of the bounded primorial steps algorithm over other generic order finding algorithms is the ability to step to exponents of a group element that are coprime to some primorial.  Section \ref{sec:ssparCoprimeFinding}  discusses techniques to find integers coprime to a primorial in a given range.
-
-Subsection \ref{subsec:ssparInPractice}
-
+SuperSPAR works in two stages: an exponentiation stage and a search stage.  The search stage of SuperSPAR computes baby steps coprime to a multiple of a primorial.  Section \ref{sec:ssparCoprimeFinding}  discusses two techniques to find integers coprime to a primorial in a given range.  As discussed in Subsection \ref{subsec:boundedPrimorialSteps}, for the search stage to work, the order of the element should have no factors in common with the primorial used for the search stage.  Section \ref{sec:ssparFactorizationOfTheOrder} discusses the data and experiments used to bound the exponents of the prime factors of the exponent used in the exponentiation stage so that (with high probability) the order of the resulting ideal class will have no factors in common with the primorial used during the search stage.  If the algorithm is unsuccessful at splitting the input integer for several ideal classes, a different class group is used.  Timing data for the number of ideal classes to try before switching class groups is provided in Section \ref{sec:ssparExpIdeals}.  The search stage of the algorithm requires the use of a lookup table.  Section \ref{sec:ssparHashing} compares two implementations of such a table.  Then, to enable the discovery of bounds useful for the search stage, Section \ref{sec:ssparBabyStepBounds} discusses a method of generating suitable candidates.  With all this in place, Section \ref{sec:ssparEmpirical} discusses the method used to determine the exponent for the exponentiation stage and the bound for the search stage that work well in practice for integers of specific sizes.  Finally, we provide a comparison of our implementation of SuperSPAR against several public implementations of factoring algorithms and show that for integers between 54-bits and 64-bits, SuperSPAR performs the best on average of the implementations tested.
 
 
 \section{Coprime Finding}
 \label{sec:ssparCoprimeFinding}
 
 % TODO: Should this section be a subsection of bounded primorial steps instead?
-% TODO: Cite something from literature?
-% TODO: State why it's called a "Wheel"?
 
 The bounded primorial steps algorithm from Section \ref{sec:primorial} and used by the SuperSPAR factoring algorithm (Section \ref{sec:superSpar}) computes baby-steps $\aclass^i$ for $1 \le i \le s$ where $i$ is coprime to some primorial $P_w$ and $s$ is a multiple of $P_w$.  By considering only values coprime to $P_w$ the running time complexity of the bounded primorial steps algorithm achieves an upper bound of $O(\sqrt{M/\log \log M})$ group operations in the worst case.  If an implementation has to test whether each $i$ from $1$ to $P_w$ is coprime to $P_w$, the algorithm cannot achieve this.  As such, the algorithm assumes a set of values coprime to $P_w$ is globally available.  Of course, one can generate such a set by testing whether $\gcd(i, P_w) = 1$ for $i$ from $1$ to $P_w$, but there are more efficient methods.  This section discusses two such methods, namely sieving and wheeling.  Additional information on each technique can be found in \cite[pp.117--127]{Crandall2001} and \cite[p.494]{Sutherland2009}.
 
@@ -2339,6 +2331,8 @@ and it holds that for all $w$ that
 \end{comment}
 
 \section{Factorization of the Order of Ideal Classes}
+\label{sec:ssparFactorizationOfTheOrder}
+
 \newcommand{\idealDataSet}{\set D}
 
 Subsection \ref{subsec:ssparInPractice} discusses some practical considerations of our implementation of SuperSPAR.  As such, this Section provides numerical evidence in support of some of those considerations.  From a set of roughly 6 million ideals, the factorization of the order of each ideal was computed.  Based on this factorization, a strategy of reusing a known multiple of the order of an ideal class for several ideal classes in the same group is adopted (Subsection \ref{subsec:ssparDiffBtwOrder}).  This data helped guide bounds on the exponents $e_i$ in the product $E = \prod {p_i}^{e_i}$ used in the exponentiation stage (Subsection \ref{subsec:ssparPrimePowerBound}).  In addition, there is evidence, at least for the integer range studied, that ideal classes from groups associated with certain multipliers are more likely to lead to factorizations (Subsection \ref{subsec:ssparBestMultipliers}).
@@ -2518,6 +2512,7 @@ Classes/Group & 32 bits & 40 bits & 48 bits & 56 bits & 64 bits & 72 bits & 80 b
 
 
 \section{Chained Hashing vs.\ Open Address Hashing}
+\label{sec:ssparHashing}
 
 The SuperSPAR Algorithm \ref{alg:superSpar} (and more generally, the bounded primorial steps algorithm \ref{alg:primorialSteps}) requires a lookup table\footnote{The lookup table maps group elements $\bclass^i$ to exponents $i$.}.  The baby steps generate a mapping from group elements $\bclass^i$ to exponents $i$ coprime to some primorial $P_w$ and store this mapping in the lookup table. The giant steps lookup group elements $\bclass^{2js}$ and $\bclass^{-2js}$ from the lookup table.  As such, the performance of the algorithm directly corresponds to the performance of the lookup table.  This Section describes the experimental results for SuperSPAR using two different implementations of lookup tables, as well as the method used to map group elements to exponents in our implementation.
 
@@ -2663,13 +2658,13 @@ Exponents for the exponentiation stage were generated using the $L$ best approxi
 
 \mygraph{search-56-bits-primorial-x}{fig:search56PrimorialX}{TODO}
 \mygraph{search-56-bits-steps-x}{fig:search56StepX}{TODO}
-\mygraph{search-56-bits-primorial-min-steps-x}{fig:search56PrimorialMin}{TODO}
 \mygraph{search-56-bits-primorial-x-steps-min}{fig:search56StepX}{TODO}
+\mygraph{search-56-bits-primorial-min-steps-x}{fig:search56PrimorialMin}{TODO}
 
 \mygraph{search-64-bits-primorial-x}{fig:search64PrimorialX}{TODO}
 \mygraph{search-64-bits-steps-x}{fig:search64StepX}{TODO}
-\mygraph{search-64-bits-primorial-min-steps-x}{fig:search64PrimorialMin}{TODO}
 \mygraph{search-64-bits-primorial-x-steps-min}{fig:search64StepX}{TODO}
+\mygraph{search-64-bits-primorial-min-steps-x}{fig:search64PrimorialMin}{TODO}
 
 
 Quadratic samples at 1/3 and 2/3 and throws away the larger third.
