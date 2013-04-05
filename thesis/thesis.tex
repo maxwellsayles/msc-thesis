@@ -2204,7 +2204,7 @@ The next Chapter brings together the improvements to ideal arithmetic and expone
 
 This Chapter discusses the experiments and results that directed our implementation of the SuperSPAR integer factoring algorithm, introduced in Section \ref{sec:superSpar}.  The algorithm is based on the ideal class group, discussed in Chapter \ref{chap:idealArithmetic}, and the experiments and results leading to our implementation of arithmetic in the ideal class group is discussed in Chapter \ref{chap:idealExperiments}.  SuperSPAR is an adaptation of the SPAR factoring algorithm, discussed in Section \ref{sec:spar}.  The algorithms differ in how they search for the order of a group element -- SuperSPAR uses the bounded primorial steps algorithm discussed in Section \ref{sec:primorial} -- but both algorithms first exponentiate a random ideal class to the product of many primes.  Chapter \ref{chap:exponentiation} discusses several methods for exponentiation in generic groups and Chapter \ref{chap:powExperiments} discusses our experiments and results of exponentiation in the ideal class group.  Practical improvements to each of these areas lead to practical improvements to our implementation of SuperSPAR.
 
-SuperSPAR works in two stages: an exponentiation stage and a search stage.  The search stage of SuperSPAR computes baby steps coprime to a multiple of a primorial.  Section \ref{sec:ssparCoprimeFinding}  discusses two techniques to find integers coprime to a primorial in a given range.  As discussed in Subsection \ref{subsec:boundedPrimorialSteps}, for the search stage to work, the order of the element should have no factors in common with the primorial used for the search stage.  Section \ref{sec:ssparFactorizationOfTheOrder} discusses the data and experiments used to bound the exponents of the prime factors of the exponent used in the exponentiation stage so that (with high probability) the order of the resulting ideal class will have no factors in common with the primorial used during the search stage.  If the algorithm is unsuccessful at splitting the input integer for several ideal classes, a different class group is used.  Timing data for the number of ideal classes to try before switching class groups is provided in Section \ref{sec:ssparExpIdeals}.  The search stage of the algorithm requires the use of a lookup table.  Section \ref{sec:ssparHashing} compares two implementations of such a table.  Then, to enable the discovery of bounds useful for the search stage, Section \ref{sec:ssparBabyStepBounds} discusses a method of generating suitable candidates.  With all this in place, Section \ref{sec:ssparEmpirical} discusses the method used to determine the exponent for the exponentiation stage and the bound for the search stage that work well in practice for integers of specific sizes.  Finally, we provide a comparison of our implementation of SuperSPAR against several public implementations of factoring algorithms and show that for integers between 54-bits and 64-bits, SuperSPAR performs the best on average of the implementations tested.
+SuperSPAR works in two stages: an exponentiation stage and a search stage.  The search stage of SuperSPAR computes baby steps coprime to a multiple of a primorial.  Section \ref{sec:ssparCoprimeFinding}  discusses two techniques to find integers coprime to a primorial in a given range.  As discussed in Subsection \ref{subsec:boundedPrimorialSteps}, for the search stage to work, the order of the element should have no factors in common with the primorial used for the search stage.  Section \ref{sec:ssparFactorizationOfTheOrder} discusses the data and experiments used to bound the exponents of the prime factors of the exponent used in the exponentiation stage so that (with high probability) the order of the resulting ideal class will have no factors in common with the primorial used during the search stage.  This Section also discusses the number of ideal classes to try in expectation for a given class group.  The search stage of the algorithm requires the use of a lookup table.  Section \ref{sec:ssparHashing} compares two implementations of such a table.  Then, to enable the discovery of bounds useful for the search stage, Section \ref{sec:ssparBabyStepBounds} discusses a method of generating suitable candidates.  With all this in place, Section \ref{sec:ssparEmpirical} discusses the method used to determine the exponent for the exponentiation stage and the bound for the search stage that work well in practice for integers of specific sizes.  Finally, we provide a comparison of our implementation of SuperSPAR against several public implementations of factoring algorithms and show that for integers between 54-bits and 64-bits, SuperSPAR performs the best on average of the implementations tested.
 
 
 \section{Coprime Finding}
@@ -2218,13 +2218,13 @@ The bounded primorial steps algorithm from Section \ref{sec:primorial} and used 
 
 \subsection{Coprime Sieve}
 
-Sieving the values coprime to some primorial $P_w$ is straightforward since the factorization $P_w = 2 \times 3 \times \cdots \times p_w$ is known.  Let $[1,b]$ denote the range such that the sieve will determine all values $1 \le x \le b$ such that $x$ is coprime to $P_w$.  First, create a table mapping the values $1$ through $b$ to \emph{true}.  Then for each prime factor $p_j$ of $P_w$, and for every multiple $mp_j$ such that $1 \le mp_j \le b$, set the table entry at index $mp_j$ to \emph{false}.  At this point, each index with a \emph{true} value is coprime to $P_w$.  To see this, note that an index $x$ is \emph{false} when there was some multiple $m$ of a prime $p_j$ dividing $P_w$ such that $mp_j = x$.  As such, the value of $x$ is false if and only if $x$ and $P_w$ share a common factor, namely $p_j$.
+Sieving the values coprime to some primorial $P_w$ is straightforward since the factorization $P_w = 2 \times 3 \times \cdots \times p_w$ is known.  Let $[1,b]$ denote the range to be sieved.  First, create a table mapping the values $1$ through $b$ to \emph{true}.  Then for each prime factor $p_j$ of $P_w$, and for every multiple $mp_j$ such that $1 \le mp_j \le b$, set the table entry at index $mp_j$ to \emph{false}.  At this point, each index with a \emph{true} value is coprime to $P_w$.  To see this, note that an index $x$ is \emph{false} when there was some multiple $m$ of a prime $p_j$ dividing $P_w$ such that $mp_j = x$.  As such, the value of $x$ is false if and only if $x$ and $P_w$ share a common factor, namely $p_j$.
 
 \subsection{Coprime Wheel}
 \newcommand{\coprimeset}{\set C}
 \newcommand{\coprimelist}{\set D}
 
-Suppose for some primorial $P_w$, that the set of all integers $1 \le x < P_w$ coprime to $P_w$ is already known.  More formally, let
+When the value $b$ from the previous section is equal to the primorial $P_w$, a coprime wheel may be faster in practice.  First, suppose that for some primorial $P_w$, the set of all integers $1 \le x < P_w$ coprime to $P_w$ is already known.  More formally, let
 \[
 	\coprimeset_w = \left\{x ~:~ \gcd(x, P_w) = 1, 1 \le x < P_w \right\}.
 \]
@@ -2242,7 +2242,7 @@ is the set of all values $1 \le x < P_{w+1}$ that are coprime to $P_{w+1}$.
 
 The primorial $P_1 = 2$ has the set $\coprimeset_1 = \{1\}$ of integers coprime to 2.  This acts as a base case, from which the representative set of integers coprime to primorials $P_2, P_3, ..., P_w$ are computed by recursive application of the above steps.
 
-Since our implementation of SuperSPAR iterates baby steps for consecutive integers coprime to some primorial $P_w$, computing the difference between coprime integers is beneficial.  The above technique is adapted to work with lists of deltas between consecutive coprime integers.  Each list begins with the difference from the first coprime integer 1 (which is coprime to all integers) to the next integer coprime to some primorial $P_w$. Let
+Our implementation of SuperSPAR iterates baby steps for consecutive integers coprime to some primorial $P_w$.  As such, the difference between coprime integers is used instead, and the above technique is adapted to work with lists of deltas between consecutive coprime integers.  Each list begins with the difference from the first coprime integer 1 (which is coprime to all integers) to the next integer coprime to some primorial $P_w$. Let
 \[
 	\coprimelist_w = d_1, ..., d_{\phi(P_w)}
 \]
@@ -2299,43 +2299,15 @@ The coprime sieve requires $b$ bits of memory, while the coprime wheel requires 
 \label{tab:primorialRateOfGrowth}
 \end{table}
 
-SuperSPAR computes baby steps coprime to a multiple of a primorial, and so $b$ is at least $\phi(P_w)$.  This means that in practice, the algorithm is restricted to primorials that fit within the available memory.  The coprime wheel is used to generate the list of coprime deltas, however, this list is only generated once and then compiled directly into the bytecode of our implementation.  In practice, the largest primorial used is $P_5 = 2310$ (see Section \ref{sec:ssparEmpirical} for details).
+SuperSPAR computes baby steps coprime to a multiple of a primorial, and so $b$ is at least $\phi(P_w)$.  This means that in practice, the algorithm is restricted to primorials that fit within the available memory.  The coprime wheel is used to generate the list of coprime deltas, however, this list is precomputed and compiled directly into the bytecode of our implementation.  In practice, the largest primorial used is $P_5 = 2310$ (see Section \ref{sec:ssparEmpirical} for details).
 
-
-\begin{comment}
-The sieve algorithm iterates for each prime $2 \le p_j \le p_w$ and performs $b / p_j$ arithmetic operations.  This gives a bound of
-\[
-	\sum_{p_j \in \{2, 3, 5, ..., p_w\}} \frac{b}{p_j}
-	\le \sum_{i=1}^{p_w} \frac{b}{i}
-	= bp_w \sum_{i=1}^{p_w} \frac{1}{i}
-	\in O(b p_w \ln p_w)
-\]
-arithmetic operations.  On the other hand, the coprime wheel iterates 
-
-Assume for the inductive hypothesis that
-\[
-	\sum_{i=1}^w \phi(P_i) \le \frac{3}{2} \phi(P_w).
-\]
-The base case $\phi(P_2) + \phi(P_1) = 3 \le \frac{3}{2} \phi(P_2)$.  The inductive step is
-\begin{align*}
-	\sum_{i=1}^{w+1} \phi(P_i) &= \phi(P_{w+1}) + \sum_{i=1}^w \phi(P_i) \\
-	&\le \phi(P_{w+1}) + \frac{3}{2} \phi(P_w) & \textrm{\{By the inductive hypothesis.\}} \\
-	&\le \phi(P_{w+1}) + (p_{w+1}-1)\frac{1}{2} \phi(P_w) & \textrm{\{True for all $p_w \ge 3$.\}} \\
-	&= \phi(P_{w+1}) + \frac{1}{2} \phi(P_{w+1}) & \textrm{\{Since $(p_{w+1}\phi(P_w) = \phi(P_{w+1}$.\}} \\
-	&= \frac{3}{2} \phi(P_{w+1}),
-\end{align*}
-and it holds that for all $w$ that
-\[
-	\sum_{i=1}^w \phi(P_i) \le \frac{3}{2} \phi(P_w).
-\]
-\end{comment}
 
 \section{Factorization of the Order of Ideal Classes}
 \label{sec:ssparFactorizationOfTheOrder}
 
 \newcommand{\idealDataSet}{\set D}
 
-Subsection \ref{subsec:ssparInPractice} discusses some practical considerations of our implementation of SuperSPAR.  As such, this Section provides numerical evidence in support of some of those considerations.  From a set of roughly 6 million ideals, the factorization of the order of each ideal was computed.  Based on this factorization, a strategy of reusing a known multiple of the order of an ideal class for several ideal classes in the same group is adopted (Subsection \ref{subsec:ssparDiffBtwOrder}).  This data helped guide bounds on the exponents $e_i$ in the product $E = \prod {p_i}^{e_i}$ used in the exponentiation stage (Subsection \ref{subsec:ssparPrimePowerBound}).  In addition, there is evidence, at least for the integer range studied, that ideal classes from groups associated with certain multipliers are more likely to lead to factorizations (Subsection \ref{subsec:ssparBestMultipliers}).
+Subsection \ref{subsec:ssparInPractice} discusses some practical considerations of our implementation of SuperSPAR.  As such, this Section provides numerical evidence in support of some of those considerations.  From a set of roughly 6 million ideals, the factorization of the order of each ideal was computed.  Based on this factorization, a strategy of reusing a known multiple of the order of an ideal class for several ideal classes in the same group is adopted (Subsection \ref{subsec:ssparDiffBtwOrder}).  This data helped guide bounds on the exponents $e_i$ in the product $E = \prod {p_i}^{e_i}$ used in the exponentiation stage (Subsection \ref{subsec:ssparPrimePowerBound}).  In addition, there is evidence, at least for the integer range studied, that ideal classes from groups associated with certain multipliers are more likely to lead to a splitting of the input integer (Subsection \ref{subsec:ssparBestMultipliers}).
 
 Since this Chapter is concerned with the performance of SuperSPAR in practice, the following parameters were selected to highlight the range in which SuperSPAR is competitive with other factoring algorithms, but also in order to minimize the size of operands.  Pari/GP was used to generate as large a data set as possible, but that still fit within the available memory (8Gb) and could be processed reasonably quickly.  For bit sizes $n \in \{32, 40, 48, 56, 64, 72, 80\}$, roughly 250,000 unique semiprime integers $N = p \cdot q$ were generated such that $p$ and $q$ are prime and half the size of $N$, while $N$ is $n$ bits in size.  Then for each square free multiplier $k \in \{1, 2, 3, 5, 6, 7, 10\}$, discriminants $\Delta = -kN$ or $\Delta = -4kN$ such that $\Delta \equiv 0, 1 \pmod 4$ were generated.  For each corresponding ideal class group $Cl_\Delta$, ideal class representatives $\idealclass p \in Cl_\Delta$ with $\ideal p = [p, (b+\sqrt\Delta)/2]$ and $p$ prime were generated for the 5 smallest suitable values of $p$.  Finally, for each ideal class $\idealclass p$, the order of $\idealclass p$, its corresponding prime factorization, and whether it lead to to a successful splitting of the integer $N$ were recorded.  This data set is used throughout the computations in the following Subsections and is denoted $\idealDataSet$.
 
@@ -2345,7 +2317,7 @@ Since this Chapter is concerned with the performance of SuperSPAR in practice, t
 
 SPAR (Section \ref{sec:spar}) exponentiates an ideal class $\aclass$ to an exponent $E$ where $E = \prod_{i=2}^t {p_i}^{e_i}$, $p_i$ are prime, and $e_i = \max \{ v : {p_i}^v \le {p_t}^2 \}$ for some appropriately chosen prime $p_t$ \cite[p.290]{Schnorr1984}.  In practice however, Schnorr and Lenstra recommend using smaller exponents $e_i$ such that $e_i = \max \{ v : {p_i}^v \le p_t \}$ \cite[p.293]{Schnorr1984}.  Here we consider bounds for the exponents $e_i$ for use with our implementation of SuperSPAR, assuming the range in which it is a competitive integer factoring tool.
 
-The exponentiation stage of SuperSPAR computes $\bclass = \aclass ^{2^\ell E}$ with $\ell = \floor{\log_2 h_\Delta}$.  The search stage then computes baby steps $\bclass^i$ for $i$ coprime to some primorial $P_w$.  However, if $\ord(\bclass)$ and $P_w$ have a common factor $x$, then $x$ is not coprime to $P_w$ and $\bclass^x$ will not be added to the lookup table used by the coprime baby steps.  If this is the case, the search phase is guaranteed to fail since it cannot find any $\bclass^i$ such that $i \equiv 0 \pmod x$ in the lookup table.  When this happens, the algorithm must start over with a different multiplier for the discriminant of the class group.  In order to ensure that the order of $\bclass$ is coprime to $E$, the exponents in $E$ would have to be chosen such that $e_i = \floor{\log_{p_i} h_\Delta}$, however, in practice it is more efficient to choose smaller values of $e_i$ at the risk that additional class groups are tried.  For this reason, the exponent $E$ is chosen to remove, with high probability, the factors from the order of $\aclass$ that are common with the primorial $P_w$ used by the search stage.
+The exponentiation stage of SuperSPAR computes $\bclass = \aclass ^{2^\ell E}$ with $\ell = \floor{\log_2 h_\Delta}$.  The search stage then computes baby steps $\bclass^i$ for $i$ coprime to some primorial $P_w$.  However, if $\ord(\bclass)$ and $P_w$ have a common factor $p$, then $p$ is not coprime to $P_w$ and $\bclass^p$ will not be added to the lookup table used by the coprime baby steps.  If this is the case, the search phase is guaranteed to fail since it cannot find any $\bclass^{2js}$ such that $2js \equiv 0 \pmod p$ in the lookup table.  In order to ensure that the order of $\bclass$ is coprime to $E$, the exponents in $E$ would have to be chosen such that $e_i = \floor{\log_{p_i} h_\Delta}$, however, in practice it is more efficient to choose smaller values of $e_i$ at the risk that additional class groups are tried.  For this reason, the exponent $E$ is chosen to remove, with high probability, the factors from the order of $\aclass$ that are common with the primorial $P_w$ used by the search stage.
 
 For each ideal in our data set $\idealDataSet$, let the factorization of the order be represented by $\ord(\aclass) = \prod {p_i}^{e_i}$ for $p_i$ prime.  For each prime power factor $3^{e_2}$, $5^{e_3}$, $7^{e_4}$, $11^{e_5}$, $13^{e_6}$, and $17^{e_7}$, more than 99\% of the ideals studied had either $e_2 \le 4$, $e_3 \le 2$, $e_4 \le 2$, $e_5 \le 1$, $e_6 \le 1$, or $e_7 \le 1$.  This is captured by Table \ref{tab:ninetyNine}.  
 
@@ -2392,7 +2364,7 @@ This is not to say that more than 99\% of the ideals in the data set were such t
 \label{tab:primePowerBound}
 \end{table}
 
-While such bounds do work well in practice, the purpose of this Section is to optimize the performance of our implementation of SuperSPAR.  As such, we iterated the bound $B$ for the exponentiation phase and timed the algorithm in practice. Table \ref{tab:actualPrimePowerBound} shows the average time to split semiprime integers\footnote{The sample set consists of 100,000 semiprime integers of each bit size, such that each integer was the product of two primes of equal size.} choosing the exponent $E$ such that odd primes $p_i \le B$ have $e_i = \floor{\log_{p_i} B}$ and $p_i > B$ have $e_i = 1$.  The primorial and multiplier in the search phase are chosen to give good performance on average and are fixed for each integer bit size.  Our implementation of SuperSPAR uses exponents with prime power bounds that correspond to the best times for each bit range.
+While such bounds do work well in practice, the purpose of this Section is to optimize the performance of our implementation of SuperSPAR.  To this end, the bound $B$ for the exponentiation phase was iterated and the algorithm was timed in practice. Table \ref{tab:actualPrimePowerBound} shows the average time to split semiprime integers\footnote{The sample set consists of 100,000 semiprime integers of each bit size, such that each integer was the product of two primes of equal size.} choosing the exponent $E$ such that odd primes $p_i \le B$ have $e_i = \floor{\log_{p_i} B}$ and $p_i > B$ have $e_i = 1$.  The primorial and multiplier in the search phase are chosen to give good performance on average and are fixed for each integer bit size.  Our implementation of SuperSPAR uses exponents with prime power bounds that correspond to the best times for each bit range.
 
 % TODO: consider redoing this table with the 100,000 set of semiprimes
 % TODO: interesting that after determining the best primorial for each bit size,
@@ -2448,41 +2420,25 @@ Suppose the search stage of SuperSPAR determines $h'$, a multiple of the order o
 \label{tab:diffOfOrderOfTwoIdeals}
 \end{table}
 
-Of the ideal class groups studied, more than 97.7\% of the time, a multiple of the order of an ideal class is also a multiple of the order of some other ideal class in the same group.  For SuperSPAR, this means that once a multiple of the order of an ideal class is discovered, if this does not lead to a splitting of $N$, then with high probability, it is also a multiple of the order of some other ideal class in the same group.  Rather than starting over with a different ideal class, let $h'$ be the odd part of the multiple of the order and compute $\bclass^{h'}$ for some other ideal class $\bclass$.  SuperSPAR then tries to find an ambiguous class by repeated squaring of $\bclass^{h'}$ and, if successful, attempts to split $N$.  This process may be repeated for several different ideal classes in the same group.
+Of the ideal class groups studied, more than 97.7\% of the time, a multiple\footnote{Assuming that the multiple is guaranteed to remove all factors of 2, 3, 5, 7, and 11 from the order of each ideal class in the class group.} of the order of an ideal class is also a multiple of the order of some other ideal class in the same group.  For SuperSPAR, this means that once a multiple of the order of an ideal class is discovered, if this does not lead to a splitting of $N$, then with high probability, it is also a multiple of the order of some other ideal class in the same group.  Rather than starting over with a different ideal class, let $h'$ be the odd part of the multiple of the order and compute $\bclass^{h'}$ for some other ideal class $\bclass$.  SuperSPAR then tries to find an ambiguous class by repeated squaring of $\bclass^{h'}$ and, if successful, attempts to split $N$.  This process may be repeated for several different ideal classes in the same group.
 
-This process may be unlucky, and as Section \ref{sec:ssparExpIdeals} shows, if the algorithm is unsuccessful for more than an fixed number of ideal classes within the same class group, changing class groups by changing multipliers is beneficial.
-
-% NOTE: Selecting the exponent E for the exponentiation phase to remove all primes $\le B$ from the order of an ideal class, changes the probability that a multiple of the order is also a multiple of the order of some other ideal class in the same group.
-
-%32, 0.82395, 0.91403, 0.95060, 0.97003, 0.97804
-%40, 0.82294, 0.91388, 0.95054, 0.96992, 0.97791
-%48, 0.82265, 0.91389, 0.95050, 0.96983, 0.97785
-%56, 0.82229, 0.91373, 0.95033, 0.96974, 0.97776
-%64, 0.82249, 0.91382, 0.95036, 0.96979, 0.97779
-%72, 0.82245, 0.91387, 0.95037, 0.96976, 0.97782
-%80, 0.82252, 0.91384, 0.95037, 0.96980, 0.97781
+This process may be unlucky, and as Subsection \ref{subsec:ssparExpIdeals} shows, if the algorithm is unsuccessful for more than an fixed number of ideal classes within the same class group, changing class groups by changing multipliers is beneficial.
 
 \subsection{Best Multipliers}
 \label{subsec:ssparBestMultipliers}
 
-Let the ideal classes $\idealclass{a_1}, \idealclass{a_2}, ...$ correspond to ideal representatives such that $\ideal a_i = [p_{\ideal a_i}, (b + \sqrt\Delta)/2]$ and $p_{\ideal a_i}$ is prime.  As in the previous Subsection, assume that an exponent $E$ is chosen for the exponentiation stage such that $\ord(\idealclass{a_1}^{2^\ell E})$ is coprime to $E$.  Also, suppose that the search stage is successful in determining $h'$, a multiple of the order of $\idealclass{a_1}^{2^\ell E} \in Cl_\Delta$.  Our implementation of SuperSPAR will first attempt to split the integer $N$ associated with the discriminant $\Delta$ by searching for an ambiguous class via repeated squaring of the ideal class $\idealclass{a_1}^{Eh'}$.  Failing this, the algorithm tries again by repeated squaring of the ideal classes $\idealclass{a_2}^{Eh'}, \idealclass{a_3}^{Eh'}, ...$ and so on in sequence.  This Subsection uses the data set $\idealDataSet$ in order to determine the expected number of ideal classes to try before a successful splitting of the integer $N$.
+As in the previous Subsection, assume that an exponent $E$ is chosen for the exponentiation stage such that $\ord(\idealclass{a_1}^{2^\ell E})$ is coprime to $E$.  Also, suppose that the search stage is successful in determining $h'$, a multiple of the order of $\idealclass{a_1}^{2^\ell E} \in Cl_\Delta$.  Our implementation of SuperSPAR will first attempt to split the integer $N$ associated with the discriminant $\Delta$ by searching for an ambiguous class via repeated squaring of the ideal class $\idealclass{a_1}^{Eh'}$.  Failing this, the algorithm tries again by repeated squaring of the ideal classes $\idealclass{a_2}^{Eh'}, \idealclass{a_3}^{Eh'}, ...$ and so on in sequence.  This Subsection uses the data set $\idealDataSet$ to determine the expected number of ideal classes to try before a successful splitting of the integer $N$.
+
+The discriminant $\Delta$ associated with an integer $N$ and multiplier $k$ is chosen to be either $\Delta = -kN$ when $-kN \equiv 0, 1 \pmod 4$, or $\Delta = -4kN$.  As such, the data set $\idealDataSet$ is separated into subsets for $N \equiv 1 \pmod 4$ or $N \equiv 3 \pmod 4$\footnote{Notice that $N \equiv 0, 2 \pmod 4$ implies that 2 is a divisor of $N$ and so can be easily split.}, and again for each multiplier $k \in \{1, 2, 3, 5, 6, 7, 10\}$.  Figure \ref{fig:ssparIdealAttempts} shows the expected number of ideal classes to try before splitting $N$, assuming that an appropriate exponent $E$ for the exponentiation stage\footnote{Again, since our implementation of SuperSPAR does not step coprime to a primorial larger than $2 \times 3 \times 5 \times 7 \times 11$ (see Section \ref{sec:ssparEmpirical}), we assume that the exponent $E$ for the exponentiation stage removed all factors $\le 11$ from the order of $\idealclass{a_i}^E$.} is chosen and that a multiple of the order $h'$ was found during the search stage.
 
 \mygraphTwo{attempts-n1}{attempts-n3}{fig:ssparIdealAttempts}{Attempts $N \equiv 1 \pmod 4$}
 
-The discriminant $\Delta$ associated with an integer $N$ and multiplier $k$ is chosen to be either $\Delta = -kN$ when $-kN \equiv 0, 1 \pmod 4$, or $\Delta = -4kN$.  As such, the data set $\idealDataSet$ is separated into subsets for $N \equiv 1 \pmod 4$ or $N \equiv 3 \pmod 4$\footnote{Notice that $N \equiv 0, 2 \pmod 4$ implies that 2 is a divisor of $N$ and so can be easily split.}, and again for each multiplier $k \in \{1, 2, 3, 5, 6, 7, 10\}$.  Figure \ref{fig:ssparIdealAttempts} shows the expected number of ideal classes to try before a successful splitting of $N$, assuming that an appropriate exponent $E$ for the exponentiation stage\footnote{Again, since our implementation of SuperSPAR does not step coprime to a primorial larger than $2 \times 3 \times 5 \times 7 \times 11$ (see Section \ref{sec:ssparEmpirical}), we assume that the exponent $E$ for the exponentiation stage removed all factors $\le 11$ from the order of $\idealclass{a_i}^E$.} is chosen and that a multiple of the order $h'$ was found during the search stage.
+Given this separation of the integer $N$ and the multiplier $k$ in our data set $\idealDataSet$, the class groups associated with discriminants $\Delta = -kN$ or $\Delta = -4kN$, as appropriate, appear to be separate with respect to the probability that an ideal class in the group will lead to a splitting of the integer $N$.  As such, our implementation of SuperSPAR chooses multipliers of $N$ sequentially such that when $N \equiv 1 \pmod 4$, $k=6, 10, 3, 1, 7, 2, 5$, and when $N \equiv 3 \pmod 4$, $k=1, 10, 3, 2, 5, 7, 6$.  In the event that the algorithm exhausts this list of multipliers without successfully splitting $N$, square free multipliers $k > 10$ are selected in increasing order.
 
-Given this separation of the integer $N$ and the multiplier $k$ in our data set $\idealDataSet$, the class groups associated with discriminants $\Delta = -kN$ or $\Delta = -4kN$, as appropriate, appear to be discretely separated with respect to the probability that an ideal class in the group will lead to a splitting of the integer $N$.  As such, our implementation of SuperSPAR chooses multipliers of $N$ sequentially such that when $N \equiv 1 \pmod 4$, $k=6, 10, 3, 1, 7, 2, 5$, and when $N \equiv 3 \pmod 4$, $k=1, 10, 3, 2, 5, 7, 6$.  In the event that the algorithm exhausts this list of multipliers without successfully splitting $N$, square free multipliers $k > 10$ are selected in increasing order.
+\subsection{Expected Number of Ideal Classes}
+\label{subsec:ssparExpIdeals}
 
-Figure \ref{fig:ssparIdealAttempts} also indicates that for most multipliers, if the search stage of the algorithm is successful in finding a multiple of the order of an ideal class, then in expectation, two ideal classes need to be tried before a successful splitting of the integer $N$.  Section \ref{sec:ssparExpIdeals}, show experimental data on the number of ideal classes to try before switching multipliers for SuperSPAR in practice.
-
-
-\section{Expected Number of Ideal Classes}
-\label{sec:ssparExpIdeals}
-
-Subsection \ref{subsec:ssparBestMultipliers} indicates that for each multiplier, in expectation, SuperSPAR will try a unique number of ideal classes in order to split the integer associated with the discriminant of the class group.  The Subsection also indicates that the expected number of ideals to try is often less than 2.  However, once a multiple of the order of an ideal class is known, our implementation of SuperSPAR is more efficient in practice if many ideal classes are tried before switching multipliers and class groups.  This is likely due to the cost of the search phase of the algorithm, which is executed with each class group\footnote{This is in contrast to the exponentiation stage, which is executed for each ideal class tried.}.  Table \ref{tab:attemptedIdealClasses} shows the average time to split integers\footnote{This uses the same set of semiprime integers as in Table \ref{tab:actualPrimePowerBound}.  Again, the exponent for the exponentiation stage, and the primorial and multiplier for the search stage where chosen to give good performance on average.} given an upper bound on the number of ideal classes tried before switching multipliers.  Our implementation of SuperSPAR bounds the number of ideal classes tried before switching class groups to the lowest time for each integer range.
-
-% TODO: This table is being regenerated for a much larger sample set of semiprimes.
-\begin{table}[h]
+\begin{table}[t]
 \centering
 \begin{tabular}{| r | r | r | r | r | r | r | r |}
 	\hline
@@ -2510,8 +2466,10 @@ Classes/Group & 32 bits & 40 bits & 48 bits & 56 bits & 64 bits & 72 bits & 80 b
 \label{tab:attemptedIdealClasses}
 \end{table}
 
+Figure \ref{fig:ssparIdealAttempts} indicates that for most multipliers, if the search stage of the algorithm is successful in finding a multiple of the order of an ideal class, then in expectation, two ideal classes need to be tried before a successful splitting of the integer $N$.  Although switching multipliers after at most two ideal classes does work in practice, our implementation of SuperSPAR is more efficient if many ideal classes are tried before switching multipliers and class groups.  This is possibly due to the cost of the search phase of the algorithm, which is executed with each class group\footnote{This is in contrast to the exponentiation stage, which is executed for each ideal class tried.}.  Table \ref{tab:attemptedIdealClasses} shows the average time to split integers\footnote{This uses the same set of semiprime integers as in Table \ref{tab:actualPrimePowerBound}.  Again, the exponent for the exponentiation stage, and the primorial and multiplier for the search stage where chosen to give good performance on average.} given an upper bound on the number of ideal classes tried before switching multipliers.  Our implementation of SuperSPAR bounds the number of ideal classes tried before switching class groups to the lowest time for each integer range.
 
-\section{Chained Hashing vs.\ Open Address Hashing}
+
+\section{Lookup Tables}
 \label{sec:ssparHashing}
 
 The SuperSPAR Algorithm \ref{alg:superSpar} (and more generally, the bounded primorial steps algorithm \ref{alg:primorialSteps}) requires a lookup table\footnote{The lookup table maps group elements $\bclass^i$ to exponents $i$.}.  The baby steps generate a mapping from group elements $\bclass^i$ to exponents $i$ coprime to some primorial $P_w$ and store this mapping in the lookup table. The giant steps lookup group elements $\bclass^{2js}$ and $\bclass^{-2js}$ from the lookup table.  As such, the performance of the algorithm directly corresponds to the performance of the lookup table.  This Section describes the experimental results for SuperSPAR using two different implementations of lookup tables, as well as the method used to map group elements to exponents in our implementation.
@@ -2526,14 +2484,17 @@ In our implementation, the lookup table is implemented as a hash table with 32-b
 \]
 The multiplier 2654435761 was chosen because it is the largest prime less than $2^{32} \times (\sqrt 5 - 1)/2$, and $(\sqrt 5 - 1)/2$ has been shown by Knuth \cite[Section~6.4]{Knuth1998} to have good scattering properties\footnote{Other multipliers were also tried but had little impact on performance.}.  Since the number of baby steps is a function of the size of the integer to be factored (see Section \ref{sec:ssparEmpirical}), the maximum number of entries in the hash table is known at initialization.  We found that a table of $2^k$ slots for the smallest $k$ such that $2^k \ge 3m\phi(P_2)$, where $m\phi(P_w)$ is the number of baby steps, worked well in practice\footnote{Different multiples of the number of baby steps were tried, as well as setting the number of slots to a prime near some multiple of the number of baby steps. There was little difference in performance, with the exception of a table having too few slots (resulting in an insertion failing), or a table having an excessive number of slots (and table initialization dominated).}.  Using a power of 2 for the number of slots has the added benefit that once a hash key is computed, the corresponding slot is found by using a binary $\band$ operation.  However, regardless of the hash function used, multiple elements may hash to the same slot.  Two methods of collision resolution are considered here\footnote{Each method was selected for cache coherency properties (see \cite[Subsection~11.2]{Cormen2001} and \cite{Kuchling2008}).}.
 
+\subsection{Chaining with List Heads}
 The first method is chaining with list heads (see \cite[Subsection~11.2]{Cormen2001}).  The idea is for the hash table to consist of $2^k$ slots, such that each slot operates as a linked list, but that the head of the linked lists are separate from the tails.  Two areas of memory are used: one for the heads, and the other for the tails (also known as the overflow).  In the head, each slot consists of the 32-bit value for a specified key, as well as the 32-bit hash key itself (since multiple keys may resolve to the same slot).  A special pair of constants are used to indicate that a slot is unoccupied, e.g.\ (0xAAAAAAAA, 0x55555555).  The overflow area consists of an array of no less than $2^k$ entries, each entry consisting of the 32-bit value for a specified hash key, the 32-bit hash key itself, and an index into the overflow area of the next node in the list, if any.  A special constant, e.g.\ 0xFFFFFFFF, is used to indicate the end of list.  The first $2^k$ entries in the overflow area are reserved and correspond to the second node in the linked list of each slot.  To perform a lookup, the hash key resolves to a slot (using $\hash(a, c) \bmod 2^k$) and the list is traversed until either the specified hash key or the end of the list is found.  To insert or update, again, the list is traversed until either the specified hash key is found, at which point an update is performed, or the end of list is found.  If the end of list is found, the next available entry in the overflow area is set appropriately and appended to the end of the list. 
 
+\subsection{Open Addressing}
 The second method of collision resolution considered is open addressing, and in particular, we implement the same probing function as in CPython \cite{Kuchling2008}.  In this method, each slot consists of a 32-bit hash key, as well as the 32-bit value associated with that hash key.  Any hash key can occupy any slot, and a special pair of constants are used to indicate that a slot is unoccupied, e.g.\ (0xAAAAAAAA, 0x55555555).   When an element is hashed, the table is probed at slot indices $s_0, s_1, ...$ generated by a probing function until a slot is found where either the hash key occupying the slot is the same as the hash key for the element in question, or the slot is unoccupied.  Our implementation defines probe indices using
 \begin{align*}
 	s_0 &= \hash(a,b) \bmod 2^k \\
 	s_i &= \left( 5s_{i-1} + 1 + \floor{\hash(a,b)/2^{5i}} \right) \bmod 2^k.
 \end{align*}
 
+\subsection{Chaining vs.\ Open Addressing}
 Figure \ref{fig:ssparHashing} shows the average time to split semiprime integers of the specified size using the collision resolution methods described above.  In this context and for each integer range tested, open addressing for collision resolution performs better.
 
 \mygraph{hashing-open-vs-chained}{fig:ssparHashing}{The average time to split an integer using either open addressing or chaining with list heads for collision resolution in a hash table.}
@@ -2546,9 +2507,9 @@ Figure \ref{fig:ssparHashing} shows the average time to split semiprime integers
 \newcommand{\lastStep}{\theta}
 \newcommand{\stepBounds}{\mathcal S}
 
-Theoretically, SuperSPAR takes the number of baby steps and giant steps proportional to the largest prime, $p_t$, used in the exponent of the exponentiation stage, such that $p_t \le N^{1/2r}$, $p_t$ is as large as possible, and $r = \sqrt{\ln N / \ln \ln N}$ (see Section \ref{sec:superSpar}).  The idea being that the search stage should use no more than a constant number of operations more than the exponentiation stage.   However, by choosing the number of baby steps and giant steps independently from the exponent used in the exponentiation stage, SuperSPAR can perform better in practice.  The algorithm takes baby steps coprime to a multiple of some primorial.  One could evaluate all multiples of primorials up to a certain bound, but this is more work than is necessary.  This section discusses the method used by our implementation to generate bounds useful for searching.  These bounds are later evaluated empirically using SuperSPAR to split integers of various sizes in Section \ref{sec:ssparEmpirical}.
+Theoretically, SuperSPAR takes the number of baby steps and giant steps proportional to the largest prime, $p_t$, used in the exponent of the exponentiation stage, such that $p_t \le N^{1/2r}$, $p_t$ is as large as possible, and $r = \sqrt{\ln N / \ln \ln N}$ (see Section \ref{sec:superSpar}).  The idea is for the search stage and the exponentiation stage to use at most $O(p_t)$ group operations.  However, by choosing the number of baby steps and giant steps independently from the exponent used in the exponentiation stage, SuperSPAR performs better in practice.  The algorithm takes baby steps coprime to a multiple of some primorial.  One could evaluate the performance of all multiples of primorials up to a certain bound, but this is more work than is necessary.  This section discusses the method used by our implementation to generate bounds useful for searching.  These bounds are later evaluated empirically in Section \ref{sec:ssparEmpirical}.
 
-The success of the search stage depends on the largest exponent $2js$ generated by the giant steps -- call this the \emph{search range}.  The idea here is to generate a set $\stepBounds$ of primorial and multiplier pairs used as candidates for the baby step bound $s$.  For each pair, let $\stepCount$ be a function from some multiple $m$ of the primorial $P_w$ to the total number of baby steps and giant steps taken during the search stage of the algorithm,
+The success of the search stage depends on the largest exponent $2js$ generated by the giant steps -- we will refer to this as the \emph{search range}.  The idea here is to generate a set $\stepBounds$ of primorial and multiplier pairs used as candidates for the baby step bound $s$.  For each pair, let $\stepCount$ be a function from some multiple $m$ of the primorial $P_w$ to the total number of baby steps and giant steps taken during the search stage of the algorithm,
 \begin{equation}
 \label{eq:stepCount}
 	\stepCount(m, w) = 2 m \phi(P_w).
@@ -2560,7 +2521,7 @@ Notice we take $m \phi(P_w)$ baby steps plus $m \phi(P_w)$ giant steps.  Each gi
 \end{equation}
 
 \begin{thm}
-For the pair $(m_i, w_i)$, there does not exist any other pair $(m_j, w_j)$ with $m_i \neq m_j$ or $w_i \neq w_j$ such that both $\stepCount(m_i, w_i) = \stepCount(m_j, w_j)$ and $\lastStep(m_i, w_i) = \lastStep(m_j, w_j)$.
+For the pair $(m_i, w_i)$, there does not exist a pair $(m_j, w_j)$ with $m_i \neq m_j$ or $w_i \neq w_j$ such that both $\stepCount(m_i, w_i) = \stepCount(m_j, w_j)$ and $\lastStep(m_i, w_i) = \lastStep(m_j, w_j)$.
 \end{thm}
 \begin{proof}
 By contradiction, suppose there exists $(m_i, w_i)$ and $(m_j, w_j)$ with $m_i \neq m_j$ or $w_i \neq w_j$ such that $\stepCount(m_i, w_i) = \stepCount(m_j, w_j)$ and $\lastStep(m_i, w_i) = \lastStep(m_j, w_j)$.  Let $w_i < w_j$. Then by Equation \ref{eq:stepCount}
@@ -2579,7 +2540,7 @@ Therefore
 \[
 	\frac{\phi(P_{w_j})}{\phi(P_{w_i})} = \frac{P_{w_j}}{P_{w_i}}.
 \]
-But this is only possible when $w_i = w_j$ and then for $\stepCount(m_i, w_i) = \stepCount(m_j, w_j)$ and $\lastStep(m_i, w_i) = \lastStep(m_j, w_j)$ to be true, $m_i = m_j$ must also be true.
+However, this is only possible when $w_i = w_j$ and then for $\stepCount(m_i, w_i) = \stepCount(m_j, w_j)$ and $\lastStep(m_i, w_i) = \lastStep(m_j, w_j)$ to be true, $m_i = m_j$ must also be true.
 \end{proof}
 
 With this out of the way, the set $\stepBounds$ consists of pairs $(m, w)$ such that for all $(m', w')$ either
@@ -2626,21 +2587,21 @@ and Algorithm \ref{alg:stepBounds} can be used to generate such a set.
 \end{algorithmic}
 \end{algorithm}
 
-First the algorithm generates all pairs $(m, w)$ such that $\stepCount(m, w) \le B$.  There is a finite number of these pairs, since there are a finite number of primorials no larger than $B$, and for a given $w$ there are $\floor{B / 2\phi(P_w)}$ possible values of $m$.  The algorithm then sorts these pairs in ascending order by the total number of steps $\stepCount(m, w)$, breaking ties by sorting in descending order of the search range $\lastStep(m, w)$.  The first pair in the list is chosen as a candidate $(m, w)$ for the set $\stepBounds_B$.  This pair is always in the solution set since by Equation \ref{eq:stepBounds} and the ordering imposed on the list, all other pairs either take more steps, or an equal number of steps, but have a smaller search range.  The algorithm then iterates over the remaining pairs, and the search range of each pair is compared with that of the candidate pair.  If the search range is greater, then the candidate pair is output to the set $\stepBounds_B$ and the current pair becomes the next candidate pair.  The correctness of this follows the fact that pairs in the list are monotonically increasing by the total number of steps, and successive candidate pairs are strictly increasing in their search range.  As such, when the candidate pair $(m, w)$ is compared with the pair $(m_i, w_i)$ from the list, if the search range of the list pair is less than that of the candidate pair, the the list pair uses at least as many steps, but does not search as far, and therefore is not a member of the set $\stepBounds_B$.  Otherwise, when the list pair has a larger search range, this implies that it uses more steps (since ties are broken by sorting in descending order of search range), and the candidate pair is guaranteed to be a member of the set $\stepBounds_B$.  This holds since all the pairs remaining in the list use more steps, and all the previous pairs from the list either had a smaller search range, or were rejected because they required more steps.
+First the algorithm generates all pairs $(m, w)$ such that $\stepCount(m, w) \le B$.  There is a finite number of these pairs, since there are a finite number of primorials no larger than $B$, and for a given $w$ there are $\floor{B / 2\phi(P_w)}$ possible values of $m$.  The algorithm then sorts these pairs in ascending order by the total number of steps $\stepCount(m, w)$, breaking ties by sorting in descending order of the search range $\lastStep(m, w)$.  The first pair in the list is chosen as a candidate $(m, w)$ for the set $\stepBounds_B$.  This pair is always in the solution set since by Equation \ref{eq:stepBounds} and the ordering imposed on the list, all other pairs either take more steps, or an equal number of steps, but have a smaller search range.  The algorithm then iterates over the remaining pairs, and the search range of each pair is compared with that of the candidate pair.  If the search range is greater, then the candidate pair is output to the set $\stepBounds_B$ and the current pair becomes the next candidate pair.  The correctness of this follows from the fact that pairs in the list are monotonically increasing by the total number of steps, and successive candidate pairs are strictly increasing in their search range.  As such, when the candidate pair $(m, w)$ is compared with the pair $(m_i, w_i)$ from the list, if the search range of the list pair is less than that of the candidate pair, the the list pair uses at least as many steps, but does not search as far, and therefore is not a member of the set $\stepBounds_B$.  Otherwise, when the list pair has a larger search range, this implies that it uses more steps (since ties are broken by sorting in descending order of search range), and the candidate pair is guaranteed to be a member of the set $\stepBounds_B$.  This holds since all the pairs remaining in the list use more steps, and all the previous pairs from the list either had a smaller search range, or were rejected because they required more steps.
 
-For example, the set $\stepBounds_{512}$ restricted to pairs using no more than 512 steps is
+As an example, the set $\stepBounds_{512}$ restricted to pairs using no more than 512 steps, and ordered according to Algorithm \ref{alg:stepBounds}, is
 \begin{align*}
 \stepBounds_{512} = \{&(1,1),(1,2),(3,1),(2,2),(5,1),(3,2),(1,3),(5,2),(6,2),(7,2),(2,3),(9,2), \\
 &(10,2),(11,2),(3,3),(14,2),(15,2),(4,3),(18,2),(19,2),(5,3),(23,2),(1,4), \\
 &(7,3),(8,3),(9,3),(10,3),(11,3),(2,4),(13,3),(14,3),(15,3),(16,3),(17,3), \\
 &(3,4),(20,3),(21,3),(22,3),(23,3),(4,4),(26,3),(27,3),(28,3),(29,3),(5,4)\}.
 \end{align*}
-The set is ordered according to Algorithm \ref{alg:stepBounds}.  The number of steps for each corresponding pair is
+The number of steps for each corresponding pair is
 \begin{align*}
 &2,4,6,8,10,12,16,20,24,28,32,36,40,44,48,56,60,64,72,76,80,92,96,112,128,144,\\
 &160,176,192,208,224,240,256,272,288,320,336,352,368,384,416,432,448,464,480,
 \end{align*}
-and the search reach, i.e.\ the value of the largest exponent generated by the giant steps, for each corresponding pair is
+and the search range, i.e.\ the value of the largest exponent generated by the giant steps, for each corresponding pair is
 \begin{align*}
 &4,24,36,96,100,216,480,600,864,1176,1920,1944,2400,2904,4320,4704,5400,7680,\\
 &7776,8664,12000,12696,20160,23520,30720,38880,48000,58080,80640,81120,94080,\\
@@ -2749,6 +2710,8 @@ Also consider parallelization of SuperSPAR using multipliers.  And possibly impl
 Median time to factor. 5-number summary graph might be interesting: \url{http://en.wikipedia.org/wiki/Five-number_summary}. Top 10\%.  That kind of thing.
 
 More rigorous analysis of the median running time, etc.
+
+Histogram of the number of multipliers used.
 
 %%%%%%%%%%%%%%%%
 % BIBLIOGRAPHY %
