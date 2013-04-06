@@ -2639,9 +2639,35 @@ Finally, figure \ref{fig:searchStepsMin} shows the best average time of all sear
 \mygraph{search-primorial-x-steps-min}{fig:searchStepsMin}{The best average time of all search bounds tested when the largest prime in the exponent $E = \prod {p_i}^{e_i}$ is iterated.}
 \mygraph{search-primorial-min-steps-x}{fig:searchPrimorialMin}{The best average time of all exponents tested when the search bound is iterated.}
 
-\subsection{Searching a Curve}
+\subsection{Searching a Noisy Curve}
 
 Quadratic samples at 1/3 and 2/3 and throws away the larger third.
+
+\newcommand{\xmin}{x_{\textrm{min}}}
+\newcommand{\xmax}{x_{\textrm{max}}}
+\newcommand{\xlo}{x_{\textrm{lo}}}
+\newcommand{\xhi}{x_{\textrm{hi}}}
+\newcommand{\xonethird}{x_\ell}
+\newcommand{\xtwothird}{x_h}
+\newcommand{\yonethird}{y_\ell}
+\newcommand{\ytwothird}{y_h}
+
+\begin{algorithm}[h]
+\caption{Determine some $x$ such that $f(x)$ is suitably small where $f(x)$ represents a noisy curve.}
+\label{alg:noisyCurveSearch}
+\begin{algorithmic}[1]
+\REQUIRE A function $f(x)$ corresponding to the average time to split an integer, a search range $[\xmin, \xmax]$, and a bound $k$ for linear searching.
+\ENSURE Some value of $x \in [\xmin, \xmax]$ such that $f(x)$ is suitably small.
+\STATE $(\xlo, \xhi) \gets (\xmin, \xmax)$
+\WHILE{$\xhi - \xlo > k$}
+	\STATE $\xonethird \gets \floor{(\xhi - \xlo) / 3}$
+	\STATE $\xtwothird \gets \floor{2(\xhi - \xlo) / 3}$
+	\STATE $\yonethird \gets f(\xonethird)$
+	\STATE $\ytwothird \gets f(\xtwothird)$
+\ENDWHILE
+\RETURN $x$
+\end{algorithmic}
+\end{algorithm}
 
 
 % TODO: show that the largest primorial used for searching is $P_5$.
