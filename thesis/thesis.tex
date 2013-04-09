@@ -2883,27 +2883,13 @@ Finally, in this thesis, we only consider double base number systems using bases
 \section{$\textrm{Super}^2\textrm{SPAR}$}
 \label{sec:futureSSPAR}
 
-Suppose we assume that when there's a collision in the hash table that $\pm2js - i$ is a multiple of the order, i.e.\ we don't ignore the $b$ component when hashing and we lookup both $\bclass^{+2js}$ abd $\bclass^{-2js}$.  Then we perform 2 table lookups per giant step, but once there is a collision, we don't have to test which one is the order.  This is probably slower because we do considerably more table lookups than we do exponentiation tests, i.e.\ there's two looks up for each giant step for each multiplier used and only one exponentiate, vs only one lookup for each giant step for each multiplier, but two exponentiations.
+Practical improvements in this thesis to ideal class arithmetic and to exponentiation also lead to improvements in the SuperSPAR integer factoring algorithm.  Future work in either area will naturally contribute to future improvements to SuperSPAR.  There are, however, many open research areas that could lead to direct practical improvements to SuperSPAR.
 
-SuperSPAR with other coprime bases or multiple bases.
+Parameters in our implementation were chosen to work well in practice.  For a given discriminant associated with the integer to be factored, there is only a probability that the integer $N$ will be split.  Often many different multipliers for the discriminant are tried before a successful splitting of $N$.  Future work would include a study of these multipliers, and more formal work would include bounding the probability that a specific number of multipliers are used.  Subsection \ref{subsec:ssparBestMultipliers} showed that for $N \bmod 4$ different multipliers were associated with a different number of ideal classes to try in expectation before a splitting of $N$.  Studying the behaviour of multipliers may be useful in the parallelization of SuperSPAR -- simply, the algorithm could run on several multiplier in parallel.  One possible highly parallel platform for consideration would be an implementation of SuperSPAR for GPUs.
 
-In our implementation we choose a primorial, $P$, such that baby steps are coprime to $P$ and giant steps are a multiple of $P$.  We can select a product of small primes that need not be consecutive, e.g. $P = 2 \times 3 \times 11 \times 13$ and then use baby steps coprime to this and giant steps that are a multiple of this.
+There are many open questions surrounding the running time of SuperSPAR.  Incomplete investigations show that the majority of integers only require a single multiplier before a successful splitting of the integer, however, a small number of integers require a very large number of multipliers.  These few \emph{hard} numbers tend to skew the average running time.  Future work would include quartile timings and 5-number summaries of samples of integers to be split.   Additional work could include more rigorous analysis of the median asymptotic complexity of SuperSPAR.  Not necessarily related to SuperSPAR would be a theoretical analysis of the factorization of the order of ideal classes, such as the probabilities of certain divisors of the order.
 
-Also consider parallelization of SuperSPAR using multipliers.  And possibly implementing it on a GPU.
-
-Median time to factor. 5-number summary graph might be interesting: \url{http://en.wikipedia.org/wiki/Five-number_summary}. Top 10\%.  That kind of thing.
-
-More rigorous analysis of the median running time, etc.
-
-Histogram of the number of multipliers used.
-
-Rigorous Analysis of the Factorization of the Order of Ideal Classes
-
-We should be able to compute theoretical probabilities of divisors of the order of ideal classes.
-
-Try some extremely large (1Gb+) primorials that are written to disk, powering 2,3 r2l chain of them, and then doing a pollard-rho or something with a smaller primorial for the same number of steps.  The idea being to simulate the original SPAR, but with our library and a few dbns tricks.  Then we try factoring some much larger composites.
-
-This might be interesting to try a discrete log record too.
+The study of ideal class arithmetic, exponentiation, and our implementation of SuperSPAR given in this thesis was guided by practice.  SPAR is theoretically capable of larger interger factorizations, and so is SuperSPAR.  Interesting future work would be to generate much larger exponents that would be stored on disk.  A method of computing 2,3 representations with low space requirements (such as right-to-left 2,3 chains of Section \ref{sec:rtolChains}) could be used to exponentiate an ideal by a primorial stored on disk.  Since the bounded primorial steps algorithm requires a large amount of memory, an alternative Pollard-Brent recursion as suggested by Schnorr and Lenstra \cite{Schnorr1984} would be space efficient and may be able to take steps coprime to the exponent used.  More generally, the bounded primorial steps algorithm can be used to compute discrete logarithms, and there are many open questions as to the difficulty of the discrete log problem in the ideal class group of imaginary quadratic number fields.
 
 
 %%%%%%%%%%%%%%%%
