@@ -1951,6 +1951,7 @@ A non-adjacent form exponentiation uses a signed base 2 representation of the ex
 
 
 \section{Right-to-Left 2,3 Chains}
+\label{sec:rtolChains}
 
 In Subsection \ref{subsec:rtolChains}, we described a method for computing 2,3 chains from low-order to high-order that is a natural extension of the binary representation or non-adjacent form of an exponent.  In this method, we reduce the exponent $n$ by 2 while it is even, and by 3 while it is divisible by 3.  At which point either $n \equiv 1 \pmod 6$ or $n \equiv 5 \pmod 6$ and we add or subtract 1 so that $n$ is a multiple of 6.  The resulting partition of $n$ is then reversed such that the number of squares or cubes in successive terms is monotonically increasing and we can use Algorithm \ref{alg:expWithChain} from Chapter \ref{chap:exponentiation} to compute the exponentiation.
 
@@ -2704,67 +2705,68 @@ Bit Size & Largest Prime in $E$ & Search Bound \\
 
 
 \section{Comparison with other algorithms}
+\label{sec:ssparComparison}
+
 \begin{itemize}
 \item Pari/GP
 \item Custom SQUFOF
-\item GNU MSieve
-\item GNU-ECM
+\item GNU MSieve (Crashes for 86-bits and up)
+\item GNU-ECM  (Fails about 26\% of the time)
 \item YAFU
 \item Flint
 \item Maple
 \end{itemize}
 
 
-%%%%%%%%%%%%%%%%
-% CHAPTER 8    %
-% FURTHER WORK %
-%%%%%%%%%%%%%%%%
-\chapter{Further Work}
+%%%%%%%%%%%%%%%
+% CHAPTER 8   %
+% FUTURE WORK %
+%%%%%%%%%%%%%%%
+\chapter{Future Work}
 
-\subsection{Improvements}
+The work of this thesis was to improve exponentiation in the ideal class group of imaginary quadratic number fields, with an application to integer factoring.  This lead to practical improvements to extended GCD computations for bounded integers (Section \ref{sec:eea}) as well as improvements to ideal class arithmetic for bounded discriminants (Section \ref{sec:idealArithmetic}).  Chapter \ref{chap:powExperiments} lead to practical performance improvements when exponentiating an ideal class with bounded discriminant to a large primorial.  Finally, this thesis revisits the SPAR factoring algorithm to bring together all the practical improvements as well as the asymptotically faster primorial steps algorithm.  Section \ref{sec:ssparComparison} compares our implementation of SuperSPAR to several integer factoring libraries available and shows that the performance improvements of this thesis lead to SuperSPAR being the fastest implementation for integers in the range of 54-bits to 64-bits (TODO).
+
+For the work of this thesis to be most useful to the future work of others, the source code for the libraries used throughout is available online, and the hope is for eventual inclusion into common mathematical packages such as Pari/GP, Sage, and Dr. Michael J. Jacobson, Jr.'s personal algorithmic number theory library.
+
+\begin{itemize}
+\item A library for 128-bit arithmetic, extended GCD computations, generic group exponentiation, and 2,3 representations. \\ \url{https://github.com/maxwellsayles/liboptarith}
+\item Ideal class arithmetic library, specialized for discriminants bound by 59-bits, \mbox{118-bits}, and unbound. \\ \url{https://github.com/maxwellsayles/libqform}
+\item Our implementation of the SuperSPAR integer factoring library. \\ \url{https://github.com/maxwellsayles/libsspar}
+\end{itemize}
+
+The work presented in this thesis is by no means exhaustive.  Sections \ref{sec:futureIdealArithmetic}, \ref{sec:futureExponentiation}, and \ref{sec:futureSSPAR} contain suggestions for future work in ideal class arithmetic, exponentiation, and integer factoring respectively.
+
+\section{Ideal Arithmetic}
+\label{sec:futureIdealArithmetic}
+
+The practical improvements to arithmetic in the ideal class group were based on the Algorithms for computing reduced (or almost reduced) representatives for multiplication (Subsection \ref{subsec:nucomp}), squaring (Subsection \ref{subsec:nudupl}), and cubing (Subsection \ref{subsec:nucube}).  While these Algorithms are certainly faster as the size of the discriminant grows, future work could include a comparison of the implementation in this thesis with an implementation of ideal class arithmetic that does not directly compute reduced (or almost reduced) representatives.  For small discriminants, the simplified implementation might prove faster.  Also relevant would be a performance comparison of the implementation presented here with that in Pari/GP and Sage.
+
+For an implementation of ideal class arithmetic based on the non-reduced product of Subsection \ref{subsec:idealMultiply}, the idea would be an optimized implementation as well as improvements to the ideal reduction algorithm from Subsection \ref{subsec:reduction}.  Ideal reduction is similar to the standard Euclidean Algorithm, as such, future work might apply several of the approaches used for computing the extended GCD to that of ideal reduction.  Furthermore, additional techniques for computing the extended GCD can be explored.  A relatively straightforward approach is to apply windowing to the left-to-right binary GCD that performed well for 32-bit to 64-bit integers.  Binary GCD computations favour bit shifting over multiplication and division since bit shifting is faster.  In groups where squaring and cubing are fast, an interesting combination to explore would be a right-to-left 2,3 GCD, similar perhaps to the right-to-left 2,3 chain of Section \ref{sec:rtolChains}.
+
+Finally, additional exploration is possible for other types of ideal arithmetic, such as the ideal ring of algebraic integers of \emph{real} quadratic fields, or function fields.
+
+\section{Exponentiation}
+\label{sec:futureExponentiation}
 
 Time 2,3 representation generation vs 2,3 exponentiation.
 A rigorous analysis of the expected cost of each 2,3 representation generated.
 
-Windowed left-to-right GCD.
-2,3 base GCD.
 
-Inclusion into supervisor's ANTL library and hopefully Sage or/and Pari/GP.
-
-Try some extremely large (1Gb+) primorials that are written to disk, powering 2,3 r2l chain of them, and then doing a pollard-rho or something with a smaller primorial for the same number of steps.  The idea being to simulate the original SPAR, but with our library and a few dbns tricks.  Then we try factoring some much larger composites.
-
-This might be interesting to try a discrete log record too.
-
-Large differences in exponents show general trends to 2,3 representations, however, when we look close up, the variation in 2, 3 representations between $n$ and $n+1$ varies greatly.  It might be interesting to measure how much they vary.  
-
-\section{Rigorous Analysis of the Factorization of the Order of Ideal Classes}
-
-We should be able to compute theoretical probabilities of divisors of the order of ideal classes.
-
-\section{Improvements to Ideal Arithmetic}
-
-Time basic composition/squaring against NUCOMP/NUDUPL.
-
-Ideal reduction uses a Euclidean like algorithm.  Try adapting the extended GCD computations from Section \ref{sec:eea} to ideal reduction.
-
-Comparison with ideal arithmetic from ANTL (QIR) library.
-
-\section{Other types of Ideal Arithmetic}
-For example, the ideal ring of algebraic integers of real quadratic fields.
-
-\section{Function Fields}
-
-For example Hyperelliptic Curves
-
-\section{DBNS with other coprime bases}
+DBNS with other coprime bases
 
 Could try tree based approaches where we approximate the cost of the complete chain based on the partial chain, rather than using the smallest remaining exponent and the cost to break ties.
 
-\section{Number systems with three, four, or more bases.}
+Number systems with three, four, or more bases.
+
+
+Large differences in exponents show general trends to 2,3 representations, however, when we look close up, the variation in 2, 3 representations between $n$ and $n+1$ varies greatly.  It might be interesting to measure how much they vary.  
+
+
 
 \section{$\textrm{Super}^2\textrm{SPAR}$}
+\label{sec:futureSSPAR}
 
-Suppose we assume that when there's a collision in the hash table that $\pm2bj - i$ is a multiple of the order, i.e.\ we don't ignore the $b$ component when hashing and we lookup both $\bclass^{+2bj}$ abd $\bclass^{-2bj}$.  Then we perform 2 table lookups per giant step, but once there is a collision, we don't have to test which one is the order.  This is probably slower because we do considerably more table lookups than we do exponentiation tests, i.e.\ there's two looks up for each giant step for each multiplier used and only one exponentiate, vs only one lookup for each giant step for each multiplier, but two exponentiations.
+Suppose we assume that when there's a collision in the hash table that $\pm2js - i$ is a multiple of the order, i.e.\ we don't ignore the $b$ component when hashing and we lookup both $\bclass^{+2js}$ abd $\bclass^{-2js}$.  Then we perform 2 table lookups per giant step, but once there is a collision, we don't have to test which one is the order.  This is probably slower because we do considerably more table lookups than we do exponentiation tests, i.e.\ there's two looks up for each giant step for each multiplier used and only one exponentiate, vs only one lookup for each giant step for each multiplier, but two exponentiations.
 
 SuperSPAR with other coprime bases or multiple bases.
 
@@ -2777,6 +2779,15 @@ Median time to factor. 5-number summary graph might be interesting: \url{http://
 More rigorous analysis of the median running time, etc.
 
 Histogram of the number of multipliers used.
+
+Rigorous Analysis of the Factorization of the Order of Ideal Classes
+
+We should be able to compute theoretical probabilities of divisors of the order of ideal classes.
+
+Try some extremely large (1Gb+) primorials that are written to disk, powering 2,3 r2l chain of them, and then doing a pollard-rho or something with a smaller primorial for the same number of steps.  The idea being to simulate the original SPAR, but with our library and a few dbns tricks.  Then we try factoring some much larger composites.
+
+This might be interesting to try a discrete log record too.
+
 
 %%%%%%%%%%%%%%%%
 % BIBLIOGRAPHY %
