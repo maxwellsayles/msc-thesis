@@ -37,6 +37,7 @@
 \usepackage{float}
 \usepackage{graphicx}
 \usepackage{hyperref}
+\usepackage{multirow}
 \usepackage{subfigure}
 
 %\theoremstyle{plain}
@@ -2825,14 +2826,38 @@ Assuming that Algorithm \ref{alg:noisyCurveSearch} computes some search bound th
 Table \ref{tab:ssparParams} shows the values used for the exponentiation and search stage in practice for various sized integers.  The range of exponents for the exponentiation stage was from a largest prime of 11 in the exponent to a largest prime of 3673.  The range for search bounds was given by the set $S_{16384}$.  Algorithm \ref{alg:noisyCurveSearch} was configured to switch to a linear search when the size of the range was $\le 8$.  Notice that the largest primorial used for search bounds is $P_5$.  This justifies our approach to bounding the values $e_i$ in the exponent $E = \prod {p_i}^{e_i}$ for values of $i \le 5$.
 
 % TODO: insert table.
+% TODO: search on 4,000 integers, emphasis on that it's a different 4,000 integers so as not to train the algorithm on the comparison set.  4,000 took 24 hours.
 % TODO: show that the largest primorial used for searching is $P_5$.
 
 \begin{table}[t]
 \centering
-\begin{tabular}{| r | r | r |}
+\begin{tabular}{| r | r | r r r | r | r |}
 	\hline
-Bit Size & Largest Prime in $E$ & Search Bound \\
+\multirow{2}{*}{Bit Size} & Largest Prime & \multicolumn{3}{r|}{Search Bound} & \multirow{2}{*}{Total Steps} & Average Time \\
+& \multicolumn{1}{c|}{in $E=\prod {p_i}^{e_i}$} & \multicolumn{3}{c|}{$s=mP_w$} & & (milliseconds) \\
 	\hline
+16 & 11 & 120 & = & $4P_3$ & 62 & 0.17992 \\
+20 & 11 & 36 & = & $6P_2$ & 22 & 0.21529 \\
+24 & 11 & 36 & = & $6P_2$ & 22 & 0.01728 \\
+28 & 11 & 90 & = & $3P_3$ & 46 & 0.02461 \\
+32 & 11 & 150 & = & $5P_3$ & 78 & 0.03475 \\
+36 & 17 & 240 & = & $8P_3$ & 126 & 0.05341 \\
+40 & 17 & 420 & = & $2P_4$ & 190 & 0.07951 \\
+44 & 23 & 630 & = & $3P_4$ & 286 & 0.12786 \\
+48 & 47 & 630 & = & $3P_4$ & 286 & 0.19711 \\
+52 & 53 & 1050 & = & $5P_4$ & 478 & 0.32283 \\
+56 & 89 & 840 & = & $4P_4$ & 382 & 0.55058 \\
+60 & 149 & 1260 & = & $6P_4$ & 574 & 0.93604 \\
+64 & 173 & 1260 & = & $6P_4$ & 574 & 1.51579 \\
+68 & 263 & 2310 & = & $1P_5$ & 958 & 2.36646 \\
+72 & 347 & 1680 & = & $8P_4$ & 766 & 3.52871 \\
+76 & 467 & 2310 & = & $1P_5$ & 958 & 5.42861 \\
+80 & 727 & 3360 & = & $16P_4$ & 1534 & 8.53706 \\
+84 & 859 & 4620 & = & $2P_5$ & 1918 & 11.97196 \\
+88 & 1033 & 4620 & = & $2P_5$ & 1918 & 18.00593 \\
+92 & 1597 & 6090 & = & $29P_4$ & 2782 & 29.14281 \\
+96 & 1861 & 9240 & = & $4P_5$ & 3838 & 40.02095 \\
+100 & 2753 & 7140 & = & $34P_4$ & 3262 & 57.97719 \\
 	\hline
 \end{tabular}
 \caption[SuperSPAR exponentiation and search parameters.]{Values for the largest prime used in the exponent $E = \prod {p_i}^{e_i}$ for the exponentiation phase, and the baby step bound $mP_w$ used for the search stage.}
