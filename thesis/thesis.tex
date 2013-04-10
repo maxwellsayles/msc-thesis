@@ -1307,11 +1307,11 @@ Stage 2 of SuperSPAR attempts to find the order of $\cclass$ by taking baby step
 If Stage 2 successfully computes $h' = \ord(\cclass)$ and assuming that $\ord(\bclass)$ is even, we compute an ambiguous ideal by repeated squaring of $\bclass^{h'}$ and then attempt to factor the integer associated with the discriminant.  If the order is odd, however, then the algorithm runs Stage 1 again with a different random ideal class $\aclass$.  If Stage 2 fails to compute the order of $\cclass$, the algorithm tries again with a different square free multiplier $k$.
 
 
-\subsection{SuperSPAR Complexity}
+%\subsection{SuperSPAR Complexity}
 
 % TODO: Complete this section.
 
-This space intentionally left empty for now.
+%This space intentionally left empty for now.
 
 \begin{comment}
 
@@ -1536,6 +1536,8 @@ and Equations \ref{eq:initialGcd1} and \ref{eq:initialGcd2} hold.  We maintain t
 In practice, these operations are performed by manipulating each variable directly, rather than by using matrix arithmetic.  Furthermore, we typically implement division with remainder, which solves $s = qt + r$ for $q,r \in \ZZ$ and $|r| < |t|$.  Notice that $r = s - qt$ is the target value of $t$ for each iteration of the Euclidean Algorithm.
 
 \subsection{Lehmer's GCD}
+
+% We do not use Lehmer's for 128-bit inputs, because the recombine step overflows the 128-bit registers.
 
 In the previous section, each iteration subtracts a multiple, $q = \floor{s / t}$, of the smaller number from the larger number.  Derrick Henry Lehmer noticed that most of the quotients, $q$, were small and that those small quotients could be computed from the leading digits (or machine word) of the numerator and denominator \cite{Lehmer1938}.
 
@@ -1972,6 +1974,8 @@ In the previous section, we demonstrated results that lead to practical improvem
 
 \subsection{Specialized Implementations of Ideal Arithmetic}
 \label{subsec:implementationOfIdealArithmetic}
+
+% TODO: Emphasis that 128-bit NUCUBE has many branches for different sized intermediates.
 
 Throughout this thesis, we represent an ideal class $[\mathfrak a]$ using the $\ZZ$-module for the reduced ideal representative $\mathfrak a = [a, (b + \sqrt{\Delta})/2]$.  Ideal class multiplication and ideal reduction use the value $c = (b^2 - \Delta)/4a$, which is also useful in determining if an ideal is an ambiguous ideal\footnote{Recall that an ideal is ambiguous if $b=0$, $a=b$, or $a=c$.}.  For this reason, our implementation represents an ideal class using the triple $(a, b, c)$.  We also maintain a representation of the group\footnote{The group representation also includes all intermediate integers needed for use by the GMP library.  The reason for this is that GMP integers are managed on the heap, and preallocating them alongside the representation of the group reduces the overhead of managing them during ideal class group operations.}, which includes the discriminant $\Delta$.
 
@@ -2869,6 +2873,67 @@ Table \ref{tab:ssparParams} shows the values used for the exponentiation and sea
 \section{Comparison with other algorithms}
 \label{sec:ssparComparison}
 
+\mygraph{factoring-all.eps}{}{}
+\mygraph{factoring-all-44-72.eps}{}{}
+\mygraph{factoring-small-44-68.eps}{}{}
+\mygraph{factoring-small-44-58.eps}{}{}
+\mygraph{factoring-small-58-68.eps}{}{}
+
+\begin{table}[t]
+\centering
+\begin{tabular}{| r | r | r | r | r | r | r | r | r |}
+	\hline
+Bits & ECM & Flint & Maple & Msieve & Pari/GP & SQUFOF & SSPAR & Yafu \\
+	\hline
+16 & 0.0270 & 0.0378 & 0.0505 & 0.0799 & 0.0065 & 0.0008 & 0.0097 & 0.8581 \\
+18 & 0.0337 & 0.0774 & 0.0920 & 0.0815 & 0.0070 & 0.0010 & 0.0116 & 0.8973 \\
+20 & 0.0473 & 0.1994 & 0.0637 & 0.0812 & 0.0085 & 0.0018 & 0.0128 & 0.8938 \\
+22 & 0.0660 & 0.9614 & 0.0795 & 0.0820 & 0.0086 & 0.0021 & 0.0165 & 0.9015 \\
+24 & 0.0946 & fails & 0.1205 & 0.0829 & 0.0127 & 0.0028 & 0.0195 & 0.9245 \\
+26 & 0.1740 & 0.9406 & 0.1340 & 0.0832 & 0.0180 & 0.0040 & 0.0221 & 0.9112 \\
+28 & 0.2235 & fails & 0.2380 & 0.0883 & 0.0261 & 0.0056 & 0.0265 & 0.9071 \\
+30 & 0.3783 & 0.8982 & 0.1544 & 0.0914 & 0.0824 & 0.0077 & 0.0311 & 0.8884 \\
+32 & 0.6537 & 0.8725 & 0.1641 & 0.1003 & 0.0957 & 0.0110 & 0.0365 & 0.9378 \\
+34 & 1.1481 & 0.8591 & 0.2044 & 0.1642 & 0.1199 & 0.0158 & 0.0465 & 0.9648 \\
+36 & 1.8327 & 0.8310 & 0.2822 & 0.3351 & 0.1357 & 0.0222 & 0.0548 & 0.9523 \\
+38 & 2.4831 & 0.8327 & 0.4612 & 0.4004 & 0.1610 & 0.0313 & 0.0662 & 0.9844 \\
+40 & 3.1906 & 0.8796 & 0.3906 & 0.4883 & 0.1870 & 0.0461 & 0.0821 & 0.9955 \\
+42 & 3.8457 & fails & 0.5226 & 0.6174 & 0.2205 & 0.0648 & 0.1045 & 1.0283 \\
+44 & 4.5650 & 0.8890 & 1.1850 & 0.8271 & 0.2722 & 0.0928 & 0.1298 & 1.1255 \\
+46 & 5.2680 & 0.9210 & 0.9994 & 1.0838 & 0.3591 & 0.1320 & 0.1671 & 1.1616 \\
+48 & 5.7561 & 0.9963 & 1.6464 & 1.5946 & 0.4670 & 0.1911 & 0.2014 & 1.1978 \\
+50 & 6.5731 & 1.0584 & 2.0015 & 2.4111 & 0.5947 & 0.2741 & 0.2573 & 1.2257 \\
+52 & 7.2033 & 1.0819 & 2.9428 & 3.1965 & 0.7578 & 0.3929 & 0.3202 & 1.2802 \\
+54 & 7.7635 & 1.0901 & 4.4271 & 3.8279 & 1.0259 & 0.5608 & 0.3949 & 1.3542 \\
+56 & 8.4054 & 1.1036 & 7.2331 & 4.2903 & 1.3752 & 0.8010 & 0.5563 & 1.3761 \\
+58 & 9.0041 & 1.2117 & 10.4179 & 4.6656 & 1.8292 & 1.1622 & 0.7365 & 1.5586 \\
+60 & 9.6012 & 1.5008 & 11.7576 & 5.0153 & 3.5080 & 4.0100 & 0.9769 & 1.7370 \\
+62 & 10.4339 & 1.5859 & 13.6654 & 6.1142 & 4.6261 & 5.7092 & 1.2482 & 1.7562 \\
+64 & 11.8548 & 1.7206 & 16.2116 & 6.3498 & 5.6207 & 7.1933 & 1.5846 & 1.8237 \\
+66 & 15.1356 & 1.7662 & 17.6785 & 7.0451 & 6.4084 & 11.6313 & 1.9639 & 1.8602 \\
+68 & 14.3670 & 1.8983 & 19.5723 & 7.5541 & 6.8028 & 16.7912 & 2.4011 & 1.9143 \\
+70 & 13.9973 & 1.9687 & 21.3196 & 7.5087 & 6.8940 & 23.9112 & 3.0578 & 1.9840 \\
+72 & 14.1343 & 2.1680 & 22.4251 & 7.4943 & 8.0791 & 34.5667 & 3.7133 & 2.0952 \\
+74 & 14.4356 & 2.2741 & 24.2755 & 7.6182 & 7.8113 & 50.3791 & 4.5587 & 2.2128 \\
+76 & 14.8602 & 2.4442 & 26.6470 & 7.8022 & 6.5805 & -- & 5.4914 & 2.2940 \\
+78 & 15.5668 & 2.6173 & 28.8623 & 8.1577 & 6.2996 & -- & 7.0521 & 2.4095 \\
+80 & 15.5548 & 3.0537 & 31.2528 & 8.5141 & 6.6235 & -- & 8.5300 & 2.5647 \\
+82 & 15.5577 & 3.6557 & 37.9693 & 9.0961 & 10.3569 & -- & 10.2062 & 2.6573 \\
+84 & 15.9824 & 4.6584 & 37.0573 & 9.6379 & 11.8881 & -- & 12.1335 & 2.8490 \\
+86 & 16.2545 & 5.4168 & 39.7901 & fails & 12.2243 & -- & 14.7879 & 3.0025 \\
+88 & 16.4600 & 5.9574 & 44.5510 & fails & 12.6767 & -- & 18.2133 & 3.2980 \\
+90 & 16.9574 & 6.6372 & 47.3801 & fails & 13.2897 & -- & 23.4263 & 3.8078 \\
+92 & 17.4196 & 7.7319 & 49.9509 & fails & 13.3701 & -- & 27.4630 & 4.1982 \\
+94 & 17.5219 & 9.4851 & 58.3808 & fails & 13.8622 & -- & 34.3230 & 4.7979 \\
+96 & 17.9056 & 11.7830 & 55.8692 & fails & 14.7439 & -- & 40.1884 & 5.1127 \\
+98 & 17.8311 & 14.4835 & 56.4315 & fails & 15.9800 & -- & 49.5837 & 5.0751 \\
+100 & 18.0168 & 16.7292 & 61.6214 & fails & 16.9010 & -- & 58.1393 & 5.6099 \\
+	\hline
+\end{tabular}
+\caption{}
+\label{tab:factoringTimes}
+\end{table}
+
 \begin{itemize}
 \item Pari/GP
 \item Custom SQUFOF
@@ -2921,6 +2986,8 @@ Finally, in this thesis, we only consider double base number systems using bases
 
 \section{$\textrm{Super}^2\textrm{SPAR}$}
 \label{sec:futureSSPAR}
+
+% TODO: Either implement the original SPAR for comparison, or mention that as future work.
 
 Practical improvements in this thesis to ideal class arithmetic and to exponentiation also lead to improvements in the SuperSPAR integer factoring algorithm.  Future work in either area will naturally contribute to future improvements to SuperSPAR.  There are, however, many open research areas that could lead to direct practical improvements to SuperSPAR.
 
