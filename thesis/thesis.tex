@@ -143,6 +143,9 @@
 }
 
 
+\newcommand{\compiler}{GNU C compiler version 4.7.2}
+\newcommand{\cpu}{2.7GHz Intel Core i7-2620M CPU}
+
 \graphicspath{{gcd-eps/}{ideal-eps/}{exp-eps/}{sspar-eps/}}
 
 \begin{document}
@@ -283,7 +286,6 @@ The software was developed using the GNU C compiler version 4.7.2 on Ubuntu 12.1
 
 
 %%%%%%%%%%%%%%%%%%%%
-% CHAPTER 2        %
 % IDEAL ARITHMETIC %
 %%%%%%%%%%%%%%%%%%%%
 \chapter{Ideal Arithmetic}
@@ -344,6 +346,7 @@ The maximal order $\OO_\Delta = [1, \omega_0]$ of $\QQ(\sqrt\Delta)$ is the ring
 
 
 \section{Ideals of $\OO_\Delta$}
+\label{sec:idealsInOrderOfIntegers}
 
 \begin{defn}
 An \emph{ideal} $\mathfrak a$ is an additive subgroup of an order $\OO$ with the property that for any $a \in \mathfrak a$ and $\xi \in \OO$, it holds that $\xi a$ and $a \xi$ are both elements of the ideal $\mathfrak a$.
@@ -462,7 +465,7 @@ and C. Siegel shows that $h_\Delta = |\Delta|^{1/2 + o(1)}$ as $\Delta \rightarr
 
 \subsection{Inverse of Ideal Class}
 \label{subsec:idealClassInverse}
-Recall from Section \ref{sec:idealArithmetic} that the inverse of an ideal $\ideal a = [a, (b + \sqrt\Delta)/2]$ is the (possibly fractional) ideal
+Recall from Equation \ref{eq:idealInverse} that the inverse of an ideal $\ideal a = [a, (b + \sqrt\Delta)/2]$ is the (possibly fractional) ideal
 \[
 	{\ideal a}^{-1} = \frac{s}{\mathcal N(\ideal a)} \left[a, \frac{-b+\sqrt{\Delta}}{2} \right].
 \]
@@ -628,7 +631,7 @@ We then compute
 \end{align}
 for the reduced or almost reduced product $\mathfrak a \mathfrak b = [a, (b + \sqrt\Delta)/2]$.  Note that this procedure assumes that $\mathcal N(\mathfrak a) \ge \mathcal N(\mathfrak b)$ and that if $a_1 < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4}$ then $R_{-1}$ and $R_{-2}$ satisfy Equation \ref{eq:nucompBound} and we compute the product $\mathfrak a \mathfrak b$ as in the previous subsection without expanding the simple continued fraction $sU/a_1$.  When $a_1 \ge \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4}$, at least one iteration of the recurrence \ref{eq:recurCNUCOMP} is performed and so $C_i \neq 0$ and there will not be a divide by zero in Equation \ref{eq:bNUCOMP}.
 
-Our implementation of fast ideal multiplication includes practical optimizations on the above technique.  For example, by Equation \ref{eq:idealProductS}, $s ~|~ a_1$ and $s ~|~ a_2$, so $a_1$ and $a_2$ are reduced modulo $s$ throughout the computation.  Also, Equation \ref{eq:idealProductS} computes \mbox{$\gcd(a_1, a_2, (b_1 + b_2)/2)$}. Following \cite[Algorithm~6]{Imbert2010}, this is separated into two parts: let $s = \gcd(a_1, a_2)$ and compute $\gcd(s, (b_1 + b_2)/2)$ only when $s \neq 1$.  Section \ref{sec:eea} discusses practical optimizations for computing the greatest common divisor and the recurrences \ref{eq:recurqNUCOMP}, \ref{eq:recurRNUCOMP}, and \ref{eq:recurCNUCOMP}.  Finally, the first coefficient, $Y$, from Equation \ref{eq:idealProductS} is never used, and so it is not computed.  See Section \ref{sec:idealArithmetic} for a more thorough treatment of our implementation of ideal class arithmetic.  Pseudo-code is given in Algorithm \ref{alg:nucomp}.
+Our implementation of fast ideal multiplication includes practical optimizations on the above technique.  For example, by Equation \ref{eq:idealProductS}, $s ~|~ a_1$ and $s ~|~ a_2$, so $a_1$ and $a_2$ are reduced modulo $s$ throughout the computation.  Also, Equation \ref{eq:idealProductS} computes \mbox{$\gcd(a_1, a_2, (b_1 + b_2)/2)$}. Following \cite[Algorithm~6]{Imbert2010}, this is separated into two parts: let $s = \gcd(a_1, a_2)$ and compute $\gcd(s, (b_1 + b_2)/2)$ only when $s \neq 1$.  Chapter \ref{chap:xgcdExperiments} discusses practical optimizations for computing the greatest common divisor and the recurrences \ref{eq:recurqNUCOMP}, \ref{eq:recurRNUCOMP}, and \ref{eq:recurCNUCOMP}.  Finally, the first coefficient, $Y$, from Equation \ref{eq:idealProductS} is never used, and so it is not computed.  See Chapter \ref{chap:idealExperiments} for a more thorough treatment of our implementation of ideal class arithmetic.  Pseudo-code is given in Algorithm \ref{alg:nucomp}.
 
 
 \subsection{Fast Ideal Squaring (NUDUPL)}
@@ -749,7 +752,6 @@ The next Chapter discusses some exponentiation techniques that use the ideal ari
 
 
 %%%%%%%%%%%%%%%%%%
-% CHAPTER 3      %
 % EXPONENTIATION %
 %%%%%%%%%%%%%%%%%%
 \chapter{Exponentiation}
@@ -1141,7 +1143,6 @@ Coming up, Chapter \ref{chap:powExperiments} discusses several variations of cha
 
 
 %%%%%%%%%%%%%
-% CHAPTER 4 %
 % SUPERSPAR %
 %%%%%%%%%%%%%
 \chapter{SuperSPAR}
@@ -1176,7 +1177,7 @@ According to \cite[p.303]{Schnorr1984}, every reduced representative of an ambig
 	\Delta &= (b - 2a)(b + 2a) & \textrm{ when } & a = c.
 \end{align*}
 
-Suppose we wish to find a factor of an odd integer $N$. Since $\Delta = b^2 - 4ac$ we must have $\Delta \equiv 0, 1 \pmod 4$.  Therefore, for some square free integer $k$, let $\Delta = -kN$ when $-kN \equiv 1 \pmod 4$ and $\Delta = -4kN$ otherwise.  Now to find a factor of $N$, we find a reduced ambiguous class representative with discriminant $\Delta$.  For a reduced ambiguous class representative, compute $d = \gcd(a, N)$ if $b = 0$ or $a = b$, and $d = \gcd(b-2a, N)$ otherwise.  If we are lucky, $d$ is a proper factor of $N$. See Section \ref{sec:eea} for a discussion on how to compute $\gcd(N, m)$.
+Suppose we wish to find a factor of an odd integer $N$. Since $\Delta = b^2 - 4ac$ we must have $\Delta \equiv 0, 1 \pmod 4$.  Therefore, for some square free integer $k$, let $\Delta = -kN$ when $-kN \equiv 1 \pmod 4$ and $\Delta = -4kN$ otherwise.  Now to find a factor of $N$, we find a reduced ambiguous class representative with discriminant $\Delta$.  For a reduced ambiguous class representative, compute $d = \gcd(a, N)$ if $b = 0$ or $a = b$, and $d = \gcd(b-2a, N)$ otherwise.  If we are lucky, $d$ is a proper factor of $N$. See Chapter \ref{chap:xgcdExperiments} for a discussion on how to compute $\gcd(N, m)$.
 
 
 \subsection{SPAR Algorithm}
@@ -1466,33 +1467,24 @@ Assuming good parameters are known, the SuperSPAR factoring algorithm used in pr
 
 This chapter introduced SuperSPAR, a factoring algorithm based on the ideal class group  and our motivation for practical improvements to the performance of arithmetic in the class group.  The next two chapters discuss several techniques used to improve performance, as well as our experiments and results.  Following that, Chapter \ref{chap:ssparExperiments} discusses techniques, experiments, and results used to improve the performance of SuperSPAR in practice.
 
-%%%%%%%%%%%%%%%%%%%%%
-% CHAPTER 5         %
-% IDEAL EXPERIMENTS %
-%%%%%%%%%%%%%%%%%%%%%
-\chapter{Ideal Experiments}
-\label{chap:idealExperiments}
+%%%%%%%%%%%%%%%%%%%%
+% XGCD EXPERIMENTS %
+%%%%%%%%%%%%%%%%%%%%
+\chapter{Extended Greatest Common Divisor Experiments}
+\label{chap:xgcdExperiments}
 
-One contribution of this thesis is an efficient implementation of arithmetic in the ideal class group of imaginary quadratic number fields.  An efficient implementation improves the performance of exponentiation within this group in practice (see Chapter \ref{chap:powExperiments}) and efficient exponentiation within this group speeds our implementation of the integer factoring algorithm SuperSPAR (see Chapters \ref{chap:superspar} and \ref{chap:ssparExperiments}).
-
-This chapter focuses on the techniques and experimental data that lead us to our implementation of arithmetic in the ideal class group.  We specialized much of our implementation for the x64 architecture.  Many of our routines benefit when the input is bounded by a single machine word, i.e.\ 64-bits, but we were also able to take advantage of integers that fit within two machine words by implementing a custom library for 128-bit arithmetic.  When integers are larger than 128-bits, we use the GNU Multiple Precision (GMP) arithmetic library.
-
-Arithmetic in the ideal class group uses solutions to equations of the form $s = Ua + Vb$ where $s$ is the largest integer dividing both $a$ and $b$. Section \ref{sec:eea} discusses several algorithms for computing such solutions and studies their performance in practice. To make arithmetic in the ideal class group as efficient as possible, we specialized our implementation and discuss this implementation in Section \ref{sec:idealArithmetic}.
-
-
-\section{Extended Greatest Common Divisor}
-\label{sec:eea}
-
-In the Subsection on Fast Ideal Multiplication (\ref{subsec:nucomp}) we describe an algorithm for the simultaneous multiplication and reduction of two reduced ideal class representatives.  Much of the computational effort of this algorithm is in computing integral solutions to equations of the form
+One contribution of this thesis is an efficient implementation of arithmetic in the ideal class group of imaginary quadratic number fields.  Arithmetic in the ideal class group uses solutions to equations of the form $s = Ua + Vb$ where $s$ is the largest integer dividing both $a$ and $b$.  Much of the computational effort of the algorithm for fast ideal multiplication (Algorithm \ref{alg:nucomp}) is in computing integral solutions to equations of the form
 \[
 	s = Ua + Vb
 \]
-where $a$ and $b$ are fixed integers given as input, and $s$ is the greatest common divisor (GCD) of both $a$ and $b$.  Solutions to this equation are referred to as the \emph{extended greatest common divisor} (or extended GCD for short).
+where $a$ and $b$ are fixed integers given as input, and $s$ is the greatest common divisor (GCD) of both $a$ and $b$.  Solutions to this equation are referred to as the \emph{extended greatest common divisor} (or extended GCD for short).  A first step to improving the performance of arithmetic in the ideal class group, is to improve performance of GCD computations.  This Chapter discusses several algorithms for computing such solutions and studies their performance in practice. 
 
-\subsection{The Euclidean Algorithm}
-\label{subsec:euclideanAlgorithm}
+This Chapter and Chapter \ref{chap:idealExperiments} focus on the techniques and experimental data that lead us to our implementation of arithmetic in the ideal class group.  We specialized much of our implementation for the x64 architecture.  Many of our routines benefit when the input is bound by a single machine word, i.e.\ 64-bits, but we were also able to take advantage of integers that fit within two machine words by implementing a custom library for 128-bit arithmetic.  When integers are larger than 128-bits, we use the GNU Multiple Precision (GMP) arithmetic library \cite{Gmp}.  All the software in this Chapter was developed using the \compiler{} on Ubuntu 12.10.   Assembly language was used for the inner loops of the routines presented here, as well as for processing features not available in the C programming language (such as 128-bit arithmetic). The hardware platform was a personal notebook with a \cpu{} and 8Gb of memory.  The CPU has four cores, only one of which was used during timing experiments.
 
-The Euclidean Algorithm is an algorithm for computing the greatest common divisor of two integers and is due to Euclid.  We start with two positive integers $a$ and $b$.  At each iteration of the algorithm, we subtract the smaller of the two numbers from the larger, until one of them is 0. At this point, the non-zero number is the largest divisor of $a$ and $b$.  Since the smaller number may still be smaller after a single iteration, we use fewer steps by subtracting an integer multiple of the smaller number from the larger one.
+\section{The Euclidean Algorithm}
+\label{sec:euclideanAlgorithm}
+
+The Euclidean Algorithm is an algorithm for computing the greatest common divisor of two integers.  We start with two positive integers $a$ and $b$.  At each iteration of the algorithm, we subtract the smaller of the two numbers from the larger, until one of them is 0. At this point, the non-zero number is the largest divisor of $a$ and $b$.  Since the smaller number may still be smaller after a single iteration, we use fewer steps by subtracting an integer multiple of the smaller number from the larger one.
 
 The Euclidean Algorithm is extended by using a system of equations of the form
 \begin{align}
@@ -1535,9 +1527,9 @@ and Equations \ref{eq:initialGcd1} and \ref{eq:initialGcd2} hold.  We maintain t
 
 In practice, these operations are performed by manipulating each variable directly, rather than by using matrix arithmetic.  Furthermore, we typically implement division with remainder, which solves $s = qt + r$ for $q,r \in \ZZ$ and $|r| < |t|$.  Notice that $r = s - qt$ is the target value of $t$ for each iteration of the Euclidean Algorithm.
 
-\subsection{Lehmer's GCD}
+\section{Lehmer's GCD}
 
-% We do not use Lehmer's for 128-bit inputs, because the recombine step overflows the 128-bit registers.
+% NOTE: We do not use Lehmer's for 128-bit inputs, because the recombine step overflows the 128-bit registers.
 
 In the previous section, each iteration subtracts a multiple, $q = \floor{s / t}$, of the smaller number from the larger number.  Derrick Henry Lehmer noticed that most of the quotients, $q$, were small and that those small quotients could be computed from the leading digits (or machine word) of the numerator and denominator \cite{Lehmer1938}.
 
@@ -1592,10 +1584,12 @@ Then continue with the outer loop of the computation until $t = 0$.  In the even
 \end{algorithm}
 
 
-\subsection{Right-to-Left Binary GCD}
-\label{subsec:r2lBinGcd}
+\section{Right-to-Left Binary GCD}
+\label{sec:r2lBinGcd}
 
-The previous extended GCD algorithms use divide with remainder, which is often expensive.  Binary GCD algorithms emphasize bit shifting over multiplication and division.  Such algorithms may perform better than other GCD algorithms in practice (see Subsection \ref{subsec:gcdResults} for results).  Here we describe a binary GCD algorithm that works from the least significant bit to the most significant bit.  We refer to this as right-to-left since this is the direction in which we process the written binary representation.  The concept was originally published by Stein \cite{Stein1967}.
+% TODO: Based on the slope of the graph, we did not anticipate that this method would outperform other methods for 128-bit integers.
+
+The previous extended GCD algorithms use divide with remainder, which is often expensive.  Binary GCD algorithms emphasize bit shifting over multiplication and division.  Such algorithms may perform better than other GCD algorithms in practice (see Section \ref{sec:gcdResults} for results).  Here we describe a binary GCD algorithm that works from the least significant bit to the most significant bit.  We refer to this as right-to-left since this is the direction in which we process the written binary representation.  The concept was originally published by Stein \cite{Stein1967}.
 
 To compute the greatest common divisor of two positive numbers, repeatedly apply the following identities,
 \[
@@ -1699,7 +1693,7 @@ This ensures that $s$ is odd, $t$ is even, and that both $s$ and $t$ are positiv
 \end{algorithm}
 
 
-\subsection{Windowed Right-to-Left Binary GCD}
+\section{Windowed Right-to-Left Binary GCD}
 
 Windowing is a common technique used to extend the base of an algorithm.  We saw this earlier in our discussion of binary exponentiation in Section \ref{sec:binaryExp}.  The idea there was to precompute $g^w$ for each $w$ in some window $0 \le w < 2^k$ for some $k$ and then to iterate over the exponent $k$ bits at a time.  We can apply this technique to the right-to-left extended binary GCD.
 
@@ -1737,7 +1731,7 @@ This is easily extended for any $2^k$ where $k$ is a positive integer.  The algo
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Left-to-Right Binary GCD}
+\section{Left-to-Right Binary GCD}
 
 Just as exponentiation can be performed from high-order to low-order, so too can an extended binary GCD computation.  This is termed a left-to-right binary GCD, since it works from the left most bit to the right most bit of the written binary representation of the inputs.
 
@@ -1796,7 +1790,9 @@ If $qt > s$ then the resulting value for $s-qt$ is negative, and so we negate th
 
 
 
-\subsection{Partial Extended GCD}
+\section{Partial Extended GCD}
+
+% TODO: Say something about why we don't experiment with all the different kinds.
 
 Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and \ref{subsec:nucube} give algorithms to compute the partially reduced coefficients of ideal representatives for multiplication, squaring, and cubing respectively.  In each case, a continued fraction expansion is computed using the recurrences
 \begin{align*}
@@ -1804,7 +1800,7 @@ Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and \ref{subsec:nucube} gi
 	R_i &= R_{i-2} - q_i R_{i-1} \\
 	C_i &= C_{i-2} - q_i C_{i-1}.
 \end{align*}
-These recurrences perform the same operation as a single step in the Extended Euclidean Algorithm of Subsection \ref{subsec:euclideanAlgorithm}, but the initial and stopping conditions are different.  As such, this is referred to as the \emph{Partial Extended Euclidean Algorithm}.  The algorithm is listed in Algorithm \ref{alg:PartialEeaDivRem}.
+These recurrences perform the same operation as a single step in the Extended Euclidean Algorithm of Section \ref{sec:euclideanAlgorithm}, but the initial and stopping conditions are different.  As such, this is referred to as the \emph{Partial Extended Euclidean Algorithm}.  The algorithm is listed in Algorithm \ref{alg:PartialEeaDivRem}.
 
 \begin{algorithm}[h]
 \caption{Partial Extended Euclidean Algorithm.}
@@ -1832,7 +1828,7 @@ All the operations performed on the matrix
 \]
 during the Partial Extended Euclidean Algorithm can be represented by an invertible $2 \times 2$ matrix with determinant $\pm 1$ (known as a \emph{unimodular} matrix).  This is necessarily the case since each operation relates one representative of an ideal equivalence class to another representative\footnote{Recall our discussion of binary quadratic forms (see subsection \ref{subsec:forms}). Two forms are related if there exists an invertible linear transformation of variables.}.  This is critical since only extended GCD computations that are restricted to operations representable using invertible $2 \times 2$ matrices can be used for the partial extended GCD.
 
-Of the extended GCD algorithms in this section, only the right-to-left binary GCD of Subsection \ref{subsec:r2lBinGcd} cannot be adapted to the partial extended GCD.  The reason is due to the step where $t$ is reduced by 2.  The Algorithm uses the computation
+Of the extended GCD algorithms in this section, only the right-to-left binary GCD of Section \ref{sec:r2lBinGcd} cannot be adapted to the partial extended GCD.  The reason is due to the step where $t$ is reduced by 2.  The Algorithm uses the computation
 \[
 	(t, X, Y) \gets \begin{cases}
 		\left( \frac{t}{2}, \frac{X}{2}, \frac{Y}{2} \right) &
@@ -1843,6 +1839,8 @@ Of the extended GCD algorithms in this section, only the right-to-left binary GC
 \]
 The step $(t, X, Y) \gets (t/2, (X+b)/2, (Y-a)/2)$ cannot be expressed as a unimodular matrix.
 
+% TODO: Ideally we'd want partial gcd experiments too.
+
 The other extended GCD algorithms of this section can be adapted to the partial extended GCD by letting
 \[
 	\matrixtt{R_0}{C_0}{R_1}{C_1} = \matrixtt{s}{U}{t}{X}
@@ -1850,8 +1848,8 @@ The other extended GCD algorithms of this section can be adapted to the partial 
 and dropping the terms $V$ and $Y$ from the computation.
 
 
-\subsection{Specialized Implementations of the Extended GCD}
-\label{subsec:gcdImpl}
+\section{Specialized Implementations of the Extended GCD}
+\label{sec:gcdImpl}
 
 To further improve performance, we specialized implementations of each of the GCD algorithms discussed in this section for the x64 architecture.  All algorithms are implemented for the GNU C compiler\footnote{The source code was compiled using GCC 4.7.2 with the default dialect, which is the GNU dialect of ISO C90.} and often benefit from hand optimized x64 assembler.  Assembly language is used in line and is conditionally compiled based on the target platform\footnote{For time critical paths and to take advantage of special instructions, x64 assembly language is used when \textrm{\_\_x86\_64} is defined, otherwise 80386 assembly language is used when \textrm{\_\_i386} is defined, and when neither are defined, C is used.}.  For each of the GCD algorithms presented here, we implemented 32-bit and 64-bit versions, and when arithmetic overflows do not require us to use GMP, we also implemented 128-bit versions.  For appropriately sized inputs, we use these specialized implementations, otherwise we use GMP for the extended GCD computation.
 
@@ -1923,8 +1921,8 @@ Often our implementation uses the number of bits in a positive integer $x$.  In 
 
 Finally, Lehmer's GCD algorithm is especially useful when the arguments to the GCD are several words in size.  However, since our implementations are specialized up to 128-bit words, we consider 8-bit words for the inner extended GCD computation.  As such, it is possible to precompute the resulting $2 \times 2$ matrix for all possible inputs into the single precision extended GCD computation.  Since there are two inputs, each 8-bits in size, there are 65536 possible pairs of inputs.  The coefficients of the resulting $2 \times 2$ matrix can be bound by 8-bits each, and so the table requires 256Kb of memory. This simplifies the GCD computation since the inner loop of Lehmer's GCD becomes a lookup from this table.
 
-\subsection{Experimental Results}
-\label{subsec:gcdResults}
+\section{Experimental Results}
+\label{sec:gcdResults}
 
 We specialized the implementation of each of the extended GCD algorithms for 32-bit and 64-bit words.  When intermediate terms did not overflow 128-bit words, we also implemented 128-bit versions.  For each $k$ from 1 to 127, we generated 1,000,000 pairs of integers of $k$ bits each, and measured the time to compute the extended GCD of each pair using each algorithm and its specialized implementation when available.
 
@@ -1966,18 +1964,23 @@ Our implementation of the Euclidean Algorithm always out performs Lehmer's GCD. 
 Since the Euclidean Algorithm and our simplified left-to-right binary GCD are our fastest implementations for inputs less than 64-bits, we extended both to work on 128-bit integers.  We also compared these with the implementation of the extended GCD algorithm from the GNU Multiple Precision (GMP) library.  Figure \ref{fig:mpzgcd} show that our implementations perform faster than the implementation in GMP for inputs smaller than 64-bits.
 \mygraphX{mpzgcd}{fig:mpzgcd}{The extended Euclidean algorithm vs our simplified left-to-right binary GCD vs the $\textrm{mpz\_gcdext}$ function from the GNU Multiple Precision library.}{EEA vs simplified left-to-right binary vs GMP.}
 
+This chapter discussed methods that lead to practical improvements for computing the greatest common divisor of two integers, and this indirectly contributes to the performance of arithmetic in the ideal class group.  The Chapter began with several methods for computing solutions to equations of the form $s=Ua + Vb$ where $s$ is the greatest common divisor of both $a$ and $b$, since arithmetic in the ideal class group is dominated by this operation.  We found that when the inputs $a$ and $b$ are bound by $2^{32}$, that the standard Extended Euclidean Algorithm performs best.  When $2^{32} \le a,b < 2^{64}$, a left-to-right binary GCD computation is fastest.  Finally, for $a,b \ge 2^{64}$ we defer to the implementation in the GNU Multiple Precision (GMP) library.
 
-\section{Ideal Arithmetic}
-\label{sec:idealArithmetic}
 
-In the previous section, we demonstrated results that lead to practical improvements in computing the extended GCD -- the dominating operation in reduced ideal multiplication.  In this section, we discuss our implementations of ideal arithmetic.  To improve the performance of ideal arithmetic, we specialized implementations to use at most a single machine word, i.e.\ 64-bits, or at most two machine words, i.e.\ 128-bits.  We also wrote a reference implementation using GMP that works for unbounded discriminant sizes.  Our 64-bit implementation of ideal arithmetic is accurate for negative discriminants up to 59-bits  in size, while our 128-bit implementation of ideal arithmetic is accurate for discriminants up to 118-bits.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% IDEAL ARITHMETIC EXPERIMENTS %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Ideal Arithmetic Experiments}
+\label{chap:idealExperiments}
 
-\subsection{Specialized Implementations of Ideal Arithmetic}
-\label{subsec:implementationOfIdealArithmetic}
+The previous Chapter demonstrated results that lead to practical improvements in computing the extended GCD -- the dominating operation in reduced ideal multiplication.  This Chapter discusses our implementations of ideal arithmetic.  To improve the performance of ideal arithmetic, specialized implementations using at most a single machine word, i.e.\ 64-bits, or at most two machine words, i.e.\ 128-bits were developed.  A reference implementation using GMP, that works for unbounded discriminant sizes, was developed for comparison.  Our 64-bit implementation of ideal arithmetic is accurate for negative discriminants up to 59-bits in size, while our 128-bit implementation of ideal arithmetic is accurate for discriminants up to 118-bits.  The related software developed for this Chapter uses the \compiler{}, and assembly language for 128-bit arithmetic.  The software was developed on Ubuntu 12.10 using a personal notebook with a \cpu{} and 8Gb of memory.  Experiments are restricted to using only a single core of the CPU's four cores.
+
+\section{Specialized Implementations of Ideal Arithmetic}
+\label{sec:implementationOfIdealArithmetic}
 
 % TODO: Emphasis that 128-bit NUCUBE has many branches for different sized intermediates.
 
-Throughout this thesis, we represent an ideal class $[\mathfrak a]$ using the $\ZZ$-module for the reduced ideal representative $\mathfrak a = [a, (b + \sqrt{\Delta})/2]$.  Ideal class multiplication and ideal reduction use the value $c = (b^2 - \Delta)/4a$, which is also useful in determining if an ideal is an ambiguous ideal\footnote{Recall that an ideal is ambiguous if $b=0$, $a=b$, or $a=c$.}.  For this reason, our implementation represents an ideal class using the triple $(a, b, c)$.  We also maintain a representation of the group\footnote{The group representation also includes all intermediate integers needed for use by the GMP library.  The reason for this is that GMP integers are managed on the heap, and preallocating them alongside the representation of the group reduces the overhead of managing them during ideal class group operations.}, which includes the discriminant $\Delta$.
+Throughout this thesis, an ideal class $[\mathfrak a]$ is represented using the $\ZZ$-module for the reduced ideal representative $\mathfrak a = [a, (b + \sqrt{\Delta})/2]$.  Ideal class multiplication and ideal reduction use the value $c = (b^2 - \Delta)/4a$, which is also useful in determining if an ideal is an ambiguous ideal\footnote{Recall that an ideal is ambiguous if $b=0$, $a=b$, or $a=c$.}.  For this reason, our implementation represents an ideal class using the triple $(a, b, c)$.  We also maintain a representation of the group\footnote{The group representation also includes all intermediate integers needed for use by the GMP library.  The reason for this is that GMP integers are managed on the heap, and preallocating them alongside the representation of the group reduces the overhead of managing them during ideal class group operations.}, which includes the discriminant $\Delta$.
 
 In Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and \ref{subsec:nucube} we gave algorithms for fast ideal class multiplication, squaring, and cubing.  These compute a termination bound for the partial extended GCD useful for computing partially reduced coefficients of the product ideal class.  In all cases, the termination bound contains the coefficient $|\Delta/4|^{1/4}$.  Since the coefficients of the partial extended GCD are integers, we instead compute $\ceil{|\Delta/4|^{1/4}}$ as well as $\ceil{|\Delta/4|^{1/2}}$ and store both in our representation of the class group.  The reason we store $\ceil{|\Delta/4|^{1/2}}$ is that the termination bound for ideal multiplication is
 \[
@@ -1998,7 +2001,7 @@ Other practical considerations are to minimize the size of variables and interme
 
 In our 64-bit implementation, $\Delta$ and $c$ take 64-bits of storage, while both $a$ and $b$ require only 32-bits at most.  As such, we take advantage of 32-bit operations when possible, such as our 32-bit implementations of the extended GCD algorithm.  Similarly in our 128-bit implementation, $\Delta$ and $c$ fit within 128-bits of storage, and both $a$ and $b$ fit within one 64-bit machine word.  Again, we use 64-bit arithmetic when possible, and even 32-bit when operands are small.  However, since intermediates may be larger, we sometimes require the full 64-bits or 128-bits of the implementation.  Cubing requires even larger intermediates -- our 64-bit implementation requires some 128-bit arithmetic, while our 128-bit implementation uses GMP when necessary.
 
-To keep intermediates small, we compute using residue classes.  For example, Equations \ref{eq:idealProductU} states that we can compute $U \pmod {a_1/s}$ and Equation \ref{eq:idealProductB} allows us to compute $b \pmod{2a}$.  When an intermediate is known to be close to zero, we do not perform a complete division with remainder, but only add or subtract the divisor as appropriate (often using the signed mask discussed in Subsection \ref{subsec:gcdImpl}).  Furthermore, rather than computing the positive remainder, we typically compute the remainder that is closest to zero.  The idea here is to minimize the number of bits required by intermediates in order to avoid overflows as much as possible.
+To keep intermediates small, we compute using residue classes.  For example, Equations \ref{eq:idealProductU} states that we can compute $U \pmod {a_1/s}$ and Equation \ref{eq:idealProductB} allows us to compute $b \pmod{2a}$.  When an intermediate is known to be close to zero, we do not perform a complete division with remainder, but only add or subtract the divisor as appropriate (often using the signed mask discussed in Section \ref{sec:gcdImpl}).  Furthermore, rather than computing the positive remainder, we typically compute the remainder that is closest to zero.  The idea here is to minimize the number of bits required by intermediates in order to avoid overflows as much as possible.
 
 In the specific case of ideal reduction (see Algorithm \ref{alg:reduce}), one step is to compute $b'$ such that $-a < b' \le a$ and $b' \equiv b \pmod{2a}$.  To compute $b \bmod{2a}$ we effectively compute $b = q2a + r$ for $q, r \in \ZZ$ where $|r| < 2a$.  We note that $q = \floor{b/(2a)} = \floor{(b/a)/2}$, and instead compute $b = q'a+r'$ for $q', r' \in \ZZ$ where $|r'| < a$.  Now $q'$ is at least twice $q$.  If $q'$ is even, then $b = q'a + r' = (q'/2)2a + r'$ and we let $b' = r'$. Suppose $q'$ is odd and $r'$ is positive.  Then $b = q'a + r' = (q' + 1)a + (r' - a) = ((q' + 1)/2)2a + (r' - a)$.  Since $0 < r' < a$, we have $b' = r' - a$ and $-a < b' \le a$.  The proof is similar when $q$ is odd and $r'$ is negative.
 
@@ -2046,9 +2049,11 @@ s = \gcd(a_1, a_2, (b_1+b_2)/2) = Ya_1 + Va_2 + W(b_1+b_2)/2
 The final performance improvement is for generating prime ideals.  For a given prime $p$, we would like to find an ideal of the form $[p, (b + \sqrt\Delta)/2]$.  We have $b^2 - 4pc = \Delta$, and so we take everything in the residue class modulo $p$ and get $b^2 \equiv \Delta \pmod p$ or $b \equiv \pm\sqrt\Delta \pmod p$.  Computing $b$ is a matter of computing a square root modulo a prime, if one exists.  There are efficient algorithms for this (see \cite{Bach1996}), but since we are interested in finding some prime ideal, rather than a specific prime ideal, we instead precompute all square roots modulo each prime $p$ for sufficiently many small $p$.  For our purposes, all primes $p < 1000$ was enough.  Finding $b \equiv \pm\sqrt\Delta \pmod p$ is now a table lookup. Having found a value for $b$, we have not necessarily found a prime ideal $[p, (b + \sqrt\Delta)/2]$.  Since $\Delta = b^2 - 4pc$, this implies that $c = (b^2 - \Delta)/4p$ must have an integral solution.  Our implementation maintains the value $c$ for an ideal class, so we compute $c$ and if $c$ is an integer, than we have found a prime ideal.  Otherwise, we try again for some other prime (usually the smallest prime greater than $p$).
 
 
-\subsection{Average time for operations}
+\section{Average time for operations}
 
-In this Subsection, we demonstrate the performance of our implementations of ideal class arithmetic. Let $k$ be the target number of bits in the discriminant $\Delta$.  We iterate $k$ from 16 to 140, and for each $k$ we repeat the following 10,000 times: We compute two prime numbers $p$ and $q$ such that $p$ is $\floor{k/2}$ bits and $q$ is $k-\floor{k/2}$ bits.  We use the negative of their product $\Delta = -pq$ as the discriminant for a class group, unless $\Delta \not\equiv 1 \pmod 4$. In which case, we try again with a different $p$ and $q$.  We then pick a prime form, $[\mathfrak a]$, randomly from among the primes less than 1000.  To time the performance of squaring and cubing, we iterate 1000 times either $[\mathfrak a] \gets [\mathfrak a^2]$ or $[\mathfrak a] \gets [\mathfrak a^3]$ respectively.  Dividing the total cost by 10,000,000 gives the average time to square or cube an ideal.  For multiplication, we initially set $[\mathfrak b] \gets [\mathfrak a]$.  We then iterate 1000 times the sequence of operations $[\mathfrak c] \gets [\mathfrak a\mathfrak b]$, $[\mathfrak a] \gets [\mathfrak b]$, and $[\mathfrak b] \gets [\mathfrak c]$. Figures \ref{fig:idealCompose}, \ref{fig:idealSquare}, and \ref{fig:idealCube} show the results of these timings. For all discriminant sizes, our 64-bit implementation performs faster than our 128-bit implementation, which performs faster than our GMP implementation.
+% TODO: Emphasis that our specialized implementations are *much* faster than the reference implementation.  If possible, get some Pari/GP timings.
+
+This Subsection demonstrates the performance of our implementations of ideal class arithmetic. Let $k$ be the target number of bits in the discriminant $\Delta$.  We iterate $k$ from 16 to 140, and for each $k$ we repeat the following 10,000 times: We compute two prime numbers $p$ and $q$ such that $p$ is $\floor{k/2}$ bits and $q$ is $k-\floor{k/2}$ bits.  We use the negative of their product $\Delta = -pq$ as the discriminant for a class group, unless $\Delta \not\equiv 1 \pmod 4$. In which case, we try again with a different $p$ and $q$.  We then pick a prime form, $[\mathfrak a]$, randomly from among the primes less than 1000.  To time the performance of squaring and cubing, we iterate 1000 times either $[\mathfrak a] \gets [\mathfrak a^2]$ or $[\mathfrak a] \gets [\mathfrak a^3]$ respectively.  Dividing the total cost by 10,000,000 gives the average time to square or cube an ideal.  For multiplication, we initially set $[\mathfrak b] \gets [\mathfrak a]$.  We then iterate 1000 times the sequence of operations $[\mathfrak c] \gets [\mathfrak a\mathfrak b]$, $[\mathfrak a] \gets [\mathfrak b]$, and $[\mathfrak b] \gets [\mathfrak c]$. Figures \ref{fig:idealCompose}, \ref{fig:idealSquare}, and \ref{fig:idealCube} show the results of these timings. For all discriminant sizes, our 64-bit implementation performs faster than our 128-bit implementation, which performs faster than our GMP implementation.
 
 \mygraph{compose-all}{fig:idealCompose}{Average Time to Multiply Reduced Ideal Class Representatives.}
 \mygraph{square-all}{fig:idealSquare}{Average Time to Square Reduced Ideal Class Representatives.}
@@ -2059,18 +2064,12 @@ In Figures \ref{fig:cubingVs64}, \ref{fig:cubingVs128}, and \ref{fig:cubingVsMpz
 \mygraph{cube-vs-128}{fig:cubingVs128}{Time to compute $[\mathfrak a^3]$ in our 128-bit implementation.}
 \mygraph{cube-vs-mpz}{fig:cubingVsMpz}{Time to compute $[\mathfrak a^3]$ in our GMP implementation.}
 
-
-\section{Summary}
-
-This chapter discussed methods that lead to practical improvements for arithmetic in the ideal class group.  We began with several methods for computing solutions to equations of the form $s=Ua + Vb$ where $s$ is the greatest common divisor of both $a$ and $b$, since arithmetic in the ideal class group is dominated by this operation.  We found that when the inputs $a$ and $b$ are bound by $2^{32}$, that the standard Extended Euclidean Algorithm performs best.  When $2^{32} \le a,b < 2^{64}$, a left-to-right binary GCD computation is fastest.  Finally, for $a,b \ge 2^{64}$ we defer to the implementation in the GNU Multiple Precision (GMP) library.
-
 Following this, we discussed specialized implementations of ideal arithmetic using 64-bit, 128-bit, and unbound arithmetic.  Our 64-bit implementation is known to work correctly for negative discriminants $-2^{60} < \Delta < 0$, while our 128-bit implementation works with negative discriminants $-2^{119} < \Delta < 0$. We discussed several low-level optimizations and showed an improvement in the performance of ideal class arithmetic over our reference implementation using GMP.
 
 Lastly, this Chapter measured the average cost of multiplication, squaring, and cubing for varying discriminant sizes.  The next Chapter uses our implementation of arithmetic in the ideal class group in order to determine fast methods of exponentiation in practice.  We discuss methods for exponentiating not discussed previously in this thesis -- many of which take the average time to multiply, square, and cube into consideration.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% CHAPTER 6                  %
 % EXPONENTIATION EXPERIMENTS %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Exponentiation Experiments}
@@ -2339,13 +2338,12 @@ The next Chapter brings together the improvements to ideal arithmetic and expone
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
-% CHAPTER 7             %
 % SUPERSPAR EXPERIMENTS %
 %%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{SuperSPAR Experiments}
 \label{chap:ssparExperiments}
 
-This Chapter discusses the experiments and results that directed our implementation of the SuperSPAR integer factoring algorithm, introduced in Section \ref{sec:superSpar}.  The algorithm is based on the ideal class group, discussed in Chapter \ref{chap:idealArithmetic}, and the experiments and results leading to our implementation of arithmetic in the ideal class group is discussed in Chapter \ref{chap:idealExperiments}.  SuperSPAR is an adaptation of the SPAR factoring algorithm, discussed in Section \ref{sec:spar}.  The algorithms differ in how they search for the order of a group element -- SuperSPAR uses the bounded primorial steps algorithm discussed in Section \ref{sec:primorial} -- but both algorithms first exponentiate a random ideal class to the product of many primes.  Chapter \ref{chap:exponentiation} discusses several methods for exponentiation in generic groups and Chapter \ref{chap:powExperiments} discusses our experiments and results of exponentiation in the ideal class group.  Practical improvements to each of these areas lead to practical improvements to our implementation of SuperSPAR.
+This Chapter discusses the experiments and results that directed our implementation of the SuperSPAR integer factoring algorithm, introduced in Section \ref{sec:superSpar}.  The algorithm is based on the ideal class group, discussed in Chapter \ref{chap:idealArithmetic}, and the experiments and results leading to our implementation of arithmetic in the ideal class group is discussed in Chapters \ref{chap:xgcdExperiments} and \ref{chap:idealExperiments}.  SuperSPAR is an adaptation of the SPAR factoring algorithm, discussed in Section \ref{sec:spar}.  The algorithms differ in how they search for the order of a group element -- SuperSPAR uses the bounded primorial steps algorithm discussed in Section \ref{sec:primorial} -- but both algorithms first exponentiate a random ideal class to the product of many primes.  Chapter \ref{chap:exponentiation} discusses several methods for exponentiation in generic groups and Chapter \ref{chap:powExperiments} discusses our experiments and results of exponentiation in the ideal class group.  Practical improvements to each of these areas lead to practical improvements to our implementation of SuperSPAR.
 
 SuperSPAR works in two stages: an exponentiation stage and a search stage.  The search stage of SuperSPAR computes baby steps coprime to a multiple of a primorial.  Section \ref{sec:ssparCoprimeFinding}  discusses two techniques to find integers coprime to a primorial in a given range.  As discussed in Subsection \ref{subsec:boundedPrimorialSteps}, for the search stage to work, the order of the element should have no factors in common with the primorial used for the search stage.  Section \ref{sec:ssparFactorizationOfTheOrder} discusses the data and experiments used to bound the exponents of the prime factors of the exponent used in the exponentiation stage so that (with high probability) the order of the resulting ideal class will have no factors in common with the primorial used during the search stage.  This Section also discusses the number of ideal classes to try in expectation for a given class group.  The search stage of the algorithm requires the use of a lookup table.  Section \ref{sec:ssparHashing} compares two implementations of such a table.  Then, to enable the discovery of bounds useful for the search stage, Section \ref{sec:ssparBabyStepBounds} discusses a method of generating suitable candidates.  With all this in place, Section \ref{sec:ssparEmpirical} discusses the method used to determine the exponent for the exponentiation stage and the bound for the search stage that work well in practice for integers of specific sizes.  Finally, a comparison of our implementation of SuperSPAR to several public implementations of factoring algorithms is provided.  We show that for random semiprime integers between 54-bits and 64-bits, SuperSPAR performs the best on average of the implementations tested.
 
@@ -2617,7 +2615,7 @@ Figure \ref{fig:ssparIdealAttempts} indicates that for most multipliers, if the 
 
 The SuperSPAR Algorithm \ref{alg:superSpar} (and more generally, the bounded primorial steps algorithm \ref{alg:primorialSteps}) requires a lookup table\footnote{The lookup table maps group elements $\bclass^i$ to exponents $i$.}.  The baby steps generate a mapping from group elements $\bclass^i$ to exponents $i$ coprime to some primorial $P_w$ and store this mapping in the lookup table. The giant steps lookup group elements $\bclass^{2js}$ and $\bclass^{-2js}$ from the lookup table.  As such, the performance of the algorithm directly corresponds to the performance of the lookup table.  This Section describes the experimental results for SuperSPAR using two different implementations of lookup tables, as well as the method used to map group elements to exponents in our implementation.
 
-Our implementation of idea class arithmetic represents an ideal class $\aclass \in Cl_\Delta$ using the triple $(a, b, c)$ where $\ideal a = [a, (b + \sqrt\Delta)/2]$ is a reduced representative for the ideal class and $c = (b^2 - \Delta)/4a$ (see Subsection \ref{subsec:implementationOfIdealArithmetic}).  Since inversion of ideal classes is virtually free, SuperSPAR computes giant steps for ideal classes $\bclass^{2js}$ and $\bclass^{-2js}$, but rather than perform two table lookups, we take advantage of the way in which the inverse of an ideal class is computed.  Recall form Subsection \ref{subsec:idealClassInverse} that the inverse of an ideal class for a representative $[a, (b + \sqrt\Delta)/2]$ is given by the representative $[a, (-b + \sqrt\Delta)]$.  Since $|b| = \pm \sqrt{\Delta +4ac}$, by using the pair $(a, c)$ for the key, our implementation is able to look up both $\bclass^{2sj}$ and $\bclass^{-2js}$ using a single table lookup.  However, once a giant step finds a corresponding $\bclass^i$ in the table, both the exponents $2js-i$ and $2js+i$ must be tested to determine which one is a multiple of the order of $\bclass$.  Figure \ref{fig:ssparSingleLookup} shows the advantage of performing a single lookup for each giant step over two lookups per giant step\footnote{The method proposed here is to use the pair $(a, b)$ for the hash key.  This distinguishes between $\bclass^{2js}$ and $\bclass^{-2js}$.  As such, both must be looked up during the giant steps.  Then when some $\bclass^i = \bclass^{2js}$ or $\bclass^i = \bclass^{-2js}$ is found, a multiple of the order is known.}, even when this requires extra exponentiations once a candidate for a multiple of the order is found.
+Our implementation of idea class arithmetic represents an ideal class $\aclass \in Cl_\Delta$ using the triple $(a, b, c)$ where $\ideal a = [a, (b + \sqrt\Delta)/2]$ is a reduced representative for the ideal class and $c = (b^2 - \Delta)/4a$ (see Section \ref{sec:implementationOfIdealArithmetic}).  Since inversion of ideal classes is virtually free, SuperSPAR computes giant steps for ideal classes $\bclass^{2js}$ and $\bclass^{-2js}$, but rather than perform two table lookups, we take advantage of the way in which the inverse of an ideal class is computed.  Recall form Subsection \ref{subsec:idealClassInverse} that the inverse of an ideal class for a representative $[a, (b + \sqrt\Delta)/2]$ is given by the representative $[a, (-b + \sqrt\Delta)]$.  Since $|b| = \pm \sqrt{\Delta +4ac}$, by using the pair $(a, c)$ for the key, our implementation is able to look up both $\bclass^{2sj}$ and $\bclass^{-2js}$ using a single table lookup.  However, once a giant step finds a corresponding $\bclass^i$ in the table, both the exponents $2js-i$ and $2js+i$ must be tested to determine which one is a multiple of the order of $\bclass$.  Figure \ref{fig:ssparSingleLookup} shows the advantage of performing a single lookup for each giant step over two lookups per giant step\footnote{The method proposed here is to use the pair $(a, b)$ for the hash key.  This distinguishes between $\bclass^{2js}$ and $\bclass^{-2js}$.  As such, both must be looked up during the giant steps.  Then when some $\bclass^i = \bclass^{2js}$ or $\bclass^i = \bclass^{-2js}$ is found, a multiple of the order is known.}, even when this requires extra exponentiations once a candidate for a multiple of the order is found.
 
 \mygraphX{hashing-single-vs-double}{fig:ssparSingleLookup}{Average time to split an integer either by using a single lookup for each giant step, with exponentiation to verify a multiple of the order, or two lookups for each giant step, but without the need to verify a multiple of the order.}{Inversion aware hashing.}
 
@@ -2868,6 +2866,8 @@ Table \ref{tab:ssparParams} shows the values used for the exponentiation and sea
 \section{Comparison with other algorithms}
 \label{sec:ssparComparison}
 
+% TODO: Mention what factoring algorithm each implementation uses, e.g.\ Flint uses MPQS, etc.
+
 To demonstrate the performance of our implementation of SuperSPAR, several factoring implementations were timed, namely Pari/GP \cite{PariGP}, Msieve \cite{Msieve}, GMP-ECM \cite{Ecm}, YAFU \cite{Yafu}, Flint \cite{Flint}, Maple \cite{Maple}, and a custom implementation of SQUFOF \cite{Gower2008} adapted from the source code of Pari/GP.
 
 For bit sizes 16, 18, ..., 100, sets of 10,000 random semiprime integers $N = p \cdot q$ for $p$ and $q$ prime and half the size of $N$ were generated and written to disk.  The file format was ASCII with one integer per line.  For each factoring implementation, this file was converted to an implementation specific format so that all the integers could be factored by that implementation in batch.  The hardware platform was a personal notebook with a 2.7GHz Intel Core i7-2620M CPU and 8Gb of memory.  The CPU has four cores, only one of which was used during timing experiments.  The operating system was 64-bit Ubuntu 12.10.  When possible, the most recent version of each factoring implementation was used and built from source using the GNU C compiler version 4.7.2.  Timings include forking the process, reading and parsing the implementation specific batch file, and factoring the 10,000 integers in the set.  The timings do not include the generation of the semiprime integers or the conversion to the implementation specific batch file.
@@ -2940,12 +2940,11 @@ Bits & ECM & Flint & Maple & Msieve & Pari/GP & SQUFOF & SSPAR & Yafu \\
 
 
 %%%%%%%%%%%%%%%
-% CHAPTER 8   %
 % FUTURE WORK %
 %%%%%%%%%%%%%%%
 \chapter{Future Work}
 
-The work of this thesis is to improve exponentiation in the ideal class group of imaginary quadratic number fields, with an application to integer factoring.  This lead to practical improvements when computing the extended GCD for bounded integers (Section \ref{sec:eea}) as well as improvements to ideal class arithmetic for bounded discriminants (Section \ref{sec:idealArithmetic}).  Chapter \ref{chap:powExperiments} lead to practical performance improvements when exponentiating an ideal class with bounded discriminant to a large primorial.  Finally, this thesis revisits the SPAR factoring algorithm using the contributions to ideal class arithmetic and exponentiation in the context of the primorial steps algorithm.  Section \ref{sec:ssparComparison} compares our implementation of SuperSPAR to several integer factoring libraries to show that the performance improvements of this thesis lead to SuperSPAR being the fastest implementation for integers in the range of 54-bits to 64-bits (TODO).
+The work of this thesis is to improve exponentiation in the ideal class group of imaginary quadratic number fields, with an application to integer factoring.  This lead to practical improvements when computing the extended GCD for bounded integers (Chapter \ref{chap:xgcdExperiments}) as well as improvements to ideal class arithmetic for bounded discriminants (Chapter \ref{chap:idealExperiments}).  Chapter \ref{chap:powExperiments} lead to practical performance improvements when exponentiating an ideal class with bounded discriminant to a large primorial.  Finally, this thesis revisits the SPAR factoring algorithm using the contributions to ideal class arithmetic and exponentiation in the context of the primorial steps algorithm.  Section \ref{sec:ssparComparison} compares our implementation of SuperSPAR to several integer factoring libraries to show that the performance improvements of this thesis lead to SuperSPAR being the fastest implementation for integers in the range of 54-bits to 64-bits (TODO).
 
 For the work of this thesis to be most useful to the future work of others, the source code for the libraries used throughout is available online, and the hope is for eventual inclusion into common mathematical packages such as Pari/GP, Sage, and Dr. Michael J. Jacobson, Jr.'s algorithmic number theory library.
 
@@ -2959,6 +2958,8 @@ The work presented in this thesis is by no means exhaustive.  Sections \ref{sec:
 
 \section{Ideal Arithmetic}
 \label{sec:futureIdealArithmetic}
+
+% TODO: Future work would time the performance of the GCD within the context of ideal arithmetic.
 
 The practical improvements to arithmetic in the ideal class group are based on the Algorithms for computing reduced (or almost reduced) representatives for multiplication (Subsection \ref{subsec:nucomp}), squaring (Subsection \ref{subsec:nudupl}), and cubing (Subsection \ref{subsec:nucube}).  While these Algorithms are certainly faster as the size of the discriminant grows, future work could include a comparison of the implementation in this thesis with an implementation of the basic ideal class multiplication presented in Subsection \ref{subsec:idealMultiply}.  The idea would be to optimize an implementation as well as make improvements to the ideal reduction algorithm from Subsection \ref{subsec:reduction}.  Ideal reduction is similar to the standard Euclidean Algorithm, as such, future work might apply several of the approaches used for computing the extended GCD to that of ideal reduction. 
 
