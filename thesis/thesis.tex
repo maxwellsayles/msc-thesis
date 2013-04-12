@@ -291,21 +291,21 @@ The software was developed using the GNU C compiler version 4.7.2 on Ubuntu 12.1
 \chapter{Ideal Arithmetic}
 \label{chap:idealArithmetic}
 
-A focus of this thesis is arithmetic and exponentiation in the ideal class group of imaginary quadratic number fields.  We begin with the relevant theory of quadratic number fields, then discuss quadratic orders and ideals of quadratic orders.  Finally, we discuss arithmetic in the ideal class group.  The theory presented here is available in detail in reference texts on algebraic number theory such as \cite{Cohn1980}, \cite{Hua2012}, or \cite{Ireland1990}. 
+A focus of this thesis is arithmetic and exponentiation in the ideal class group of imaginary quadratic number fields.  We begin with with the relevant theory of quadratic number fields, then discuss quadratic orders and ideals of quadratic orders.  Finally, we discuss arithmetic in the ideal class group.  The theory presented here is available in detail in reference texts on algebraic number theory such as \cite{Cohn1980}, \cite{Hua2012}, or \cite{Ireland1990}. 
 
 
+\section{Quadratic Number Fields}
 
-\section{Quadratic Numbers}
-
-A \emph{quadratic number} is a root $\alpha$ of a quadratic polynomial $f(x) = ax^2 + bx + c$ with integer coefficients. The roots of $f(x)$ are given by the quadratic formula
+A quadratic number field $\KK$ is an algebraic number field of degree 2 over the rational numbers $\QQ$, and is defined as
 \[
-	\alpha = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a} ~.
+	\KK = \QQ(\alpha) = \{u + v\alpha : u,v \in \QQ\}
 \]
-The \emph{discriminant} of $f(x)$ is $\Delta = b^2 - 4ac$, and a quadratic number field $\KK$ can be constructed as an extension field of the rational numbers $\QQ$ as
+for some quadratic irrational $\alpha \in \CC$.   Following Jacobson and Williams \cite[p.77]{Jacobson2009}, let $\alpha$ be a root of a polynomial $f(x) = ax^2 + bx + c$ with integer coefficients and $f(x)$ is irreducible over the rationals.  As such
 \[
-	\KK = \QQ(\alpha) = \QQ(\sqrt{\Delta}) = \{u + v\sqrt{\Delta} : u,v \in \QQ\}.
+	\alpha = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}.
 \]
-We call $\Delta$ the \emph{radicand} of $\KK$.  Notice that $\Delta \equiv 0, 1 \pmod 4$ and that if $\Delta$ is a perfect square, then $\KK = \QQ$.  We are interested in the case that $\Delta$ is not a perfect square.  Also, if $\Delta = f^2\Delta_0$ where $\Delta_0$ is square free, then $\QQ(\sqrt\Delta) = \QQ(\sqrt{\Delta_0})$.  As such, $\Delta_0$ or any square multiple of it can be used as the radicand of $\KK$.  When $\Delta$ is positive, $\KK$ is a subset of the real numbers, $\RR$, and is a \emph{real} quadratic number field. When $\Delta$ is negative, $\KK$ is a subset of the complex numbers, $\CC$, and is an \emph{imaginary} quadratic number field.  This thesis only considers the imaginary case.
+The \emph{discriminant} of the polynomial $f(x)$ is $\Delta = b^2 - 4ac$, and our number field $\KK = \QQ(\alpha) = \QQ(\sqrt \Delta)$.  Notice that $\Delta \equiv 0, 1 \pmod 4$ and $\sqrt \Delta \not\in \QQ$ since $f(x)$ is irreducible.  Also, if $\Delta = f^2\Delta_0$ where $\Delta_0$ is square free, then $\QQ(\sqrt\Delta) = \QQ(\sqrt{\Delta_0})$.  When $\Delta$ or $\Delta / 4$ is square free then $\Delta$ is a \emph{fundamental discriminant}.  In the case that $\Delta$ is positive, $\KK$ is a subset of the real numbers, $\RR$, and is a \emph{real} quadratic number field. When $\Delta$ is negative, $\KK$ is a subset of the complex numbers, $\CC$, and is an \emph{imaginary} quadratic number field.  Throughout this thesis, the assumption is that $\Delta$ is negative.
+
 
 
 \section{Quadratic Integers}
@@ -352,7 +352,7 @@ The maximal order $\OO_\Delta = [1, \omega_0]$ of $\QQ(\sqrt\Delta)$ is the ring
 An \emph{ideal} $\mathfrak a$ is an additive subgroup of an order $\OO$ with the property that for any $a \in \mathfrak a$ and $\xi \in \OO$, it holds that $\xi a$ and $a \xi$ are both elements of the ideal $\mathfrak a$.
 \end{defn}
 
-When $\OO_\Delta$ is a quadratic order, for $\alpha, \beta \in \OO_\Delta$, the set $\ideal a = \{x \alpha + y \beta : x, y \in \OO_\Delta\}$ is an ideal in the order $\OO_\Delta$ and is denoted $(\alpha, \beta)$ \cite[p.16]{Ramachandran2006}.  Every ideal of a quadratic order $\OO_\Delta$ can be represented by at most two generators \cite[p.125--126,~\S~10]{Cohn1980}, while some can be represented by a single generator.  An ideal represented by a single generator is a \emph{principal} ideal and is denoted $(\alpha) = \{ x \alpha : x \in \OO_\Delta \}$ \cite[p.87]{Jacobson2009}.
+When $\OO_\Delta$ is a maximal order, for $\alpha, \beta \in \OO_\Delta$, the set $\ideal a = \{x \alpha + y \beta : x, y \in \OO_\Delta\}$ is an ideal in the order $\OO_\Delta$ and is denoted $(\alpha, \beta)$ \cite[p.16]{Ramachandran2006}.  Every ideal of a quadratic order $\OO_\Delta$ can be represented by at most two generators \cite[p.125--126,~\S~10]{Cohn1980}, while some can be represented by a single generator.  An ideal represented by a single generator is a \emph{principal} ideal and is denoted $(\alpha) = \{ x \alpha : x \in \OO_\Delta \}$ \cite[p.87]{Jacobson2009}.
 
 For two ideals, $\ideal a = (\alpha_1, \beta_1)$ and $\ideal b = (\alpha_2, \beta_2)$ in $\OO_\Delta$, their product is
 \begin{equation}
@@ -432,7 +432,7 @@ In an imaginary quadratic field, every ideal class contains exactly one reduced 
 \label{eq:idealSwapNorm}
 	\ideal b = \left[ -\mathcal N((b + \sqrt\Delta)/2)/a, -(b - \sqrt\Delta)/2 \right]
 \end{equation}
-is a representative of an equivalent class and can be verified by
+is equivalent, which can be verified by
 \[
 	\left(-(b - \sqrt\Delta)/2 \right) \ideal a = (a) \ideal b.
 \]
@@ -452,7 +452,7 @@ As such, the first step is to reduce $a$ by setting $\ideal a = [c, (-b + \sqrt\
 
 % TODO: Something about the distribution of the class number for discriminants of the same size.
 
-Using $|b| \le a$ from the definition of a reduced representative \ref{defn:reducedIdeal}, $-\Delta = 4ac - b^2 \ge 4ac -a^2$, and using $a \le c$, it follows that $|b| \le a \le \sqrt{|\Delta|/3}$.  Since $a$ and $b$ are bound and $c$ is determined by $a$, $b$, and $\Delta$, it follows that the number of ideal classes in the class group $Cl_\Delta$ is finite \cite[p.153]{Jacobson2009}.
+Using $|b| \le a$ from the definition of a reduced representative \ref{defn:reducedIdeal}, $-\Delta = 4ac - b^2 \ge 4ac -a^2$, and using $a \le c$, it follows that $|b| \le a \le \sqrt{|\Delta|/3}$.  Since $a$ and $b$ are bounded and $c$ is determined by $a$, $b$, and $\Delta$, it follows that the number of ideal classes in the class group $Cl_\Delta$ is finite \cite[p.153]{Jacobson2009}.
 \begin{defn}
 The number of ideal classes in the class group $Cl_\Delta$ is the \emph{class number} and is denoted $h_\Delta$ \cite[p.153]{Jacobson2009}.
 \end{defn}
@@ -558,7 +558,7 @@ Let $c_2 = ({b_2}^2 - \Delta)/4a_2$ and $U = (V(b_1-b_2)/2 - Wc_2) \bmod{(a_1/s)
 \[
 	b \equiv b_2 + \frac{2a_2}{s} U \pmod{2a},
 \]
-which completes the derivation of Equation \ref{eq:idealProductB}.  Note that the product ideal $\mathfrak a \mathfrak b$ is not a reduced representative and that the size of its coefficients can be as much as twice that of the ideal factors $\mathfrak a$ and $\mathfrak b$.
+which completes the derivation of Equation \ref{eq:idealProductB}.  Note that the product ideal $\mathfrak a \mathfrak b$ is not reduced and that the size of its coefficients can be as much as twice that of the ideal factors $\mathfrak a$ and $\mathfrak b$.
 
 
 \subsection{Fast Ideal Multiplication (NUCOMP)}
@@ -600,7 +600,9 @@ $C_i=C_{i-2}-q_i C_{i-1}$
 \end{algorithmic}
 \end{algorithm}
 
-Equations \ref{eq:idealProductS}, \ref{eq:idealProductA}, and \ref{eq:idealProductB} from the previous Subsection give a solution to the ideal product $\mathfrak a \mathfrak b = s[a, (b+\sqrt\Delta)/2]$.  We begin with the observation (\cite[p.119]{Jacobson2009}) that $(b/2)/a$ is roughly equal to the $sU / a_1$ where $U$ is given by Equation \ref{eq:idealProductU}. To see this, recall from Subsection \ref{subsec:classNumber} that $a_1$ is approximately $\sqrt{|\Delta|}$ in size, so $s^2 / 2 a_1 \approx 1 / \sqrt{|\Delta|}$ and
+% TODO: Say why $sU/a_1$ is important.
+
+Equations \ref{eq:idealProductS}, \ref{eq:idealProductA}, and \ref{eq:idealProductB} from the previous Subsection give a solution to the ideal product $\mathfrak a \mathfrak b = s[a, (b+\sqrt\Delta)/2]$.  We begin with the observation (\cite[p.119]{Jacobson2009}) that $(b/2)/a$ is roughly equal to $sU / a_1$ where $U$ is given by Equation \ref{eq:idealProductU}. To see this, recall from Subsection \ref{subsec:classNumber} that $a_1$ is approximately $\sqrt{|\Delta|}$ in size, so $s^2 / 2 a_1 \approx 1 / \sqrt{|\Delta|}$ and
 \[
 	\frac{b}{2a} = \frac{b_2 + 2Ua_2/s}{2a_1a_2/s^2} 
 	= \frac{s^2 b_2+s2Ua_2}{2a_1a_2}
@@ -629,15 +631,15 @@ We then compute
 	a &= (-1)^{i+1} (R_i M_1  - C_i M_2), \nonumber \\
 	b &= \left( \frac{2(R_i a_2 /s - C_{i-1} a)}{C_i} - b_2 \right) \bmod 2a \label{eq:bNUCOMP}
 \end{align}
-for the reduced or almost reduced product $\mathfrak a \mathfrak b = [a, (b + \sqrt\Delta)/2]$.  Note that this procedure assumes that $\mathcal N(\mathfrak a) \ge \mathcal N(\mathfrak b)$ and that if $a_1 < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4}$ then $R_{-1}$ and $R_{-2}$ satisfy Equation \ref{eq:nucompBound} and we compute the product $\mathfrak a \mathfrak b$ as in the previous subsection without expanding the simple continued fraction $sU/a_1$.  When $a_1 \ge \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4}$, at least one iteration of the recurrence \ref{eq:recurCNUCOMP} is performed and so $C_i \neq 0$ and there will not be a divide by zero in Equation \ref{eq:bNUCOMP}.
+for the reduced or almost reduced product $\mathfrak a \mathfrak b = [a, (b + \sqrt\Delta)/2]$.  Note that this procedure assumes that $\mathcal N(\mathfrak a) \ge \mathcal N(\mathfrak b)$ and that if $a_1 < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4}$ then $R_{-1}$ and $R_{-2}$ satisfy Equation \ref{eq:nucompBound} and we compute the product $\mathfrak a \mathfrak b$ as in the previous subsection without expanding the simple continued fraction $sU/a_1$.  When $a_1 \ge \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4}$, at least one iteration of the recurrence \ref{eq:recurCNUCOMP} is performed and so $C_i \neq 0$ and there will not be a division by zero in Equation \ref{eq:bNUCOMP}.
 
-Our implementation of fast ideal multiplication includes practical optimizations on the above technique.  For example, by Equation \ref{eq:idealProductS}, $s ~|~ a_1$ and $s ~|~ a_2$, so $a_1$ and $a_2$ are reduced modulo $s$ throughout the computation.  Also, Equation \ref{eq:idealProductS} computes \mbox{$\gcd(a_1, a_2, (b_1 + b_2)/2)$}. Following \cite[Algorithm~6]{Imbert2010}, this is separated into two parts: let $s = \gcd(a_1, a_2)$ and compute $\gcd(s, (b_1 + b_2)/2)$ only when $s \neq 1$.  Chapter \ref{chap:xgcdExperiments} discusses practical optimizations for computing the greatest common divisor and the recurrences \ref{eq:recurqNUCOMP}, \ref{eq:recurRNUCOMP}, and \ref{eq:recurCNUCOMP}.  Finally, the first coefficient, $Y$, from Equation \ref{eq:idealProductS} is never used, and so it is not computed.  See Chapter \ref{chap:idealExperiments} for a more thorough treatment of our implementation of ideal class arithmetic.  Pseudo-code is given in Algorithm \ref{alg:nucomp}.
+Our implementation of fast ideal multiplication includes practical optimizations on the above technique.  For example, by Equation \ref{eq:idealProductS}, $s ~|~ a_1$ and $s ~|~ a_2$, so ${a_1}' = a_1/s$ and ${a_2}' = a_2/s$ are used throughout the computation.  Also, Equation \ref{eq:idealProductS} computes \mbox{$\gcd(a_1, a_2, (b_1 + b_2)/2)$}. Following \cite[Algorithm~6]{Imbert2010}, this is separated into two parts: let $s = \gcd(a_1, a_2)$ and compute $\gcd(s, (b_1 + b_2)/2)$ only when $s \neq 1$.  Chapter \ref{chap:xgcdExperiments} discusses practical optimizations for computing the greatest common divisor and the recurrences \ref{eq:recurqNUCOMP}, \ref{eq:recurRNUCOMP}, and \ref{eq:recurCNUCOMP}.  Finally, the first coefficient, $Y$, from Equation \ref{eq:idealProductS} is never used, and so it is not computed.  See Chapter \ref{chap:idealExperiments} for a more thorough treatment of our implementation of ideal class arithmetic.  Pseudo-code is given in Algorithm \ref{alg:nucomp}.
 
 
 \subsection{Fast Ideal Squaring (NUDUPL)}
 \label{subsec:nudupl}
 
-When the two input ideals for multiplication are the same, as is the case when squaring, much of the arithmetic simplifies.  For reduced ideals $\mathfrak a = [a_1, (b_1 + \sqrt\Delta)/2]$ and \mbox{$\mathfrak b = [a_2, (b_2 + \sqrt\Delta)/2]$}, we have $a_1=a_2$ and $b_1=b_2$.  Equations \ref{eq:idealProductS} and \ref{eq:idealProductU} simplify to
+When the two input ideals for multiplication are the same, as is the case when squaring, much of the arithmetic simplifies.  In this case, $a_1 = a_2$, $b_1 = b_2$, and Equations \ref{eq:idealProductS} and \ref{eq:idealProductU} simplify to
 \begin{align*}
 	s &= \gcd(a_1, b_1) = Xa_1 + Yb_1 \\
 	U &= -Yc_1 \bmod (a_1/s).
@@ -757,14 +759,14 @@ The next Chapter discusses some exponentiation techniques that use the ideal ari
 \chapter{Exponentiation}
 \label{chap:exponentiation}
 
-Exponentiation has many applications. Diffie-Hellman key exchange uses exponentiation so that two parties may jointly establish a shared secret key over an insecure channel.  An application discussed in detail in this thesis is that of computing the order of a group element (see Sections \ref{sec:spar} and \ref{sec:superSpar}).  Our approach is to exponentiate a group element to the product, $P$, of several small primes.  The result is an element whose order is likely to not be divisible by any of these primes. We then compute the order using a variant of Shanks' baby-step giant-step algorithm where only powers relatively prime to $P$ are computed.  Determining the order of an element is useful in computing the structure of a group, and in factoring an integer associated with a group.  Faster exponentiation means the entire computation is faster.
+Exponentiation has many applications. Diffie-Hellman key exchange uses exponentiation so that two parties may jointly establish a shared secret key over an insecure channel.  An application discussed in detail in this thesis is that of computing the order of an ideal class.  The approach used in Chapter \ref{chap:superspar} is to exponentiate an ideal class to the product, $E$, of several small primes.  The result is an ideal class whose order is likely to not be divisible by any of these primes.  The order is then computed using a variant of Shanks' baby-step giant-step algorithm where only powers relatively prime to $E$ are computed.  Computing the order of several ideal classes is one method to factor an integer associated with the ideal class group.  Faster exponentiation means the approach used there is faster.
 
 In Sections \ref{sec:binaryExp} and \ref{sec:naf} we discuss standard exponentiation techniques that rely on a base 2 representation of the exponent.  In Section \ref{sec:dbns} we describe double-base number systems, which, as the name implies, are number systems that make use of two bases in the representation of a number.  We are particularly interested in representations that use bases 2 and 3, since our implementation of ideal class group arithmetic provides multiplication, squaring, and cubing. In Section \ref{sec:dbnsMethods} we discuss some methods to compute double-base representations found in the literature.  Throughout this chapter, the running time and space complexities are given in terms of the number of group operations and elements required. They do not take into consideration the binary costs associated with each.
 
 
 \section{Binary Exponentiation}
 \label{sec:binaryExp}
-The simplest method of exponentiation is binary exponentiation.  Let $g$ be an element in the group $G$ and $n$ a positive integer.  To compute $g^n$, we first represent $n$ in binary as
+The simplest method of exponentiation is binary exponentiation.  Let $g$ be an element in a group $G$ and $n$ a positive integer.  To compute $g^n$, we first represent $n$ in binary as
 \[
 	n = \sum_{i=0}^{\floor{\log_2 n}} b_i 2^i
 \]
@@ -772,7 +774,7 @@ where $b_i \in \{0, 1\}$ such that $b_i$ represents the $i^{\textrm{th}}$ bit of
 \[
 	g^n = \prod_{i=0}^{\floor{\log_2 n}} g^{b_i 2^i}.
 \]
-and compute $g^{2^i}$ by repeated squaring of $g$.  The result, $g^n$, is the product of each $g^{2^i}$ where $b_i = 1$.  This description is known as right-to-left binary exponentiation because the result is computed by generating the terms of the product from right to left in the written binary representation of $n$.  The left-to-right variant evaluates the bits of the exponent $n$ from high order to lower order by repeatedly squaring an accumulator and multiplying this with the base element $g$ when $b_i = 1$.  The left-to-right variant has the advantage that one of the values in each multiplication, namely $g$, remains fixed throughout the evaluation.  There also exist windowed variants where $g^w$ is precomputed for each $w$ in some window $0 \le w < 2^k$ for some $k$ (typically chosen to be cache efficient). The exponent $n$ is then expressed in base $2^k$.  For further discussion of windowed techniques, see \cite{Cohen2006}.
+and compute $g^{2^i}$ by repeated squaring of $g$.  The result, $g^n$, is the product of each $g^{2^i}$ where $b_i = 1$.  This description is known as right-to-left binary exponentiation because the result is computed by generating the terms of the product from right to left in the written binary representation of $n$.  The left-to-right variant evaluates the bits of the exponent $n$ from high order to lower order by repeatedly squaring an accumulator and multiplying this with the base element $g$ when $b_i = 1$.  The left-to-right variant has the advantage that one of the values in each multiplication, namely $g$, remains fixed throughout the evaluation.  There also exist windowed variants where $g^w$ is precomputed for each $w$ in some window $0 \le w < 2^k$ for some $k$ (typically chosen to be cache efficient). The exponent $n$ is then expressed in base $2^k$.  For further discussion of windowed techniques, see \cite[Subsection~9.1.3.~p.149]{Cohen2006}.
 
 Binary exponentiation algorithms require $\floor{\log_2 n}$ squarings and $\left(\floor{\log_2~n} + 1 \right)/2$ multiplications on average, since a multiplication is only necessary when $b_i = 1$ and the probability of $b_i = 1$ is 1/2.
 
@@ -835,6 +837,7 @@ In our experiments, we use a variation of the above, originally due to Reitwiesn
 
 An advantage of non-adjacent form is that it requires at most $\floor{\log_2 n}+1$ squares and on average $(\floor{\log_2 n}+2)/3$ multiplications, as opposed to $(\floor{\log_2 n}+1)/2$ for binary exponentiation.  To see this, recall that non-adjacent form requires that no two non-zero terms be adjacent.  Consider any two adjacent terms.  The possible outcomes are $(0,0)$, $(s, 0)$, or $(0, s$) where $s \in \{-1, 1\}$. This means that 2/3 of the time, 1/2 of the terms will be non-zero, and so the probability of any given term being non-zero is 1/3.
 
+As with binary exponentiation, there exist windowed variants of non-adjacent form (see \cite[Algorithm~9.20.~p.153]{Cohen2006}).   In this case, $g^w$ is computed for each $w$ in some window $-2^{k-1} < w \le 2^{k-1}$, and the exponent $n$ is repeatedly evaluated modulo $2^k$ using the smallest residue in absolute value, i.e.\ the residue $w$ such that $-2^{k-1} < w \le 2^{k-1}$.
 
 \section{Double-Base Number Systems}
 \label{sec:dbns}
@@ -1719,7 +1722,7 @@ This is easily extended for any $2^k$ where $k$ is a positive integer.  The algo
 	\WHILE {$t$ is even}
 		\STATE let $h$ be the largest integer such that $h \le k$ and $2^h$ divides $t$
 		\STATE $j \gets Y \bmod 2^h$
-		\STATE $(t, X, Y) \gets \left( \frac{t}{2^k}, \frac{X+x_j}{2^h}, \frac{Y+y_j}{2^h} \right)$  \COMMENT{Reduce by $2^h$}
+		\STATE $(t, X, Y) \gets \left( \frac{t}{2^h}, \frac{X+x_j}{2^h}, \frac{Y-y_j}{2^h} \right)$  \COMMENT{Reduce by $2^h$}
 	\ENDWHILE
 	\IF {$s \ge t$}
 		\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{0}{1}{1}{-1} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$
