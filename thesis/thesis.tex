@@ -1529,7 +1529,7 @@ In practice, these operations are performed by manipulating each variable direct
 
 \section{Lehmer's GCD}
 
-% NOTE: We do not use Lehmer's for 128-bit inputs, because the recombine step overflows the 128-bit registers.
+% TODO: Talk about Lehmer's with 64-bit EEA and 64-bit L2R.
 
 In the previous section, each iteration subtracts a multiple, $q = \floor{s / t}$, of the smaller number from the larger number.  Derrick Henry Lehmer noticed that most of the quotients, $q$, were small and that those small quotients could be computed from the leading digits (or machine word) of the numerator and denominator \cite{Lehmer1938}.
 
@@ -1923,6 +1923,8 @@ Finally, Lehmer's GCD algorithm is especially useful when the arguments to the G
 
 \section{Experimental Results}
 \label{sec:gcdResults}
+
+% TODO: Add Lehmer's with 64-bit L2R, etc.
 
 We specialized the implementation of each of the extended GCD algorithms for 32-bit and 64-bit words.  When intermediate terms did not overflow 128-bit words, we also implemented 128-bit versions.  For each $k$ from 1 to 127, we generated 1,000,000 pairs of integers of $k$ bits each, and measured the time to compute the extended GCD of each pair using each algorithm and its specialized implementation when available.
 
