@@ -26,8 +26,8 @@
 
 
 \usepackage[chapter]{algorithm}
-%\usepackage[compatible]{algpseudocode}
-\usepackage{algorithmic}
+\usepackage{algpseudocode}
+%\usepackage{algorithmic}
 \usepackage{amsfonts}
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -52,9 +52,13 @@
 \newtheorem{defn}[thm]{Definition}
 \newtheorem{example}[thm]{Example}
 
+\algtext*{EndWhile}  % Remove "end while" text
+\algtext*{EndIf}     % Remove "end if" text
+\algtext*{EndFor}    % Remove "end for" text
 \renewcommand{\algorithmiccomment}[1]{\hfill \{#1\}}
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
+\newcommand{\algnewline}{\par\noindent\hskip\algorithmicindent}
 
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
@@ -410,22 +414,22 @@ A primitive ideal $\ideal a = [a, (b+\sqrt{\Delta})/2]$ with $\Delta < 0$ is a \
 \caption{Ideal Reduction (\cite[p.90]{Jacobson2006}).}
 \label{alg:reduce}
 \begin{algorithmic}[1]
-\REQUIRE An ideal class representative $\ideal a_1 = [a_1, (b_1+\sqrt\Delta)/2]$ and $c_1 = ({b_1}^2 - \Delta)/4a_1$.
-\ENSURE A reduced representative $\ideal a = [a, (b+\sqrt\Delta)/2]$.
-\STATE $(a, b, c) \gets (a_1, b_1, c_1)$
-\WHILE {$a > c$ or $b > a$ or $b \le -a$}
-	\IF {$a > c$}
-		\STATE swap $a$ with $c$ and let $b \gets -b$
-	\ENDIF
-	\IF {$b > a$ or $b \le -a$}
-		\STATE $b \gets b'$ such that $-a < b' \le a$ and $b' \equiv b \pmod{2a}$
-		\STATE $c \gets (b^2-\Delta)/4a$
-	\ENDIF
-\ENDWHILE
-\IF {$a=c$ and $b < 0$}
-	\STATE $b \gets -b$
-\ENDIF
-\RETURN $[a, (b+\sqrt\Delta)/2]$
+\Require An ideal class representative $\ideal a_1 = [a_1, (b_1+\sqrt\Delta)/2]$ and $c_1 = ({b_1}^2 - \Delta)/4a_1$.
+\Ensure A reduced representative $\ideal a = [a, (b+\sqrt\Delta)/2]$.
+\State $(a, b, c) \gets (a_1, b_1, c_1)$
+\While {$a > c$ or $b > a$ or $b \le -a$}
+	\If {$a > c$}
+		\State swap $a$ with $c$ and let $b \gets -b$
+	\EndIf
+	\If {$b > a$ or $b \le -a$}
+		\State $b \gets b'$ such that $-a < b' \le a$ and $b' \equiv b \pmod{2a}$
+		\State $c \gets (b^2-\Delta)/4a$
+	\EndIf
+\EndWhile
+\If {$a=c$ and $b < 0$}
+	\State $b \gets -b$
+\EndIf
+\State \Return $[a, (b+\sqrt\Delta)/2]$
 \end{algorithmic}
 \end{algorithm}
 
@@ -568,37 +572,39 @@ which completes the derivation of Equation \ref{eq:idealProductB}.  Note that th
 
 Shanks \cite{Shanks1989} gives an algorithm for multiplying two ideal class representatives such that their product is reduced or almost reduced.  The algorithm is known as NUCOMP and stands for ``New COMPosition''.  This algorithm is often faster in practice as the intermediate numbers are smaller and the final product requires at most two\footnote{According to \cite[p.441]{Jacobson2009}, experiments show that 88\% of the time the resulting product requires no applications of the reduction operation, 12\% of the time only one application is required, and very infrequently are two applications necessary.} applications of the reduction operation to be converted to reduced form \cite[pp.439--441]{Jacobson2009}. The description of NUCOMP provided here is a high level description of the algorithm based on \cite[pp.119-123]{Jacobson2009}.
 
-\begin{algorithm}[htb]
+\begin{algorithm}[h]
 \caption{NUCOMP -- Fast Ideal Multiplication (\cite[pp.441-443]{Jacobson2009}).}
 \label{alg:nucomp}
 \begin{algorithmic}[1]
-\REQUIRE Reduced representatives $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$, $\mathfrak b = [a_2, (b_2+\sqrt\Delta)/2]$ \\ with $c_1 = ({b_1}^2-\Delta)/4a_1$, $c_2 = ({b_2}^2-\Delta)/4a_2$, and discriminant $\Delta$.
-\ENSURE A reduced or almost reduced representative $\mathfrak a \mathfrak b$.
-\STATE ensure $\mathcal N(\mathfrak a) < \mathcal N(\mathfrak b)$ by swapping $\mathfrak a$ with $\mathfrak b$ if $a_1 < a_2$
-\STATE compute $s'$ and $V'$ such that $s' = \gcd(a_1, a_2) = Y'a_1 + V'a_2$ for $s', Y', V' \in \ZZ$
-\STATE $s \gets 1$
-\STATE $U \gets V'(b_1 - b_2)/2 \bmod a_1$
-\IF {$s' \neq 1$}
-	\STATE compute $s, V$, and $W$ \\
-	       such that $s = \gcd(s', (b_1 + b_2)/2) = Vs' + W(b_1 + b_2)/2$ for $V, W \in \ZZ$
-	\STATE $(a_1, a_2) \gets (a_1/s, a_2/s)$
-	\STATE $U \gets (VU - Wc_2) \bmod a_1$
-\ENDIF
-\IF {$a_1 < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4}$}
-	\STATE $a \gets a_1a_2$
-	\STATE $b \gets (2a_2U + b_2) \bmod{2a}$
-	\RETURN $[a, (b+\sqrt\Delta)/2]$
-\ENDIF
-\STATE $\matrixtt{R_{-2}}{R_{-1}}{C_{-2}}{C_{-1}} \gets \matrixtt{U}{a_1}{-1}{0}$
-\STATE find $i$ such that $R_i < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4} < R_{i-1}$ using the recurrences: \\
-$q_i = \floor{R_{i-2} ~/~ R_{i-1}}$ \\
-$R_i = R_{i-2}-q_i R_{i-1}$ \\
-$C_i=C_{i-2}-q_i C_{i-1}$
-\STATE $M_1 \gets (R_i a_2 + C_i(b_1-b_2)/2)/a_1$
-\STATE $M_2 \gets (R_i (b_1+b_2)/2 -sC_i c_2)/a_1$
-\STATE $a \gets (-1)^{i+1}(R_i M_1 - C_i M_2)$
-\STATE $b \gets ((2(R_i a_2 - C_{i-1} a)/C_i) - b_2) \bmod{2a}$
-\RETURN $[a, (b+\sqrt\Delta)/2]$
+\Require Reduced representatives $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$, $\mathfrak b = [a_2, (b_2+\sqrt\Delta)/2]$
+\algnewline with $c_1 = ({b_1}^2-\Delta)/4a_1$, $c_2 = ({b_2}^2-\Delta)/4a_2$, and discriminant $\Delta$.
+\Ensure A reduced or almost reduced representative $\mathfrak a \mathfrak b$.
+\State ensure $\mathcal N(\mathfrak a) < \mathcal N(\mathfrak b)$ by swapping $\mathfrak a$ with $\mathfrak b$ if $a_1 < a_2$
+\State compute $s', V' \in \ZZ$ such that $s' = \gcd(a_1, a_2) = Y'a_1 + V'a_2$ for $Y' \in \ZZ$
+\State $s \gets 1$
+\State $U \gets V'(b_1 - b_2)/2 \bmod a_1$
+\If {$s' \neq 1$}
+	\State compute $s, V, W \in \ZZ$ such that $s = \gcd(s', (b_1 + b_2)/2) = Vs' + W(b_1 + b_2)/2$
+	\State $(a_1, a_2) \gets (a_1/s, a_2/s)$
+	\State $U \gets (VU - Wc_2) \bmod a_1$
+\EndIf
+\If {$a_1 < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4}$}
+	\State $a \gets a_1a_2$
+	\State $b \gets (2a_2U + b_2) \bmod{2a}$
+	\State \Return $[a, (b+\sqrt\Delta)/2]$
+\EndIf
+\State $\matrixtt{R_{-2}}{R_{-1}}{C_{-2}}{C_{-1}} \gets \matrixtt{U}{a_1}{-1}{0}$
+\State find $i$ such that $R_i < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4} < R_{i-1}$ using the recurrences:
+\begin{itemize}
+\item $q_i = \floor{R_{i-2} ~/~ R_{i-1}}$
+\item $R_i = R_{i-2}-q_i R_{i-1}$
+\item $C_i=C_{i-2}-q_i C_{i-1}$
+\end{itemize}
+\State $M_1 \gets (R_i a_2 + C_i(b_1-b_2)/2)/a_1$
+\State $M_2 \gets (R_i (b_1+b_2)/2 -sC_i c_2)/a_1$
+\State $a \gets (-1)^{i+1}(R_i M_1 - C_i M_2)$
+\State $b \gets ((2(R_i a_2 - C_{i-1} a)/C_i) - b_2) \bmod{2a}$
+\State \Return $[a, (b+\sqrt\Delta)/2]$
 \end{algorithmic}
 \end{algorithm}
 
@@ -663,26 +669,28 @@ Pseudo-code for our implementation is given in Algorithm \ref{alg:nudupl}.
 \caption{NUDUPL -- Fast Ideal Squaring.}
 \label{alg:nudupl}
 \begin{algorithmic}[1]
-\REQUIRE Reduced representative $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$ \\
-         with $c_1 = ({b_1}^2-\Delta)/4a_1$ and discriminant $\Delta$.
-\ENSURE A reduced or almost reduced representative $\mathfrak a^2$.
-\STATE compute $s$ and $Y$ such that $s = \gcd(a_1, b_1) = Xa_1 + Yb_1$ for $s,X,Y \in \ZZ$
-\STATE $a_1 \gets a_1/s$
-\STATE $U \gets -Yc_1 \bmod a_1$
-\IF {$a_1 < |\Delta/4|^{1/4}$}
-	\STATE $a \gets {a_1}^2$
-	\STATE $b \gets (2Ua_1 + b_1) \bmod 2a$
-	\RETURN $[a, (b + \sqrt\Delta)/2]$
-\ENDIF
-\STATE $\matrixtt{R_{-2}}{R_{-1}}{C_{-2}}{C_{-1}} \gets \matrixtt{U}{a_1}{-1}{0}$
-\STATE Find $i$ such that $R_i < |\Delta/4|^{1/4} < R_{i-1}$ using the recurrences: \\
-       $q_i = \floor{R_{i-2}/R_{i-1}}$ \\
-       $R_i = R_{i-2}-q_i R_{i-1}$ \\
-       $C_i=C_{i-2}-q_i C_{i-1}$
-\STATE $M_2 \gets (R_i b_1 -sC_i c_1)/a_1$
-\STATE $a \gets (-1)^{i+1}({R_i}^2 - C_i M_2)$
-\STATE $b \gets (2(R_i a_1 + C_{i-1} a)/C_i) \bmod{2a}$
-\RETURN $[a, (b+\sqrt\Delta)/2]$
+\Require Reduced representative $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$
+\algnewline with $c_1 = ({b_1}^2-\Delta)/4a_1$ and discriminant $\Delta$.
+\Ensure A reduced or almost reduced representative $\mathfrak a^2$.
+\State compute $s, Y \in \ZZ$ such that $s = \gcd(a_1, b_1) = Xa_1 + Yb_1$ for $X \in \ZZ$
+\State $a_1 \gets a_1/s$
+\State $U \gets -Yc_1 \bmod a_1$
+\If {$a_1 < |\Delta/4|^{1/4}$}
+	\State $a \gets {a_1}^2$
+	\State $b \gets (2Ua_1 + b_1) \bmod 2a$
+	\State \Return $[a, (b + \sqrt\Delta)/2]$
+\EndIf
+\State $\matrixtt{R_{-2}}{R_{-1}}{C_{-2}}{C_{-1}} \gets \matrixtt{U}{a_1}{-1}{0}$
+\State find $i$ such that $R_i < |\Delta/4|^{1/4} < R_{i-1}$ using the recurrences:
+\begin{itemize}
+\item $q_i = \floor{R_{i-2}/R_{i-1}}$
+\item $R_i = R_{i-2}-q_i R_{i-1}$
+\item $C_i=C_{i-2}-q_i C_{i-1}$
+\end{itemize}
+\State $M_2 \gets (R_i b_1 -sC_i c_1)/a_1$
+\State $a \gets (-1)^{i+1}({R_i}^2 - C_i M_2)$
+\State $b \gets (2(R_i a_1 + C_{i-1} a)/C_i) \bmod{2a}$
+\State \Return $[a, (b+\sqrt\Delta)/2]$
 \end{algorithmic}
 \end{algorithm}
 
@@ -724,31 +732,33 @@ By \cite[p.15~Theorem~5.1]{Imbert2010}, the ideal $[a, (b + \sqrt\Delta)/2]$ is 
 \caption{NUCUBE -- Fast Ideal Cubing (\cite[p.26]{Imbert2010}).}
 \label{alg:nucube}
 \begin{algorithmic}[1]
-\REQUIRE A reduced representative $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$.
-\ENSURE A reduced or almost reduced representative $\mathfrak a^3$.
-\STATE compute $s'$ and $Y'$ such that $s' = \gcd(a_1, b_1) = X'a_1 + Y'b_1$ for $s', X', Y' \in \ZZ$
-\IF{$s' = 1$}
-	\STATE $s \gets 1$
-	\STATE $U \gets Y'c_1(Y'(b_1 - Y'c_1a_1) - 2) \bmod {a_1}^2$
-\ELSE
-	\STATE compute $s, X$, and $Y$ such that $s = \gcd(s'a_1, {b_1}^2 - a_1c_1) = Xs'a_1 + Y({b_1}^2 - a_1c_1)$ for $s, X, Y \in \ZZ$
-	\STATE $U \gets -c_1(XY'a_1+Yb_1) \bmod {a_1}^2/s$
-\ENDIF
-\IF {${a_1}^2/s < \sqrt{a_1} ~ |\Delta/4|^{1/4}$}
-	\STATE $a \gets {a_1}^3/s^2$
-	\STATE $b \gets (b_1 + 2Ua_1/s) \bmod 2a$
-	\RETURN $[a, (b+\sqrt\Delta)/2]$
-\ENDIF
-\STATE $\matrixtt{R_{-2}}{R_{-1}}{C_{-2}}{C_{-1}} \gets \matrixtt{U}{({a_1}^2/s)}{-1}{0}$
-\STATE Find $i$ such that $R_i < \sqrt{a_1} |\Delta/4|^{1/4} < R_{i-1}$ using the recurrences: \\
-       $q_i = \floor{R_{i-2}/R_{i-1}}$ \\
-       $R_i = R_{i-2}-q_i R_{i-1}$ \\
-       $C_i=C_{i-2}-q_i C_{i-1}$
-\STATE $M_1 \gets (R_ia_1 + C_iUa_1) / {a_1}^2$
-\STATE $M_2 \gets (R_i(b_1 + Ua_1) - sC_ic_1) / {a_1}^2$
-\STATE $a \gets (-1)^{i+1} R_i M_1 - C_i M_2$
-\STATE $b \gets (2(R_ia_1/s - C_{i-1}a)/C_i - b_1) \bmod 2a$
-\RETURN $[a, (b+\sqrt\Delta)/2]$
+\Require A reduced representative $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$.
+\Ensure A reduced or almost reduced representative $\mathfrak a^3$.
+\State compute $s',Y' \in \ZZ$ such that $s' = \gcd(a_1, b_1) = X'a_1 + Y'b_1$ and $X' \in \ZZ$
+\If{$s' = 1$}
+	\State $s \gets 1$
+	\State $U \gets Y'c_1(Y'(b_1 - Y'c_1a_1) - 2) \bmod {a_1}^2$
+\Else
+	\State compute $s, X, Y \in \ZZ$ such that $s = \gcd(s'a_1, {b_1}^2 - a_1c_1) = Xs'a_1 + Y({b_1}^2 - a_1c_1)$
+	\State $U \gets -c_1(XY'a_1+Yb_1) \bmod {a_1}^2/s$
+\EndIf
+\If {${a_1}^2/s < \sqrt{a_1} ~ |\Delta/4|^{1/4}$}
+	\State $a \gets {a_1}^3/s^2$
+	\State $b \gets (b_1 + 2Ua_1/s) \bmod 2a$
+	\State \Return $[a, (b+\sqrt\Delta)/2]$
+\EndIf
+\State $\matrixtt{R_{-2}}{R_{-1}}{C_{-2}}{C_{-1}} \gets \matrixtt{U}{({a_1}^2/s)}{-1}{0}$
+\State find $i$ such that $R_i < \sqrt{a_1} |\Delta/4|^{1/4} < R_{i-1}$ using the recurrences:
+\begin{itemize}
+\item $q_i = \floor{R_{i-2}/R_{i-1}}$
+\item $R_i = R_{i-2}-q_i R_{i-1}$
+\item $C_i=C_{i-2}-q_i C_{i-1}$
+\end{itemize}
+\State $M_1 \gets (R_ia_1 + C_iUa_1) / {a_1}^2$
+\State $M_2 \gets (R_i(b_1 + Ua_1) - sC_ic_1) / {a_1}^2$
+\State $a \gets (-1)^{i+1} R_i M_1 - C_i M_2$
+\State $b \gets (2(R_ia_1/s - C_{i-1}a)/C_i - b_1) \bmod 2a$
+\State \Return $[a, (b+\sqrt\Delta)/2]$
 \end{algorithmic}
 \end{algorithm}
 
@@ -816,24 +826,24 @@ In our experiments, we use a variation of the above, originally due to Reitwiesn
 \caption{Computes $g^n$ using right-to-left non-adjacent form (Reitwiesner \cite{reitwiesner1960}).}
 \label{alg:nafR2LImmutable}
 \begin{algorithmic}[1]
-\REQUIRE $g \in G, n \in \ZZgez$
-\STATE $c \gets 0$ \COMMENT{carry flag}
-\STATE $T \gets g$ \COMMENT{invariant: $T = g^{2^i}$}
-\STATE $R \gets 1_G$
-\STATE $i \gets 0$
-\WHILE {$n \ge 2^i$}
-	\IF {$\floor{n/2^i}+c \equiv 1 \pmod 4$}
-		\STATE $R \gets R \cdot T$
-		\STATE $c \gets 0$
-	\ELSIF {$\floor{n/2^i}+c \equiv 3 \pmod 4$}
-		\STATE $R \gets R \cdot T^{-1}$
-		\STATE $c \gets 1$
-	\ENDIF
-	\STATE $T \gets T^2$
-	\STATE $i \gets i+1$
-\ENDWHILE
-\IF {$c=1$} \STATE $R \gets R \cdot T$ \ENDIF
-\RETURN $R$
+\Require $g \in G, n \in \ZZgez$
+\State $c \gets 0$ \Comment{carry flag}
+\State $T \gets g$ \Comment{invariant: $T = g^{2^i}$}
+\State $R \gets 1_G$
+\State $i \gets 0$
+\While {$n \ge 2^i$}
+	\If {$\floor{n/2^i}+c \equiv 1 \pmod 4$}
+		\State $R \gets R \cdot T$
+		\State $c \gets 0$
+	\ElsIf {$\floor{n/2^i}+c \equiv 3 \pmod 4$}
+		\State $R \gets R \cdot T^{-1}$
+		\State $c \gets 1$
+	\EndIf
+	\State $T \gets T^2$
+	\State $i \gets i+1$
+\EndWhile
+\If {$c=1$} \State $R \gets R \cdot T$ \EndIf
+\State \Return $R$
 \end{algorithmic}
 \end{algorithm}
 
@@ -889,27 +899,26 @@ The benefit of restricting 2,3 representations to chained representations is the
 \caption{Computes $g^n$ given $n$ as a chained 2,3 partition (Dimitrov et al \cite{Dimitrov2005}).}
 \label{alg:expWithChain}
 \begin{algorithmic}[1]
-\REQUIRE $g \in G,$ 
-$n = \sum_{i=1}^k s_i2^{a_i}3^{b_i},$ \\
-$s_1,...,s_k \in \{-1, 1\},$ 
-$0 \le a_1 \le ...\le a_k \in \ZZ,$ 
-$0 \le b_1 \le ... \le b_k \in \ZZ.$
-\STATE $i \gets 1$
-\STATE $a \gets 0$ \COMMENT{current power of 2}
-\STATE $b \gets 0$ \COMMENT{current power of 3}
-\STATE $T \gets g$ \COMMENT{loop invariant: $T = g^{2^a 3^b}$}
-\STATE $R \gets 1_G$
-\WHILE {$i \le k$}
-	\WHILE {$a < a_i$}
-		\STATE $T \gets T^2, a \gets a + 1$
-	\ENDWHILE
-	\WHILE {$b < b_i$}
-		\STATE $T \gets T^3, b \gets b + 1$
-	\ENDWHILE
-	\STATE $R \gets R \cdot T^{s_i}$ \COMMENT{multiply with $T$ or $T^{-1}$}
-	\STATE $i \gets i + 1$
-\ENDWHILE
-\RETURN $R$
+\Require $g \in G$, $n = \sum_{i=1}^k s_i2^{a_i}3^{b_i},$
+\algnewline $s_1,...,s_k \in \{-1, 1\}$,
+\algnewline $0 \le a_1 \le ...\le a_k \in \ZZ$,
+\algnewline $0 \le b_1 \le ... \le b_k \in \ZZ$.
+\State $i \gets 1$
+\State $a \gets 0$ \Comment{current power of 2}
+\State $b \gets 0$ \Comment{current power of 3}
+\State $T \gets g$ \Comment{loop invariant: $T = g^{2^a 3^b}$}
+\State $R \gets 1_G$
+\While {$i \le k$}
+	\While {$a < a_i$}
+		\State $T \gets T^2, a \gets a + 1$
+	\EndWhile
+	\While {$b < b_i$}
+		\State $T \gets T^3, b \gets b + 1$
+	\EndWhile
+	\State $R \gets R \cdot T^{s_i}$ \Comment{multiply with $T$ or $T^{-1}$}
+	\State $i \gets i + 1$
+\EndWhile
+\State \Return $R$
 \end{algorithmic}
 \end{algorithm}
 
@@ -918,29 +927,28 @@ $0 \le b_1 \le ... \le b_k \in \ZZ.$
 
 There is evidence \cite{Imbert2010} that the shortest possible chained representations require a linear number of terms in relation to the size of the input.  This is in contrast to unchained representations for which there are algorithms where the number of terms in the representation is provably sublinear in the length of the input \cite{Dimitrov2008, Ciet2005}, however, these algorithms still require $O(\log n)$ operations overall.
 
-Given an unchained 2,3 representation for an integer $n = \sum s_i 2^{a_i} 3^{b_i}$, M\'{e}loni and Hasan \cite[Section 3.2]{Meloni2009} give an algorithm that achieves the same bound on the number of operations as in algorithm \ref{alg:expWithChain}, but with a bound of $O(\min \{\max a_i, \max b_i\})$ on the memory used.  Suppose $\max b_i < \max a_i$ and that the terms are labelled and sorted such that $a_1 \ge ... \ge a_k$.  The algorithm works by precomputing a table of $T_b = g^{3^b}$ for $0 \le b \le \max b_i$.  Let $i=1$ and begin with the first term $s_i2^{a_i}3^{b_i}$.  Look up $T_{b_i} = g^{3^{b_i}}$ and, after applying the sign $s_i$, multiply ${T_{b_i}}^{s_i}$ with the running result.  Let $a_\Delta = a_i - a_{i+1}$ when $i < k$ and $a_\Delta = a_k$ when $i = k$.  Then square the running result $a_\Delta$ times.  The algorithm then removes the term $s_i2^{a_i}3^{b_i}$ from the list of terms, and continues in this way with the next largest $a_i$.  The algorithm terminates when there are no more terms in the list.  Algorithm  \ref{alg:yaos} gives pseudo-code for this approach and requires the storage of $O(\max b_i)$ group elements.  When $\max a_i < \max b_i$, we use a related algorithm that requires the terms to be sorted such that $b_1 \ge ... \ge b_k$; it precomputes $T_a = g^{2^a}$ for $0 \le a \le \max a_i$ and works similar to Algorithm \ref{alg:yaos} but with cubing and squaring appropriately swapped.
+Given an unchained 2,3 representation for an integer $n = \sum s_i 2^{a_i} 3^{b_i}$, M\'{e}loni and Hasan \cite[Section 3.2]{Meloni2009} give an algorithm that achieves the same bound on the number of operations as in algorithm \ref{alg:expWithChain}, but with a bound of $O(\min \{\max a_i, \max b_i\})$ on the memory used.  Suppose $\max b_i < \max a_i$ and that the terms are labelled and sorted such that $a_1 \ge ... \ge a_k$.  The algorithm works by precomputing a table of $T_b = g^{3^b}$ for $0 \le b \le \max b_i$.  Let $i=1$ and begin with the first term $s_i2^{a_i}3^{b_i}$.  Look up $T_{b_i} = g^{3^{b_i}}$ and, after applying the sign $s_i$, multiply ${T_{b_i}}^{s_i}$ with the running result.  Let $a' = a_i - a_{i+1}$ when $i < k$ and $a' = a_k$ when $i = k$.  Then square the running result $a'$ times.  The algorithm then removes the term $s_i2^{a_i}3^{b_i}$ from the list of terms, and continues in this way with the next largest $a_i$.  The algorithm terminates when there are no more terms in the list.  Algorithm  \ref{alg:yaos} gives pseudo-code for this approach and requires the storage of $O(\max b_i)$ group elements.  When $\max a_i < \max b_i$, we use a related algorithm that requires the terms to be sorted such that $b_1 \ge ... \ge b_k$; it precomputes $T_a = g^{2^a}$ for $0 \le a \le \max a_i$ and works similar to Algorithm \ref{alg:yaos} but with cubing and squaring appropriately swapped.
 
 \begin{algorithm}[h]
 \caption{Compute $g^n$ for a 2,3 representation of $n$ (\cite[Section 3.2]{Meloni2009}).}
 \label{alg:yaos}
 \begin{algorithmic}[1]
-\REQUIRE $g \in G,$ 
-$n = \sum_{i=1}^k s_i2^{a_i}3^{b_i},$ \\
-$s_1,...,s_k \in \{-1, 1\},$ 
-$a_1 \ge ... \ge a_k \in \ZZgez,$ 
-$b_1,...,b_k \in \ZZgez.$
-\STATE $T_b \gets g^{3^b}$ for $0 \le b \le \max \{ b_1, ..., b_k \}$ \COMMENT{by repeated cubing}
-\STATE $R \gets 1_G$
-\STATE $i \gets 1$
-\WHILE {$i < k$}
-	\STATE $R \gets R \cdot {T_{b_i}}^{s_i}$ \COMMENT{multiply with $T_{b_i}$ or ${T_{b_i}}^{-1}$}
-	\STATE $a_\Delta \gets a_i - a_{i+1}$
-	\STATE $R \gets R ^ {2^{a_\Delta}}$ \COMMENT{by squaring $a_\Delta$ number of times}
-	\STATE $i \gets i + 1$
-\ENDWHILE
-\STATE $R \gets R \cdot {T_{b_k}}^{s_k}$
-\STATE $R \gets R ^ {2^{a_k}}$ \COMMENT{by squaring $a_k$ number of times}
-\RETURN $R$
+\Require $g \in G$, $n = \sum_{i=1}^k s_i2^{a_i}3^{b_i},$
+\algnewline $s_1,...,s_k \in \{-1, 1\}$,
+\algnewline $a_1 \ge ... \ge a_k \in \ZZgez$,
+\algnewline $b_1,...,b_k \in \ZZgez$.
+\State $T_b \gets g^{3^b}$ for $0 \le b \le \max \{ b_1, ..., b_k \}$ \Comment{by repeated cubing}
+\State $R \gets 1_G$
+\State $i \gets 1$
+\While {$i < k$}
+	\State $R \gets R \cdot {T_{b_i}}^{s_i}$ \Comment{multiply with $T_{b_i}$ or ${T_{b_i}}^{-1}$}
+	\State $a' \gets a_i - a_{i+1}$
+	\State $R \gets R ^ {2^{a'}}$ \Comment{by squaring $a'$ number of times}
+	\State $i \gets i + 1$
+\EndWhile
+\State $R \gets R \cdot {T_{b_k}}^{s_k}$
+\State $R \gets R ^ {2^{a_k}}$ \Comment{by squaring $a_k$ number of times}
+\State \Return $R$
 \end{algorithmic}
 \end{algorithm}
 
@@ -1001,26 +1009,26 @@ Algorithm \ref{alg:rtolDbnsChain} describes a non-recursive function with group 
 \caption{2,3 strict chains from low order to high order (Ciet et al \cite{Ciet2006}).}
 \label{alg:rtolDbnsChain}
 \begin{algorithmic}[1]
-\REQUIRE $n \in \ZZgez$
-\STATE $(a, b) \gets (0, 0)$
-\STATE $i \gets 1$
-\WHILE {$n > 0$}
-	\WHILE {$n \equiv 0 \pmod 2$} 
-		\STATE $n \gets n / 2, a \gets a + 1$
-	\ENDWHILE
-	\WHILE {$n \equiv 0 \pmod 3$}
-		\STATE $n \gets n / 3, b \gets b + 1$
-	\ENDWHILE
-	\IF {$n \equiv 1 \pmod 3$}
-		\STATE $n \gets n - 1, s \gets 1$
-	\ELSIF {$n \equiv 2 \pmod 3$}
-		\STATE $n \gets n + 1, s \gets -1$
-	\ENDIF
-	\STATE $(s_i, a_i, b_i) \gets (s, a, b)$
-	\STATE $i \gets i + 1$
-\ENDWHILE
-\STATE $k \gets i$
-\RETURN $(a_1, b_1, s_1), ..., (a_k, b_k, s_k)$
+\Require $n \in \ZZgez$
+\State $(a, b) \gets (0, 0)$
+\State $i \gets 1$
+\While {$n > 0$}
+	\While {$n \equiv 0 \pmod 2$} 
+		\State $n \gets n / 2, a \gets a + 1$
+	\EndWhile
+	\While {$n \equiv 0 \pmod 3$}
+		\State $n \gets n / 3, b \gets b + 1$
+	\EndWhile
+	\If {$n \equiv 1 \pmod 3$}
+		\State $n \gets n - 1, s \gets 1$
+	\ElsIf {$n \equiv 2 \pmod 3$}
+		\State $n \gets n + 1, s \gets -1$
+	\EndIf
+	\State $(s_i, a_i, b_i) \gets (s, a, b)$
+	\State $i \gets i + 1$
+\EndWhile
+\State $k \gets i$
+\State \Return $(a_1, b_1, s_1), ..., (a_k, b_k, s_k)$
 \end{algorithmic}
 \end{algorithm}
 
@@ -1072,17 +1080,17 @@ We present pseudocode in Algorithm \ref{alg:greedyltor}. Note that on successive
 \caption{Greedy left to right representation (Berth{\'e} and Imbert \cite{Berthe2009}).}
 \label{alg:greedyltor}
 \begin{algorithmic}[1]
-\REQUIRE $n, \amax, \bmax \in \{\ZZgez, +\infty\}$ \COMMENT{$+\infty$ for unbounded $a$ or $b$}
-\STATE $L \gets \textrm{empty list}$
-\WHILE {$n \ne 0$}
-	\STATE compute integers $a$ and $b$ that minimize $\left||n| - 2^a3^b \right|$ \\
-	       such that $0 \le a \le \amax$ and $0 \le b \le \bmax$
-	\STATE $s \gets -1 \textrm{ when } n < 0 \textrm{ and } 1 \textrm{ otherwise}$
-	\STATE $\textrm{push }(s, a, b) \textrm{ onto the front of } L$
-	\STATE $\textrm{optionally set } (\amax, \bmax) \gets (a, b) \textrm{ when a chain is desired}$
-	\STATE $n \gets n - s2^a3^b$
-\ENDWHILE
-\RETURN $L$
+\Require $n \in \ZZ$, $\amax, \bmax \in \{\ZZgez, +\infty\}$ \Comment{$+\infty$ for unbounded $a$ or $b$}
+\State $L \gets \textrm{empty list}$
+\While {$n \ne 0$}
+	\State compute integers $a$ and $b$ that minimize $\left||n| - 2^a3^b \right|$
+	\algnewline such that $0 \le a \le \amax$ and $0 \le b \le \bmax$
+	\State $s \gets -1 \textrm{ when } n < 0 \textrm{ and } 1 \textrm{ otherwise}$
+	\State $\textrm{push }(s, a, b) \textrm{ onto the front of } L$
+	\State $\textrm{optionally set } (\amax, \bmax) \gets (a, b) \textrm{ when a chain is desired}$
+	\State $n \gets n - s2^a3^b$
+\EndWhile
+\State \Return $L$
 \end{algorithmic}
 \end{algorithm}
 
@@ -1104,17 +1112,17 @@ The next technique for finding strictly chained 2,3 partitions was suggested by 
 \caption{Chain from $\pm 1$ Pruned Tree (Doche and Habsieger \cite{Doche2008}).}
 \label{alg:pm1Tree}
 \begin{algorithmic}[1]
-\REQUIRE $n \in \ZZgtz$ and a bound $L \in \ZZgtz$.
-\STATE $T \gets$ a binary tree on the node $n$
-\WHILE {no leaf is 1}
-	\FORALL {leaf nodes $v \in T$}
-		\STATE insert as a left child $(v - 1)$ with all factors of 2 and 3 removed
-		\STATE insert as a right child $(v + 1)$ with all factors of 2 and 3 removed
-	\ENDFOR
-	\STATE discard any duplicate leaves
-	\STATE discard all but the smallest $L$ leaves
-\ENDWHILE
-\RETURN the chained 2,3 partition generated by the path from the root to the first leaf node containing 1
+\Require $n \in \ZZgtz$ and a bound $L \in \ZZgtz$.
+\State $T \gets$ a binary tree on the node $n$
+\While {no leaf is 1}
+	\ForAll {leaf nodes $v \in T$}
+		\State insert as a left child $(v - 1)$ with all factors of 2 and 3 removed
+		\State insert as a right child $(v + 1)$ with all factors of 2 and 3 removed
+	\EndFor
+	\State discard any duplicate leaves
+	\State discard all but the smallest $L$ leaves
+\EndWhile
+\State \Return the chained 2,3 partition generated by the path from the root to the first leaf node containing 1
 \end{algorithmic}
 \end{algorithm}
 
@@ -1240,25 +1248,25 @@ The problem is that $\ord(\alpha)$ may not be odd.  However, by repeated squarin
 \caption{Primorial Steps (Sutherland \cite[p.57]{Sutherland2007}).}
 \label{alg:primorialSteps}
 \begin{algorithmic}[1]
-\REQUIRE $\alpha \in G$, a bound $M \ge \ord(\alpha)$, and a fast order algorithm $\mathcal A(\alpha, E)$.
-\STATE maximize $w$ such that $P_w \le \sqrt{M}$
-\STATE maximize $m$ such that $m^2P_w\phi(P_w) \le M$
-\STATE $s = mP_w$
-\STATE $E = \prod_{i=1}^n p_i^{\floor{\log_{p_i} M}}$
-\STATE $\beta \gets \alpha^E$
-\FOR{$i$ from 1 to $s$ where $i$ is coprime to $P_w$}
-	\STATE compute $\beta^i$ and store $\beta^i \mapsto i$ in the table \COMMENT{baby steps}
-	\IF {$\beta^i = 1_G$}
-		\RETURN $i \cdot \mathcal A(\alpha^i, E)$
-	\ENDIF
-\ENDFOR
-\FOR{$j=2s, 3s, ...$}
-	\IF{$\beta^j$ is in the table}
-		\STATE lookup $\beta^j \mapsto i$ from the table \COMMENT{giant steps}
-		\STATE $h' = j - i$
-		\RETURN $h' \cdot \mathcal A(\alpha^{h'}, E)$
-	\ENDIF
-\ENDFOR
+\Require $\alpha \in G$, a bound $M \ge \ord(\alpha)$, and a fast order algorithm $\mathcal A(\alpha, E)$.
+\State maximize $w$ such that $P_w \le \sqrt{M}$
+\State maximize $m$ such that $m^2P_w\phi(P_w) \le M$
+\State $s = mP_w$
+\State $E = \prod_{i=1}^n p_i^{\floor{\log_{p_i} M}}$
+\State $\beta \gets \alpha^E$
+\For{$i$ from 1 to $s$ where $i$ is coprime to $P_w$}
+	\State compute $\beta^i$ and store $\beta^i \mapsto i$ in the table \Comment{baby steps}
+	\If {$\beta^i = 1_G$}
+		\State \Return $i \cdot \mathcal A(\alpha^i, E)$
+	\EndIf
+\EndFor
+\For{$j=2s, 3s, ...$}
+	\If{$\beta^j$ is in the table}
+		\State lookup $\beta^j \mapsto i$ from the table \Comment{giant steps}
+		\State $h' = j - i$
+		\State \Return $h' \cdot \mathcal A(\alpha^{h'}, E)$
+	\EndIf
+\EndFor
 \end{algorithmic}
 \end{algorithm}
 
@@ -1408,23 +1416,23 @@ Experimentally we found that the prime factorization of the order of ideal class
 \caption{SuperSPAR - Exponentiation stage.}
 \label{alg:ssparExponentiation}
 \begin{algorithmic}[1]
-\REQUIRE $N \in \ZZgez$ odd and composite, \\
+\Require $N \in \ZZgez$ odd and composite, \\
   $E = \prod_{i=2}^t {p_i}^{e_i}$ for the exponentiation phase, \\
   $s = mP_w$ a multiple of a primorial for the search phase, \\
   $c \in \ZZgtz$ the number of ideal classes to try before switching multipliers.
 
-\STATE $\bclass \gets {\idealclass{a_1}}^E$ for the smallest prime ideal class $\idealclass{a_1}$ \COMMENT{$\bclass = \idclass$ is handled by line \ref{line:firstAmbiguous}}
-\STATE $\idealclass{b'} \gets \bclass$ \COMMENT{backup $\bclass$}
-\FOR{$1 \le k \le \floor{\log_2 h_\Delta}$}
-	\IF {$\bclass$ is an ambiguous ideal class} \label{line:firstAmbiguous}
-		\IF{$\bclass$ leads to a factor of $N$}
-			\RETURN a factor of $N$
-		\ELSE
-			\STATE go to line \ref{goto:tryIdeals}
-		\ENDIF
-	\ENDIF
-	\STATE $\bclass \gets \bclass^2$
-\ENDFOR
+\State $\bclass \gets {\idealclass{a_1}}^E$ for the smallest prime ideal class $\idealclass{a_1}$ \Comment{$\bclass = \idclass$ is handled by line \ref{line:firstAmbiguous}}
+\State $\idealclass{b'} \gets \bclass$ \Comment{backup $\bclass$}
+\For{$1 \le k \le \floor{\log_2 h_\Delta}$}
+	\If {$\bclass$ is an ambiguous ideal class} \label{line:firstAmbiguous}
+		\If{$\bclass$ leads to a factor of $N$}
+			\State \Return a factor of $N$
+		\Else
+			\State go to line \ref{goto:tryIdeals}
+		\EndIf
+	\EndIf
+	\State $\bclass \gets \bclass^2$
+\EndFor
 \end{algorithmic}
 \end{algorithm}
 
@@ -1432,23 +1440,23 @@ Experimentally we found that the prime factorization of the order of ideal class
 \caption{SuperSPAR - Try several ideals.}
 \label{alg:ssparTryIdeals}
 \begin{algorithmic}[1]
-\REQUIRE SuperSPAR($h$, $c$, $\Delta$) \\
+\Require SuperSPAR($h$, $c$, $\Delta$) \\
 $N \in \ZZgez$ odd and composite, \\
   $E = \prod_{i=2}^t {p_i}^{e_i}$ for the exponentiation phase, \\
   $s = mP_w$ a multiple of a primorial for the search phase, \\
   $c \in \ZZgtz$ the number of ideal classes to try before switching multipliers.
-\STATE \{-- try several ideal classes --\}
-\STATE $h \gets h \cdot E$
+\State \{-- try several ideal classes --\}
+\State $h \gets h \cdot E$
 \label{goto:tryIdeals}
-\FOR{$2 \le y \le c$}
-	\STATE $\bclass \gets {\idealclass{a_y}}^h$ where $\idealclass{a_y}$ is the $y^{\textrm{th}}$ smallest prime ideal class
-	\FOR{$1 \le k \le \floor{\log_2 h_\Delta}$ and $\bclass \neq \idclass$}
-		\IF{$\bclass$ is an ambiguous ideal and $\bclass$ leads to a factor of $N$}
-			\RETURN a factor of $N$
-		\ENDIF
-		\STATE $\bclass \gets \bclass^2$
-	\ENDFOR
-\ENDFOR
+\For{$2 \le y \le c$}
+	\State $\bclass \gets {\idealclass{a_y}}^h$ where $\idealclass{a_y}$ is the $y^{\textrm{th}}$ smallest prime ideal class
+	\For{$1 \le k \le \floor{\log_2 h_\Delta}$ and $\bclass \neq \idclass$}
+		\If{$\bclass$ is an ambiguous ideal and $\bclass$ leads to a factor of $N$}
+			\State \Return a factor of $N$
+		\EndIf
+		\State $\bclass \gets \bclass^2$
+	\EndFor
+\EndFor
 \end{algorithmic}
 \end{algorithm}
 
@@ -1457,35 +1465,35 @@ $N \in \ZZgez$ odd and composite, \\
 \caption{SuperSPAR Integer Factoring Algorithm.}
 \label{alg:superSpar}
 \begin{algorithmic}[1]
-\REQUIRE $N \in \ZZgez$ odd and composite, \\
+\Require $N \in \ZZgez$ odd and composite, \\
   $E = \prod_{i=2}^t {p_i}^{e_i}$ for the exponentiation phase, \\
   $s = mP_w$ a multiple of a primorial for the search phase, \\
   $c \in \ZZgtz$ the number of ideal classes to try before switching multipliers.
-\STATE $k \gets 0$ \COMMENT{the next line sets $k$ to 1 on the first run}
-\STATE $k \gets $ smallest square free integer $> k$ \label{goto:newK}
-\STATE $\Delta \gets -kN$
-\STATE \textbf{if} $\Delta \not\equiv 0,1 \pmod 4$ \textbf{then} $\Delta \gets 4\Delta$ \textbf{endif}
+\State $k \gets 0$ \Comment{the next line sets $k$ to 1 on the first run}
+\State $k \gets $ smallest square free integer $> k$ \label{goto:newK}
+\State $\Delta \gets -kN$
+\State \textbf{if} $\Delta \not\equiv 0,1 \pmod 4$ \textbf{then} $\Delta \gets 4\Delta$ \textbf{endif}
 
 
 
-\STATE \{-- search stage --\}
-\STATE clear the lookup table
-\FOR{$1 \le i \le s$ where $\gcd(i,P_w)=1$}
-	\STATE compute $\bclass^i$ and store $\bclass^i \mapsto i$ in the lookup table \COMMENT{coprime baby-steps}
-	\IF{$\bclass^i = \idclass$}
-		\STATE $h \gets i$, $\bclass \gets \idealclass{b'}^i$, then go to line \ref{goto:tryAmbiguous}
-	\ENDIF
-\ENDFOR
-\FOR{$1 \le j \le m\phi(P_w)$}
-	\IF{$\bclass^{2js}$ is in the table, first lookup $i$}
-		\STATE $h \gets$ odd part of $(2js - i)E$, then go to line \ref{goto:tryAmbiguous}  \COMMENT{positive giant-step}
-	\ELSIF{$\bclass^{-2js}$ is in the table, first lookup $i$}
-		\STATE $h \gets$ odd part of $(2js + i)E$, then go to line \ref{goto:tryAmbiguous} \COMMENT{inverted giant-step}
-	\ENDIF
-\ENDFOR
+\State \{-- search stage --\}
+\State clear the lookup table
+\For{$1 \le i \le s$ where $\gcd(i,P_w)=1$}
+	\State compute $\bclass^i$ and store $\bclass^i \mapsto i$ in the lookup table \Comment{coprime baby-steps}
+	\If{$\bclass^i = \idclass$}
+		\State $h \gets i$, $\bclass \gets \idealclass{b'}^i$, then go to line \ref{goto:tryAmbiguous}
+	\EndIf
+\EndFor
+\For{$1 \le j \le m\phi(P_w)$}
+	\If{$\bclass^{2js}$ is in the table, first lookup $i$}
+		\State $h \gets$ odd part of $(2js - i)E$, then go to line \ref{goto:tryAmbiguous}  \Comment{positive giant-step}
+	\ElsIf{$\bclass^{-2js}$ is in the table, first lookup $i$}
+		\State $h \gets$ odd part of $(2js + i)E$, then go to line \ref{goto:tryAmbiguous} \Comment{inverted giant-step}
+	\EndIf
+\EndFor
 
 
-\STATE start over at line \ref{goto:newK}
+\State start over at line \ref{goto:newK}
 \end{algorithmic}
 \end{algorithm}
 
@@ -1539,20 +1547,20 @@ and Equations \ref{eq:initialGcd1} and \ref{eq:initialGcd2} hold.  We maintain t
 \caption{Extended Euclidean Algorithm.}
 \label{alg:EeaDivRem}
 \begin{algorithmic}[1]
-\REQUIRE $a,b \in \ZZgez$
-\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets 
+\Require $a,b \in \ZZgez$
+\State $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets 
         \matrixThreeTwo{a}{1}{0}{b}{0}{1}$
-\IF {$t > s$}
-	\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets
+\If {$t > s$}
+	\State $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets
 	        \matrixtt{0}{1}{1}{0} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$
-	        \COMMENT{Swap rows. Maintain $s \ge t$.}
-\ENDIF
-\WHILE {$t \neq 0$}
-	\STATE $q \gets \floor{s / t}$
-	\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{0}{1}{1}{-q} \cdot
-		    \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$ \COMMENT{Subtract $q$ times $2^{\textrm{nd}}$ row and swap.}
-\ENDWHILE
-\RETURN $(s, U, V)$ \COMMENT{Such that $s = Ua + Vb$.}
+	        \Comment{Swap rows. Maintain $s \ge t$.}
+\EndIf
+\While {$t \neq 0$}
+	\State $q \gets \floor{s / t}$
+	\State $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{0}{1}{1}{-q} \cdot
+		    \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$ \Comment{Subtract $q$ times $2^{\textrm{nd}}$ row and swap.}
+\EndWhile
+\State \Return $(s, U, V)$ \Comment{Such that $s = Ua + Vb$.}
 \end{algorithmic}
 \end{algorithm}
 
@@ -1589,28 +1597,28 @@ Then continue with the outer loop of the computation until $t = 0$.  In the even
 \caption{Lehmer's GCD (\cite{Lehmer1938}).}
 \label{alg:lehmerGcd}
 \begin{algorithmic}[1]
-\REQUIRE $a,b, \in \ZZ$ and $a \ge b > 0$. \\
-         Let $m$ be the number of bits in a machine word. \\
-\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixThreeTwo{a}{1}{0}{b}{0}{1}$
-\WHILE{$t \neq 0$}
-	\STATE $k \gets \floor{\log_2 s} + 1 - m$
-	\STATE $s' \gets \floor{s / 2^k}$ \COMMENT{Shift right for most significant word.}
-	\STATE $t' \gets \floor{t / 2^k}$
-	\STATE $\matrixtt{A}{B}{C}{D} \gets \matrixtt{1}{0}{0}{1}$
-	\WHILE{$t' \neq 0$ and $\floor{(s'+A)/(t'+C)} = \floor{(s'+B)/(t'+D)}$}
-		\STATE $q' \gets \floor{(s'+A)/(t'+C)}$ \COMMENT{Single precision step.}
-		\STATE $\matrixThreeTwo{s'}{A}{B}{t'}{C}{D} \gets \matrixtt{0}{1}{1}{-q'}
+\Require $a,b, \in \ZZ$ and $a \ge b > 0$.
+\algnewline Let $m$ be the number of bits in a machine word.
+\State $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixThreeTwo{a}{1}{0}{b}{0}{1}$
+\While{$t \neq 0$}
+	\State $k \gets \floor{\log_2 s} + 1 - m$
+	\State $s' \gets \floor{s / 2^k}$ \Comment{Shift right for most significant word.}
+	\State $t' \gets \floor{t / 2^k}$
+	\State $\matrixtt{A}{B}{C}{D} \gets \matrixtt{1}{0}{0}{1}$
+	\While{$t' \neq 0$ and $\floor{(s'+A)/(t'+C)} = \floor{(s'+B)/(t'+D)}$}
+		\State $q' \gets \floor{(s'+A)/(t'+C)}$ \Comment{Single precision step.}
+		\State $\matrixThreeTwo{s'}{A}{B}{t'}{C}{D} \gets \matrixtt{0}{1}{1}{-q'}
 			    \cdot \matrixThreeTwo{s'}{A}{B}{t'}{C}{D}$
-	\ENDWHILE
-	\IF{$B = 0$}
-		\STATE $q \gets \floor{s/t}$  \COMMENT{Full precision step.}
-		\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{0}{1}{1}{-q}
+	\EndWhile
+	\If{$B = 0$}
+		\State $q \gets \floor{s/t}$  \Comment{Full precision step.}
+		\State $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{0}{1}{1}{-q}
 		        \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$
-	\ELSE
-		\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{A}{B}{C}{D}
-		        \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$ \COMMENT{Combine step.}
-	\ENDIF
-\ENDWHILE
+	\Else
+		\State $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{A}{B}{C}{D}
+		        \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$ \Comment{Combine step.}
+	\EndIf
+\EndWhile
 \end{algorithmic}
 \end{algorithm}
 
@@ -1701,25 +1709,25 @@ This ensures that $s$ is odd, $t$ is even, and that both $s$ and $t$ are positiv
 \caption{Right-to-left Binary GCD (Stein \cite{Stein1967}).}
 \label{alg:r2lBinGcd}
 \begin{algorithmic}[1]
-\REQUIRE $a,b, \in \ZZgtz$.
-\STATE let $r$ be the largest integer such that $2^r$ divides both $a$ and $b$
-\STATE $a \gets a / 2^r, b \gets b / 2^r$
-\STATE swap $a$ and $b$ if $a$ is not odd
-\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixThreeTwo{a}{1}{0}{b}{0}{1}$
-\WHILE {$t \neq 0$}
-	\WHILE {$t$ is even}
-		\IF {$Y$ is odd}
-			\STATE $(X, Y) \gets (X+b, Y-a)$
-		\ENDIF
-		\STATE $(t, X, Y) \gets \left( \frac{t}{2}, \frac{X}{2}, \frac{Y}{2} \right)$
-	\ENDWHILE
-	\IF {$s \ge t$}
-		\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{0}{1}{1}{-1} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$
-	\ELSE
-		\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{0}{1}{-1}{1} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$
-	\ENDIF
-\ENDWHILE
-\RETURN $(s2^r, U, V)$ if $a$ and $b$ were not swapped and $(s2^r, V, U)$ otherwise
+\Require $a,b, \in \ZZgtz$.
+\State let $r$ be the largest integer such that $2^r$ divides both $a$ and $b$
+\State $a \gets a / 2^r, b \gets b / 2^r$
+\State swap $a$ and $b$ if $a$ is not odd
+\State $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixThreeTwo{a}{1}{0}{b}{0}{1}$
+\While {$t \neq 0$}
+	\While {$t$ is even}
+		\If {$Y$ is odd}
+			\State $(X, Y) \gets (X+b, Y-a)$
+		\EndIf
+		\State $(t, X, Y) \gets \left( \frac{t}{2}, \frac{X}{2}, \frac{Y}{2} \right)$
+	\EndWhile
+	\If {$s \ge t$}
+		\State $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{0}{1}{1}{-1} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$
+	\Else
+		\State $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{0}{1}{-1}{1} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$
+	\EndIf
+\EndWhile
+\State \Return $(s2^r, U, V)$ if $a$ and $b$ were not swapped and $(s2^r, V, U)$ otherwise
 \end{algorithmic}
 \end{algorithm}
 
@@ -1736,29 +1744,29 @@ This is easily extended for any $2^k$ where $k$ is a positive integer.  The algo
 \caption{Windowed Right-to-left Binary GCD.}
 \label{alg:windowedR2lBinGcd}
 \begin{algorithmic}[1]
-\REQUIRE $a,b, \in \ZZgtz$ and let $k \in \ZZgtz$ be the window size in bits.
-\STATE let $r$ be the largest integer such that $2^r$ divides both $a$ and $b$
-\STATE $a \gets a / 2^r, b \gets b / 2^r$
-\STATE swap $a$ and $b$ if $a$ is not odd
-\FOR{$m$ from $2^k - 1$ downto $0$}
-	\STATE $j \gets ma \bmod 2^k$
-	\STATE $x_j \gets mb$
-	\STATE $y_j \gets ma$
-\ENDFOR
-\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixThreeTwo{a}{1}{0}{b}{0}{1}$
-\WHILE {$t \neq 0$}
-	\WHILE {$t$ is even}
-		\STATE let $h$ be the largest integer such that $h \le k$ and $2^h$ divides $t$
-		\STATE $j \gets Y \bmod 2^h$
-		\STATE $(t, X, Y) \gets \left( \frac{t}{2^h}, \frac{X+x_j}{2^h}, \frac{Y-y_j}{2^h} \right)$  \COMMENT{Reduce by $2^h$}
-	\ENDWHILE
-	\IF {$s \ge t$}
-		\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{0}{1}{1}{-1} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$
-	\ELSE
-		\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{0}{1}{-1}{1} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$
-	\ENDIF
-\ENDWHILE
-\RETURN $(s2^r, U, V)$ if $a$ and $b$ were not swapped and $(s2^r, V, U)$ otherwise
+\Require $a,b, \in \ZZgtz$ and let $k \in \ZZgtz$ be the window size in bits.
+\State let $r$ be the largest integer such that $2^r$ divides both $a$ and $b$
+\State $a \gets a / 2^r, b \gets b / 2^r$
+\State swap $a$ and $b$ if $a$ is not odd
+\For{$m$ from $2^k - 1$ downto $0$}
+	\State $j \gets ma \bmod 2^k$
+	\State $x_j \gets mb$
+	\State $y_j \gets ma$
+\EndFor
+\State $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixThreeTwo{a}{1}{0}{b}{0}{1}$
+\While {$t \neq 0$}
+	\While {$t$ is even}
+		\State let $h$ be the largest integer such that $h \le k$ and $2^h$ divides $t$
+		\State $j \gets Y \bmod 2^h$
+		\State $(t, X, Y) \gets \left( \frac{t}{2^h}, \frac{X+x_j}{2^h}, \frac{Y-y_j}{2^h} \right)$  \Comment{Reduce by $2^h$}
+	\EndWhile
+	\If {$s \ge t$}
+		\State $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{0}{1}{1}{-1} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$
+	\Else
+		\State $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{0}{1}{-1}{1} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$
+	\EndIf
+\EndWhile
+\State \Return $(s2^r, U, V)$ if $a$ and $b$ were not swapped and $(s2^r, V, U)$ otherwise
 \end{algorithmic}
 \end{algorithm}
 
@@ -1784,30 +1792,30 @@ Notice that after this step $s$ has the previous value of $t$ and that the binar
 \caption{Shallit and Sorenson Left-to-Right binary GCD (\cite{Shallit1994}).}
 \label{alg:shallitGcd}
 \begin{algorithmic}[1]
-\REQUIRE $a,b \in \ZZ$
-\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets 
+\Require $a,b \in \ZZ$
+\State $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets 
         \matrixThreeTwo{a}{1}{0}{b}{0}{1}$
-\IF {$t > s$}
-	\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets
+\If {$t > s$}
+	\State $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets
 	        \matrixtt{0}{1}{1}{0} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$
-	       	\COMMENT{Swap rows. Maintain $s \ge t$.}
-\ENDIF
-\WHILE {$t \neq 0$}
-	\STATE find $q=2^k$ such that $qt \le s < 2qt$
-	\IF {$s - qt < 2qt - s$}
-		\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} =
+	       	\Comment{Swap rows. Maintain $s \ge t$.}
+\EndIf
+\While {$t \neq 0$}
+	\State find $q=2^k$ such that $qt \le s < 2qt$
+	\If {$s - qt < 2qt - s$}
+		\State $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} =
 		\matrixtt{0}{1}{1}{-q} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$
-	\ELSE
-		\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} =
+	\Else
+		\State $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} =
 		\matrixtt{0}{1}{-1}{2q} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$
-	\ENDIF
-	\IF {$t > s$}
-		\STATE $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets
+	\EndIf
+	\If {$t > s$}
+		\State $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets
 	    	    \matrixtt{0}{1}{1}{0} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}$
-	        	\COMMENT{Swap rows. Maintain $s \ge t$.}
-	\ENDIF
-\ENDWHILE
-\RETURN $(s, U, V)$
+	        	\Comment{Swap rows. Maintain $s \ge t$.}
+	\EndIf
+\EndWhile
+\State \Return $(s, U, V)$
 \end{algorithmic}
 \end{algorithm}
 In practice, to find $q=2^k$ we compute the number of bits in both $s$ and $t$ and then use the difference as a candidate for $k$.  Let $k' = (\floor{\log_2s} + 1) - (\floor{\log_2t}+1) = \floor{\log_2s} - \floor{\log_2t}$ be our candidate.  If $t2^{k'} \le s$ then $k = k'$, otherwise $k = k'-1$.  Notice that either $k=k'$ in which case $t2^k=t2^{k'}$, or $k=k'-1$ and then $t2^{k+1} = t2^{k'}$.  Either way $t2^{k'}$ can be reused for one half of the comparison of $s-qt < 2qt - s$.  Also, if $k' = 0$ then $t \le s$ (by our invariant) and so there is no possibility of using $t2^{-1}$, since we will use $t2^{k'}$ and $t2^{k'+1}$ in the comparison.
@@ -1837,19 +1845,19 @@ These recurrences perform the same operation as a single step in the Extended Eu
 \caption{Partial Extended Euclidean Algorithm.}
 \label{alg:PartialEeaDivRem}
 \begin{algorithmic}[1]
-\REQUIRE $a,b, \in \ZZ$ and a termination bound $B \in \ZZ$.
-\STATE $\matrixtt{R_0}{C_0}{R_1}{C_1} = \matrixtt{a}{0}{b}{-1}$
-\IF {$R_1 > R_0$}
-	\STATE $\matrixtt{R_0}{C_0}{R_1}{C_1} \gets
+\Require $a,b, \in \ZZ$ and a termination bound $B \in \ZZ$.
+\State $\matrixtt{R_0}{C_0}{R_1}{C_1} = \matrixtt{a}{0}{b}{-1}$
+\If {$R_1 > R_0$}
+	\State $\matrixtt{R_0}{C_0}{R_1}{C_1} \gets
 	        \matrixtt{0}{1}{1}{0} \cdot \matrixtt{R_0}{C_0}{R_1}{C_1}$
-	        \COMMENT{Swap rows. Maintain $s \ge t$.}
-\ENDIF
-\WHILE {$R_1 > B$}
-	\STATE $q \gets \floor{R_0 / R_1}$
-	\STATE $\matrixtt{R_0}{C_0}{R_1}{C_1} \gets \matrixtt{0}{1}{1}{-q} \cdot
-		    \matrixtt{R_0}{C_0}{R_1}{C_1}$ \COMMENT{Subtract $q$ times $2^{\textrm{nd}}$ row and swap.}
-\ENDWHILE
-\RETURN $(R_0, R_1, C_0, C_1)$
+	        \Comment{Swap rows. Maintain $s \ge t$.}
+\EndIf
+\While {$R_1 > B$}
+	\State $q \gets \floor{R_0 / R_1}$
+	\State $\matrixtt{R_0}{C_0}{R_1}{C_1} \gets \matrixtt{0}{1}{1}{-q} \cdot
+		    \matrixtt{R_0}{C_0}{R_1}{C_1}$ \Comment{Subtract $q$ times $2^{\textrm{nd}}$ row and swap.}
+\EndWhile
+\State \Return $(R_0, R_1, C_0, C_1)$
 \end{algorithmic}
 \end{algorithm}
 
@@ -1917,17 +1925,17 @@ Two words, $x$ and $y$, are conditionally swapped when $x < y$ by using two addi
 \caption{Conditionally swap $(s, U, V)$ with $(t, X, Y)$ when $s < t$.}
 \label{alg:condSwap3}
 \begin{algorithmic}[1]
-\STATE $d \gets s - t$
-\STATE $m \gets \texttt{sign\_mask}(d)$
-\STATE $d \gets d \band m$
-\STATE $s \gets s - d$
-\STATE $t \gets t + d$
-\STATE $d \gets (U - X) \band m$
-\STATE $U \gets U - d$
-\STATE $X \gets X + d$
-\STATE $d \gets (V - Y) \band m$
-\STATE $V \gets V - d$
-\STATE $Y \gets Y + d$
+\State $d \gets s - t$
+\State $m \gets \texttt{sign\_mask}(d)$
+\State $d \gets d \band m$
+\State $s \gets s - d$
+\State $t \gets t + d$
+\State $d \gets (U - X) \band m$
+\State $U \gets U - d$
+\State $X \gets X + d$
+\State $d \gets (V - Y) \band m$
+\State $V \gets V - d$
+\State $Y \gets Y + d$
 \end{algorithmic}
 \end{algorithm}
 On the x64 architecture we optimize the computation of $d \gets s - t$ and $m \gets \texttt{sign\_mask}(d)$ since the operation $s-t$ sets the carry flag when the result is negative.  Using a subtract with borrow, we subtract $m$ from itself.  This sets $m$ to 0 when the carry is clear, and -1 when the carry is set.
@@ -1938,15 +1946,15 @@ Often our implementation uses the number of bits in a positive integer $x$.  In 
 \caption{Return the index of the most significant set bit of $x$.}
 \label{alg:msb}
 \begin{algorithmic}[1]
-\STATE $i \gets 0$
-\STATE $k \gets \floor{m/2}$ \COMMENT{$m$ is the number of bits in a machine word.}
-\WHILE {$k \neq 0$}
-	\IF {$x \ge 2^k$}
-		\STATE $x \gets \floor{x / 2^k}$
-		\STATE $i \gets i + k$
-	\ENDIF
-\ENDWHILE
-\RETURN $i$
+\State $i \gets 0$
+\State $k \gets \floor{m/2}$ \Comment{$m$ is the number of bits in a machine word.}
+\While {$k \neq 0$}
+	\If {$x \ge 2^k$}
+		\State $x \gets \floor{x / 2^k}$
+		\State $i \gets i + k$
+	\EndIf
+\EndWhile
+\State \Return $i$
 \end{algorithmic}
 \end{algorithm}
 
@@ -2142,17 +2150,17 @@ and then recursively write $\floor{n/4} \pmod 3$ the same way. This provides us 
 \caption{Fast $n \bmod 3$ (adapted from Hacker's Delight \cite{Warren2002}).}
 \label{alg:fastMod3}
 \begin{algorithmic}[1]
-\REQUIRE $n \in \ZZ$.
-\ENSURE $n \bmod 3$.
-\STATE $s \gets 0$
-\FOR {$i$ from $0$ to $\floor{\log_2 n}$ by 64}
-	\STATE $t \gets \floor{n / 2^i} \bmod {2^{64}}$
-	\STATE $s \gets (s + t) \bmod {2^{64}}$
-\ENDFOR
-\STATE $s \gets \left(s + \floor{s/{2^{32}}} \right) \bmod {2^{32}}$
-\STATE $s \gets \left(s + \floor{s/{2^{16}}} \right) \bmod {2^{16}}$
-\STATE $s \gets \left(s + \floor{s/{2^{8}}} \right) \bmod {2^{8}}$
-\RETURN $s \bmod 3$ \COMMENT{Lookup from a table with 256 entries.}
+\Require $n \in \ZZ$.
+\Ensure $n \bmod 3$.
+\State $s \gets 0$
+\For {$i$ from $0$ to $\floor{\log_2 n}$ by 64}
+	\State $t \gets \floor{n / 2^i} \bmod {2^{64}}$
+	\State $s \gets (s + t) \bmod {2^{64}}$
+\EndFor
+\State $s \gets \left(s + \floor{s/{2^{32}}} \right) \bmod {2^{32}}$
+\State $s \gets \left(s + \floor{s/{2^{16}}} \right) \bmod {2^{16}}$
+\State $s \gets \left(s + \floor{s/{2^{8}}} \right) \bmod {2^{8}}$
+\State \Return $s \bmod 3$ \Comment{Lookup from a table with 256 entries.}
 \end{algorithmic}
 \end{algorithm}
 
@@ -2273,19 +2281,19 @@ The techniques of the previous two Subsections are computationally expensive and
 \]
 where $0 \le b_i < 2^{16}$.  Assuming that we can exponentiate a group element $g$ to a 16-bit exponent $b_i$, Algorithm \ref{alg:blockedExp} computes the exponentiation $g^n$ using an approach similar to a left-to-right windowed binary exponentiation.
 
-\begin{algorithm}[H]
+\begin{algorithm}[h]
 \caption{16-bit Blocked Exponentiation.}
 \label{alg:blockedExp}
 \begin{algorithmic}[1]
-\REQUIRE $n \in \ZZ, g \in G$ and a method to compute $g^{b_i}$ for $0 \le b_i < 2^{16}$.
-\ENSURE $g^n$.
-\STATE $R \gets 1_G$
-\FOR {$i$ from $\ceil{\log_{2^{16}} n}$ downto 0}
-	\STATE $R \gets R^{2^{16}}$ \COMMENT{By repeated squaring.}
-	\STATE $b_i \gets \floor{n / 2^{16i}} \bmod {2^{16}}$
-	\STATE $R \gets R \cdot g^{b_i}$
-\ENDFOR
-\RETURN $R$
+\Require $n \in \ZZ, g \in G$ and a method to compute $g^{b_i}$ for $0 \le b_i < 2^{16}$.
+\Ensure $g^n$
+\State $R \gets 1_G$
+\For {$i$ from $\ceil{\log_{2^{16}} n}$ downto 0}
+	\State $R \gets R^{2^{16}}$ \Comment{By repeated squaring.}
+	\State $b_i \gets \floor{n / 2^{16i}} \bmod {2^{16}}$
+	\State $R \gets R \cdot g^{b_i}$ \Comment{Externally compute $g^{b_i}$.}
+\EndFor
+\State \Return $R$
 \end{algorithmic}
 \end{algorithm}
 
@@ -2431,20 +2439,22 @@ such that $d_i = c_{i+1} - c_i$ for consecutive integers $c_i$ and $c_{i+1}$ cop
 \caption{Compute deltas for $P_{w+1}$ given deltas for $P_w$.}
 \label{alg:deltaWheel}
 \begin{algorithmic}[1]
-\REQUIRE A primorial $P_w$, the delta list $\coprimelist_w$, and the next prime $p_{w+1}$. \\
-Let $P_{w+1} = p_{w+1} P_w$ and $\phi(P_{w+1}) = (p_{w+1}-1)\phi(P_w)$.
-\ENSURE The delta list $\coprimelist_{w+1}$.
-\STATE $i \gets 1, j \gets 1, c \gets 1, d \gets 0$
-\WHILE{$j \le \phi(P_{w+1})$}
-	\STATE $c \gets c + d_i$ \COMMENT{each $c$ is coprime to $P_w$}
-	\STATE $d \gets d + d_i$
-	\IF{$c \not\equiv 0 \pmod{p_{w+1}}$}
-		\STATE $d'_j \gets d, d \gets 0, j \gets j + 1$ \COMMENT{output $d$ when $c$ is coprime to $P_{w+1}$}
-	\ENDIF
-	\STATE $i \gets i + 1$
-	\STATE \textbf{if} $i > \phi(P_w)$ \textbf{then} $i \gets 1$ \textbf{end if}
-\ENDWHILE
-\RETURN $d'_1, ..., d'_{\phi(P_{w+1})}$
+\Require A primorial $P_w$, the delta list $\coprimelist_w$, and the next prime $p_{w+1}$.
+\algnewline Let $P_{w+1} = p_{w+1} P_w$ and $\phi(P_{w+1}) = (p_{w+1}-1)\phi(P_w)$.
+\Ensure The delta list $\coprimelist_{w+1}$.
+\State $i \gets 1, j \gets 1, c \gets 1, d \gets 0$
+\While{$j \le \phi(P_{w+1})$}
+	\State $c \gets c + d_i$ \Comment{each $c$ is coprime to $P_w$}
+	\State $d \gets d + d_i$
+	\If{$c \not\equiv 0 \pmod{p_{w+1}}$}
+		\State $d'_j \gets d, d \gets 0, j \gets j + 1$ \Comment{output $d$ when $c$ is coprime to $P_{w+1}$}
+	\EndIf
+	\State $i \gets i + 1$
+	\If{$i > \phi(P_w)$}
+		\State $i \gets 1$
+	\EndIf
+\EndWhile
+\State \Return $d'_1, ..., d'_{\phi(P_{w+1})}$
 \end{algorithmic}
 \end{algorithm}
 
@@ -2741,27 +2751,27 @@ and Algorithm \ref{alg:stepBounds} can be used to generate such a set.
 \caption{Compute baby step bound candidates.}
 \label{alg:stepBounds}
 \begin{algorithmic}[1]
-\REQUIRE A bound $B$ on the total number of steps $\stepCount(m, w)$.
-\ENSURE The set of candidate pairs $\stepBounds$ (Equation \ref{eq:stepBounds}).
-\STATE generate the set $\mathcal T = \{(m, w) ~:~ \stepCount(m, w) \le B\}$
-\STATE define an ordering on the set $\mathcal T$ using
+\Require A bound $B$ on the total number of steps $\stepCount(m, w)$.
+\Ensure The set of candidate pairs $\stepBounds$ (Equation \ref{eq:stepBounds}).
+\State generate the set $\mathcal T = \{(m, w) ~:~ \stepCount(m, w) \le B\}$
+\State define an ordering on the set $\mathcal T$ using
 \[
 (m_i, w_i) < (m_j, w_j) \Leftrightarrow \begin{cases}
 	\stepCount(m_i, w_i) < \stepCount(m_j, w_j) \\
 	\stepCount(m_i, w_i) = \stepCount(m_j, w_j) \textrm{ and } \lastStep(m_i, w_i) > \lastStep(m_j, w_j).
 \end{cases}
 \]
-\STATE let $(m_1, w_1), (m_2, w_2), ..., (m_n, w_n)$ be the list of elements generated by sorting the set $\mathcal T$ in ascending order
-\STATE $\stepBounds_B \gets \{\}$
-\STATE $(m, w) \gets (m_1, w_1)$
-\FOR{$i = 2$ to $n$}
-	\IF{$\lastStep(m_i, w_i) > \lastStep(m, w)$}
-		\STATE $\stepBounds_B \gets \stepBounds_B \cup \{(m, w)\}$
-		\STATE $(m, w) \gets (m_i, w_i)$
-	\ENDIF
-\ENDFOR
-\STATE $\stepBounds_B \gets \stepBounds_B \cup \{(m, w)\}$
-\RETURN $\stepBounds_B$
+\State let $(m_1, w_1), (m_2, w_2), ..., (m_n, w_n)$ be the list of elements generated by sorting the set $\mathcal T$ in ascending order
+\State $\stepBounds_B \gets \{\}$
+\State $(m, w) \gets (m_1, w_1)$
+\For{$i = 2$ to $n$}
+	\If{$\lastStep(m_i, w_i) > \lastStep(m, w)$}
+		\State $\stepBounds_B \gets \stepBounds_B \cup \{(m, w)\}$
+		\State $(m, w) \gets (m_i, w_i)$
+	\EndIf
+\EndFor
+\State $\stepBounds_B \gets \stepBounds_B \cup \{(m, w)\}$
+\State \Return $\stepBounds_B$
 \end{algorithmic}
 \end{algorithm}
 
@@ -2831,30 +2841,32 @@ The information in the above figures is noisy, which may be partly due to the in
 To find values for the exponentiation stage and search stage that work well in practice, one could iterate all suitable exponents $E$ and multiples of primorials $mP_w$, but that would conceivably take a long time\footnote{The improved method proposed here took approximately 1 day to run on a set of 4,000 random semiprime  integers for bits sizes 16, 18, ..., 100. See Table \ref{tab:ssparParams} for the results.} for even a small sample set of integers.  The Figures in the previous section suggest a more efficient approach, given by Algorithm \ref{alg:noisyCurveSearch}.  Using a more efficient approach also allows us to use a larger sample of integers than would be possible otherwise.
 
 \begin{algorithm}[h]
-\caption[Find good parameters for SuperSPAR.]{Determine some $x$ such that $f(x)$ is suitably small where $f(x)$ is the average time to split integers using SuperSPAR with one free variable.}
+\caption[Find suitable parameters for SuperSPAR.]{Determine some $x$ such that $f(x)$ is suitably small where $f(x)$ is the average time to split integers using SuperSPAR with one free variable.}
 \label{alg:noisyCurveSearch}
 \begin{algorithmic}[1]
-\REQUIRE A function $f(x)$ corresponding to the average time to split an integer,\\ a search range $[\xmin, \xmax]$, \\and a bound $k$ within which to linear search.
-\ENSURE $x \in [\xmin, \xmax]$ such that $f(x)$ is suitably small.
-\STATE \{-- reduce by $1/3^{\textrm{rd}}$ each iteration --\}
-\STATE $(\xlo, \xhi) \gets (\xmin, \xmax)$
-\WHILE{$\xhi - \xlo > k$}
-	\STATE $\xonethird \gets \floor{(\xhi - \xlo) / 3} + \xlo$
-	\STATE $\xtwothird \gets \floor{2(\xhi - \xlo) / 3} + \xlo$
-	\IF{$f(\xonethird) \le f(\xtwothird)$}
-		\STATE $\xhi \gets \xtwothird$
-	\ELSE
-		\STATE $\xlo \gets \xonethird$
-	\ENDIF
-\ENDWHILE
-\STATE \{-- linear search --\}
-\STATE $(x, y) \gets (\xlo, f(\xlo))$ \COMMENT{$(x, y)$ represent smallest $f(x)$ encountered.}
-\STATE $\xlo \gets \xlo + 1$
-\WHILE{$\xlo \le \xhi$}
-	\STATE \textbf{if} $f(\xlo) < y$ \textbf{then} $(x, y) \gets (\xlo, f(\xlo))$ \textbf{end}
-	\STATE $\xlo \gets \xlo + 1$
-\ENDWHILE
-\RETURN $x$
+\Require A function $f(x)$ corresponding to the average time to split an integer,
+\algnewline a search range $[\xmin, \xmax]$,
+\algnewline and a bound $k$ within which to linear search.
+\Ensure $x \in [\xmin, \xmax]$ such that $f(x)$ is suitably small.
+\Statex \{-- reduce by $1/3^{\textrm{rd}}$ each iteration --\}
+\State $(\xlo, \xhi) \gets (\xmin, \xmax)$
+\While{$\xhi - \xlo > k$}
+	\State $\xonethird \gets \floor{(\xhi - \xlo) / 3} + \xlo$
+	\State $\xtwothird \gets \floor{2(\xhi - \xlo) / 3} + \xlo$
+	\If{$f(\xonethird) \le f(\xtwothird)$}
+		\State $\xhi \gets \xtwothird$
+	\Else
+		\State $\xlo \gets \xonethird$
+	\EndIf
+\EndWhile
+\Statex \{-- linear search --\}
+\State $(x, y) \gets (\xlo, f(\xlo))$ \Comment{$(x, y)$ represent smallest $f(x)$ encountered.}
+\State $\xlo \gets \xlo + 1$
+\While{$\xlo \le \xhi$}
+	\State \textbf{if} $f(\xlo) < y$ \textbf{then} $(x, y) \gets (\xlo, f(\xlo))$
+	\State $\xlo \gets \xlo + 1$
+\EndWhile
+\State \Return $x$
 \end{algorithmic}
 \end{algorithm}
 
