@@ -1411,52 +1411,42 @@ Experimentally we found that the prime factorization of the order of ideal class
 
 % NOTE: We give a test for an ambiguous ideal and a method of factoring the discriminant in section 4.1.1
 
-% -- Exponentiation stage of SuperSPAR -- %
+% -- Try to Find an Ambiguous Ideal Class -- %
 \begin{algorithm}[h]
-\caption{SuperSPAR - Exponentiation stage.}
-\label{alg:ssparExponentiation}
+\caption{Try to Find an Ambiguous Ideal Class.}
 \begin{algorithmic}[1]
-\Require $N \in \ZZgez$ odd and composite, \\
-  $E = \prod_{i=2}^t {p_i}^{e_i}$ for the exponentiation phase, \\
-  $s = mP_w$ a multiple of a primorial for the search phase, \\
-  $c \in \ZZgtz$ the number of ideal classes to try before switching multipliers.
-
-\State $\bclass \gets {\idealclass{a_1}}^E$ for the smallest prime ideal class $\idealclass{a_1}$ \Comment{$\bclass = \idclass$ is handled by line \ref{line:firstAmbiguous}}
-\State $\idealclass{b'} \gets \bclass$ \Comment{backup $\bclass$}
-\For{$1 \le k \le \floor{\log_2 h_\Delta}$}
-	\If {$\bclass$ is an ambiguous ideal class} \label{line:firstAmbiguous}
-		\If{$\bclass$ leads to a factor of $N$}
-			\State \Return a factor of $N$
+\Procedure{TryAmbiguous}{$\bclass, \ell$}
+\For{$i$ from 1 to $\ell$ while $\bclass \neq \idclass$}
+	\If{$\bclass$ is an ambiguous ideal}  \Comment{See Subsection \ref{subsec:forms}.}
+		\If{$\bclass$ leads to a non-trivial factor of $N$}
+			\State $d \gets$ a non-trivial factor of $N$
+			\State \Return ($\bclass$, $d$)
 		\Else
-			\State go to line \ref{goto:tryIdeals}
+			\State \Return ($\bclass$, 1)
 		\EndIf
 	\EndIf
 	\State $\bclass \gets \bclass^2$
 \EndFor
+\State \Return ($\bclass$, 1)
+\EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
+
+% -- Try Several Ideal Classes -- %
 \begin{algorithm}[h]
-\caption{SuperSPAR - Try several ideals.}
-\label{alg:ssparTryIdeals}
+\caption{Try Several Ideal Classes.}
 \begin{algorithmic}[1]
-\Require SuperSPAR($h$, $c$, $\Delta$) \\
-$N \in \ZZgez$ odd and composite, \\
-  $E = \prod_{i=2}^t {p_i}^{e_i}$ for the exponentiation phase, \\
-  $s = mP_w$ a multiple of a primorial for the search phase, \\
-  $c \in \ZZgtz$ the number of ideal classes to try before switching multipliers.
-\State \{-- try several ideal classes --\}
-\State $h \gets h \cdot E$
-\label{goto:tryIdeals}
-\For{$2 \le y \le c$}
-	\State $\bclass \gets {\idealclass{a_y}}^h$ where $\idealclass{a_y}$ is the $y^{\textrm{th}}$ smallest prime ideal class
-	\For{$1 \le k \le \floor{\log_2 h_\Delta}$ and $\bclass \neq \idclass$}
-		\If{$\bclass$ is an ambiguous ideal and $\bclass$ leads to a factor of $N$}
-			\State \Return a factor of $N$
-		\EndIf
-		\State $\bclass \gets \bclass^2$
-	\EndFor
+\Procedure{TrySeveralIdealClasses}{$\Delta$, $h$, $\ell$, $c$}
+\For{$2 \le i \le c$}
+	\State let $\idealclass{p_i}$ be the $i^{\textrm{th}}$ smallest prime ideal class in $Cl_\Delta$
+	\State $(\_, d) \gets$ \Call{TryAmbiguous}{$\idealclass{p_i}^h$, $\ell$}
+	\If{$d \neq 1$}
+		\State \Return d
+	\EndIf
 \EndFor
+\State \Return 1
+\EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
@@ -1465,34 +1455,61 @@ $N \in \ZZgez$ odd and composite, \\
 \caption{SuperSPAR Integer Factoring Algorithm.}
 \label{alg:superSpar}
 \begin{algorithmic}[1]
-\Require $N \in \ZZgez$ odd and composite, \\
-  $E = \prod_{i=2}^t {p_i}^{e_i}$ for the exponentiation phase, \\
-  $s = mP_w$ a multiple of a primorial for the search phase, \\
-  $c \in \ZZgtz$ the number of ideal classes to try before switching multipliers.
+\Require $N \in \ZZgez$ odd and composite,
+\algnewline $E = \prod_{i=2}^t {p_i}^{e_i}$ for the exponentiation phase,
+\algnewline $s = mP_w$ a multiple of a primorial for the search phase,
+\algnewline $c \in \ZZgtz$ the number of ideal classes to try before switching multipliers,
+\State $\ell = \floor{\log_2 \left(\sqrt N \log N\right)}$ \Comment{bound for repeated squaring}
 \State $k \gets 0$ \Comment{the next line sets $k$ to 1 on the first run}
 \State $k \gets $ smallest square free integer $> k$ \label{goto:newK}
 \State $\Delta \gets -kN$
-\State \textbf{if} $\Delta \not\equiv 0,1 \pmod 4$ \textbf{then} $\Delta \gets 4\Delta$ \textbf{endif}
+\If{$\Delta \not\equiv 0,1 \pmod 4$}
+	$\Delta \gets 4\Delta$
+\EndIf
+%\State lazily compute prime ideal classes $\idealclass{a_1}, \idealclass{a_2}, ..., \idealclass{a_c} \in Cl_\Delta$ only as needed
 
+% -- Exponentiation Stage -- %
+\Statex \{-- exponentiation stage --\}
+\State let $\idealclass{p_1}$ be the smallest prime ideal class in $Cl_\Delta$
+\State $\idealclass{b'} \gets \idealclass{p_1}^E$
+\State $(\idealclass{b}, d) \gets$ \Call{TryAmbiguous}{$\idealclass{b'}$, $\ell$}
+\If{$d \neq 1$}
+	\Return d
+\ElsIf{$\bclass = \idclass$}
+	\State $d \gets$ \Call{TrySeveralIdealClasses}{$\Delta$, $E$, $\ell$, $c$}
+	\If{$d \neq 1$}
+		\Return d
+	\Else
+		~start over at line \ref{goto:newK}
+	\EndIf
+\EndIf
 
-
-\State \{-- search stage --\}
+% -- Search Stage -- %
+\Statex \{-- search stage --\}
 \State clear the lookup table
 \For{$1 \le i \le s$ where $\gcd(i,P_w)=1$}
 	\State compute $\bclass^i$ and store $\bclass^i \mapsto i$ in the lookup table \Comment{coprime baby-steps}
 	\If{$\bclass^i = \idclass$}
-		\State $h \gets i$, $\bclass \gets \idealclass{b'}^i$, then go to line \ref{goto:tryAmbiguous}
+		$h \gets i$, and go to line \ref{goto:foundOrder}
 	\EndIf
 \EndFor
 \For{$1 \le j \le m\phi(P_w)$}
 	\If{$\bclass^{2js}$ is in the table, first lookup $i$}
-		\State $h \gets$ odd part of $(2js - i)E$, then go to line \ref{goto:tryAmbiguous}  \Comment{positive giant-step}
+		\State $h \gets$ odd part of $(2js - i)$, and go to line \ref{goto:foundOrder}  \Comment{positive giant-step}
 	\ElsIf{$\bclass^{-2js}$ is in the table, first lookup $i$}
-		\State $h \gets$ odd part of $(2js + i)E$, then go to line \ref{goto:tryAmbiguous} \Comment{inverted giant-step}
+		\State $h \gets$ odd part of $(2js + i)$, and go to line \ref{goto:foundOrder} \Comment{inverted giant-step}
 	\EndIf
 \EndFor
 
+% -- Found a Multiple of the Order -- %
+\Statex \{-- found a multiple of the order --\}
+\State $(\_, d) \gets$ \Call{TryAmbiguous}{$\idealclass{b'}^h$, $\ell$}
+\label{goto:foundOrder}
+\If{$d \neq 1$} \Return $d$	\EndIf	
+\State $d \gets$ \Call{TrySeveralIdealClasses}{$\Delta$, $E \cdot h$, $\ell$, $c$}
+\If{$d \neq 1$} \Return $d$ \EndIf
 
+% -- Restart with Next Multiplier -- %
 \State start over at line \ref{goto:newK}
 \end{algorithmic}
 \end{algorithm}
