@@ -26,6 +26,7 @@
 
 
 \usepackage[chapter]{algorithm}
+%\usepackage[compatible]{algpseudocode}
 \usepackage{algorithmic}
 \usepackage{amsfonts}
 \usepackage{amsmath}
@@ -38,6 +39,7 @@
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{multirow}
+\usepackage{needspace}
 \usepackage{subfigure}
 
 %\theoremstyle{plain}
@@ -1401,6 +1403,56 @@ Experimentally we found that the prime factorization of the order of ideal class
 
 % NOTE: We give a test for an ambiguous ideal and a method of factoring the discriminant in section 4.1.1
 
+% -- Exponentiation stage of SuperSPAR -- %
+\begin{algorithm}[h]
+\caption{SuperSPAR - Exponentiation stage.}
+\label{alg:ssparExponentiation}
+\begin{algorithmic}[1]
+\REQUIRE $N \in \ZZgez$ odd and composite, \\
+  $E = \prod_{i=2}^t {p_i}^{e_i}$ for the exponentiation phase, \\
+  $s = mP_w$ a multiple of a primorial for the search phase, \\
+  $c \in \ZZgtz$ the number of ideal classes to try before switching multipliers.
+
+\STATE $\bclass \gets {\idealclass{a_1}}^E$ for the smallest prime ideal class $\idealclass{a_1}$ \COMMENT{$\bclass = \idclass$ is handled by line \ref{line:firstAmbiguous}}
+\STATE $\idealclass{b'} \gets \bclass$ \COMMENT{backup $\bclass$}
+\FOR{$1 \le k \le \floor{\log_2 h_\Delta}$}
+	\IF {$\bclass$ is an ambiguous ideal class} \label{line:firstAmbiguous}
+		\IF{$\bclass$ leads to a factor of $N$}
+			\RETURN a factor of $N$
+		\ELSE
+			\STATE go to line \ref{goto:tryIdeals}
+		\ENDIF
+	\ENDIF
+	\STATE $\bclass \gets \bclass^2$
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[h]
+\caption{SuperSPAR - Try several ideals.}
+\label{alg:ssparTryIdeals}
+\begin{algorithmic}[1]
+\REQUIRE SuperSPAR($h$, $c$, $\Delta$) \\
+$N \in \ZZgez$ odd and composite, \\
+  $E = \prod_{i=2}^t {p_i}^{e_i}$ for the exponentiation phase, \\
+  $s = mP_w$ a multiple of a primorial for the search phase, \\
+  $c \in \ZZgtz$ the number of ideal classes to try before switching multipliers.
+\STATE \{-- try several ideal classes --\}
+\STATE $h \gets h \cdot E$
+\label{goto:tryIdeals}
+\FOR{$2 \le y \le c$}
+	\STATE $\bclass \gets {\idealclass{a_y}}^h$ where $\idealclass{a_y}$ is the $y^{\textrm{th}}$ smallest prime ideal class
+	\FOR{$1 \le k \le \floor{\log_2 h_\Delta}$ and $\bclass \neq \idclass$}
+		\IF{$\bclass$ is an ambiguous ideal and $\bclass$ leads to a factor of $N$}
+			\RETURN a factor of $N$
+		\ENDIF
+		\STATE $\bclass \gets \bclass^2$
+	\ENDFOR
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
+
+% -- Main SuperSPAR -- %
 \begin{algorithm}[h]
 \caption{SuperSPAR Integer Factoring Algorithm.}
 \label{alg:superSpar}
@@ -1413,31 +1465,15 @@ Experimentally we found that the prime factorization of the order of ideal class
 \STATE $k \gets $ smallest square free integer $> k$ \label{goto:newK}
 \STATE $\Delta \gets -kN$
 \STATE \textbf{if} $\Delta \not\equiv 0,1 \pmod 4$ \textbf{then} $\Delta \gets 4\Delta$ \textbf{endif}
-\STATE lazily compute prime ideal classes $[\mathfrak a_1], [\mathfrak a_2], ..., [\mathfrak a_c]$ in $Cl_\Delta$, only as needed
 
-\STATE \{-- exponentiation stage --\}
-\STATE $\bclass \gets {\idealclass{a_1}}^E$ for the smallest prime ideal class $\idealclass{a_1}$ \COMMENT{$\bclass = \idclass$ is handled by line \ref{line:firstAmbiguous}}
-\STATE $\idealclass{b'} \gets \bclass$ \COMMENT{backup $\bclass$}
-\STATE $h \gets 1$
-\STATE \{-- attempt to factor $N$ by finding an ambiguous ideal class --\}
-\FOR{$1 \le k \le \floor{\log_2 h_\Delta}$}
-\label{goto:tryAmbiguous}
-	\IF {$\bclass$ is an ambiguous ideal class} \label{line:firstAmbiguous}
-		\IF{$\bclass$ leads to a factor of $N$}
-			\RETURN a factor of $N$
-		\ELSE
-			\STATE go to line \ref{goto:tryIdeals}
-		\ENDIF
-	\ENDIF
-	\STATE $\bclass \gets \bclass^2$
-\ENDFOR
+
 
 \STATE \{-- search stage --\}
 \STATE clear the lookup table
 \FOR{$1 \le i \le s$ where $\gcd(i,P_w)=1$}
 	\STATE compute $\bclass^i$ and store $\bclass^i \mapsto i$ in the lookup table \COMMENT{coprime baby-steps}
 	\IF{$\bclass^i = \idclass$}
-		\STATE $h \gets iE$, $\bclass \gets \idealclass{b'}^i$, then go to line \ref{goto:tryAmbiguous}
+		\STATE $h \gets i$, $\bclass \gets \idealclass{b'}^i$, then go to line \ref{goto:tryAmbiguous}
 	\ENDIF
 \ENDFOR
 \FOR{$1 \le j \le m\phi(P_w)$}
@@ -1448,21 +1484,11 @@ Experimentally we found that the prime factorization of the order of ideal class
 	\ENDIF
 \ENDFOR
 
-\STATE \{-- try several ideal classes --\}
-\STATE $h \gets h \cdot E$
-\label{goto:tryIdeals}
-\FOR{$2 \le y \le c$}
-	\STATE $\bclass \gets {[\mathfrak a_y]}^h$
-	\FOR{$1 \le k \le \floor{\log_2 h_\Delta}$ and $\bclass \neq \idclass$}
-		\IF{$\bclass$ is an ambiguous ideal and $\bclass$ leads to a factor of $N$}
-			\RETURN a factor of $N$
-		\ENDIF
-		\STATE $\bclass \gets \bclass^2$
-	\ENDFOR
-\ENDFOR
+
 \STATE start over at line \ref{goto:newK}
 \end{algorithmic}
 \end{algorithm}
+
 
 
 Assuming good parameters are known, the SuperSPAR factoring algorithm used in practice is given in listing \ref{alg:superSpar}.  Chapter \ref{chap:ssparExperiments} discusses the experiments and results that lead to parameters for this algorithm that perform well in practice.  Notice, that parameters for Algorithm \ref{alg:superSpar} can be selected based on the theoretical analysis of SuperSPAR from the previous section.
