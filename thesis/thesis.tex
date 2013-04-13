@@ -52,9 +52,10 @@
 \newtheorem{defn}[thm]{Definition}
 \newtheorem{example}[thm]{Example}
 
-\algtext*{EndWhile}  % Remove "end while" text
-\algtext*{EndIf}     % Remove "end if" text
-\algtext*{EndFor}    % Remove "end for" text
+\algtext*{EndWhile}      % Remove "end while" text
+\algtext*{EndIf}         % Remove "end if" text
+\algtext*{EndFor}        % Remove "end for" text
+\algtext*{EndProcedure}  % Remove "end procedure" text
 \renewcommand{\algorithmiccomment}[1]{\hfill \{#1\}}
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
@@ -1441,9 +1442,7 @@ Experimentally we found that the prime factorization of the order of ideal class
 \For{$2 \le i \le c$}
 	\State let $\idealclass{p_i}$ be the $i^{\textrm{th}}$ smallest prime ideal class in $Cl_\Delta$
 	\State $(\_, d) \gets$ \Call{TryAmbiguous}{$\idealclass{p_i}^h$, $\ell$}
-	\If{$d \neq 1$}
-		\State \Return d
-	\EndIf
+	\If{$d \neq 1$}	\Return d \EndIf
 \EndFor
 \State \Return 1
 \EndProcedure
@@ -1475,18 +1474,14 @@ Experimentally we found that the prime factorization of the order of ideal class
 \State $(\idealclass{b}, d) \gets$ \Call{TryAmbiguous}{$\idealclass{b'}$, $\ell$}
 \If{$d \neq 1$}
 	\Return d
-\ElsIf{$\bclass = \idclass$}
-	\State $d \gets$ \Call{TrySeveralIdealClasses}{$\Delta$, $E$, $\ell$, $c$}
-	\If{$d \neq 1$}
-		\Return d
-	\Else
-		~start over at line \ref{goto:newK}
-	\EndIf
+\EndIf
+\If{$\bclass = \idclass$}
+	$h \gets 1$, and go to line \ref{goto:tryIdeals}
 \EndIf
 
 % -- Search Stage -- %
 \Statex \{-- search stage --\}
-\State clear the lookup table
+\State initialize the lookup table
 \For{$1 \le i \le s$ where $\gcd(i,P_w)=1$}
 	\State compute $\bclass^i$ and store $\bclass^i \mapsto i$ in the lookup table \Comment{coprime baby-steps}
 	\If{$\bclass^i = \idclass$}
@@ -1507,6 +1502,7 @@ Experimentally we found that the prime factorization of the order of ideal class
 \label{goto:foundOrder}
 \If{$d \neq 1$} \Return $d$	\EndIf	
 \State $d \gets$ \Call{TrySeveralIdealClasses}{$\Delta$, $E \cdot h$, $\ell$, $c$}
+\label{goto:tryIdeals}
 \If{$d \neq 1$} \Return $d$ \EndIf
 
 % -- Restart with Next Multiplier -- %
