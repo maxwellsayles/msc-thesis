@@ -58,6 +58,86 @@ Investigate if there are any particular multipliers that we would want to use.
 
 
 
+\subsection{SuperSPAR Complexity}
+
+% TODO: Complete this section.
+
+%This space intentionally left empty for now.
+
+Lenstra and Pomerance \cite[Theorem 11.1]{Lenstra1992} show that for all $x$ there exist $n \le x$ such that for every negative discriminant $\Delta \equiv 0 \pmod n$, the class number $h_\Delta$ has a prime factor exceeding $x^{1/9}$.  
+
+By \cite[Lemma 6.4]{Sutherland2007}, for the largest prime $p_t \le N^{1/2r}$ on the order, the ratio of the size of the giant steps to the number of baby steps is
+\[
+P_w / \phi(P_w) \sim e^\gamma \log \log N^{1/2r}
+\]
+where $\gamma \approx 0.5772$ is Euler's constant and $e \approx 2.71828$. This simplifies to
+\begin{align*}
+	e^\gamma \log \log N^{1/2r} &= \log (\log(N)/2r) \\
+	&= \log \log N - \log(2r) \\
+	&= \log \log N - \log r - \log2 \\
+	&= \log \log N - \log(\sqrt{\log N / \log \log N}) - \log2 \\
+	&= \log \log N - \log(\log N / \log\log N) / 2 - \log2 \\
+	&= \log \log N - (\log\log N - \log\log\log N) / 2 - \log2 \\
+	&= (\log \log N + \log\log\log N) / 2 - \log2 \\
+	&\in O(\log \log N)
+\end{align*}
+
+Note that $m\phi(P_w) \approx N^{1/2r}$.  So the largest exponent discovered by the giant steps is
+\[
+	m^2P_w\phi(P_w) = N^{1/r} \log \log N \approx N^{1/r}.
+\]
+
+So we find the order of $\aclass$ if $\ord(\aclass)$ is $N^{1/r}$ smooth and this occurs with probability $(r/2)^{(r/2)}$.  So the expected running time is
+\[
+	(r/2)^{(r/2)} N^{1/r}.
+\]
+
+Substituting $r' = r/2$ in
+\[
+	r'^{r'} N^{1/2r'}
+\]
+which is minimized for $r' = \sqrt{\ln N / \ln \ln N}$ and the expected running time for $r = 2\sqrt{\ln N / \ln \ln N}$ is
+\[
+	\exp(\sqrt{\ln N \ln \ln N}).
+\]
+
+On page 81 of Drew's thesis he states that if $h=\ord(\alpha)$ is uniformly distributed over some appropriate range, the probability that $h$ is $h^{1/u}$-smooth is $u^{-u+o(1)}$.
+
+So if we treat the order of a random element from the ideal class group as uniformly distributed over an appropriate range then I understand the analysis of the original SPAR as follows.
+
+For some $r$, let $p_t$ be the largest prime $\le N^{1/2r}$. We spend $O(p_t)$ group operations on each multiplier with a probability of factoring being $\ge r^{-r}$ and so in expectation we use $r^r$ multipliers for an expected running time of $r^r N^{1/r}$.  This is minimized for $r = \sqrt{\ln N / \ln \ln N}$.
+
+I do not understand how the value of $r$ was determined.
+
+Now, to spend $O(p_t)$ operations on each multiplier, SPAR chooses the first $t$ primes $p_1, ..., p_t$, and computes $e_i = \max \{ v : {p_i}^v \le {p_t}^2 \}$.  Let $E = \prod {p_i}^{e_i}$.  We then exponentiate a random form $a$ to $E$.  Using binary exponentiation, this takes $O(\log E)$ operations, which is $O(p_t)$ since there are about $p_t / \log p_t$ operands in the product $E$, each of which is $2 \log p_t$ in size.  If this fails to find an ambiguous form, we do a random walk of $O(p_t)$ operations on the new form.
+
+One thing I'm unsure about is whether $\ord(a^E)$ is guaranteed to not have any primes $p_i \le p_t$ as divisors, since SPAR uses $e_i$ bound by ${p_t}^2$.  This does not seem like a high enough bound (maybe it is asymptotically?).
+
+
+Looking at Andrew's original SuperSPAR implementation, this is a little different.  We pick some $u$ (this was $r$ in SPAR).  Then compute all the primes up to $N^{1/u}$ and exponents $e_i = \max \{ v : {p_i}^v \le p_t \}$.  Here we use $p_t$ instead of ${p_t}^2$ but I don't think that matters too much.  Again, let $E$ be the product of all prime powers.
+
+For the purpose of discussing SuperSPAR, we treat the distribution on the order of random ideals as uniform.  Let $N$ be the odd integer we wish to factor.  For some square free integer $k$, choose a discriminant $\Delta = -kN$ or $\Delta = -4kN$ such that $\Delta \equiv 0, 1 \pmod 4$, and a random prime ideal class representative $\mathfrak a$ such that $\aclass \in Cl_\Delta$.  The idea is that for some real value $u$, we will perform $O(|\Delta|^{1/u})$ group operations on $\aclass$ in an attempt to find an ambiguous idea.  Treating the order $h = \ord(\aclass)$ as uniformly distributed, we can expect $h$ to be $|\Delta|^{1/u}$-smooth with probability $u^{-u}$.  As such, we can expect to try $u^u$ different discriminants. TODO: more rigour here.
+
+Sutherland notes \cite[p.84]{Sutherland2007} that the distribution of $\ord(\alpha_i)$ may not be uniform.
+
+Ideally, we want to minimize the expected number of group operations that lead to a factorization of the integer $N$.  The parameters involved are the number of prime ideal classes $\aclass$ tried before switching multipliers and class groups, the bound on the largest prime in the exponent $E$, a bound on the exponents $e_i$ of the prime powers ${p_i}^{e_i}$ whose product is the exponents $E$, and a bound on the largest baby step $s$.
+
+
+Cohen \cite[p.295]{Cohen1993} states a bound on the number of elements in the class group $Cl_\Delta$ as
+\begin{equation}
+\label{eq:hDelta}
+	h_\Delta < \frac{1}{\pi} \sqrt{|\Delta|}\log{|\Delta|} \textrm{ when } \Delta < -4.
+\end{equation}
+Since the prime exponents $e_i$ in Stage 1 are bound by $\floor{\log_{p_i} {p_t}^2}$ instead of $\floor{\log_{p_i} h_\Delta}$, there is no guaranteed that $h' = \ord(\cclass)$ does not have some $p_i \le p_t$ as a divisor.
+
+
+%If $\ord(\aclass)$ divides $\prod_{i=2}^t {p_i}^{e_i}$ then by \cite[p.292]{Schnorr1984} the probability that $\ord(\aclass)$ is even is $\ge 1/2$. 
+
+%\subsection{How Do We Do It (Empirically)}
+%\subsection{Analysis for Generic Groups}
+%\subsection{Analysis for Class Group of Imaginary Quadratic Number Fields}
+%\subsection{Comparison with Original SPAR}
+
 
 \end{document}
 
