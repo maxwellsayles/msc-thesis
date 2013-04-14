@@ -411,7 +411,7 @@ Subsection \ref{subsec:reduction} defines the reduced form of a representative a
 A primitive ideal $\ideal a = [a, (b+\sqrt{\Delta})/2]$ with $\Delta < 0$ is a \emph{reduced} representative of the ideal class $\aclass$ when $-a < b \le a < c$ or when $0 \le b \le a = c$ for $c = (b^2 - \Delta)/4a$ \cite[p.241]{Crandall2001}.  Often, we refer to the ideal $\ideal a$ simply as being \emph{reduced}.
 \end{defn}
 
-\begin{algorithm}[h]
+\begin{algorithm}[htb]
 \caption{Ideal Reduction (\cite[p.90]{Jacobson2006}).}
 \label{alg:reduce}
 \begin{algorithmic}[1]
@@ -565,15 +565,46 @@ Let $c_2 = ({b_2}^2 - \Delta)/4a_2$ and $U = (V(b_1-b_2)/2 - Wc_2) \bmod{(a_1/s)
 \[
 	b \equiv b_2 + \frac{2a_2}{s} U \pmod{2a},
 \]
-which completes the derivation of Equation \ref{eq:idealProductB}.  Note that the product ideal $\mathfrak a \mathfrak b$ is not reduced and that the size of its coefficients can be as much as twice that of the ideal factors $\mathfrak a$ and $\mathfrak b$.
+which completes the derivation of Equation \ref{eq:idealProductB}.  Note that the product ideal $\mathfrak a \mathfrak b$ is not reduced and that the size of its coefficients can be as much as twice that of the ideal factors $\mathfrak a$ and $\mathfrak b$ \cite[p.118]{Jacobson2009}.
 
 
 \subsection{Fast Ideal Multiplication (NUCOMP)}
 \label{subsec:nucomp}
 
-Shanks \cite{Shanks1989} gives an algorithm for multiplying two ideal class representatives such that their product is reduced or almost reduced.  The algorithm is known as NUCOMP and stands for ``New COMPosition''.  This algorithm is often faster in practice as the intermediate numbers are smaller and the final product requires at most two\footnote{According to \cite[p.441]{Jacobson2009}, experiments show that 88\% of the time the resulting product requires no applications of the reduction operation, 12\% of the time only one application is required, and very infrequently are two applications necessary.} applications of the reduction operation to be converted to reduced form \cite[pp.439--441]{Jacobson2009}. The description of NUCOMP provided here is a high level description of the algorithm based on \cite[pp.119-123]{Jacobson2009}.
+Shanks \cite{Shanks1989} gives an algorithm for multiplying two ideal class representatives such that their product is reduced or almost reduced.  The algorithm is known as NUCOMP and stands for ``New COMPosition''.  This algorithm is often faster in practice as the intermediate numbers are smaller and the final product requires at most two\footnote{According to \cite[p.441]{Jacobson2009}, experiments show that 88\% of the time the resulting product requires no applications of the reduction operation, 12\% of the time only one application is required, and very infrequently are two applications necessary.} applications of the reduction operation to be converted to reduced form \cite[pp.439--441]{Jacobson2009}. The description of NUCOMP provided here is a high level description of the algorithm based on Jacobson and Williams \mbox{\cite[\S 5.4,~pp. 119-123]{Jacobson2009}}.
 
-\begin{algorithm}[h]
+Equations \ref{eq:idealProductS}, \ref{eq:idealProductA}, and \ref{eq:idealProductB} from the previous Subsection give a solution to the ideal product $\ideal a \ideal b = s[a, (b+\sqrt\Delta)/2]$.  In this case, the product ideal is not necessarily reduced.  Computing the reduced ideal class representative corresponds to computing the simple continued fraction expansion of $(b/2)/a$ \cite[p.119]{Jacobson2009}, but in this case, the coefficients $a$ and $b$ may be as large as $\Delta$ \cite[p.118]{Jacobson2009}.  Instead of computing the simple continued fraction expansion of $(b/2)/a$, Jacobson and Williams \cite[p.119]{Jacobson2009} use $sU/a_1$ where $U$ is given by Equation \ref{eq:idealProductU}.  To see why this is sufficient, recall from Subsection \ref{subsec:classNumber} that $a_1$ is approximately $\sqrt{|\Delta|}$ in size, so $s^2 / 2 a_1 \approx 1 / \sqrt{|\Delta|}$ and
+\[
+	\frac{b}{2a} = \frac{b_2 + 2Ua_2/s}{2a_1a_2/s^2} 
+	= \frac{s^2 b_2+s2Ua_2}{2a_1a_2}
+	= \frac{s^2b_2}{2a_1a_2} + \frac{sU}{a_1}
+	\approx \frac{sU}{a_1}.
+\]
+Following \cite[pp.120-121]{Jacobson2009}, we develop the simple continued fraction expansion of $sU/a_1 = \langle q_0, q_1, \dots, q_i, \phi_{i+1} \rangle$ using the recurrences
+\begin{align}
+	q_i &= \floor{R_{i-2} ~/~ R_{i-1}} \label{eq:recurqNUCOMP} \\
+	R_i &= R_{i-2} - q_i R_{i-1} \label{eq:recurRNUCOMP} \\
+	C_i &= C_{i-2} - q_i C_{i-1} \label{eq:recurCNUCOMP}
+\end{align}
+until we have $R_i$ and $R_{i-1}$ such that
+\begin{equation}
+\label{eq:nucompBound}
+	R_i < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4} < R_{i-1}.
+\end{equation}
+Initial values for the recurrence are given by
+\[
+	\matrixtt{R_{-2}}{R_{-1}}{C_{-2}}{C_{-1}} = \matrixtt{sU}{a_1}{-1}{0}.
+\]
+We then compute
+\begin{align}
+	M_1 &= \frac{R_i a_2 + sC_i(b_1-b_2)/2}{a_1}, \nonumber \\
+	M_2 &= \frac{R_i (b_1+b_2)/2 - s C_i c_2}{a_1}, \nonumber \\
+	a &= (-1)^{i+1} (R_i M_1  - C_i M_2), \nonumber \\
+	b &= \left( \frac{2(R_i a_2 /s - C_{i-1} a)}{C_i} - b_2 \right) \bmod 2a \label{eq:bNUCOMP}
+\end{align}
+for the reduced or almost reduced product $\mathfrak a \mathfrak b = [a, (b + \sqrt\Delta)/2]$.  Note that this procedure assumes that $\mathcal N(\mathfrak a) \ge \mathcal N(\mathfrak b)$ and that if $a_1 < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4}$ then $R_{-1}$ and $R_{-2}$ satisfy Equation \ref{eq:nucompBound} and we compute the product $\mathfrak a \mathfrak b$ as in the previous subsection without expanding the simple continued fraction $sU/a_1$.  When $a_1 \ge \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4}$, at least one iteration of the recurrence \ref{eq:recurCNUCOMP} is performed and so $C_i \neq 0$ and there will not be a division by zero in Equation \ref{eq:bNUCOMP}.
+
+\begin{algorithm}[htb]
 \caption{NUCOMP -- Fast Ideal Multiplication (\cite[pp.441-443]{Jacobson2009}).}
 \label{alg:nucomp}
 \begin{algorithmic}[1]
@@ -609,39 +640,6 @@ Shanks \cite{Shanks1989} gives an algorithm for multiplying two ideal class repr
 \end{algorithmic}
 \end{algorithm}
 
-% TODO: Say why $sU/a_1$ is important.
-
-Equations \ref{eq:idealProductS}, \ref{eq:idealProductA}, and \ref{eq:idealProductB} from the previous Subsection give a solution to the ideal product $\mathfrak a \mathfrak b = s[a, (b+\sqrt\Delta)/2]$.  We begin with the observation (\cite[p.119]{Jacobson2009}) that $(b/2)/a$ is roughly equal to $sU / a_1$ where $U$ is given by Equation \ref{eq:idealProductU}. To see this, recall from Subsection \ref{subsec:classNumber} that $a_1$ is approximately $\sqrt{|\Delta|}$ in size, so $s^2 / 2 a_1 \approx 1 / \sqrt{|\Delta|}$ and
-\[
-	\frac{b}{2a} = \frac{b_2 + 2Ua_2/s}{2a_1a_2/s^2} 
-	= \frac{s^2 b_2+s2Ua_2}{2a_1a_2}
-	= \frac{s^2b_2}{2a_1a_2} + \frac{sU}{a_1}
-	\approx \frac{sU}{a_1}.
-\]
-Following Jacobson and Williams \cite[pp.120-121]{Jacobson2009}, we develop the simple continued fraction expansion of $sU/a_1 = \langle q_0, q_1, \dots, q_i, \phi_{i+1} \rangle$ using the recurrences
-\begin{align}
-	q_i &= \floor{R_{i-2} ~/~ R_{i-1}} \label{eq:recurqNUCOMP} \\
-	R_i &= R_{i-2} - q_i R_{i-1} \label{eq:recurRNUCOMP} \\
-	C_i &= C_{i-2} - q_i C_{i-1} \label{eq:recurCNUCOMP}
-\end{align}
-until we have $R_i$ and $R_{i-1}$ such that
-\begin{equation}
-\label{eq:nucompBound}
-	R_i < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4} < R_{i-1}.
-\end{equation}
-Initial values for the recurrence are given by
-\[
-	\matrixtt{R_{-2}}{R_{-1}}{C_{-2}}{C_{-1}} = \matrixtt{sU}{a_1}{-1}{0}.
-\]
-We then compute
-\begin{align}
-	M_1 &= \frac{R_i a_2 + sC_i(b_1-b_2)/2}{a_1}, \nonumber \\
-	M_2 &= \frac{R_i (b_1+b_2)/2 - s C_i c_2}{a_1}, \nonumber \\
-	a &= (-1)^{i+1} (R_i M_1  - C_i M_2), \nonumber \\
-	b &= \left( \frac{2(R_i a_2 /s - C_{i-1} a)}{C_i} - b_2 \right) \bmod 2a \label{eq:bNUCOMP}
-\end{align}
-for the reduced or almost reduced product $\mathfrak a \mathfrak b = [a, (b + \sqrt\Delta)/2]$.  Note that this procedure assumes that $\mathcal N(\mathfrak a) \ge \mathcal N(\mathfrak b)$ and that if $a_1 < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4}$ then $R_{-1}$ and $R_{-2}$ satisfy Equation \ref{eq:nucompBound} and we compute the product $\mathfrak a \mathfrak b$ as in the previous subsection without expanding the simple continued fraction $sU/a_1$.  When $a_1 \ge \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4}$, at least one iteration of the recurrence \ref{eq:recurCNUCOMP} is performed and so $C_i \neq 0$ and there will not be a division by zero in Equation \ref{eq:bNUCOMP}.
-
 Our implementation of fast ideal multiplication includes practical optimizations on the above technique.  For example, by Equation \ref{eq:idealProductS}, $s ~|~ a_1$ and $s ~|~ a_2$, so ${a_1}' = a_1/s$ and ${a_2}' = a_2/s$ are used throughout the computation.  Also, Equation \ref{eq:idealProductS} computes \mbox{$\gcd(a_1, a_2, (b_1 + b_2)/2)$}. Following \cite[Algorithm~6]{Imbert2010}, this is separated into two parts: let $s = \gcd(a_1, a_2)$ and compute $\gcd(s, (b_1 + b_2)/2)$ only when $s \neq 1$.  Chapter \ref{chap:xgcdExperiments} discusses practical optimizations for computing the greatest common divisor and the recurrences \ref{eq:recurqNUCOMP}, \ref{eq:recurRNUCOMP}, and \ref{eq:recurCNUCOMP}.  Finally, the first coefficient, $Y$, from Equation \ref{eq:idealProductS} is never used, and so it is not computed.  See Chapter \ref{chap:idealExperiments} for a more thorough treatment of our implementation of ideal class arithmetic.  Pseudo-code is given in Algorithm \ref{alg:nucomp}.
 
 
@@ -666,7 +664,7 @@ Computing the ideal class representative simplifies as well -- we have
 \end{align*}
 Pseudo-code for our implementation is given in Algorithm \ref{alg:nudupl}.
 
-\begin{algorithm}[h]
+\begin{algorithm}[htb]
 \caption{NUDUPL -- Fast Ideal Squaring.}
 \label{alg:nudupl}
 \begin{algorithmic}[1]
@@ -729,7 +727,7 @@ Finally, compute the representative $\mathfrak a^3 = [a, (b + \sqrt\Delta)/2]$ u
 By \cite[p.15~Theorem~5.1]{Imbert2010}, the ideal $[a, (b + \sqrt\Delta)/2]$ is at most two reduction steps from being reduced.  Pseudo-code for our implementation of fast ideal cubing is given in Algorithm \ref{alg:nucube}.
 
 % NUCUBE
-\begin{algorithm}[h]
+\begin{algorithm}[htb]
 \caption{NUCUBE -- Fast Ideal Cubing (\cite[p.26]{Imbert2010}).}
 \label{alg:nucube}
 \begin{algorithmic}[1]
@@ -823,7 +821,7 @@ To compute the non-adjacent form of an integer $n$, inspect $n$ two bits at a ti
 
 In our experiments, we use a variation of the above, originally due to Reitwiesner \cite{reitwiesner1960}, that maintains a carry flag $c$ (see Algorithm \ref{alg:nafR2LImmutable}).  Instead of adding $2^i$ to $n$, set $c = 1$, and instead of subtracting $2^i$ from $n$, set $c = 0$.  When inspecting $n$ two bits at a time, we consider the bit pattern $(m+c) \bmod 4$ where $m = 2 b_{i+1} + b_i$.  This technique is faster since addition and subtraction is performed with constant sized integers.
 
-\begin{algorithm}[h]
+\begin{algorithm}[htb]
 \caption{Computes $g^n$ using right-to-left non-adjacent form (Reitwiesner \cite{reitwiesner1960}).}
 \label{alg:nafR2LImmutable}
 \begin{algorithmic}[1]
@@ -896,7 +894,7 @@ Binary and non-adjacent form are special types of strictly chained partitions, s
 
 The benefit of restricting 2,3 representations to chained representations is the ease with which one can compute $g^n$ when $n$ is given as a chain.  For example $g^{23814216} = g^{2^3 3^2 - 2^{13} 3^2 + 2^{15} 3^6}$ can be computed by first computing $x_0 = g$, $x_1 = g^{2^3 3^2}$, $x_2 = {x_1}^{2^{10}}$, $x_3 = {x_2}^{2^2 3^4}$, each term being computed by repeated squaring and cubing from the previous term.  Finally $g^{23814216} = x_1 \cdot {x_2}^{-1} \cdot x_3$.  When $n$ is given as a chained 2,3 representation, Algorithm \ref{alg:expWithChain} will compute $g^n$ using exactly $a_k$ squares, $b_k$  cubes, $k-1$ multiplications, and at most $k$ inverses\footnote{Recall that when inversion is expensive, the product of terms with negative exponents can be computed separately from terms with positive exponents -- the inverse is then computed only once for this product.  Since computing inverses is negligible in the ideal class group, we instead compute the product of all terms directly.}.  Since $x_i ~|~ x_{i+1}$, an implementation need only retain $x_i$ in order to compute $x_{i+1}$, and so only requires storage of a constant number of group elements.
 
-\begin{algorithm}[h]
+\begin{algorithm}[htb]
 \caption{Computes $g^n$ given $n$ as a chained 2,3 partition (Dimitrov et al \cite{Dimitrov2005}).}
 \label{alg:expWithChain}
 \begin{algorithmic}[1]
@@ -930,7 +928,7 @@ There is evidence \cite{Imbert2010} that the shortest possible chained represent
 
 Given an unchained 2,3 representation for an integer $n = \sum s_i 2^{a_i} 3^{b_i}$, M\'{e}loni and Hasan \cite[Section 3.2]{Meloni2009} give an algorithm that achieves the same bound on the number of operations as in algorithm \ref{alg:expWithChain}, but with a bound of $O(\min \{\max a_i, \max b_i\})$ on the memory used.  Suppose $\max b_i < \max a_i$ and that the terms are labelled and sorted such that $a_1 \ge ... \ge a_k$.  The algorithm works by precomputing a table of $T_b = g^{3^b}$ for $0 \le b \le \max b_i$.  Let $i=1$ and begin with the first term $s_i2^{a_i}3^{b_i}$.  Look up $T_{b_i} = g^{3^{b_i}}$ and, after applying the sign $s_i$, multiply ${T_{b_i}}^{s_i}$ with the running result.  Let $a' = a_i - a_{i+1}$ when $i < k$ and $a' = a_k$ when $i = k$.  Then square the running result $a'$ times.  The algorithm then removes the term $s_i2^{a_i}3^{b_i}$ from the list of terms, and continues in this way with the next largest $a_i$.  The algorithm terminates when there are no more terms in the list.  Algorithm  \ref{alg:yaos} gives pseudo-code for this approach and requires the storage of $O(\max b_i)$ group elements.  When $\max a_i < \max b_i$, we use a related algorithm that requires the terms to be sorted such that $b_1 \ge ... \ge b_k$; it precomputes $T_a = g^{2^a}$ for $0 \le a \le \max a_i$ and works similar to Algorithm \ref{alg:yaos} but with cubing and squaring appropriately swapped.
 
-\begin{algorithm}[h]
+\begin{algorithm}[htb]
 \caption{Compute $g^n$ for a 2,3 representation of $n$ (\cite[Section 3.2]{Meloni2009}).}
 \label{alg:yaos}
 \begin{algorithmic}[1]
@@ -1006,7 +1004,7 @@ This concept is extended to a 2,3 number system by repeatedly removing factors o
 
 Algorithm \ref{alg:rtolDbnsChain} describes a non-recursive function with group operations that correspond to those generated by the function $\rtol$.  The idea is as follows: let $a = 0$, $b=0$, and $i=1$.  While $n > 0$, repeatedly remove factors of 2 from $n$ and increment $a$ for each factor of 2 removed. Then repeatedly remove factors of 3 from $n$ and increment $b$ for each factor of 3 removed. At this point, either $n \equiv 1 \pmod 6$ or $n \equiv 5 \pmod 6$ and so continue on $n-1$ or $n+1$ respectively.  When we continue on $n-1$, this corresponds to adding the current term, so we set $s_i=1$, and when we continue on $n+1$, this corresponds to subtracting the current term, so we set $s_i=-1$. Let $a_i = a$ and $b_i = b$ and then increment $i$ and then repeat this process while $n > 0$.  We then use Algorithm \ref{alg:expWithChain} to compute the exponentiation given the strictly chained 2,3 partition. When we are not able to precompute the chain, it is relatively straightforward to interleave the computation of the partition with the computation of the exponentiation, since the terms $s_i2^{a_i}3^{b_i}$ are computed in increasing order for $i=1..k$.
 
-\begin{algorithm}[h]
+\begin{algorithm}[htb]
 \caption{2,3 strict chains from low order to high order (Ciet et al \cite{Ciet2006}).}
 \label{alg:rtolDbnsChain}
 \begin{algorithmic}[1]
@@ -1077,7 +1075,7 @@ where $0 \le a \le \amax$, $0 \le b \le \bmax$, $a$ and $b$ minimize $\left| |n|
 \noindent
 We present pseudocode in Algorithm \ref{alg:greedyltor}. Note that on successive invocations of $\greedychain$, the absolute value of $v=|s2^a3^b|$ returned by $\closest'$ is monotonically decreasing.  Reversing the terms of the partition gives a chained 2,3 partition of $n$ that we can use to perform exponentiation using Algorithm \ref{alg:expWithChain}.
 
-\begin{algorithm}[h]
+\begin{algorithm}[htb]
 \caption{Greedy left to right representation (Berth{\'e} and Imbert \cite{Berthe2009}).}
 \label{alg:greedyltor}
 \begin{algorithmic}[1]
@@ -1109,7 +1107,7 @@ They also found that applying a global bound $A^*$ and $B^*$ such that $0 \le a 
 
 The next technique for finding strictly chained 2,3 partitions was suggested by Doche and Habsieger \cite{Doche2008}. The idea is similar to the method for generating chains from right to left as described in Subsection \ref{subsec:rtolChains} above, but this technique differs by generating multiple values that may be further reduced by powers of 2 and 3. The procedure is given in Algorithm \ref{alg:pm1Tree}.  The idea is to maintain a tree, $T$, with at most $L$ leaf nodes. At each iteration, each leaf node $v \in T$ generates two new leaves, $v-1$ and $v+1$, which are then reduced as much as possible by removing factors of 2 and 3.  We then discard any duplicate nodes and all but the smallest $L$ elements generated. The path from the root to the first leaf with a value of 1 represents a chained 2,3 partition of the number $n$.
 
-\begin{algorithm}[h]
+\begin{algorithm}[htb]
 \caption{Chain from $\pm 1$ Pruned Tree (Doche and Habsieger \cite{Doche2008}).}
 \label{alg:pm1Tree}
 \begin{algorithmic}[1]
@@ -1245,7 +1243,7 @@ Sutherland observed \cite[p.56]{Sutherland2007} that if $h = \ord(\alpha)$ is od
 
 The problem is that $\ord(\alpha)$ may not be odd.  However, by repeated squaring of $\alpha$ it is easy to find an element whose order is guaranteed to be even \cite[p.56]{Sutherland2007}.  Given a bound $M$ on the group order, compute $\beta = \alpha^{2^\ell}$ where $\ell = \floor{\log_2 M}$ and now run the modified algorithm on $\beta$ to find $h' = \ord(\beta)$.  The order of $\alpha$ can be found by computing $\zeta = \alpha^{h'}$ and then repeatedly squaring $\zeta$ until $\zeta^{2^k} = 1_G$ for some $k$.  The order of $\alpha$ is then $2^k h'$.
 
-\begin{algorithm}[h]
+\begin{algorithm}[htb]
 \caption{Primorial Steps (Sutherland \cite[p.57]{Sutherland2007}).}
 \label{alg:primorialSteps}
 \begin{algorithmic}[1]
@@ -1304,7 +1302,7 @@ Notice that the idea behind the SPAR factoring algorithm is to find an ambiguous
 \subsection{SuperSPAR Algorithm}
 \label{subsec:ssparAlg}
 
-
+% TODO: this needs updating.
 
 Let $N$ be the odd composite integer that we wish to factor.  For some square free integer $k$, choose a discriminant $\Delta = -kN$ or $\Delta = -4kN$ such that $\Delta \equiv 0, 1 \pmod 4$.  
 
@@ -1330,7 +1328,7 @@ Experimentally we found that the prime factorization of the order of ideal class
 % NOTE: We give a test for an ambiguous ideal and a method of factoring the discriminant in section 4.1.1
 
 % -- Try to Find an Ambiguous Ideal Class -- %
-\begin{algorithm}[h]
+\begin{algorithm}[htb]
 \caption[Repeatedly Square]{Try to find an ambiguous ideal class by repeated squaring.}
 \begin{algorithmic}[1]
 \Procedure{RepeatedlySquare}{$\bclass, \ell$}
@@ -1352,7 +1350,7 @@ Experimentally we found that the prime factorization of the order of ideal class
 
 
 % -- Try Many Ideal Classes -- %
-\begin{algorithm}[h]
+\begin{algorithm}[htb]
 \caption[Try Many Ideal Classes.]{Try to factor $N$ using several ideal classes and a multiple of the order of a single ideal class.}
 \begin{algorithmic}[1]
 \Procedure{TryManyIdealClasses}{$\Delta$, $h$, $\ell$, $c$}
@@ -1367,7 +1365,7 @@ Experimentally we found that the prime factorization of the order of ideal class
 \end{algorithm}
 
 % -- Main SuperSPAR -- %
-\begin{algorithm}[h]
+\begin{algorithm}[htb]
 \caption{SuperSPAR Integer Factoring Algorithm.}
 \label{alg:superSpar}
 \begin{algorithmic}[1]
@@ -1439,16 +1437,28 @@ This Chapter discussed SuperSPAR, a factoring algorithm based on the ideal class
 \chapter{Extended Greatest Common Divisor Experiments}
 \label{chap:xgcdExperiments}
 
-One contribution of this thesis is an efficient implementation of arithmetic in the ideal class group of imaginary quadratic number fields.  Arithmetic in the ideal class group uses solutions to equations of the form $s = Ua + Vb$ where $s$ is the largest integer dividing both $a$ and $b$.  Much of the computational effort of the algorithm for fast ideal multiplication (Algorithm \ref{alg:nucomp}) is in computing integral solutions to equations of the form
+One contribution of this thesis is an efficient implementation of arithmetic in the ideal class group of imaginary quadratic number fields.  Much of the computational effort of ideal class multiplication (Algorithm \ref{alg:nucomp}) is in computing integral solutions to equations of the form
 \[
 	s = Ua + Vb
 \]
-where $a$ and $b$ are fixed integers given as input, and $s$ is the greatest common divisor (GCD) of both $a$ and $b$.  Solutions to this equation are referred to as the \emph{extended greatest common divisor} (or extended GCD for short).  A first step to improving the performance of arithmetic in the ideal class group, is to improve performance of GCD computations.  This Chapter discusses several algorithms for computing such solutions and studies their performance in practice. 
+where $a$ and $b$ are fixed integers given as input, and $s$ is the greatest common divisor (GCD) of both $a$ and $b$.  Solutions to this equation are referred to as the \emph{extended greatest common divisor} (or extended GCD for short).  A first step to improving the performance of arithmetic in the ideal class group is to improve the performance of GCD computations.  This Chapter discusses several algorithms for computing solutions to the extended GCD.
 
-This Chapter and Chapter \ref{chap:idealExperiments} focus on the techniques and experimental data that lead us to our implementation of arithmetic in the ideal class group.  We specialized much of our implementation for the x64 architecture.  Many of our routines benefit when the input is bound by a single machine word, i.e.\ 64-bits, but we were also able to take advantage of integers that fit within two machine words by implementing a custom library for 128-bit arithmetic.  When integers are larger than 128-bits, we use the GNU Multiple Precision (GMP) arithmetic library \cite{Gmp}.  All the software in this Chapter was developed using the \compiler{} on Ubuntu 12.10.   Assembly language was used for the inner loops of the routines presented here, as well as for processing features not available in the C programming language (such as 128-bit arithmetic). The hardware platform was a personal notebook with a \cpu{} and 8Gb of memory.  The CPU has four cores, only one of which was used during timing experiments.
+Section \ref{sec:gcdEEA} discuses the standard extended Euclidean Algorithm.  The core of the extended Euclidean Algorithm is used in Lehmer's extended GCD in Section \ref{sec:gcdLehmer}.  Both the extended Euclidean algorithm and Lehmer's extended GCD use division and multiplication, which can be costly.  Binary extended GCD computations emphasize bit shifting in lieu of division and multiplication.  Sections \ref{sec:gcdR2LBin} and \ref{sec:gcdR2LWindowed} discuss an extended GCD algorithm that works from low-order to high-order\footnote{Referred to here as \emph{right-to-left} since this is the order in which bits are operated on in the written binary representation of the inputs.} and its windowed variant.  An extended GCD can also be computed in binary from high-order to low-order\footnote{Also referred to as \emph{left-to-right}.}, and is discussed in Section \ref{sec:gcdL2R}.
+
+In addition to this, ideal class multiplication (Subsection \ref{subsec:nucomp}), squaring (Subsection \ref{subsec:nudupl}), and cubing (Subsection \ref{subsec:nucube}), compute solutions to $R_i < B < R_{i-1}$ using the recurrences
+\begin{align*}
+	q_i &= \floor{R_{i-2} ~/~ R_{i-1}} \\
+	R_i &= R_{i-2} - q_i R_{i-1} \\
+	C_i &= C_{i-2} - q_i C_{i-1}.
+\end{align*}
+Such computations are related to the extended GCD and are referred to as the \emph{partial extended GCD}.  Section \ref{sec:gcdPartial} discusses our implementations of the partial extended GCD.
+
+To improve the performance of these algorithms in practice, we specialized much of our implementation for the x64 architecture.  The details of this specialization are discussed in Section \ref{sec:gcdImpl}.  Many of our routines benefit when the input is bound by a single machine word, i.e.\ 64-bits, but we were also able to take advantage of integers that fit within two machine words by implementing a custom library for 128-bit arithmetic.  When integers are larger than 128-bits, we use the GNU Multiple Precision (GMP) arithmetic library \cite{Gmp}.  All the software in this Chapter was developed using the \compiler{} on Ubuntu 12.10.   Assembly language was used for the inner loops of the routines presented here, as well as for processing features not available in the C programming language (such as 128-bit arithmetic). The hardware platform was a personal notebook with a \cpu{} and 8Gb of memory.  The CPU has four cores, only one of which was used during timing experiments.
+
+Finally, for each of the extended GCD techniques discussed in this Chapter, Section \ref{sec:gcdResults} provides the average time to compute the extended GCD for pairs of random positive integers $(a, b)$ where $a$ and $b$ are an equal number of bits from 1 to 127.
 
 \section{The Euclidean Algorithm}
-\label{sec:euclideanAlgorithm}
+\label{sec:gcdEEA}
 
 The Euclidean Algorithm is an algorithm for computing the greatest common divisor of two integers.  We start with two positive integers $a$ and $b$.  At each iteration of the algorithm, we subtract the smaller of the two numbers from the larger, until one of them is 0. At this point, the non-zero number is the largest divisor of $a$ and $b$.  Since the smaller number may still be smaller after a single iteration, we use fewer steps by subtracting an integer multiple of the smaller number from the larger one.
 
@@ -1470,7 +1480,7 @@ and Equations \ref{eq:initialGcd1} and \ref{eq:initialGcd2} hold.  We maintain t
 	\end{cases}
 \]
 
-\begin{algorithm}[h]
+\begin{algorithm}[htb]
 \caption{Extended Euclidean Algorithm.}
 \label{alg:EeaDivRem}
 \begin{algorithmic}[1]
@@ -1494,6 +1504,7 @@ and Equations \ref{eq:initialGcd1} and \ref{eq:initialGcd2} hold.  We maintain t
 In practice, these operations are performed by manipulating each variable directly, rather than by using matrix arithmetic.  Furthermore, we typically implement division with remainder, which solves $s = qt + r$ for $q,r \in \ZZ$ and $|r| < |t|$.  Notice that $r = s - qt$ is the target value of $t$ for each iteration of the Euclidean Algorithm.
 
 \section{Lehmer's Extended GCD}
+\label{sec:gcdLehmer}
 
 % TODO: Talk about Lehmer's with 64-bit EEA and 64-bit L2R.
 
@@ -1520,7 +1531,7 @@ represents the concatenation of the operations performed during the single preci
 \]
 Then continue with the outer loop of the computation until $t = 0$.  In the event that $B=0$, then $s$ and $t$ differ in length by more than a machine word, and we use a step of the full precision GCD computation to adjust their lengths.  The complete algorithm is given in Algorithm \ref{alg:lehmerGcd}.
 
-\begin{algorithm}[h]
+\begin{algorithm}[htb]
 \caption{Lehmer's GCD (\cite{Lehmer1938}).}
 \label{alg:lehmerGcd}
 \begin{algorithmic}[1]
@@ -1551,7 +1562,7 @@ Then continue with the outer loop of the computation until $t = 0$.  In the even
 
 
 \section{Right-to-Left Binary Extended GCD}
-\label{sec:r2lBinGcd}
+\label{sec:gcdR2LBin}
 
 % TODO: Based on the slope of the graph, we did not anticipate that this method would outperform other methods for 128-bit integers.
 
@@ -1632,7 +1643,7 @@ otherwise let
 \]
 This ensures that $s$ is odd, $t$ is even, and that both $s$ and $t$ are positive.  Repeat the steps of reducing $t$ by powers of 2 and then subtracting one row from the other until $t=0$.  The complete algorithm is given in Algorithm \ref{alg:r2lBinGcd}.  Note that in practice, integer division by 2 is performed using a bit shift right.
 
-\begin{algorithm}[h]
+\begin{algorithm}[htb]
 \caption{Right-to-left Binary GCD (Stein \cite{Stein1967}).}
 \label{alg:r2lBinGcd}
 \begin{algorithmic}[1]
@@ -1660,6 +1671,7 @@ This ensures that $s$ is odd, $t$ is even, and that both $s$ and $t$ are positiv
 
 
 \section{Windowed Right-to-Left Binary Extended GCD}
+\label{sec:gcdR2LWindowed}
 
 Windowing is a common technique used to extend the base of an algorithm.  We saw this earlier in our discussion of binary exponentiation in Section \ref{sec:binaryExp}.  The idea there was to precompute $g^w$ for each $w$ in some window $0 \le w < 2^k$ for some $k$ and then to iterate over the exponent $k$ bits at a time.  We can apply this technique to the right-to-left extended binary GCD.
 
@@ -1667,7 +1679,7 @@ The algorithm in the previous subsection repeatedly reduces either the equation 
 
 This is easily extended for any $2^k$ where $k$ is a positive integer.  The algorithm first computes $x_j = mb$ and $y_j = ma$ for $0 \le m < 2^k$ where $j = ma \bmod 2^k$.  While $t$ is divisible by $2^h$ for some $h \le k$, we look up $x_j$ and $y_j$ for $j = Y \bmod 2^h$ and compute $(X + x_j) / 2^h$ and $(Y - y_j) / 2^h$.  The complete Algorithm is given in listing \ref{alg:windowedR2lBinGcd}.
 
-\begin{algorithm}[h]
+\begin{algorithm}[htb]
 \caption{Windowed Right-to-left Binary GCD.}
 \label{alg:windowedR2lBinGcd}
 \begin{algorithmic}[1]
@@ -1698,6 +1710,7 @@ This is easily extended for any $2^k$ where $k$ is a positive integer.  The algo
 \end{algorithm}
 
 \section{Left-to-Right Binary Extended GCD}
+\label{sec:gcdL2R}
 
 Just as exponentiation can be performed from high-order to low-order, so too can an extended binary GCD computation.  This is termed a left-to-right binary GCD, since it works from the left most bit to the right most bit of the written binary representation of the inputs.
 
@@ -1715,7 +1728,7 @@ otherwise, compute
 \]
 Notice that after this step $s$ has the previous value of $t$ and that the binary representation of $t$ is one digit shorter than the binary representation of the previous value of $s$, i.e.\ the the left most set bit of the previous value of $s$ is now cleared.  As with the extended Euclidean Algorithm, maintain the invariant that $s \ge t$; if after the above operation $s < t$, then swap the rows of the matrix to restore the invariant. The complete algorithm is given in Algorithm \ref{alg:shallitGcd}.
 
-\begin{algorithm}[h]
+\begin{algorithm}[htb]
 \caption{Shallit and Sorenson Left-to-Right binary GCD (\cite{Shallit1994}).}
 \label{alg:shallitGcd}
 \begin{algorithmic}[1]
@@ -1757,6 +1770,7 @@ If $qt > s$ then the resulting value for $s-qt$ is negative, and so we negate th
 
 
 \section{Partial Extended GCD}
+\label{sec:gcdPartial}
 
 % TODO: Say something about why we don't experiment with all the different kinds.
 
@@ -1768,7 +1782,7 @@ Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and \ref{subsec:nucube} gi
 \end{align*}
 These recurrences perform the same operation as a single step in the Extended Euclidean Algorithm of Section \ref{sec:euclideanAlgorithm}, but the initial and stopping conditions are different.  As such, this is referred to as the \emph{Partial Extended Euclidean Algorithm}.  The algorithm is listed in Algorithm \ref{alg:PartialEeaDivRem}.
 
-\begin{algorithm}[h]
+\begin{algorithm}[htb]
 \caption{Partial Extended Euclidean Algorithm.}
 \label{alg:PartialEeaDivRem}
 \begin{algorithmic}[1]
@@ -1848,7 +1862,7 @@ To swap two machine words, $x_0$ and $y_0$, without using additional words, comp
 and this reduces to $x_2 = y_0$.  Also, $y_1$ expands to $(x_0 \bxor y_0) \bxor y_0$, which is just $x_0$.  In practice, each assignment to $x_i$ and $y_i$ overwrites the previous $x_{i-1}$ and $y_{i-1}$ and so is performed in place.
 
 Two words, $x$ and $y$, are conditionally swapped when $x < y$ by using two additional words.  Let $d = x - y$.  Notice that simply computing $x \gets x - d$ and $y \gets y + d$ swaps $x$ and $y$.  Instead, let $m = \texttt{sign\_mask}(d)$ and then  $x \gets x - (d \band m)$ and $y \gets y + (d \band m)$ swaps $x$ and $y$ only when $x < y$.  In the left-to-right binary GCD, we conditionally swap the triple $(s, U, V)$ with $(t, X, Y)$ when $s < t$.  By fixing $m = \texttt{sign\_mask}(s - t)$, but letting $d$ take on $s - t$, and then $U - X$, and finally $V - Y$, we conditionally swap the triples when $s < t$. The algorithm is given in Algorithm \ref{alg:condSwap3}.
-\begin{algorithm}[h]
+\begin{algorithm}[htb]
 \caption{Conditionally swap $(s, U, V)$ with $(t, X, Y)$ when $s < t$.}
 \label{alg:condSwap3}
 \begin{algorithmic}[1]
@@ -1869,7 +1883,7 @@ On the x64 architecture we optimize the computation of $d \gets s - t$ and $m \g
 
 Often our implementation uses the number of bits in a positive integer $x$.  In the algorithm description we use $\floor{\log_2x} + 1$.  On the x64 architecture there is an instruction (\texttt{bsr}) that returns the index of the most significant set bit.  This allows us to quickly compute that value.  On a platform that does not have such an instruction, we use a logarithmic search to find the most significant set bit\footnote{There is also a similar algorithm to find the \emph{least} significant set bit of a machine word (\texttt{bsl} on x64).}.  Let $k = \floor{m/2}$ where $m$ is the number of bits in a machine word and let $i$ be the computed index (initially $i \gets 0$).  We first check if $x \ge 2^k$.  If it is, then $i \gets i + k$ and $x$ is shifted right by $k$.  We repeat on $k \gets \floor{k/2}$ until $k=0$.  At which point, $i$ is the index of the most significant set bit (see Algorithm \ref{alg:msb}).  Notice that we can use the signed mask of $2^k - x$ instead of the conditional `if' statement, and we can unroll the while loop for fixed values of $m$.
 
-\begin{algorithm}[h]
+\begin{algorithm}[htb]
 \caption{Return the index of the most significant set bit of $x$.}
 \label{alg:msb}
 \begin{algorithmic}[1]
@@ -2073,7 +2087,7 @@ n = 4 \floor{n/4} + (n \bmod 4) \equiv \floor{n/4} + (n \bmod 4) \pmod 3
 \]
 and then recursively write $\floor{n/4} \pmod 3$ the same way. This provides us with a method to quickly compute $n \bmod 3$ -- we partition the binary representation of $n$ into \mbox{2-bit} blocks and sum each block modulo 4.  The resulting sum $s$ is $s \equiv n \pmod 3$.  We further improve the performance of this algorithm by noting that $4^m \equiv 1 \pmod 3$.  Since our target architecture (and language) has 64-bit words, we partition the binary representation into 64-bit blocks and sum each block modulo $2^{64}$.  We then add each 32-bit word of the resulting sum modulo $2^{32}$, then each 16-bit word of the sum modulo $2^{16}$, and finally each 8-bit word modulo $2^8$.  We look up the final answer modulo 3 from a table of 256 entries (see Algorithm \ref{alg:fastMod3}).
 
-\begin{algorithm}[h]
+\begin{algorithm}[htb]
 \caption{Fast $n \bmod 3$ (adapted from Hacker's Delight \cite{Warren2002}).}
 \label{alg:fastMod3}
 \begin{algorithmic}[1]
@@ -2208,7 +2222,7 @@ The techniques of the previous two Subsections are computationally expensive and
 \]
 where $0 \le b_i < 2^{16}$.  Assuming that we can exponentiate a group element $g$ to a 16-bit exponent $b_i$, Algorithm \ref{alg:blockedExp} computes the exponentiation $g^n$ using an approach similar to a left-to-right windowed binary exponentiation.
 
-\begin{algorithm}[h]
+\begin{algorithm}[htb]
 \caption{16-bit Blocked Exponentiation.}
 \label{alg:blockedExp}
 \begin{algorithmic}[1]
@@ -2370,7 +2384,7 @@ Our implementation of SuperSPAR iterates baby steps for consecutive integers cop
 \]
 such that $d_i = c_{i+1} - c_i$ for consecutive integers $c_i$ and $c_{i+1}$ coprime to $P_w$ where $c_1 = 1$. The list $\coprimelist_1$ consists of the single value 2.
 
-\begin{algorithm}[h]
+\begin{algorithm}[htb]
 \caption{Compute deltas for $P_{w+1}$ given deltas for $P_w$.}
 \label{alg:deltaWheel}
 \begin{algorithmic}[1]
@@ -2686,7 +2700,7 @@ and is infinite.  When a bound $B$ on the total number of steps $\stepCount(m, w
 \end{equation}
 and Algorithm \ref{alg:stepBounds} can be used to generate such a set.
 
-\begin{algorithm}[h]
+\begin{algorithm}[htb]
 \caption{Compute baby step bound candidates.}
 \label{alg:stepBounds}
 \begin{algorithmic}[1]
@@ -2781,7 +2795,7 @@ The information in the above figures is noisy, which may be partly due to the in
 
 To find values for the exponentiation stage and search stage that work well in practice, one could iterate all suitable exponents $E$ and multiples of primorials $mP_w$, but that would conceivably take a long time\footnote{The improved method proposed here took approximately 1 day to run on a set of 4,000 random semiprime  integers for bits sizes 16, 18, ..., 100. See Table \ref{tab:ssparParams} for the results.} for even a small sample set of integers.  The Figures in the previous section suggest a more efficient approach, given by Algorithm \ref{alg:noisyCurveSearch}.  Using a more efficient approach also allows us to use a larger sample of integers than would be possible otherwise.
 
-\begin{algorithm}[h]
+\begin{algorithm}[htb]
 \caption[Find suitable parameters for SuperSPAR.]{Determine some $x$ such that $f(x)$ is suitably small where $f(x)$ is the average time to split integers using SuperSPAR with one free variable.}
 \label{alg:noisyCurveSearch}
 \begin{algorithmic}[1]
