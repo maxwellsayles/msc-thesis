@@ -1298,14 +1298,15 @@ The cost is minimized for $u \approx \sqrt{2 \log M / \log \log M}$, which gives
 	\exp \left( \left( \sqrt2 + o(1) \right) \sqrt{\log M \log \log M} \right).
 \]
 
-Notice that the idea behind the SPAR factoring algorithm is to find an ambiguous ideal for one of the class groups with valid discriminant $\Delta = -kN$ for $1 \le k \le r^r$ where $r = \sqrt{\ln N / \ln \ln N}$.  In this case, the success of splitting a composite integer $N$ is not limited to finding an ambiguous ideal within a single group, but instead to finding an ambiguous ideal from any of several groups.  As such, the above approach is directly applied to that of the SuperSPAR factoring algorithm.  Unfortunately, as shown by Lenstra and Pomerance \mbox{\cite[\S~11]{Lenstra1992}}, there exist integers $N$ where there is no multiplier $k$ such that the class group $Cl_\Delta$ for $\Delta = -kN$ is sufficiently smooth.  However, Chapter \ref{chap:ssparExperiments} assumes that such integers are sufficiently rare that SuperSPAR will perform well in practice.
+Notice that the idea behind the SPAR factoring algorithm is to find an ambiguous ideal for one of the class groups with valid discriminant $\Delta = -kN$ for $1 \le k \le r^r$ where $r = \sqrt{\ln N / \ln \ln N}$.  In this case, the success of splitting a composite integer $N$ is not limited to finding an ambiguous ideal within a single group, but instead to finding an ambiguous ideal from any of several groups.  As such, the above approach is directly applied to that of the SuperSPAR factoring algorithm.  Unfortunately, as shown by Lenstra and Pomerance \mbox{\cite[\S~11]{Lenstra1992}}, there exist integers $N$ where there is no multiplier $k$ such that the class group $Cl_\Delta$ for $\Delta = -kN$ is sufficiently smooth.  However, the next Subsection assumes that such integers are sufficiently rare that SuperSPAR will perform well in practice.
 
 
 \subsection{SuperSPAR Algorithm}
 \label{subsec:ssparAlg}
 
 
-For some square free integer $k$, choose a discriminant $\Delta = -kN$ or $\Delta = -4kN$ such that $\Delta \equiv 0, 1 \pmod 4$.  
+
+Let $N$ be the odd composite integer that we wish to factor.  For some square free integer $k$, choose a discriminant $\Delta = -kN$ or $\Delta = -4kN$ such that $\Delta \equiv 0, 1 \pmod 4$.  
 
 Stage 1 takes the first $t$ primes $p_1 = 2, p_2 = 3, ..., p_t \le N^{1/2r}$ for $r = \sqrt{\ln N / \ln \ln N}$, sets $e_i = \max \{ v : {p_i}^v \le {p_t}^2 \}$, lets $E = \prod_{i=2}^t {p_i}^{e_i}$ be the product of the odd prime powers, and then computes $\bclass = \aclass^E$ for a random ideal class $\aclass$.  Finally, it computes $\cclass = {\bclass}^{\left(2^k\right)}$ for $k=\floor{\log_2 \sqrt{|\Delta|}}$.  If $\bclass = \idclass$, then $\ord(\aclass)$ divides $E$ and is odd, and the algorithm tries again with a different random ideal class $\aclass$.  If the odd part of $\ord(\aclass)$ divides $E$ and the order of $\aclass$ is even, then there is some $\bclass^{\left( 2^j \right)}$ for $0 \le j < k$ that is an ambiguous ideal and we attempt to factor the discriminant $\Delta$.  Failing this, SuperSPAR continues with Stage 2.
 
@@ -1324,13 +1325,13 @@ In both SPAR and SuperSPAR, each stage uses $O(p_t)$ group operations where $p_t
 
 Furthermore, balancing both stages of SuperSPAR to use $O(N^{1/2r})$ group operations is not ideal.  This is partly because the actual cost of multiplication, squaring, and cubing differ, but also because the success of each stage depends on different properties of the class number.  The exponentiation stage is successful when the order of a random ideal class is smooth with respect to some primorial $E$, while the search stage is successful when the non-smooth part of the order is sufficiently small.  In this sense, the efficiency of the factoring algorithm depends both on the smoothness of the order of a random ideal class $\aclass$ with respect to the primorial $E$, but also on the size of its non-smooth part with respect to the largest exponent reached by the search stage.  Selecting bounds for each stage independently of $r$ varies the time spent during each stage inversely to the probability of its success.
 
-Experimentally we found that the prime factorization of the order of ideal classes consists of prime powers with exponents that are typically 1 for all but the smallest primes (see Subsection \ref{subsec:ssparPrimePowerBound}).  Schnorr and Lenstra \cite[p.293]{Schnorr1984} also advise the use of smaller exponents in practice.  Additionally, we found that the order of an ideal class $[\ideal a_1]$ was, with high probability (about 96.9\% in our experiments), either the same as or a multiple of the order of some other ideal class $[\mathfrak a_2]$ in the same class group (see Subsection~\ref{subsec:ssparDiffBtwOrder}).  For this reason, if the algorithm finds some $h'$ such that ${[\mathfrak a_1]^{h'}}^{\left(2^j\right)}$ is an ambiguous class for some $j$, but is unsuccessful at factoring $N$, the algorithm simply attempts to find an ambiguous class by repeated squaring of $[\mathfrak a_i]^{h'}$ for several $[\mathfrak a_i]$.  If this fails for several ideal classes, the algorithm then starts over with a different multiplier $k$ for the discriminant.  Let $c$ be the maximum number of ideal classes tried.
+Experimentally we found that the prime factorization of the order of ideal classes consists of prime powers with exponents that are typically 1 for all but the smallest primes (see Subsection \ref{subsec:ssparPrimePowerBound}).  Schnorr and Lenstra \cite[p.293]{Schnorr1984} also advise the use of smaller exponents in practice.  Additionally, we found that the order of an ideal class $[\ideal a_1]$ was, with high probability (about 97.8\% in our experiments), either the same as or a multiple of the order of some other ideal class $[\mathfrak a_2]$ in the same class group (see Subsection~\ref{subsec:ssparDiffBtwOrder}).  For this reason, if the algorithm finds some $h'$ such that ${[\mathfrak a_1]^{h'}}^{\left(2^j\right)}$ is an ambiguous class for some $j$, but is unsuccessful at factoring $N$, the algorithm simply attempts to find an ambiguous class by repeated squaring of $[\mathfrak a_i]^{h'}$ for several $[\mathfrak a_i]$.  If this fails for several ideal classes, the algorithm then starts over with a different multiplier $k$ for the discriminant.  Let $c$ be the maximum number of ideal classes tried.
 
 % NOTE: We give a test for an ambiguous ideal and a method of factoring the discriminant in section 4.1.1
 
 % -- Try to Find an Ambiguous Ideal Class -- %
 \begin{algorithm}[h]
-\caption{Try to Find an Ambiguous Ideal Class by Repeated Squaring.}
+\caption[Repeatedly Square]{Try to find an ambiguous ideal class by repeated squaring.}
 \begin{algorithmic}[1]
 \Procedure{RepeatedlySquare}{$\bclass, \ell$}
 \For{$i$ from 1 to $\ell$ while $\bclass \neq \idclass$}
@@ -1352,7 +1353,7 @@ Experimentally we found that the prime factorization of the order of ideal class
 
 % -- Try Many Ideal Classes -- %
 \begin{algorithm}[h]
-\caption{Try Many Ideal Classes.}
+\caption[Try Many Ideal Classes.]{Try to factor $N$ using several ideal classes and a multiple of the order of a single ideal class.}
 \begin{algorithmic}[1]
 \Procedure{TryManyIdealClasses}{$\Delta$, $h$, $\ell$, $c$}
 \For{$2 \le i \le c$}
@@ -1492,7 +1493,7 @@ and Equations \ref{eq:initialGcd1} and \ref{eq:initialGcd2} hold.  We maintain t
 
 In practice, these operations are performed by manipulating each variable directly, rather than by using matrix arithmetic.  Furthermore, we typically implement division with remainder, which solves $s = qt + r$ for $q,r \in \ZZ$ and $|r| < |t|$.  Notice that $r = s - qt$ is the target value of $t$ for each iteration of the Euclidean Algorithm.
 
-\section{Lehmer's GCD}
+\section{Lehmer's Extended GCD}
 
 % TODO: Talk about Lehmer's with 64-bit EEA and 64-bit L2R.
 
@@ -1549,7 +1550,7 @@ Then continue with the outer loop of the computation until $t = 0$.  In the even
 \end{algorithm}
 
 
-\section{Right-to-Left Binary GCD}
+\section{Right-to-Left Binary Extended GCD}
 \label{sec:r2lBinGcd}
 
 % TODO: Based on the slope of the graph, we did not anticipate that this method would outperform other methods for 128-bit integers.
@@ -1658,7 +1659,7 @@ This ensures that $s$ is odd, $t$ is even, and that both $s$ and $t$ are positiv
 \end{algorithm}
 
 
-\section{Windowed Right-to-Left Binary GCD}
+\section{Windowed Right-to-Left Binary Extended GCD}
 
 Windowing is a common technique used to extend the base of an algorithm.  We saw this earlier in our discussion of binary exponentiation in Section \ref{sec:binaryExp}.  The idea there was to precompute $g^w$ for each $w$ in some window $0 \le w < 2^k$ for some $k$ and then to iterate over the exponent $k$ bits at a time.  We can apply this technique to the right-to-left extended binary GCD.
 
@@ -1696,7 +1697,7 @@ This is easily extended for any $2^k$ where $k$ is a positive integer.  The algo
 \end{algorithmic}
 \end{algorithm}
 
-\section{Left-to-Right Binary GCD}
+\section{Left-to-Right Binary Extended GCD}
 
 Just as exponentiation can be performed from high-order to low-order, so too can an extended binary GCD computation.  This is termed a left-to-right binary GCD, since it works from the left most bit to the right most bit of the written binary representation of the inputs.
 
