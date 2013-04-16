@@ -110,7 +110,7 @@
 \newcommand{\ith}{i^{\textrm{th}}}
 
 \newcommand{\mygraph}[3]{
-	\begin{figure}[H]
+	\begin{figure}[htb]
 	\centering
 	\includegraphics{#1}
 	\caption{#3}
@@ -120,7 +120,7 @@
 
 % Same as \mygraph only it allows for a custom TOC description.
 \newcommand{\mygraphX}[4]{
-	\begin{figure}[H]
+	\begin{figure}[htb]
 	\centering
 	\includegraphics{#1}
 	\caption[#4]{#3}
@@ -129,7 +129,7 @@
 }
 
 \newcommand{\mygraphTwo}[4]{
-	\begin{figure}[H]
+	\begin{figure}[htb]
 	\centering
 	\includegraphics{#1}
 	\includegraphics{#2}
@@ -140,7 +140,7 @@
 
 % Same as \mygraphTwo, but allows for a custom TOC desc.
 \newcommand{\mygraphTwoX}[5]{
-	\begin{figure}[H]
+	\begin{figure}[htb]
 	\centering
 	\includegraphics{#1}
 	\includegraphics{#2}
@@ -969,6 +969,7 @@ using 15 squares, 6 cubes, 2 inverses, and 3 multiplications.  The result of the
 \caption[The construction of $2^{15} 3^6 - 2^8 3^5 - 2^4 3^6 + 2^3 3^3$.]{The construction of $2^{15} 3^6 - 2^8 3^5 - 2^4 3^6 + 2^3 3^3$ using algorithm \ref{alg:yaos}.  Steps are executed from left-to-right, top-to-bottom.}
 \label{fig:yao1}
 \end{figure}
+%\clearpage
 
 
 \section{Methods for Computing 2,3 Chains/Representations}
@@ -1306,7 +1307,7 @@ Notice that the idea behind the SPAR factoring algorithm is to find an ambiguous
 
 As mentioned previously, SuperSPAR works in two stages: an exponentiation stage and a search stage.  First, let $N$ be the odd composite integer that we wish to factor.  Then, for some square free integer $k$, choose a discriminant $\Delta = -kN$ or $\Delta = -4kN$ such that $\Delta \equiv 0, 1 \pmod 4$.  The exponentiation stage of SuperSPAR is the same as in SPAR, but we quickly recap this here.
 
-In the exponentiation stage of SuperSPAR, we take the first $t$ primes $p_1 = 2, p_2 = 3, ..., p_t \le N^{1/2r}$ for $r = \sqrt{\ln N / \ln \ln N}$, let $E = \prod_{i=2}^t {p_i}^{e_i}$ be the product of the odd prime powers where $e_i = \max \{ v : {p_i}^v \le {p_t}^2 \}$, and then compute $\bclass = \aclass^E$ for a random ideal class $\aclass \in Cl_\Delta$.  If $\bclass = \idclass$, then $\ord(\aclass)$ divides $E$ and is odd, and we cannot find an ambiguous ideal class from $\aclass$.  As such, we try again with a different random ideal class in $Cl_\Delta$.  Assuming $\bclass \neq \idclass$, we then compute $\bclass^{\left(2^j\right)}$, by repeated squaring, for $1 \le j \le \floor{\log_2\sqrt{|\Delta|}}$ or until $\bclass^{\left(2^j\right)}$ is an ambiguous ideal.  If there is some $j$ such that $\bclass^{\left(2^j\right)}$ is an ambiguous ideal, we attempt to split the integer $N$, and if this fails, we try again for another ideal class in $Cl_\Delta$.  If there is no $j$ such that $\bclass^{\left(2^j\right)}$ is an ambiguous ideal class, then we have computed $\cclass = {\bclass}^{\left(2^\ell\right)}$ for $\ell=\floor{\log_2 \sqrt{|\Delta|}}$, and SuperSPAR moves on to the search stage.
+In the exponentiation stage of SuperSPAR, we take the first $t$ primes $p_1 = 2, p_2 = 3, ..., p_t \le N^{1/2r}$ for $r = \sqrt{\ln N / \ln \ln N}$, let $E = \prod_{i=2}^t {p_i}^{e_i}$ be the product of the odd prime powers where $e_i = \max \{ v : {p_i}^v \le {p_t}^2 \}$, and $\bclass = \aclass^E$ for a random ideal class $\aclass \in Cl_\Delta$.  If $\bclass = \idclass$, then $\ord(\aclass)$ divides $E$ and is odd, and we cannot find an ambiguous ideal class from $\aclass$.  As such, we try again with a different random ideal class in $Cl_\Delta$.  Assuming $\bclass \neq \idclass$, we then compute $\bclass^{\left(2^j\right)}$, by repeated squaring, for $1 \le j \le \floor{\log_2\sqrt{|\Delta|}}$ or until $\bclass^{\left(2^j\right)}$ is an ambiguous ideal.  If there is some $j$ such that $\bclass^{\left(2^j\right)}$ is an ambiguous ideal, we attempt to split the integer $N$, and if this fails, we try again for another ideal class in $Cl_\Delta$.  If there is no $j$ such that $\bclass^{\left(2^j\right)}$ is an ambiguous ideal class, then we have computed $\cclass = {\bclass}^{\left(2^\ell\right)}$ for $\ell=\floor{\log_2 \sqrt{|\Delta|}}$, and SuperSPAR moves on to the search stage.
 
 % TODO: Why 3s/4?
 
@@ -1314,7 +1315,7 @@ The search stage of SuperSPAR differs from that of SPAR.  Using SPAR, one attemp
 
 If we successfully compute $h' = \ord(\cclass)$ during the search stage, then assuming that $\ord(\bclass)$ is even, we compute an ambiguous ideal class by repeated squaring of $\bclass^{h'}$, and then attempt to factor the integer associated with the discriminant.  Since the order of $\bclass^{h'}$ might not be even, we do not square more than $\ell = \floor{\log_2{\sqrt N}}$ times, as in the exponentiation stage.  If the order is odd, we choose a different random ideal class and start over with the exponentiation stage.  On the other hand, if we fail to compute the order of $\cclass$ during the search stage, then we start from the beginning with a different square free multiplier $k$ of the integer $N$.
 
-The work by Lenstra and Pomerance \cite[\S 11]{Lenstra1992}, precludes a subexponential running time complexity for both SPAR and SuperSPAR, however, their results dictate a worst case running time.  Future work would include a median case complexity analysis of SuperSPAR (Section \ref{sec:futureSSPAR}.  In Chapter \ref{chap:ssparExperiments}, we empirically search for parameters for SuperSPAR in order to minimize the average running time for integers in the range where SuperSPAR is competitive with other factoring algorithms.  Section \ref{sec:ssparInPractice} discusses several ways in which our implementation of SuperSPAR differs from the description given here in order to improve the performance of SuperSPAR in practice.  Details of our implementation are given in Algorithm \ref{alg:superSpar}.
+The work by Lenstra and Pomerance \cite[\S 11]{Lenstra1992}, precludes a subexponential running time complexity for both SPAR and SuperSPAR, however, their results dictate a worst case running time.  Future work would include a median case complexity analysis of SuperSPAR (Section \ref{sec:futureSSPAR}.  In Chapter \ref{chap:ssparExperiments}, we empirically search for parameters for SuperSPAR, such as the exponent $E$ and the multiple of a primorial $mP_w$, in order to minimize the average running time to factor integers in the range where SuperSPAR is competitive with other factoring algorithms.  Section \ref{sec:ssparInPractice} discusses several ways in which our implementation of SuperSPAR differs from the description given here in order to improve the performance of SuperSPAR in practice.  Details of our implementation are given in Algorithm \ref{alg:superSpar}.
 
 \section{Summary}
 
@@ -1815,11 +1816,15 @@ The graphs in Figures \ref{fig:stein1-32v64}, \ref{fig:stein2-32v64}, \ref{fig:s
 \mygraph{stein4-32v64}{fig:stein4-32v64}{4-bit Windowed Right-to-Left Binary GCD.}
 \mygraph{stein5-32v64}{fig:stein5-32v64}{5-bit Windowed Right-to-Left Binary GCD.}
 
+\clearpage
+
 The left-to-right variant of the binary GCD proposed by Shallit and Sorenson is shown in figure \ref{fig:shallit-32v64}.  Here the 32-bit implementation is slightly faster than the 64-bit implementation.
 \mygraph{shallit-32v64}{fig:shallit-32v64}{Left-to-Right binary GCD of Shallit and Sorenson.}
 
 Lastly, our simplified version of the left-to-right binary GCD is shown in figure \ref{fig:binary_l2r-32v64}.  In this case, the benefit, if any, to using a 32-bit implementation over a 64-bit implementation is negligible\footnote{Nanosecond differences between the two versions could be attributed to timing inaccuracies.}.
 \mygraph{binary_l2r-32v64}{fig:binary_l2r-32v64}{Simplified Left-to-Right binary GCD.}
+
+\clearpage
 
 Note that the 32-bit versions of the right-to-left binary GCD are only accurate up to 29-bits (ignoring sign), while the 64-bit versions are only accurate to 60-bits. All other 32-bit implementations are accurate to 31-bits\footnote{The input is less than or equal to 31-bits, since in a two's complement representation the sign of the input variable takes the most significant bit and accounts for all 32-bits.} and all other 64-bit implementations are accurate to 63-bits\footnote{Similar to the 32-bit implementation, the most significant bit represents the sign of the integer.}.
 
