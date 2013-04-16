@@ -610,6 +610,15 @@ We then compute
 \end{align}
 for the product $\mathfrak a \mathfrak b = [a, (b + \sqrt\Delta)/2]$ where $\ideal a \ideal b$ is at most two steps from being reduced.  Note that this procedure assumes that $\mathcal N(\mathfrak a) \ge \mathcal N(\mathfrak b)$ and that if $a_1 < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4}$ then $R_{-1}$ and $R_{-2}$ satisfy Equation \ref{eq:nucompBound} and we compute the product $\mathfrak a \mathfrak b$ as in the previous subsection without expanding the simple continued fraction $sU/a_1$.  When $a_1 \ge \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4}$, at least one iteration of the recurrence \ref{eq:recurCNUCOMP} is performed and so $C_i \neq 0$ and there will not be a division by zero in Equation \ref{eq:bNUCOMP}.
 
+Our implementation of fast ideal multiplication includes many practical optimizations developed by Imbert, Jacobson, and Schmidt \cite[Algorithm~6]{Imbert2010}.  For example, by Equation \ref{eq:idealProductS}, $s ~|~ a_1$ and $s ~|~ a_2$, and so after computing $s$, we use ${a_1}' = a_1/s$ and ${a_2}' = a_2/s$ throughout.  Furthermore, they separate Equation \ref{eq:idealProductS} into the following computations. Let
+\begin{align}
+s' &= \gcd(a_1, a_2) = Y'a_1 + V'a_2 \label{eq:idealProductSPart1} \\
+s  &= \gcd(s', (b_1 + b_2)/2) = V''s'+W(b_1+b_2)/2. \label{eq:idealProductSPart2} 
+\end{align}
+Only when $s' \neq 1$ do we compute Equation \ref{eq:idealProductSPart2}, in which case $V = V'V''$.  When $s' = 1$, we do not compute Equation \ref{eq:idealProductSPart2} and instead set $s = 1$, $V = V'$, and $W=0$ (which simplifies Equation \ref{eq:idealProductU}).  Also notice that $Y$ from Equation \ref{eq:idealProductS} (and correspondingly $Y'$ from Equation \ref{eq:idealProductSPart1}) is not used throughout the ideal product calculation.  As such, we do not compute this coefficient when computing Equation \ref{eq:idealProductSPart1}.
+
+Chapter \ref{chap:xgcdExperiments} discusses practical optimizations for computing the extended GCD used in Equations \ref{eq:idealProductSPart1} and \ref{eq:idealProductSPart2}, as well as the simple continued fraction expansion of $sU/a_1$, which is closely related to the extended GCD computation.  Chapter \ref{chap:idealExperiments} gives a more thorough treatment of our implementation of ideal class arithmetic.  Pseudo-code for the approach described here is given in Algorithm \ref{alg:nucomp}.
+
 \begin{algorithm}[htb]
 \caption{NUCOMP -- Fast Ideal Multiplication (\cite[pp.441-443]{Jacobson2009}).}
 \label{alg:nucomp}
@@ -645,15 +654,6 @@ for the product $\mathfrak a \mathfrak b = [a, (b + \sqrt\Delta)/2]$ where $\ide
 \State \Return $[a, (b+\sqrt\Delta)/2]$
 \end{algorithmic}
 \end{algorithm}
-
-Our implementation of fast ideal multiplication includes many practical optimizations developed by Imbert, Jacobson, and Schmidt \cite[Algorithm~6]{Imbert2010}.  For example, by Equation \ref{eq:idealProductS}, $s ~|~ a_1$ and $s ~|~ a_2$, and so after computing $s$, we use ${a_1}' = a_1/s$ and ${a_2}' = a_2/s$ throughout.  Furthermore, they separate Equation \ref{eq:idealProductS} into the following computations. Let
-\begin{align}
-s' &= \gcd(a_1, a_2) = Y'a_1 + V'a_2 \label{eq:idealProductSPart1} \\
-s  &= \gcd(s', (b_1 + b_2)/2) = V''s'+W(b_1+b_2)/2. \label{eq:idealProductSPart2} 
-\end{align}
-Only when $s' \neq 1$ do we compute Equation \ref{eq:idealProductSPart2}, in which case $V = V'V''$.  When $s' = 1$, we do not compute Equation \ref{eq:idealProductSPart2} and instead set $s = 1$, $V = V'$, and $W=0$ (which simplifies Equation \ref{eq:idealProductU}).  Also notice that $Y$ from Equation \ref{eq:idealProductS} (and correspondingly $Y'$ from Equation \ref{eq:idealProductSPart1}) is not used throughout the ideal product calculation.  As such, we do not compute this coefficient when computing Equation \ref{eq:idealProductSPart1}.
-
-Chapter \ref{chap:xgcdExperiments} discusses practical optimizations for computing the extended greatest common divisor and the recurrences \ref{eq:recurqNUCOMP}, \ref{eq:recurRNUCOMP}, and \ref{eq:recurCNUCOMP}.  Finally, the first coefficient, $Y$, from Equation \ref{eq:idealProductS} is never used, and so it is not computed.  See Chapter \ref{chap:idealExperiments} for a more thorough treatment of our implementation of ideal class arithmetic.  Pseudo-code is given in Algorithm \ref{alg:nucomp}.
 
 
 \subsection{Fast Ideal Squaring (NUDUPL)}
