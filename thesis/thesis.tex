@@ -1311,7 +1311,7 @@ In the exponentiation stage of SuperSPAR, we take the first $t$ primes $p_1 = 2,
 
 % TODO: Why 3s/4?
 
-The search stage of SuperSPAR differs from that of SPAR.  Using SPAR, one attempts to find the order of $\cclass$ by performing a random walk using at most $O(p_t)$ group operations.  With SuperSPAR, on the other hand, one attempts to find the order of $\cclass$ using a variation of the bounded primorial steps algorithm, again, using at most $O(p_t)$ group operations.   First, we select a multiple of a primorial for the primorial steps.  Let $\eta$ be the number of group operations performed during the exponentiation stage, and choose $w$ to be as large as possible such that $\eta / 2 \le m\phi(P_w) < 3 \eta / 4$ for some $m \in \ZZ$. The choice of $m$ and $w$ is such that the exponent of the final giant step, $m^2\phi(P_w)P_w$, is as large as possible, while the total number of steps taken is still at most $O(p_t)$.  Let $s = mP_w$ and $d = m\phi(P_w)$.  Then take baby steps $\cclass^i$ for $1 \le i \le s$ with $i$ coprime to $P_w$.  If any $\cclass^i = \idclass$, then we have computed the order $h' = i$ of $\cclass$.  Otherwise, we compute giant steps $\cclass^j$ for $j=2s,-2s,4s,-4s,...,2sd,-2sd$.  Notice that this sequence of giant steps is used since computing the inverse in the ideal class group is essentially free.  If there exists a giant step $\cclass^j$ such that $\cclass^j = \cclass^i$ for some corresponding baby step $\cclass^i$, then we have computed the order $h' = j - i$ of $\cclass$.  
+The search stage of SuperSPAR differs from that of SPAR.  Using SPAR, one attempts to find the order of $\cclass$ by performing a random walk using at most $O(p_t)$ group operations.  With SuperSPAR, on the other hand, one attempts to find the order of $\cclass$ using a variation of the bounded primorial steps algorithm such that the exponent of the final giant step, $m^2\phi(P_w)P_w$, is as large as possible, while the total number of steps taken is still at most $O(p_t)$.  Let $\eta$ be the number of group operations performed during the exponentiation stage, and choose $w$ to be as large as possible such that $\eta / 2 \le m\phi(P_w) < 3 \eta / 4$ for some integer $m$.  Let $s = mP_w$ and $d = m\phi(P_w)$.  Then take baby steps $\cclass^i$ for $1 \le i \le s$ with $i$ coprime to $P_w$.  If any $\cclass^i = \idclass$, then we have computed the order $h' = i$ of $\cclass$.  Otherwise, we compute giant steps $\cclass^j$ for $j=2s,-2s,4s,-4s,...,2sd,-2sd$.  Notice that this sequence of giant steps is used since computing the inverse in the ideal class group is essentially free.  If there exists a giant step $\cclass^j$ such that $\cclass^j = \cclass^i$ for some corresponding baby step $\cclass^i$, then we have computed the order $h' = j - i$ of $\cclass$.  
 
 If we successfully compute $h' = \ord(\cclass)$ during the search stage, then assuming that $\ord(\bclass)$ is even, we compute an ambiguous ideal class by repeated squaring of $\bclass^{h'}$, and then attempt to factor the integer associated with the discriminant.  Since the order of $\bclass^{h'}$ might not be even, we do not square more than $\ell = \floor{\log_2{\sqrt N}}$ times, as in the exponentiation stage.  If the order is odd, we choose a different random ideal class and start over with the exponentiation stage.  On the other hand, if we fail to compute the order of $\cclass$ during the search stage, then we start from the beginning with a different square free multiplier $k$ of the integer $N$.
 
@@ -1338,15 +1338,15 @@ One contribution of this thesis is an efficient implementation of arithmetic in 
 \]
 where $a$ and $b$ are fixed integers given as input, and $s$ is the greatest common divisor (GCD) of both $a$ and $b$.  Solutions to this equation are referred to as the \emph{extended greatest common divisor} (or extended GCD for short).  A first step to improving the performance of arithmetic in the ideal class group is to improve the performance of GCD computations.  This chapter discusses several algorithms for computing solutions to the extended GCD.
 
-Section \ref{sec:gcdEEA} discuses the standard extended Euclidean Algorithm.  The core of the extended Euclidean Algorithm is used in Lehmer's extended GCD in Section \ref{sec:gcdLehmer}.  Both the extended Euclidean algorithm and Lehmer's extended GCD use division and multiplication, which can be costly.  Binary extended GCD computations emphasize bit shifting in lieu of division and multiplication.  Sections \ref{sec:gcdR2LBin} and \ref{sec:gcdR2LWindowed} discuss an extended GCD algorithm that works from low-order to high-order\footnote{Referred to here as \emph{right-to-left} since this is the order in which bits are operated on in the written binary representation of the inputs.} and its windowed variant.  An extended GCD can also be computed in binary from high-order to low-order\footnote{Also referred to as \emph{left-to-right}.}, and is discussed in Section \ref{sec:gcdL2R}.
+Section \ref{sec:gcdEEA} discuses the standard extended Euclidean Algorithm.  The core of the extended Euclidean Algorithm is used in Lehmer's extended GCD in Section \ref{sec:gcdLehmer}.  Both the extended Euclidean algorithm and Lehmer's extended GCD use division and multiplication, which can be costly.  Binary extended GCD computations emphasize bit shifting in place of multiplication and division.  Section \ref{sec:gcdR2LBin} discusses an extended GCD algorithm that works from low-order to high-order, referred to as \emph{right-to-left} since this is the order in which bits are operated on in the binary representation. Section \ref{sec:gcdR2LWindowed} discusses the windowed variant of this algorithm.  An extended GCD can also be computed in binary from high-order to low-order, also referred to as \emph{left-to-right}, and is discussed in Section \ref{sec:gcdL2R}.
 
-In addition to this, ideal class multiplication (Subsection \ref{subsec:nucomp}), squaring (Subsection \ref{subsec:nudupl}), and cubing (Subsection \ref{subsec:nucube}), compute solutions to $R_i < B < R_{i-1}$ using the recurrences
+The ideal class multiplication, squaring, and cubing from Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and ref{subsec:nucube}, use the recurrences
 \begin{align*}
 	q_i &= \floor{R_{i-2} ~/~ R_{i-1}} \\
 	R_i &= R_{i-2} - q_i R_{i-1} \\
 	C_i &= C_{i-2} - q_i C_{i-1}.
 \end{align*}
-Such computations are related to the extended GCD and are referred to as the \emph{partial extended GCD}.  Section \ref{sec:gcdPartial} discusses our implementations of the partial extended GCD.
+Such computations are related to the extended GCD and are referred to as the \emph{partial extended GCD}, discussed in Section \ref{sec:gcdPartial}.
 
 To improve the performance of these algorithms in practice, we specialized much of our implementation for the x64 architecture.  The details of this specialization are discussed in Section \ref{sec:gcdImpl}.  Many of our routines benefit when the input is bound by a single machine word, i.e.\ 64-bits, but we were also able to take advantage of integers that fit within two machine words by implementing a custom library for 128-bit arithmetic.  When integers are larger than 128-bits, we use the GNU Multiple Precision (GMP) arithmetic library \cite{Gmp}.  All the software in this chapter was developed using the \compiler{} on Ubuntu 12.10.   Assembly language was used for the inner loops of the routines presented here, as well as for processing features not available in the C programming language (such as 128-bit arithmetic). The hardware platform was a personal notebook with a \cpu{} and 8Gb of memory.  The CPU has four cores, only one of which was used during timing experiments.
 
@@ -1355,7 +1355,7 @@ Finally, for each of the extended GCD techniques discussed in this chapter, Sect
 \section{The Euclidean Algorithm}
 \label{sec:gcdEEA}
 
-The Euclidean Algorithm is an algorithm for computing the greatest common divisor of two integers.  We start with two positive integers $a$ and $b$.  At each iteration of the algorithm, we subtract the smaller of the two numbers from the larger, until one of them is 0. At this point, the non-zero number is the largest divisor of $a$ and $b$.  Since the smaller number may still be smaller after a single iteration, we use fewer steps by subtracting an integer multiple of the smaller number from the larger one.
+The Euclidean Algorithm (see \cite[\S 9.3.2]{Cohen2006}) is an algorithm for computing the greatest common divisor of two integers.  The input is the two positive integers $a$ and $b$.  At each iteration of the algorithm, we subtract the smaller of the two numbers from the larger, until one of them is 0. At this point, the non-zero number is the largest divisor of $a$ and $b$.  Since the smaller number may still be smaller after a single iteration, we use fewer steps by subtracting an integer multiple of the smaller number from the larger one.
 
 The Euclidean Algorithm is extended by using a system of equations of the form
 \begin{align}
@@ -1405,11 +1405,11 @@ In practice, these operations are performed by manipulating each variable direct
 
 In the previous section, each iteration subtracts a multiple, $q = \floor{s / t}$, of the smaller number from the larger number.  Derrick Henry Lehmer noticed that most of the quotients, $q$, were small and that those small quotients could be computed from the leading digits (or machine word) of the numerator and denominator \cite{Lehmer1938}.
 
-The idea is similar to the Extended Euclidean Algorithm, only that there is an inner loop that performs an Extended GCD computation using values that fit within a single machine word.  As before, start by letting
+The idea is similar to the extended Euclidean Algorithm, only that there is an inner loop that performs an extended GCD computation using values that fit within a single machine word.  As before, start by letting
 \[
 	\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixThreeTwo{a}{1}{0}{b}{0}{1}
 \]
-for positive integers $a$ and $b$.  Assume that $s \ge t$ (if this is not the case, then swap the rows of the matrix).  Compute $s'=\floor{s/2^k}$ for some $k$ such that $s'$ fits within a single machine word and is as large as possible (if $s$ already fits within a single machine word, then let $k=0$), and compute $t' = \floor{t/2^k}$ for the same value $k$.  Then perform an Extended GCD computation on the values $s'$ and $t'$ but only for as long as the quotients $q'=\floor{s'/t'}$, generated by each step of the single precision GCD computation, are equal to the quotients $q=\floor{s/t}$, generated by a full precision GCD computation.  To determine when the quotients $q'$ differ from the quotients $q$, compute $q_1 = \floor{(s'+A)/(t'+C)}$ and $q_2 = \floor{(s'+B)/(t'+D)}$.  Let $q' = q_1$ and when $q_1 = q_2$ it follows that $q' = q$ \cite[p.229,~Theorem~A]{Lehmer1938}.
+for positive integers $a$ and $b$.  Assume that $s \ge t$ (if this is not the case, then swap the rows of the matrix).  Compute $s'=\floor{s/2^k}$ for some $k$ such that $s'$ fits within a single machine word and is as large as possible (if $s$ already fits within a single machine word, then let $k=0$), and compute $t' = \floor{t/2^k}$ for the same value $k$.  Then perform an extended GCD computation on the values $s'$ and $t'$ but only for as long as the quotients $q'=\floor{s'/t'}$, generated by each step of the single precision extended GCD computation, are equal to the quotients $q=\floor{s/t}$, generated by a full precision extended GCD computation.  To determine when the quotients $q'$ differ from the quotients $q$, compute $q_1 = \floor{(s'+A)/(t'+C)}$ and $q_2 = \floor{(s'+B)/(t'+D)}$.  Let $q' = q_1$ and when $q_1 = q_2$ it follows that $q' = q$ \cite[p.229,~Theorem~A]{Lehmer1938}.
 
 Let
 \[
@@ -1419,15 +1419,15 @@ be the initial matrix consisting of single precision integers.  Then perform the
 \[
 \matrixtt{A}{B}{C}{D}
 \]
-represents the concatenation of the operations performed during the single precision GCD.  If $B \neq 0$, these operations are combined with the outer loop of the larger GCD by computing
+represents the concatenation of the operations performed during the single precision extended GCD.  If $B \neq 0$, these operations are combined with the outer loop of the larger extended GCD by computing
 \[
 \matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixtt{A}{B}{C}{D}
 		        \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}.
 \]
-Then continue with the outer loop of the computation until $t = 0$.  In the event that $B=0$, then $s$ and $t$ differ in length by more than a machine word, and we use a step of the full precision GCD computation to adjust their lengths.  The complete algorithm is given in Algorithm \ref{alg:lehmerGcd}.
+Then continue with the outer loop of the computation until $t = 0$.  In the event that $B=0$, then $s$ and $t$ differ in length by more than a machine word, and we use a step of the full precision extended GCD computation to adjust their lengths.  The complete algorithm is given in Algorithm \ref{alg:lehmerGcd}.
 
 \begin{algorithm}[htb]
-\caption{Lehmer's GCD (\cite{Lehmer1938}).}
+\caption{Lehmer's extended GCD (\cite{Lehmer1938}).}
 \label{alg:lehmerGcd}
 \begin{algorithmic}[1]
 \Require $a,b, \in \ZZ$ and $a \ge b > 0$.
@@ -1461,7 +1461,7 @@ Then continue with the outer loop of the computation until $t = 0$.  In the even
 
 % TODO: Based on the slope of the graph, we did not anticipate that this method would outperform other methods for 128-bit integers.
 
-The previous extended GCD algorithms use divide with remainder, which is often expensive.  Binary GCD algorithms emphasize bit shifting over multiplication and division.  Such algorithms may perform better than other GCD algorithms in practice (see Section \ref{sec:gcdResults} for results).  Here we describe a binary GCD algorithm that works from the least significant bit to the most significant bit.  We refer to this as right-to-left since this is the direction in which we process the written binary representation.  The concept was originally published by Stein \cite{Stein1967}.
+The previous extended GCD algorithms use divide with remainder, which is often expensive.  Binary extended GCD algorithms emphasize bit shifting over multiplication and division.  Such algorithms may perform better than other extended GCD algorithms in practice (see Section \ref{sec:gcdResults} for results).  Here we describe a binary extended GCD algorithm that works from the least significant bit to the most significant bit.  We refer to this as right-to-left since this is the direction in which we process the written binary representation.  The concept was originally published by Stein \cite{Stein1967}.
 
 To compute the greatest common divisor of two positive numbers, repeatedly apply the following identities,
 \[
@@ -1475,7 +1475,7 @@ To compute the greatest common divisor of two positive numbers, repeatedly apply
 \]
 In the case that only $a$ is even, we divide $a$ by 2 since 2 is not a common divisor of both.  The same is true when only $b$ is even.  When both $a$ and $b$ are odd, their difference is even and so is further reduced by 2.  Notice that each relation reduces at least one of the arguments and so the recursion terminates with either $\gcd(a, 0) = a$ or $\gcd(0, b) = b$.
 
-When both $a$ and $b$ are even, $\gcd(a, b) = 2 \cdot \gcd(a/2, b/2)$.  So the first step of our binary GCD algorithm is to remove all common powers of two from $a$ and $b$.  Let $r$ be the number of times 2 is removed from both.  Now either $a$ or $b$ or both are odd.  If $a$ is not odd, then swap $a$ and $b$ so that $a$ is guaranteed to be odd.  We will compute the GCD of the reduced $a$ and $b$.  As such, the final solution to the original input is $s2^r = Ua2^r + Vb2^r$.
+When both $a$ and $b$ are even, $\gcd(a, b) = 2 \cdot \gcd(a/2, b/2)$.  So the first step of our binary extended GCD algorithm is to remove all common powers of two from $a$ and $b$.  Let $r$ be the number of times 2 is removed from both.  Now either $a$ or $b$ or both are odd.  If $a$ is not odd, then swap $a$ and $b$ so that $a$ is guaranteed to be odd.  We will compute the extended GCD of the reduced $a$ and $b$.  As such, the final solution to the original input is $s2^r = Ua2^r + Vb2^r$.
 
 As before, begin with the matrix representation
 \[
@@ -1539,7 +1539,7 @@ otherwise let
 This ensures that $s$ is odd, $t$ is even, and that both $s$ and $t$ are positive.  Repeat the steps of reducing $t$ by powers of 2 and then subtracting one row from the other until $t=0$.  The complete algorithm is given in Algorithm \ref{alg:r2lBinGcd}.  Note that in practice, integer division by 2 is performed using a bit shift right.
 
 \begin{algorithm}[htb]
-\caption{Right-to-left Binary GCD (Stein \cite{Stein1967}).}
+\caption{Right-to-left Binary Extended GCD (Stein \cite{Stein1967}).}
 \label{alg:r2lBinGcd}
 \begin{algorithmic}[1]
 \Require $a,b, \in \ZZgtz$.
@@ -1575,7 +1575,7 @@ The algorithm in the previous subsection repeatedly reduces either the equation 
 This is easily extended for any $2^k$ where $k$ is a positive integer.  The algorithm first computes $x_j = mb$ and $y_j = ma$ for $0 \le m < 2^k$ where $j = ma \bmod 2^k$.  While $t$ is divisible by $2^h$ for some $h \le k$, we look up $x_j$ and $y_j$ for $j = Y \bmod 2^h$ and compute $(X + x_j) / 2^h$ and $(Y - y_j) / 2^h$.  The complete Algorithm is given in listing \ref{alg:windowedR2lBinGcd}.
 
 \begin{algorithm}[htb]
-\caption{Windowed Right-to-left Binary GCD.}
+\caption{Windowed Right-to-left Binary Extended GCD.}
 \label{alg:windowedR2lBinGcd}
 \begin{algorithmic}[1]
 \Require $a,b, \in \ZZgtz$ and let $k \in \ZZgtz$ be the window size in bits.
@@ -1624,7 +1624,7 @@ otherwise, compute
 Notice that after this step $s$ has the previous value of $t$ and that the binary representation of $t$ is one digit shorter than the binary representation of the previous value of $s$, i.e.\ the the left most set bit of the previous value of $s$ is now cleared.  As with the extended Euclidean Algorithm, maintain the invariant that $s \ge t$; if after the above operation $s < t$, then swap the rows of the matrix to restore the invariant. The complete algorithm is given in Algorithm \ref{alg:shallitGcd}.
 
 \begin{algorithm}[htb]
-\caption{Shallit and Sorenson Left-to-Right binary GCD (\cite{Shallit1994}).}
+\caption{Shallit and Sorenson Left-to-Right Binary Extended GCD (\cite{Shallit1994}).}
 \label{alg:shallitGcd}
 \begin{algorithmic}[1]
 \Require $a,b \in \ZZ$
@@ -1675,7 +1675,7 @@ Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and \ref{subsec:nucube} gi
 	R_i &= R_{i-2} - q_i R_{i-1} \\
 	C_i &= C_{i-2} - q_i C_{i-1}.
 \end{align*}
-These recurrences perform the same operation as a single step in the Extended Euclidean Algorithm of Section \ref{sec:euclideanAlgorithm}, but the initial and stopping conditions are different.  As such, this is referred to as the \emph{Partial Extended Euclidean Algorithm}.  The algorithm is listed in Algorithm \ref{alg:PartialEeaDivRem}.
+These recurrences perform the same operation as a single step in the Extended Euclidean Algorithm of Section \ref{sec:gcdEEA}, but the initial and stopping conditions are different.  As such, this is referred to as the \emph{Partial Extended Euclidean Algorithm}.  The algorithm is listed in Algorithm \ref{alg:PartialEeaDivRem}.
 
 \begin{algorithm}[htb]
 \caption{Partial Extended Euclidean Algorithm.}
@@ -1701,9 +1701,9 @@ All the operations performed on the matrix
 \[
 \matrixtt{R_0}{C_0}{R_1}{C_1}
 \]
-during the Partial Extended Euclidean Algorithm can be represented by an invertible $2 \times 2$ matrix with determinant $\pm 1$ (known as a \emph{unimodular} matrix).  This is necessarily the case since each operation relates one representative of an ideal equivalence class to another representative\footnote{Recall our discussion of binary quadratic forms (see subsection \ref{subsec:forms}). Two forms are related if there exists an invertible linear transformation of variables.}.  This is critical since only extended GCD computations that are restricted to operations representable using invertible $2 \times 2$ matrices can be used for the partial extended GCD.
+during the Partial Extended Euclidean Algorithm can be represented by an invertible $2 \times 2$ matrix with determinant $\pm 1$ (known as a \emph{unimodular} matrix).  This is necessarily the case since each operation relates one representative of an ideal equivalence class to another representative. Two forms are related if there exists an invertible linear transformation of variables.  This is critical since only extended GCD computations that are restricted to operations representable using invertible $2 \times 2$ matrices can be used for the partial extended GCD.
 
-Of the extended GCD algorithms in this section, only the right-to-left binary GCD of Section \ref{sec:r2lBinGcd} cannot be adapted to the partial extended GCD.  The reason is due to the step where $t$ is reduced by 2.  The Algorithm uses the computation
+Of the extended GCD algorithms in this section, only the right-to-left binary extended GCD of Section \ref{sec:gcdR2LBin} (and its windowed variants of Section \ref{sec:gcdR2LWindowed}) cannot be adapted to the partial extended GCD.  The reason is due to the step where $t$ is reduced by 2.  The Algorithm uses the computation
 \[
 	(t, X, Y) \gets \begin{cases}
 		\left( \frac{t}{2}, \frac{X}{2}, \frac{Y}{2} \right) &
@@ -1726,7 +1726,7 @@ and dropping the terms $V$ and $Y$ from the computation.
 \section{Specialized Implementations of the Extended GCD}
 \label{sec:gcdImpl}
 
-To further improve performance, we specialized implementations of each of the GCD algorithms discussed in this section for the x64 architecture.  All algorithms are implemented for the GNU C compiler\footnote{The source code was compiled using GCC 4.7.2 with the default dialect, which is the GNU dialect of ISO C90.} and often benefit from hand optimized x64 assembler.  Assembly language is used in line and is conditionally compiled based on the target platform\footnote{For time critical paths and to take advantage of special instructions, x64 assembly language is used when \textrm{\_\_x86\_64} is defined, otherwise 80386 assembly language is used when \textrm{\_\_i386} is defined, and when neither are defined, C is used.}.  For each of the GCD algorithms presented here, we implemented 32-bit and 64-bit versions, and when arithmetic overflows do not require us to use GMP, we also implemented 128-bit versions.  For appropriately sized inputs, we use these specialized implementations, otherwise we use GMP for the extended GCD computation.
+To further improve performance, we specialized implementations of each of the GCD algorithms discussed in this section for the x64 architecture.  All algorithms are implemented for the \compiler{} and often benefit from hand optimized x64 assembler.  Assembly language is used in line and is conditionally compiled based on the target platform.  For each of the GCD algorithms presented here, we implemented 32-bit and 64-bit versions, and when arithmetic overflows do not require us to use GMP, we also implemented 128-bit versions.  For appropriately sized inputs, we use these specialized implementations, otherwise we use GMP for the extended GCD computation.
 
 Many of the techniques used here are described in the book ``Hacker's Delight'' \cite{Warren2002}.  We use $\band$ to denote bitwise `and', $\bor$ for bitwise `or', `$\bxor$' for bitwise `exclusive or', and `$\bnot$' for bitwise negation.  Computing $x2^k$ corresponds to shifting $x$ left by $k$ bits, while computing the integer $\floor{x / 2^k}$ corresponds to shifting $x$ right by $k$ bits.  To compute $x \bmod 2^k$ use $x \band (2^k-1)$.
 
@@ -1794,7 +1794,7 @@ Often our implementation uses the number of bits in a positive integer $x$.  In 
 \end{algorithmic}
 \end{algorithm}
 
-Finally, Lehmer's GCD algorithm is especially useful when the arguments to the GCD are several words in size.  However, since our implementations are specialized up to 128-bit words, we consider 8-bit words for the inner extended GCD computation.  As such, it is possible to precompute the resulting $2 \times 2$ matrix for all possible inputs into the single precision extended GCD computation.  Since there are two inputs, each 8-bits in size, there are 65536 possible pairs of inputs.  The coefficients of the resulting $2 \times 2$ matrix can be bound by 8-bits each, and so the table requires 256Kb of memory. This simplifies the GCD computation since the inner loop of Lehmer's GCD becomes a lookup from this table.
+Finally, Lehmer's extended GCD algorithm is especially useful when the arguments to the GCD are several words in size.  However, since our implementations are specialized up to 128-bit words, we consider 8-bit words for the inner extended GCD computation.  As such, it is possible to precompute the resulting $2 \times 2$ matrix for all possible inputs into the single precision extended GCD computation.  Since there are two inputs, each 8-bits in size, there are 65536 possible pairs of inputs.  The coefficients of the resulting $2 \times 2$ matrix can be bound by 8-bits each, and so the table requires 256Kb of memory. This simplifies the extended GCD computation since the inner loop of Lehmer's extended GCD becomes a lookup from this table.
 
 \section{Experimental Results}
 \label{sec:gcdResults}
@@ -1806,35 +1806,35 @@ We specialized the implementation of each of the extended GCD algorithms for 32-
 First, we present evidence that in each case, the 32-bit implementation is no slower than the 64-bit implementation, and in all but one case, always faster.  Figure \ref{fig:divrem-32v64} shows that a 32-bit Extended Euclidean Algorithm using division with remainder is faster than a 64-bit one, for the same inputs.
 \mygraph{divrem-32v64}{fig:divrem-32v64}{Extended Euclidean Algorithm using division with remainder.}
 
-For Lehmer's GCD, we precomputed a table of 8-bit inputs for the inner GCD computation -- see Figure \ref{fig:lehmer-32v64}. In each case, the 32-bit implementation is faster than the 64-bit implementation.
-\mygraph{lehmer-32v64}{fig:lehmer-32v64}{Lehmer's GCD with 8-bit precomputed inner GCD.}
+For Lehmer's extended GCD, we precomputed a table of 8-bit inputs for the inner extended GCD computation -- see Figure \ref{fig:lehmer-32v64}. In each case, the 32-bit implementation is faster than the 64-bit implementation.
+\mygraph{lehmer-32v64}{fig:lehmer-32v64}{Lehmer's extended GCD with 8-bit precomputed inner GCD.}
 
 The graphs in Figures \ref{fig:stein1-32v64}, \ref{fig:stein2-32v64}, \ref{fig:stein3-32v64}, \ref{fig:stein4-32v64}, and \ref{fig:stein5-32v64} show that for all window sizes from 1 to 5 bits, that the 32-bit version of the right-to-left binary GCD is faster than the 64-bit version.
-\mygraph{stein1-32v64}{fig:stein1-32v64}{Right-to-Left Binary GCD.}
-\mygraph{stein2-32v64}{fig:stein2-32v64}{2-bit Windowed Right-to-Left Binary GCD.}
-\mygraph{stein3-32v64}{fig:stein3-32v64}{3-bit Windowed Right-to-Left Binary GCD.}
-\mygraph{stein4-32v64}{fig:stein4-32v64}{4-bit Windowed Right-to-Left Binary GCD.}
-\mygraph{stein5-32v64}{fig:stein5-32v64}{5-bit Windowed Right-to-Left Binary GCD.}
+\mygraph{stein1-32v64}{fig:stein1-32v64}{Right-to-Left Binary Extended GCD.}
+\mygraph{stein2-32v64}{fig:stein2-32v64}{2-bit Windowed Right-to-Left Binary Extended GCD.}
+\mygraph{stein3-32v64}{fig:stein3-32v64}{3-bit Windowed Right-to-Left Binary Extended GCD.}
+\mygraph{stein4-32v64}{fig:stein4-32v64}{4-bit Windowed Right-to-Left Binary Extended GCD.}
+\mygraph{stein5-32v64}{fig:stein5-32v64}{5-bit Windowed Right-to-Left Binary Extended GCD.}
 
 \clearpage
 
 The left-to-right variant of the binary GCD proposed by Shallit and Sorenson is shown in figure \ref{fig:shallit-32v64}.  Here the 32-bit implementation is slightly faster than the 64-bit implementation.
-\mygraph{shallit-32v64}{fig:shallit-32v64}{Left-to-Right binary GCD of Shallit and Sorenson.}
+\mygraph{shallit-32v64}{fig:shallit-32v64}{Left-to-Right Binary Extended GCD of Shallit and Sorenson.}
 
 Lastly, our simplified version of the left-to-right binary GCD is shown in figure \ref{fig:binary_l2r-32v64}.  In this case, the benefit, if any, to using a 32-bit implementation over a 64-bit implementation is negligible\footnote{Nanosecond differences between the two versions could be attributed to timing inaccuracies.}.
-\mygraph{binary_l2r-32v64}{fig:binary_l2r-32v64}{Simplified Left-to-Right binary GCD.}
+\mygraph{binary_l2r-32v64}{fig:binary_l2r-32v64}{Simplified Left-to-Right Binary  Extended GCD.}
 
 \clearpage
 
-Note that the 32-bit versions of the right-to-left binary GCD are only accurate up to 29-bits (ignoring sign), while the 64-bit versions are only accurate to 60-bits. All other 32-bit implementations are accurate to 31-bits\footnote{The input is less than or equal to 31-bits, since in a two's complement representation the sign of the input variable takes the most significant bit and accounts for all 32-bits.} and all other 64-bit implementations are accurate to 63-bits\footnote{Similar to the 32-bit implementation, the most significant bit represents the sign of the integer.}.
+Note that the 32-bit versions of the right-to-left binary extended GCD are only accurate up to 29-bits (ignoring sign), while the 64-bit versions are only accurate to 60-bits. All other 32-bit implementations are accurate to 31-bits\footnote{The input is less than or equal to 31-bits, since in a two's complement representation the sign of the input variable takes the most significant bit and accounts for all 32-bits.} and all other 64-bit implementations are accurate to 63-bits\footnote{Similar to the 32-bit implementation, the most significant bit represents the sign of the integer.}.
 
 Since the 32-bit implementation of each algorithm is at least no slower than the 64-bit implementation, when comparing the different algorithms, we always prefer the 32-bit implementation of each when the algorithm is known to be accurate for the size of the inputs.
 
 Both the Extended Euclidean Algorithm and Lehmer's GCD use division with remainder to compute their result, so we first compare our implementations of both.  Figure \ref{fig:divrem-vs-lehmer} shows that the Extended Euclidean Algorithm is always faster.
-\mygraphX{divrem-vs-lehmer}{fig:divrem-vs-lehmer}{Extended Euclidean Algorithm compared to Lehmer's GCD using precomputed 8-bit words.}{EEA vs Lehmer's GCD.}
+\mygraphX{divrem-vs-lehmer}{fig:divrem-vs-lehmer}{Extended Euclidean Algorithm compared to Lehmer's GCD using precomputed 8-bit words.}{EEA vs Lehmer's Extended GCD.}
 
 In Figure \ref{fig:steins}, we compare each of our windowed implementations of the right-to-left binary GCD.  Larger windows trade off precomputation against the likelihood that a number will be divisible by some power of two. You can see that the non-windowed version is most efficient for inputs less than 16-bits in size, at which point the 3-bit windowed version is best until 30 bits.  After 30 bits, the 4-bit windowed version out performs other window sizes in the range with which we experimented.  In the 64-bit implementation, the slope of the 5-bit windowed version is the lowest and so presumably it would out perform the 4-bit window once inputs were large enough.
-\mygraphTwo{steins-32}{steins-64}{fig:steins}{Windowed right-to-left binary GCDs.}
+\mygraphTwo{steins-32}{steins-64}{fig:steins}{Windowed Right-to-Left Binary Extended GCDs.}
 
 Figure \ref{fig:shallit-vs-binary_l2r} compares the left-to-right binary GCD proposed by Shallit and Sorenson to our own simplified version.
 \mygraph{shallit-vs-binary_l2r}{fig:shallit-vs-binary_l2r}{Shallit and Sorenson compared to our simplified left-to-right binary GCD.}
