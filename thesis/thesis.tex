@@ -1689,43 +1689,32 @@ Lehmer's original description \cite{Lehmer1938} uses the extended Euclidean algo
 
 % TODO: Say something about why we don't experiment with all the different kinds.
 
-Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and \ref{subsec:nucube} describe algorithms to compute reduced or almost reduced ideal class multiplication, squaring, and cubing respectively.  Each of these techniques involve computing a simple continued fraction, which is done using an extended GCD computation (see \cite[\S 3.2]{Jacobson2009}).  Unlike the extended GCD algorithms previously described in this chapter, the extended GCD computation representing the simple continued fraction expansion used in ideal multiplication terminates once the next remainder computed is within a given bound.  As such, we refer to this computation as the \emph{partial extended GCD}.
+Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and \ref{subsec:nucube} describe algorithms to perform ideal class multiplication (NUCOMP), squaring (NUDUPL), and cubing (NUCUBE) respectively, where the result requires at most two reduction operations to be reduced.  Each of these techniques involve computing a simple continued fraction, which is done using an extended GCD computation (see \cite[\S 3.2]{Jacobson2009}).  Unlike the extended GCD algorithms previously described in this chapter, the extended GCD used to compute the simple continued fraction for ideal multiplication terminates once the next remainder computed is within a given bound.  As such, this computation is referred to as the \emph{partial extended GCD}.
 
-In the description of NUCOMP, NUDUPL, and NUCUBE, we use the variables $R_i$ and $C_i$.  
-
-the partially reduced coefficients of ideal representatives for multiplication, squaring, and cubing respectively.  In each case, a continued fraction expansion is computed using the recurrences
-\begin{align*}
-	q_i &= \floor{R_{i-2} ~/~ R_{i-1}} \\
-	R_i &= R_{i-2} - q_i R_{i-1} \\
-	C_i &= C_{i-2} - q_i C_{i-1}.
-\end{align*}
-These recurrences perform the same operation as a single step in the Extended Euclidean Algorithm of Section \ref{sec:gcdEEA}, but the initial and stopping conditions are different.  As such, this is referred to as the \emph{Partial Extended Euclidean Algorithm}.  The algorithm is listed in Algorithm \ref{alg:PartialEeaDivRem}.
-
-\begin{algorithm}[htb]
-\caption{Partial Extended Euclidean Algorithm.}
-\label{alg:PartialEeaDivRem}
-\begin{algorithmic}[1]
-\Require $a,b, \in \ZZ$ and a termination bound $B \in \ZZ$.
-\State $\matrixtt{R_0}{C_0}{R_1}{C_1} = \matrixtt{a}{0}{b}{-1}$
-\If {$R_1 > R_0$}
-	\State $\matrixtt{R_0}{C_0}{R_1}{C_1} \gets
-	        \matrixtt{0}{1}{1}{0} \cdot \matrixtt{R_0}{C_0}{R_1}{C_1}$
-	        \Comment{Swap rows. Maintain $s \ge t$.}
-\EndIf
-\While {$R_1 > B$}
-	\State $q \gets \floor{R_0 / R_1}$
-	\State $\matrixtt{R_0}{C_0}{R_1}{C_1} \gets \matrixtt{0}{1}{1}{-q} \cdot
-		    \matrixtt{R_0}{C_0}{R_1}{C_1}$ \Comment{Subtract $q$ times $2^{\textrm{nd}}$ row and swap.}
-\EndWhile
-\State \Return $(R_0, R_1, C_0, C_1)$
-\end{algorithmic}
-\end{algorithm}
-
-All the operations performed on the matrix
+The descriptions of NUCUBE, NUDUPL, and NUCUBE use the variables $R_i$ and $C_i$.  We relate these variables to the descriptions of the extended GCD in this chapter using
 \[
-\matrixtt{R_0}{C_0}{R_1}{C_1}
+	\matrixThreeTwo{s}{U}{V}{t}{X}{Y} = \matrixThreeTwo{R_{i-1}}{C_{i-1}}{D_{i-1}}{R_i}{C_i}{D_i}
 \]
-during the Partial Extended Euclidean Algorithm can be represented by an invertible $2 \times 2$ matrix with determinant $\pm 1$ (known as a \emph{unimodular} matrix).  This is necessarily the case since each operation relates one representative of an ideal equivalence class to another representative. Two forms are related if there exists an invertible linear transformation of variables.  This is critical since only extended GCD computations that are restricted to operations representable using invertible $2 \times 2$ matrices can be used for the partial extended GCD.
+for integers $D_i$.  To expand the simple continued fraction $a/b$, let
+\[
+\matrixThreeTwo{R_{-2}}{C_{-2}}{D_{-2}}{R_{-1}}{C_{-1}}{D_{-1}} = \matrixThreeTwo{a}{-1}{0}{b}{0}{1}.
+\]
+Now the coefficients of the partial extended GCD represent solutions to the equation
+\[
+	R_i = -C_i a + D_i b.
+\]
+Since the coefficients $D_i$ are never used, our implementation of the partial extended GCD does not compute them.  This is similar to the case of computing the extended GCD in Equation \ref{eq:idealProductS}, since the coefficient $Y$ is never used.
+
+Each of the operations performed on the matrix
+\[
+\matrixtt{R_{i-1}}{C_{i_1}}{R_i}{C_i}
+\]
+during the partial extended GCD must be representable by an invertible $2 \times 2$ matrix with determinant $\pm 1$ (known as a \emph{unimodular} matrix).  This is because the resulting coefficients are applied to an ideal in order to (partially) reduce it, and so it must have determinant $\pm 1$ in order to stay in the same equivalence class.
+
+This is critical since only extended GCD computations that are restricted to operations representable using invertible $2 \times 2$ matrices can be used for the partial extended GCD.
+
+% TODO: It is due to the defn of equivalence of forms (and thus ideals).  Recall that two forms are equivalent if one can be obtained from another via a change of variables represented by a 2x2 matrix of det +1 or -1.  All the matrix stuff in NUCOMP is intended to be applied to a form/ideal in order to reduce it, so it has to have det +1 or -1 in order to stay in the same equivalence class.
+
 
 Of the extended GCD algorithms in this section, only the right-to-left binary extended GCD of Section \ref{sec:gcdR2LBin} (and its windowed variants of Section \ref{sec:gcdR2LWindowed}) cannot be adapted to the partial extended GCD.  The reason is due to the step where $t$ is reduced by 2.  The Algorithm uses the computation
 \[
