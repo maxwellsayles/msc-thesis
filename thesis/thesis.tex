@@ -153,6 +153,10 @@
 
 \newcommand{\compiler}{GNU C compiler version 4.7.2}
 \newcommand{\cpu}{2.7GHz Intel Core i7-2620M CPU}
+\newcommand{\GMP}{GMP 5.1.1}
+\newcommand{\Pari}{Pari 2.5.1}
+\newcommand{\PariGP}{Pari/GP 2.5.1}
+\newcommand{\MPIR}{MPIR 2.6.0}
 
 \graphicspath{{gcd-eps/}{ideal-eps/}{exp-eps/}{sspar-eps/}}
 
@@ -1357,7 +1361,7 @@ One contribution of this thesis is an efficient implementation of arithmetic in 
 \]
 where $a$ and $b$ are fixed integers given as input, and $s$ is the greatest common divisor (GCD) of both $a$ and $b$.  Solutions to this equation are referred to as the \emph{extended greatest common divisor} (or extended GCD for short).  A first step to improving the performance of arithmetic in the ideal class group is to improve the performance of extended GCD computations.  This chapter discusses several algorithms for computing solutions to the extended GCD.
 
-Section \ref{sec:gcdEEA} discuses the standard extended Euclidean Algorithm, which uses multiplication and division.  Binary extended GCD computations, in contrast, emphasize bit shifting instead of multiplication and division.  Section \ref{sec:gcdR2LBin} discusses an extended GCD algorithm that works from low-order to high-order, referred to as \emph{right-to-left} as this is the order in which bits are operated on in the binary representation.  Section \ref{sec:gcdR2LWindowed} discusses a windowed variant of this algorithm that operates on several bits of the input for each iteration.  An extended GCD can also be computed from high-order to low-order, and is referred to as \emph{left-to-right}.  One such technique is discussed in Section \ref{sec:gcdL2R}.  When the inputs are larger than a single machine word, Lehmer \cite{Lehmer1938} observed that much of the computation of the extended GCD can still be performed using just the most significant machine word of the intermediates.  Section \ref{sec:gcdLehmer} discusses Lehmer's standard extended GCD as well as some variations that we tried, namely precomputing intermediate solutions for 8-bit machine words and the use of a binary extended GCD for 64-bit machine words.  Section \ref{sec:gcdPartial} briefly describes each of these extended GCD computations in the context of the partial extended GCD, which is useful for computing the simple continued fraction expansion used by NUCOMP, NUDUPL, and NUCUBE from Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and \ref{subsec:nucube} respective.
+Section \ref{sec:gcdEEA} discuses the standard extended Euclidean Algorithm, which uses multiplication and division.  Binary extended GCD computations, in contrast, emphasize bit shifting instead of multiplication and division.  Section \ref{sec:gcdR2LBin} discusses an extended GCD algorithm that works from low-order to high-order, referred to as \emph{right-to-left} as this is the order in which bits are operated on in the binary representation.  Subsection \ref{subsec:gcdR2LWindowed} discusses a windowed variant of this algorithm that operates on several bits of the input for each iteration.  An extended GCD can also be computed from high-order to low-order, and is referred to as \emph{left-to-right}.  One such technique is discussed in Section \ref{sec:gcdL2R}.  When the inputs are larger than a single machine word, Lehmer \cite{Lehmer1938} observed that much of the computation of the extended GCD can still be performed using just the most significant machine word of the intermediates.  Section \ref{sec:gcdLehmer} discusses Lehmer's standard extended GCD as well as some variations that we tried, namely precomputing intermediate solutions for 8-bit machine words and the use of a binary extended GCD for 64-bit machine words.  Section \ref{sec:gcdPartial} briefly describes each of these extended GCD computations in the context of the partial extended GCD, which is useful for computing the simple continued fraction expansion used by NUCOMP, NUDUPL, and NUCUBE from Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and \ref{subsec:nucube} respective.
 
 To improve the performance of these algorithms in practice, we specialized much of our implementation for the x64 architecture.  The details of this specialization are discussed in Section \ref{sec:gcdImpl}.  Many of our routines benefit when the input is bound by a single machine word, i.e.\ 64-bits, but we were also able to take advantage of integers that fit within two machine words by implementing a custom library for 128-bit arithmetic.  When integers are larger than 128-bits, we use the GNU Multiple Precision (GMP) arithmetic library \cite{Gmp}.  All the software in this chapter was developed using the \compiler{} on Ubuntu 12.10.  Assembly language was used for 128-bit arithmetic and processing features not available in the C language.  The hardware platform was a \cpu{} and 8Gb of memory.  The CPU has four cores, only one of which was used during timing experiments.  Section \ref{sec:gcdResults} shows the average time to compute the extended GCD for pairs of random positive integers $(a, b)$ where $a$ and $b$ are the same number of bits in size.  We use GMP \cite{Gmp}, Pari \cite{PariGP}, and MPIR \cite{Mpir} as reference implementations.
 
@@ -1517,12 +1521,12 @@ This ensures that $s$ is odd, $t$ is even, and that both $s$ and $t$ are positiv
 \end{algorithm}
 
 
-\section{Windowed Right-to-Left Binary Extended GCD}
-\label{sec:gcdR2LWindowed}
+\subsection{Windowed Right-to-Left Binary Extended GCD}
+\label{subsec:gcdR2LWindowed}
 
 Windowing is a common technique used to extend the base of an algorithm.  We saw this earlier in our discussion of binary exponentiation in Section \ref{sec:binaryExp}.  The idea there was to precompute $g^w$ for each $w$ in some window $0 \le w < 2^k$ for some $k$ and then to iterate over the exponent $k$ bits at a time.  We can apply this technique to the right-to-left extended binary GCD.
 
-The algorithm in the previous subsection repeatedly reduces either the equation $t=Xa+Yb$ or the equation $t=(X+b)a+(Y-a)b$ by 2. When $Y$ is odd, we simultaneously add $b$ to $X$ and subtract $a$ from $Y$ in order to make both $X$ and $Y$ even.  Suppose that $t$ was a multiple of 4.  We could simultaneously add $b$ to $X$ and subtract $a$ from $Y$ repeatedly until both $X$ and $Y$ were divisible by 4.  Choose $m$ such that $ma \equiv Y \pmod 4$, and then $t = (X+mb)a + (Y-ma)b$ is evenly divisible by 4 when $t$ is divisible by 4.
+The algorithm repeatedly reduces either the equation $t=Xa+Yb$ or the equation $t=(X+b)a+(Y-a)b$ by 2. When $Y$ is odd, we simultaneously add $b$ to $X$ and subtract $a$ from $Y$ in order to make both $X$ and $Y$ even.  Suppose that $t$ was a multiple of 4.  We could simultaneously add $b$ to $X$ and subtract $a$ from $Y$ repeatedly until both $X$ and $Y$ were divisible by 4.  Choose $m$ such that $ma \equiv Y \pmod 4$, and then $t = (X+mb)a + (Y-ma)b$ is evenly divisible by 4 when $t$ is divisible by 4.
 
 This is easily extended for any $2^k$ where $k$ is a positive integer.  The algorithm first computes $x_j = mb$ and $y_j = ma$ for $0 \le m < 2^k$ where $j = ma \bmod 2^k$.  While $t$ is divisible by $2^h$ for some $h \le k$, we look up $x_j$ and $y_j$ for $j = Y \bmod 2^h$ and compute $(X + x_j) / 2^h$ and $(Y - y_j) / 2^h$.  The complete Algorithm is given in listing \ref{alg:windowedR2lBinGcd}.
 
@@ -1709,7 +1713,7 @@ By \cite[\S 5.6.1]{Crandall2001}, two ideals are equivalent if there exists an i
 \]
 during the partial extended GCD must be representable by an invertible $2 \times 2$ matrix with determinant $\pm 1$ (known as a \emph{unimodular} matrix).  This is because the resulting coefficients are applied to an ideal in order to reduce it, and so must have determinant $\pm 1$ for the ideal to remain in the same equivalence class.  This is important since only extended GCD computations that are restricted to operations representable using invertible $2 \times 2$ matrices can be used for the partial extended GCD.
 
-Of the extended GCD algorithms in this chapter, only the right-to-left binary extended GCD of Section \ref{sec:gcdR2LBin} (and its windowed variants of Section \ref{sec:gcdR2LWindowed}) cannot be adapted to the partial extended GCD.  The reason is due to the step where $t$ is reduced by 2.  The algorithm uses the computation
+Of the extended GCD algorithms in this chapter, only the right-to-left binary extended GCD of Section \ref{sec:gcdR2LBin} (and its windowed variants of Subsection \ref{subsec:gcdR2LWindowed}) cannot be adapted to the partial extended GCD.  The reason is due to the step where $t$ is reduced by 2.  The algorithm uses the computation
 \[
 	(t, X, Y) \gets \begin{cases}
 		\left( \frac{t}{2}, \frac{X}{2}, \frac{Y}{2} \right) &
@@ -1799,31 +1803,48 @@ Often our implementation uses the number of bits in a positive integer $x$.  In 
 \end{algorithmic}
 \end{algorithm}
 
-Finally, Lehmer's extended GCD algorithm is especially useful when the inputs are several machine words.  For 128-bit inputs, we implemented Lehmer's extended GCD using the extended Euclidean algorithm for 32 and 64-bit machine words, as well as Stein's 4-bit windowed right-to-left binary extended GCD and our simplified left-to-right binary extended GCD, both for 64-bits.  For 32-bit and 64-bit inputs, we implemented Lehmer's extended GCD using 8-bit machine words.  For 8-bit machine words it is possible to precompute the resulting $2 \times 2$ matrix for all possible 8-bit inputs.  Since there are two inputs, there exist 65536 possible pairs of values.  The coefficients of the resulting $2 \times 2$ matrix can be bound by 8-bits each, and so the resulting table requires 256Kb of memory. This simplifies the extended GCD computation since the inner loop of Lehmer's extended GCD becomes a lookup from this table.
+Finally, Lehmer's extended GCD algorithm is especially useful when the inputs are several machine words.  For 128-bit inputs, we implemented Lehmer's extended GCD using the extended Euclidean algorithm for 32 and 64-bit machine words, and our simplified left-to-right binary extended GCD for 64-bit machine words.  For 32 and 64-bit inputs, we implemented Lehmer's extended GCD using 8-bit machine words.  In this case, it is possible to precompute the resulting $2 \times 2$ matrix for all possible 8-bit values for the two inputs, i.e. all 65536 pairs of values.  The coefficients of the resulting $2 \times 2$ matrix can be bound by 8-bits each, and so the resulting table requires 256Kb of memory. This simplifies the extended GCD computation since the inner loop of Lehmer's extended GCD becomes a lookup from this table.
 
 \section{Experimental Results}
 \label{sec:gcdResults}
 
+We specialized the implementation of each of the extended GCD algorithms for 32, 64, and 128-bit inputs.  For each $k$ from 1 to 127, we generated 1,000,000 pairs of random positive integers of $k$ bits each.  For the 32-bit implementations, we measured the time to compute the extended GCD of each pair for $1 \le k \le 31$, then for the 64-bit implementations, we measure the time for each pair for $1 \le k \le 63$, and finally for the 128-bit implementations, we measure the time for each pair for $1 \le k \le 127$.  Only positive integers were considered since the prologue and epilogue code to handle negative inputs is the same in each implementation, namely the sign of the inputs is recorded and the inputs are made positive, the extended GCD is computed, and then the sign of the output coefficients is corrected.  The source for these experiments was developed using the \compiler{} on Ubuntu 12.10.  The experiments were performed on a \cpu{} with 8Gb of memory.  The CPU has four cores, only one of which was used during testing.
 
-% TODO: Say something about why we don't experiment with all the different kinds.
+To verify that this work has lead to practical performance improvements, we perform the same timing experiments using \Pari{}, \MPIR{}, and \GMP{} as reference implementations.  We present this data first.  We then demonstrate that for each of the extended GCD techniques presented in this chapter, that our 32-bit implementation is no slower than our 64-bit implementation, which is no slower than our 128-bit implementation.  Finally, we show that for input integers no larger than 31-bits, that our implementation of the standard extended Euclidean algorithm performs best.  For input integers larger than 31-bits but no larger than 63-bits, our implementation of a simplified left-to-right binary extended GCD is the fastest.  Then for input integers larger than 63-bits but no larger than 127-bits, our implementation of Lehmer's extended GCD using our simplified left-to-right binary extended GCD for 64-bit machine words is the fastest of the implementations tested.  For input integers larger than 127-bits, we defer to one of the reference implementations.
 
-% TODO: Ideally we'd want partial gcd experiments too.
+Ideal class arithmetic uses a variant of the extended GCD where only $s$ and $U$ are computed for the solution $s = Ua + Vb$ for input integers $a$ and $b$.   This is referred to as a \emph{left-only} extended GCD.  Ideal class arithmetic also uses the partial extended GCD, which is similar to the left-only extended GCD, but also that the algorithm is terminated when the next quotient is less than a specified bound.  Future work (see Section \ref{sec:futureIdealArithmetic}) would test these implementations specifically.  In Chapter \ref{chap:idealExperiments}, we adapt the best performing extended GCD for each input size for use with the left-only extended GCD and the partial extended GCD.
 
-% TODO: Subsections for 32-bit, 64-bit, 128-bit.
+\subsection{Reference Implementations}
 
-% TODO: Add Lehmer's with 64-bit L2R, etc.
+As reference implementations of the extended GCD, we use \Pari{}, \MPIR{}, and \GMP{}.  In the case of both GMP and MPIR, we use instances of \texttt{mpz\_t} modified to use at most two 64-bit words of locally allocated stack space for limbs.  The only operations timed are calls to \texttt{mpz\_xgcd}.  Since MPIR is a fork of GMP, we simply change the \texttt{\#include} directive, recompile, and then link against the appropriate library.  In the case of Pari, we interface directly with the Pari library from C.  For 64-bit integers, Pari \texttt{GEN} objects are created using \texttt{stoi}, while for 128-bit integers we use \texttt{mkintn(4, ...)}.  All pairs of inputs integers are first converted to Pari \texttt{GEN} objects.  Pari timings only include calls to \texttt{bezout}.  Garbage collection in Pari is performed by recording Pari's stack pointer (\texttt{avma}) and then restoring it at the end of each batch timing.  In each case, we statically linked with the corresponding library.  Figure \ref{fig:gcdRefImpl} shows the results.
 
-% TODO: We use positive inputs for experimenting since the prologue and epilogue for each XGCD type is the same for converting numbers to positive and then adjusting the results.
+\mygraph{reference-impl}{fig:gcdRefImpl}{Reference Implementation of Extended GCD.}
 
-% TODO: Based on the slope of the graph, we did not anticipate that this method would outperform other methods for 128-bit integers.
+Pari is faster than GMP and MPIR for input integers no larger than 66-bits, at which point GMP is faster.  Pari's timings for input integers larger than 66-bits is very similar to GMP's timings.  This is likely because Pari was compiled to take advantage of GMP and only specializes the GCD implementation for input integers that fit within a single machine word, i.e.\ 64-bits.
 
-% TODO: 128-bit version is good up till 124-bits.  Bad at 125-bits.
+\subsection{Extended Euclidean GCD}
+
+Figures \ref{fig:divrem32v64} and \ref{fig:divrem64v128} show the performance of our extended Euclidean GCD.
+
+\mygraph{divrem-32v64}{fig:divrem32v64}{Extended Euclidean Algorithm (32-bit vs 64-bit).}
+\mygraph{divrem-64v128}{fig:divrem64v128}{Extended Euclidean Algorithm (64-bit vs 128-bit).}
+
+\clearpage
 
 
-We specialized the implementation of each of the extended GCD algorithms for 32-bit and 64-bit words.  When intermediate terms did not overflow 128-bit words, we also implemented 128-bit versions.  For each $k$ from 1 to 127, we generated 1,000,000 pairs of integers of $k$ bits each, and measured the time to compute the extended GCD of each pair using each algorithm and its specialized implementation when available.
+\subsection{Right-to-Left Binary Extended GCD}
 
-First, we present evidence that in each case, the 32-bit implementation is no slower than the 64-bit implementation, and in all but one case, always faster.  Figure \ref{fig:divrem-32v64} shows that a 32-bit Extended Euclidean Algorithm using division with remainder is faster than a 64-bit one, for the same inputs.
-\mygraph{divrem-32v64}{fig:divrem-32v64}{Extended Euclidean Algorithm using division with remainder.}
+\subsection{Left-to-Right Binary Extended GCD}
+
+\subsection{Lehmer's Extended GCD}
+
+\subsection{32-bit Implementations}
+
+\subsection{64-bit Implementations}
+
+\subsection{128-bit Implementations}
+
+
 
 For Lehmer's extended GCD, we precomputed a table of 8-bit inputs for the inner extended GCD computation -- see Figure \ref{fig:lehmer-32v64}. In each case, the 32-bit implementation is faster than the 64-bit implementation.
 \mygraph{lehmer-32v64}{fig:lehmer-32v64}{Lehmer's extended GCD with 8-bit precomputed inner GCD.}
