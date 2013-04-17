@@ -287,7 +287,7 @@ Paragraph 3
 
 \end{enumerate}
 
-The software was developed using the GNU C compiler version 4.7.2 on Ubuntu 12.10. The hardware platform was a personal notebook with a 2.7GHz Intel Core i7-2620M CPU and 8Gb of memory.  The CPU has four cores, only one of which was used during timing experiments.
+The software was developed using the \compiler{} on Ubuntu 12.10. The hardware platform was a \cpu{} with 8Gb of memory.  The CPU has four cores, only one of which was used during timing experiments.
 
 \section{Overview of Thesis}
 
@@ -1687,8 +1687,6 @@ Lehmer's original description \cite{Lehmer1938} uses the extended Euclidean algo
 \section{Partial Extended GCD}
 \label{sec:gcdPartial}
 
-% TODO: Say something about why we don't experiment with all the different kinds.
-
 Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and \ref{subsec:nucube} describe algorithms to perform ideal class multiplication (NUCOMP), squaring (NUDUPL), and cubing (NUCUBE) respectively, where the result requires at most two reduction operations to be reduced.  Each of these techniques involve computing a simple continued fraction, which is done using an extended GCD computation (see \cite[\S 3.2]{Jacobson2009}).  Unlike the extended GCD algorithms previously described in this chapter, the extended GCD used to compute the simple continued fraction for ideal multiplication terminates once the next remainder computed is within a given bound.  As such, this computation is referred to as the \emph{partial extended GCD}.
 
 The descriptions of NUCUBE, NUDUPL, and NUCUBE use the variables $R_i$ and $C_i$.  We relate these variables to the descriptions of the extended GCD in this chapter using
@@ -1697,26 +1695,21 @@ The descriptions of NUCUBE, NUDUPL, and NUCUBE use the variables $R_i$ and $C_i$
 \]
 for integers $D_i$.  To expand the simple continued fraction $a/b$, let
 \[
-\matrixThreeTwo{R_{-2}}{C_{-2}}{D_{-2}}{R_{-1}}{C_{-1}}{D_{-1}} = \matrixThreeTwo{a}{-1}{0}{b}{0}{1}.
+\matrixThreeTwo{R_{-2}}{C_{-2}}{D_{-2}}{R_{-1}}{C_{-1}}{D_{-1}} = \matrixThreeTwo{a}{-1}{0}{b}{0}{1}
 \]
-Now the coefficients of the partial extended GCD represent solutions to the equation
+and perform an extended GCD computation on the left hand side.  As such, the coefficients of the partial extended GCD represent solutions to the equation
 \[
 	R_i = -C_i a + D_i b.
 \]
 Since the coefficients $D_i$ are never used, our implementation of the partial extended GCD does not compute them.  This is similar to the case of computing the extended GCD in Equation \ref{eq:idealProductS}, since the coefficient $Y$ is never used.
 
-Each of the operations performed on the matrix
+By \cite[\S 5.6.1]{Crandall2001}, two ideals are equivalent if there exists an invertible integral linear change of variables from one ideal to the other.  As such, each of the operations performed on the matrix
 \[
-\matrixtt{R_{i-1}}{C_{i_1}}{R_i}{C_i}
+\matrixtt{R_{i-1}}{C_{i-1}}{R_i}{C_i}
 \]
-during the partial extended GCD must be representable by an invertible $2 \times 2$ matrix with determinant $\pm 1$ (known as a \emph{unimodular} matrix).  This is because the resulting coefficients are applied to an ideal in order to (partially) reduce it, and so it must have determinant $\pm 1$ in order to stay in the same equivalence class.
+during the partial extended GCD must be representable by an invertible $2 \times 2$ matrix with determinant $\pm 1$ (known as a \emph{unimodular} matrix).  This is because the resulting coefficients are applied to an ideal in order to reduce it, and so must have determinant $\pm 1$ for the ideal to remain in the same equivalence class.  This is important since only extended GCD computations that are restricted to operations representable using invertible $2 \times 2$ matrices can be used for the partial extended GCD.
 
-This is critical since only extended GCD computations that are restricted to operations representable using invertible $2 \times 2$ matrices can be used for the partial extended GCD.
-
-% TODO: It is due to the defn of equivalence of forms (and thus ideals).  Recall that two forms are equivalent if one can be obtained from another via a change of variables represented by a 2x2 matrix of det +1 or -1.  All the matrix stuff in NUCOMP is intended to be applied to a form/ideal in order to reduce it, so it has to have det +1 or -1 in order to stay in the same equivalence class.
-
-
-Of the extended GCD algorithms in this section, only the right-to-left binary extended GCD of Section \ref{sec:gcdR2LBin} (and its windowed variants of Section \ref{sec:gcdR2LWindowed}) cannot be adapted to the partial extended GCD.  The reason is due to the step where $t$ is reduced by 2.  The Algorithm uses the computation
+Of the extended GCD algorithms in this chapter, only the right-to-left binary extended GCD of Section \ref{sec:gcdR2LBin} (and its windowed variants of Section \ref{sec:gcdR2LWindowed}) cannot be adapted to the partial extended GCD.  The reason is due to the step where $t$ is reduced by 2.  The algorithm uses the computation
 \[
 	(t, X, Y) \gets \begin{cases}
 		\left( \frac{t}{2}, \frac{X}{2}, \frac{Y}{2} \right) &
@@ -1727,11 +1720,10 @@ Of the extended GCD algorithms in this section, only the right-to-left binary ex
 \]
 The step $(t, X, Y) \gets (t/2, (X+b)/2, (Y-a)/2)$ cannot be expressed as a unimodular matrix.
 
-% TODO: Ideally we'd want partial gcd experiments too.
 
-The other extended GCD algorithms of this section can be adapted to the partial extended GCD by letting
+The other extended GCD algorithms of this chapter can be adapted to the partial extended GCD by letting
 \[
-	\matrixtt{R_0}{C_0}{R_1}{C_1} = \matrixtt{s}{U}{t}{X}
+	\matrixtt{R_{i-1}}{C_{i-1}}{R_i}{C_i} = \matrixtt{s}{U}{t}{X}
 \]
 and dropping the terms $V$ and $Y$ from the computation.
 
@@ -1739,7 +1731,7 @@ and dropping the terms $V$ and $Y$ from the computation.
 \section{Specialized Implementations of the Extended GCD}
 \label{sec:gcdImpl}
 
-To further improve performance, we specialized implementations of each of the GCD algorithms discussed in this section for the x64 architecture.  All algorithms are implemented for the \compiler{} and often benefit from hand optimized x64 assembler.  Assembly language is used in line and is conditionally compiled based on the target platform.  For each of the GCD algorithms presented here, we implemented 32-bit and 64-bit versions, and when arithmetic overflows do not require us to use GMP, we also implemented 128-bit versions.  For appropriately sized inputs, we use these specialized implementations, otherwise we use GMP for the extended GCD computation.
+To further improve performance, we specialized implementations of each of the GCD algorithms discussed in this section for the x64 architecture.  All algorithms are implemented for the \compiler{} and often benefit from hand optimized x64 assembler.  For each of the GCD algorithms presented here, we implemented 32-bit, 64-bit, and 128-bit versions.
 
 Many of the techniques used here are described in the book ``Hacker's Delight'' \cite{Warren2002}.  We use $\band$ to denote bitwise `and', $\bor$ for bitwise `or', `$\bxor$' for bitwise `exclusive or', and `$\bnot$' for bitwise negation.  Computing $x2^k$ corresponds to shifting $x$ left by $k$ bits, while computing the integer $\floor{x / 2^k}$ corresponds to shifting $x$ right by $k$ bits.  To compute $x \bmod 2^k$ use $x \band (2^k-1)$.
 
@@ -1789,7 +1781,7 @@ Two words, $x$ and $y$, are conditionally swapped when $x < y$ by using two addi
 \end{algorithm}
 On the x64 architecture we optimize the computation of $d \gets s - t$ and $m \gets \texttt{sign\_mask}(d)$ since the operation $s-t$ sets the carry flag when the result is negative.  Using a subtract with borrow, we subtract $m$ from itself.  This sets $m$ to 0 when the carry is clear, and -1 when the carry is set.
 
-Often our implementation uses the number of bits in a positive integer $x$.  In the algorithm description we use $\floor{\log_2x} + 1$.  On the x64 architecture there is an instruction (\texttt{bsr}) that returns the index of the most significant set bit.  This allows us to quickly compute that value.  On a platform that does not have such an instruction, we use a logarithmic search to find the most significant set bit\footnote{There is also a similar algorithm to find the \emph{least} significant set bit of a machine word (\texttt{bsl} on x64).}.  Let $k = \floor{m/2}$ where $m$ is the number of bits in a machine word and let $i$ be the computed index (initially $i \gets 0$).  We first check if $x \ge 2^k$.  If it is, then $i \gets i + k$ and $x$ is shifted right by $k$.  We repeat on $k \gets \floor{k/2}$ until $k=0$.  At which point, $i$ is the index of the most significant set bit (see Algorithm \ref{alg:msb}).  Notice that we can use the signed mask of $2^k - x$ instead of the conditional `if' statement, and we can unroll the while loop for fixed values of $m$.
+Often our implementation uses the number of bits in a positive integer $x$.  In the algorithm description we use $\floor{\log_2x} + 1$.  On the x64 architecture the instruction \texttt{bsr} returns the index of the most significant set bit, while the instruction \texttt{bsf} return the index of the least significant set bit.  This allows us to quickly compute either value.  On other platforms, we use a logarithmic search to find the most (or least) significant set bit.  To find the most significant bit, let $k = \floor{m/2}$ where $m$ is the number of bits in a machine word and let $i$ be the computed index (initially $i \gets 0$).  We first check if $x \ge 2^k$.  If it is, then $i \gets i + k$ and $x$ is shifted right by $k$.  We repeat on $k \gets \floor{k/2}$ until $k=0$.  At which point, $i$ is the index of the most significant set bit (see Algorithm \ref{alg:msb}).  Notice that we can use the signed mask of $2^k - x$ instead of the conditional `if' statement, and we can unroll the while loop for fixed values of $m$.
 
 \begin{algorithm}[htb]
 \caption{Return the index of the most significant set bit of $x$.}
@@ -1807,10 +1799,15 @@ Often our implementation uses the number of bits in a positive integer $x$.  In 
 \end{algorithmic}
 \end{algorithm}
 
-Finally, Lehmer's extended GCD algorithm is especially useful when the arguments to the GCD are several words in size.  However, since our implementations are specialized up to 128-bit words, we consider 8-bit words for the inner extended GCD computation.  As such, it is possible to precompute the resulting $2 \times 2$ matrix for all possible inputs into the single precision extended GCD computation.  Since there are two inputs, each 8-bits in size, there are 65536 possible pairs of inputs.  The coefficients of the resulting $2 \times 2$ matrix can be bound by 8-bits each, and so the table requires 256Kb of memory. This simplifies the extended GCD computation since the inner loop of Lehmer's extended GCD becomes a lookup from this table.
+Finally, Lehmer's extended GCD algorithm is especially useful when the inputs are several machine words.  For 128-bit inputs, we implemented Lehmer's extended GCD using the extended Euclidean algorithm for 32 and 64-bit machine words, as well as Stein's 4-bit windowed right-to-left binary extended GCD and our simplified left-to-right binary extended GCD, both for 64-bits.  For 32-bit and 64-bit inputs, we implemented Lehmer's extended GCD using 8-bit machine words.  For 8-bit machine words it is possible to precompute the resulting $2 \times 2$ matrix for all possible 8-bit inputs.  Since there are two inputs, there exist 65536 possible pairs of values.  The coefficients of the resulting $2 \times 2$ matrix can be bound by 8-bits each, and so the resulting table requires 256Kb of memory. This simplifies the extended GCD computation since the inner loop of Lehmer's extended GCD becomes a lookup from this table.
 
 \section{Experimental Results}
 \label{sec:gcdResults}
+
+
+% TODO: Say something about why we don't experiment with all the different kinds.
+
+% TODO: Ideally we'd want partial gcd experiments too.
 
 % TODO: Subsections for 32-bit, 64-bit, 128-bit.
 
@@ -1878,7 +1875,7 @@ This chapter discussed methods that lead to practical improvements for computing
 
 % TODO: Basically the story throughout is this.  If things fit within a single machine word, we try to use routines for a single machine word.  If they fit within two machine words, but not within one machine word, only then do we use routines for two machine words.   If they don't fit within two machine words, then we fall back to GMP, and only in that situation.
 
-The previous chapter demonstrated results that lead to practical improvements in computing the extended GCD -- the dominating operation in reduced ideal multiplication.  This chapter discusses our implementations of ideal arithmetic.  To improve the performance of ideal arithmetic, specialized implementations using at most a single machine word, i.e.\ 64-bits, or at most two machine words, i.e.\ 128-bits were developed.  A reference implementation using GMP, that works for unbounded discriminant sizes, was developed for comparison.  Our 64-bit implementation of ideal arithmetic is accurate for negative discriminants up to 59-bits in size, while our 128-bit implementation of ideal arithmetic is accurate for discriminants up to 118-bits.  The related software developed for this chapter uses the \compiler{}, and assembly language for 128-bit arithmetic.  The software was developed on Ubuntu 12.10 using a personal notebook with a \cpu{} and 8Gb of memory.  Experiments are restricted to using only a single core of the CPU's four cores.
+The previous chapter demonstrated results that lead to practical improvements in computing the extended GCD -- the dominating operation in reduced ideal multiplication.  This chapter discusses our implementations of ideal arithmetic.  To improve the performance of ideal arithmetic, specialized implementations using at most a single machine word, i.e.\ 64-bits, or at most two machine words, i.e.\ 128-bits were developed.  A reference implementation using GMP, that works for unbounded discriminant sizes, was developed for comparison.  Our 64-bit implementation of ideal arithmetic is accurate for negative discriminants up to 59-bits in size, while our 128-bit implementation of ideal arithmetic is accurate for discriminants up to 118-bits.  The related software developed for this chapter uses the \compiler{}, and assembly language for 128-bit arithmetic.  The software was developed on Ubuntu 12.10 using a \cpu{} with 8Gb of memory.  Experiments are restricted to using only a single core of the CPU's four cores.
 
 \section{Specialized Implementations of Ideal Arithmetic}
 \label{sec:implementationOfIdealArithmetic}
@@ -2263,7 +2260,7 @@ This chapter discusses the experiments and results that directed our implementat
 
 SuperSPAR works in two stages: an exponentiation stage and a search stage.  The search stage of SuperSPAR computes baby steps coprime to a multiple of a primorial.  Section \ref{sec:ssparCoprimeFinding}  discusses two techniques to find integers coprime to a primorial in a given range.  As discussed in Subsection \ref{subsec:boundedPrimorialSteps}, for the search stage to work, the order of the element should have no factors in common with the primorial used for the search stage.  Section \ref{sec:ssparFactorizationOfTheOrder} discusses the data and experiments used to bound the exponents of the prime factors of the exponent used in the exponentiation stage so that (with high probability) the order of the resulting ideal class will have no factors in common with the primorial used during the search stage.  This section also discusses the number of ideal classes to try in expectation for a given class group.  The search stage of the algorithm requires the use of a lookup table.  Section \ref{sec:ssparHashing} compares two implementations of such a table.  Then, to enable the discovery of bounds useful for the search stage, Section \ref{sec:ssparBabyStepBounds} discusses a method of generating suitable candidates.  With all this in place, Section \ref{sec:ssparEmpirical} discusses the method used to determine the exponent for the exponentiation stage and the bound for the search stage that work well in practice for integers of specific sizes.  Finally, a comparison of our implementation of SuperSPAR to several public implementations of factoring algorithms is provided.  We show that for random semiprime integers 50-bits or more and less than 64-bits, SuperSPAR performs the best on average of the implementations tested.
 
-The software used to generate timing information was developed using \compiler{} on Ubuntu 12.10 and a personal notebook with a \cpu{} and 8Gb of RAM.  Never more than one of the four cores was used for experiments.
+The software used to generate timing information was developed using \compiler{} on Ubuntu 12.10 and a \cpu{} with 8Gb of RAM.  Never more than one of the four cores was used for experiments.
 
 
 \section{Coprime Finding}
@@ -2922,7 +2919,7 @@ Table \ref{tab:ssparParams} shows the values used for the exponentiation and sea
 
 To demonstrate the performance of our implementation of SuperSPAR, several factoring implementations were timed, namely Pari/GP \cite{PariGP}, Msieve \cite{Msieve}, GMP-ECM \cite{Ecm}, YAFU \cite{Yafu}, Flint \cite{Flint}, Maple \cite{Maple}, and a custom implementation of SQUFOF \cite{Gower2008} adapted from the source code of Pari/GP.
 
-For bit sizes 16, 18, ..., 100, sets of 10,000 random semiprime integers $N = p \cdot q$ for $p$ and $q$ prime and half the size of $N$ were generated and written to disk.  The file format was ASCII with one integer per line.  For each factoring implementation, either this file was converted to an implementation specific format so that all the integers could be factored in batch, or, if a C programming interface was provided, a program was written to load the set of integers and use the library directly\footnote{In the case of Pari/GP, Flint, SQUFOF, and SuperSPAR, C programming libraries were provided.  Msieve, GMP-ECM, YAFU, and Maple were scripted.}.  The hardware platform was a personal notebook with a \cpu{} and 8Gb of memory.  The CPU has four cores, only one of which was used during timing experiments.  The operating system was 64-bit Ubuntu 12.10.  When possible, the most recent version of each factoring implementation was used and built from source using the \compiler{}.  Timings include forking the process, reading and parsing the test set, and factoring all the integers in the set.  The timings do not include the generation of the semiprime integers or the conversion to the implementation specific batch file.
+For bit sizes 16, 18, ..., 100, sets of 10,000 random semiprime integers $N = p \cdot q$ for $p$ and $q$ prime and half the size of $N$ were generated and written to disk.  The file format was ASCII with one integer per line.  For each factoring implementation, either this file was converted to an implementation specific format so that all the integers could be factored in batch, or, if a C programming interface was provided, a program was written to load the set of integers and use the library directly\footnote{In the case of Pari/GP, Flint, SQUFOF, and SuperSPAR, C programming libraries were provided.  Msieve, GMP-ECM, YAFU, and Maple were scripted.}.  The hardware platform was a \cpu{} with 8Gb of memory.  The CPU has four cores, only one of which was used during timing experiments.  The operating system was 64-bit Ubuntu 12.10.  When possible, the most recent version of each factoring implementation was used and built from source using the \compiler{}.  Timings include forking the process, reading and parsing the test set, and factoring all the integers in the set.  The timings do not include the generation of the semiprime integers or the conversion to the implementation specific batch file.
 
 Figures \ref{fig:factoring1} through \ref{fig:factoring5} were chosen to emphasize different features of the performance of SuperSPAR.  Figure \ref{fig:factoring1} shows the performance of each factoring implementation for the complete range of integer sizes timed -- visually, SuperSPAR is not particularly competitive for integers much larger than 90-bits.  Figure \ref{fig:factoring2} zooms in on the range of integers \mbox{44-bits} to 72-bits.  This shows that SQUFOF quickly becomes impractical for integers larger than 70-bits, and that Maple, Msieve, and GMP-ECM do not perform as efficiently as the other implementations for integers in the range 44-bits to 72-bits.  This also shows that SuperSPAR is highly competitive below 64-bits.  Figure \ref{fig:factoring3} shows the 5 best performing implementations for integers in the range of 44-bits to 68-bits.  Figure \ref{fig:factoring4} zooms in on the left of this image for integers in the range 44-bits to 58-bits.  This shows the same 5 implementations.  For integers between 44-bits and around 50-bits, the custom implementation of SQUFOF is the fastest performing, but as the integer size grows, SQUFOF takes longer more quickly.  For integers around 50-bits in size, SuperSPAR is typically the fastest performing implementation of the implementations tested.   Finally, Figure \ref{fig:factoring5} zooms in on the right part of Figure \ref{fig:factoring3}.  This shows the 3 best performing implementations for this range, and the point at which the performance of SuperSPAR decreases and YAFU is better performing.  This occurs for integers around 64-bits in size.
 
