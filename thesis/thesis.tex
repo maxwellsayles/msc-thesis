@@ -82,6 +82,7 @@
 \newcommand{\matrixto}[2]{\left[ \begin{array}{rr} #1 & #2 \end{array} \right]}
 \newcommand{\matrixot}[2]{\left[ \begin{array}{r} #1 \\ #2 \end{array} \right]}
 \newcommand{\matrixtt}[4]{\left[ \begin{array}{rr} #1 & #2 \\ #3 & #4 \end{array} \right]}
+\newcommand{\matrixltt}[4]{\left[ \begin{array}{ll} #1 & #2 \\ #3 & #4 \end{array} \right]}
 \newcommand{\matrixThreeOne}[3]{\left[ \begin{array}{rrr} #1 & #2 & #3 \end{array} \right]}
 \newcommand{\matrixThreeTwo}[6]{\left[ \begin{array}{rrr} #1 & #2 & #3 \\ #4 & #5 & #6 \end{array} \right]}
 \newcommand{\ntoinfty}{\lim_{n \rightarrow \infty}}
@@ -599,7 +600,7 @@ until we have $R_i$ and $R_{i-1}$ such that
 \end{equation}
 Initial values for the recurrence are given by
 \[
-	\matrixtt{R_{-2}}{R_{-1}}{C_{-2}}{C_{-1}} = \matrixtt{sU}{a_1}{-1}{0}.
+	\matrixtt{R_{-2}}{C_{-2}}{R_{-1}}{C_{-1}} = \matrixtt{sU}{-1}{a_1}{0}.
 \]
 We then compute
 \begin{align}
@@ -640,13 +641,14 @@ Chapter \ref{chap:xgcdExperiments} discusses practical optimizations for computi
 	\State $b \gets (2a_2U + b_2) \bmod{2a}$
 	\State \Return $[a, (b+\sqrt\Delta)/2]$
 \EndIf
-\State $\matrixtt{R_{-2}}{R_{-1}}{C_{-2}}{C_{-1}} \gets \matrixtt{U}{a_1}{-1}{0}$
-\State find $i$ such that $R_i < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4} < R_{i-1}$ using the recurrences:
-\begin{itemize}
-\item $q_i = \floor{R_{i-2} ~/~ R_{i-1}}$
-\item $R_i = R_{i-2}-q_i R_{i-1}$
-\item $C_i=C_{i-2}-q_i C_{i-1}$
-\end{itemize}
+\State $\matrixtt{R_{-2}}{C_{-2}}{R_{-1}}{C_{-1}} \gets \matrixtt{U}{-1}{a_1}{0}$
+\State $i \gets -1$
+\While{$R_i > \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4}$}
+	\State $i \gets i + 1$
+	\State $q_i = \floor{R_{i-2} ~/~ R_{i-1}}$
+	\State $R_i = R_{i-2}-q_i R_{i-1}$
+	\State $C_i=C_{i-2}-q_i C_{i-1}$
+\EndWhile
 \State $M_1 \gets (R_i a_2 + C_i(b_1-b_2)/2)/a_1$
 \State $M_2 \gets (R_i (b_1+b_2)/2 -sC_i c_2)/a_1$
 \State $a \gets (-1)^{i+1}(R_i M_1 - C_i M_2)$
@@ -692,13 +694,14 @@ Pseudo-code for our implementation is given in Algorithm \ref{alg:nudupl}.
 	\State $b \gets (2Ua_1 + b_1) \bmod 2a$
 	\State \Return $[a, (b + \sqrt\Delta)/2]$
 \EndIf
-\State $\matrixtt{R_{-2}}{R_{-1}}{C_{-2}}{C_{-1}} \gets \matrixtt{U}{a_1}{-1}{0}$
-\State find $i$ such that $R_i < |\Delta/4|^{1/4} < R_{i-1}$ using the recurrences:
-\begin{itemize}
-\item $q_i = \floor{R_{i-2}/R_{i-1}}$
-\item $R_i = R_{i-2}-q_i R_{i-1}$
-\item $C_i=C_{i-2}-q_i C_{i-1}$
-\end{itemize}
+\State $\matrixtt{R_{-2}}{C_{-2}}{R_{-1}}{C_{-1}} \gets \matrixtt{U}{-1}{a_1}{0}$
+\State $i \gets -1$
+\While{$R_i > |\Delta/4|^{1/4}$}
+	\State $i \gets i + 1$
+	\State $q_i = \floor{R_{i-2} ~/~ R_{i-1}}$
+	\State $R_i = R_{i-2}-q_i R_{i-1}$
+	\State $C_i=C_{i-2}-q_i C_{i-1}$
+\EndWhile
 \State $M_2 \gets (R_i b_1 -sC_i c_1)/a_1$
 \State $a \gets (-1)^{i+1}({R_i}^2 - C_i M_2)$
 \State $b \gets (2(R_i a_1 + C_{i-1} a)/C_i) \bmod{2a}$
@@ -739,7 +742,9 @@ Finally, compute the representative $\mathfrak a^3 = [a, (b + \sqrt\Delta)/2]$ u
 \end{align*}
 By \cite[p.15~Theorem~5.1]{Imbert2010}, the ideal $[a, (b + \sqrt\Delta)/2]$ is at most two reduction steps from being reduced.  Pseudo-code for our implementation of fast ideal cubing is given in Algorithm \ref{alg:nucube}.
 
+
 % NUCUBE
+% TODO: Check my use of $s$ in this case.  I'm not sure that I've divided a_1 through.
 \begin{algorithm}[htb]
 \caption{NUCUBE -- Fast Ideal Cubing (\cite[p.26]{Imbert2010}).}
 \label{alg:nucube}
@@ -759,13 +764,16 @@ By \cite[p.15~Theorem~5.1]{Imbert2010}, the ideal $[a, (b + \sqrt\Delta)/2]$ is 
 	\State $b \gets (b_1 + 2Ua_1/s) \bmod 2a$
 	\State \Return $[a, (b+\sqrt\Delta)/2]$
 \EndIf
-\State $\matrixtt{R_{-2}}{R_{-1}}{C_{-2}}{C_{-1}} \gets \matrixtt{U}{({a_1}^2/s)}{-1}{0}$
-\State find $i$ such that $R_i < \sqrt{a_1} |\Delta/4|^{1/4} < R_{i-1}$ using the recurrences:
-\begin{itemize}
-\item $q_i = \floor{R_{i-2}/R_{i-1}}$
-\item $R_i = R_{i-2}-q_i R_{i-1}$
-\item $C_i=C_{i-2}-q_i C_{i-1}$
-\end{itemize}
+
+\State $\matrixtt{R_{-2}}{C_{-2}}{R_{-1}}{C_{-1}} \gets \matrixtt{U}{-1}{{a_1}^2/s}{0}$
+\State $i \gets -1$
+\While{$R_i > \sqrt{a_1} |\Delta/4|^{1/4}$}
+	\State $i \gets i + 1$
+	\State $q_i = \floor{R_{i-2} ~/~ R_{i-1}}$
+	\State $R_i = R_{i-2}-q_i R_{i-1}$
+	\State $C_i=C_{i-2}-q_i C_{i-1}$
+\EndWhile
+
 \State $M_1 \gets (R_ia_1 + C_iUa_1) / {a_1}^2$
 \State $M_2 \gets (R_i(b_1 + Ua_1) - sC_ic_1) / {a_1}^2$
 \State $a \gets (-1)^{i+1} R_i M_1 - C_i M_2$
@@ -1681,7 +1689,11 @@ Lehmer's original description \cite{Lehmer1938} uses the extended Euclidean algo
 
 % TODO: Say something about why we don't experiment with all the different kinds.
 
-Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and \ref{subsec:nucube} give algorithms to compute the partially reduced coefficients of ideal representatives for multiplication, squaring, and cubing respectively.  In each case, a continued fraction expansion is computed using the recurrences
+Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and \ref{subsec:nucube} describe algorithms to compute reduced or almost reduced ideal class multiplication, squaring, and cubing respectively.  Each of these techniques involve computing a simple continued fraction, which is done using an extended GCD computation (see \cite[\S 3.2]{Jacobson2009}).  Unlike the extended GCD algorithms previously described in this chapter, the extended GCD computation representing the simple continued fraction expansion used in ideal multiplication terminates once the next remainder computed is within a given bound.  As such, we refer to this computation as the \emph{partial extended GCD}.
+
+In the description of NUCOMP, NUDUPL, and NUCUBE, we use the variables $R_i$ and $C_i$.  
+
+the partially reduced coefficients of ideal representatives for multiplication, squaring, and cubing respectively.  In each case, a continued fraction expansion is computed using the recurrences
 \begin{align*}
 	q_i &= \floor{R_{i-2} ~/~ R_{i-1}} \\
 	R_i &= R_{i-2} - q_i R_{i-1} \\
