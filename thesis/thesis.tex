@@ -154,8 +154,8 @@
 \newcommand{\compiler}{GNU C compiler version 4.7.2}
 \newcommand{\cpu}{2.7GHz Intel Core i7-2620M CPU}
 \newcommand{\GMP}{GMP 5.1.1}
-\newcommand{\Pari}{Pari 2.5.1}
-\newcommand{\PariGP}{Pari/GP 2.5.1}
+\newcommand{\Pari}{Pari 2.5.3}
+\newcommand{\PariGP}{Pari/GP 2.5.3}
 \newcommand{\MPIR}{MPIR 2.6.0}
 
 \graphicspath{{gcd-eps/}{ideal-eps/}{exp-eps/}{sspar-eps/}}
@@ -1808,15 +1808,17 @@ Finally, Lehmer's extended GCD algorithm is especially useful when the inputs ar
 \section{Experimental Results}
 \label{sec:gcdResults}
 
-We specialized the implementation of each of the extended GCD algorithms for 32, 64, and 128-bit inputs.  For each $k$ from 1 to 127, we generated 1,000,000 pairs of random positive integers of $k$ bits each.  For the 32-bit implementations, we measured the time to compute the extended GCD of each pair for $1 \le k \le 31$, then for the 64-bit implementations, we measure the time for each pair for $1 \le k \le 63$, and finally for the 128-bit implementations, we measure the time for each pair for $1 \le k \le 127$.  Only positive integers were considered since the prologue and epilogue code to handle negative inputs is the same in each implementation, namely the sign of the inputs is recorded and the inputs are made positive, the extended GCD is computed, and then the sign of the output coefficients is corrected.  The source for these experiments was developed using the \compiler{} on Ubuntu 12.10.  The experiments were performed on a \cpu{} with 8Gb of memory.  The CPU has four cores, only one of which was used during testing.
+We specialized the implementation of each of the extended GCD algorithms for 32, 64, and 128-bit inputs.  For each $k$ from 1 to 127, we generated 1,000,000 pairs of pseudorandom positive integers of no more than $k$ bits each.  For the 32-bit implementations, we measured the time to compute the extended GCD of each pair for $1 \le k \le 31$, then for the 64-bit implementations, we measure the time for each pair for $1 \le k \le 63$, and finally for the 128-bit implementations, we measure the time for each pair for $1 \le k \le 127$.  Only positive integers were considered since the prologue and epilogue code to handle negative inputs is the same in each implementation, namely the sign of the inputs is recorded and the inputs are made positive, the extended GCD is computed, and then the sign of the output coefficients is corrected.  The source for these experiments was developed using the \compiler{} on Ubuntu 12.10.  The experiments were performed on a \cpu{} with 8Gb of memory.  The CPU has four cores, only one of which was used during testing.
 
-To verify that this work has lead to practical performance improvements, we use \Pari{}, \MPIR{}, and \GMP{} as reference implementations of the extended GCD.  In the case of both GMP and MPIR, we use instances of \texttt{mpz\_t} modified to use at most two 64-bit words of locally allocated stack space for limbs.  The only operations timed are calls to \texttt{mpz\_xgcd}.  Since MPIR is a fork of GMP, we simply change the \texttt{\#include} directive, recompile, and then link against the appropriate library.  In the case of Pari, we linked directly with the Pari library from C.  For 64-bit integers, Pari \texttt{GEN} objects are created using \texttt{stoi}, while for 128-bit integers we use \texttt{mkintn(4, ...)}.  All pairs of input integers are first converted to Pari \texttt{GEN} objects.  As such, Pari timings only include calls to \texttt{bezout}.  Garbage collection in Pari is performed by recording Pari's stack pointer (\texttt{avma}) and then restoring it at the end of each batch timing.  For each of Pari, MPIR, and GMP, we statically link with the corresponding library.
+To verify that this work has lead to practical performance improvements, we use \Pari{}, \MPIR{}, and \GMP{} as reference implementations of the extended GCD.  In the case of both GMP and MPIR, we use instances of \texttt{mpz\_t} modified to use at most two 64-bit words of locally allocated stack space for limbs.  The only operations timed are calls to \texttt{mpz\_xgcd}.  Since MPIR is a fork of GMP, we simply change the \texttt{\#include} directive, recompile, and then link against the appropriate library.  In the case of Pari, we linked directly with the Pari library from C.  For 64-bit integers, Pari \texttt{GEN} objects are created using \texttt{stoi}, while for 128-bit integers we use \texttt{mkintn(4, ...)}.  All pairs of input integers are first converted to Pari \texttt{GEN} objects.  As such, Pari timings only include calls to \texttt{bezout}, the symbol for Pari's implementation of the extended GCD.  Garbage collection in Pari is performed by recording Pari's stack pointer (\texttt{avma}) and then restoring it at the end of each batch timing.  For each of Pari, MPIR, and GMP, we statically link with the corresponding library.
 
-We present our data in three sections, relating to our implementations specialized for 32-bit, 64-bit, and 128-bit inputs.  In each case, we show that our 32-bit implementation is no slower than our 64-bit implementation, which is no slower than our 128-bit implementation.  For input integers smaller than 32-bits, our implementation of the standard extended Euclidean algorithm performs best.  For input integers larger than 31-bits but smaller than 64-bits, our implementation of a simplified left-to-right binary extended GCD is the fastest.  Finally for input integers larger than 63-bits but smaller than 128-bits, our implementation of Lehmer's extended GCD using our simplified left-to-right binary extended GCD for 64-bit machine words is the fastest of the implementations tested.  For input integers larger than 127-bits, we defer to one of the reference implementations.
+We present our data in three sections, relating to our implementations specialized for 32-bit, 64-bit, and 128-bit inputs.  In each case, we show that our 32-bit implementation is no slower than our 64-bit implementation, which is no slower than our 128-bit implementation.  For input integers smaller than 32-bits, our implementation of the standard extended Euclidean algorithm performs best.  For input integers larger than 31-bits but smaller than 64-bits, our implementation of a simplified left-to-right binary extended GCD is the fastest.  Finally for input integers larger than 63-bits but smaller than 128-bits, our implementation of a simplified left-to-right binary extended GCD is fastest up to 116-bits and then our implementation of Lehmer's extended GCD using our simplified left-to-right binary extended GCD for 64-bit machine words becomes faster.  For input integers larger than 127-bits, we defer to one of the reference implementations.
 
 Ideal class arithmetic uses a variant of the extended GCD where only $s$ and $U$ are computed for the solution $s = Ua + Vb$ for input integers $a$ and $b$.   This is referred to as a \emph{left-only} extended GCD.  Ideal class arithmetic also uses the partial extended GCD, which is similar to the left-only extended GCD, but also that the algorithm is terminated when the next quotient is less than a specified bound.  Future work (see Section \ref{sec:futureIdealArithmetic}) would test these implementations specifically.  In Chapter \ref{chap:idealExperiments}, we adapt the best performing extended GCD for each input size for use with the left-only extended GCD and the partial extended GCD.  Since none of the reference implementations tested provide a partial extended GCD, we implemented one using a partial extended Euclidean GCD using \texttt{mpz\_t} types.
 
-\subsection{Inputs smaller than 32-bits}
+\subsection{32-bit Extended GCDs}
+
+Figures \ref{fig:gcdRef32} through \ref{fig:gcdBest32} show performance timings for each of our implementations of the extended GCD, as well as the reference implementations, for inputs less than 32-bits. For each bit size $k$ from 1 through 31, a set of 1,000,000 pseudorandom positive integers of at most $k$ bits was created.  The times shown are the average time for a single extended GCD computation.  In each case, our 32-bit implementations perform faster than our corresponding 64-bit and 128-bit implementations.  Figure \ref{fig:gcdRef32} shows that for inputs of this size, Pari is the fastest of the reference implementations tested.  Figure \ref{fig:gcdSteins32} shows the performance of our 32-bit implementations of Stein's right-to-left binary extended GCD for window sizes from 1-bit to 5-bits.  Of these implementations, the 1-bit window is fastest for inputs up to 15-bits, and then the 3-bit window is faster up to 29-bits.  All the implementations tested here are known to be produce correct results for inputs up to 31-bits, with the exception of our 32-bit implementations of Stein's right-to-left binary extended GCD, which is only known to be correct up to 29-bits.  Figure \ref{fig:gcdBest32} shows the best performing implementations from among the reference implementations and each of our 32-bit implementations.  In the case of our implementations of Stein's right-to-left binary extended GCD, this figure only includes the 1-bit and 3-bit windowed implementations, since these were the best performing of the windowed implementations.  This figure shows that for inputs less than 32-bits, our 32-bit implementation of the extended Euclidean performs best, and takes roughly only 63\% as long as the fastest reference implementation, for inputs of this size.
 
 \mygraph{reference-impl-32}{fig:gcdRef32}{Reference Implementations for 32-bit Inputs.}
 \mygraph{divrem-32}{fig:gcdDivrem32}{Extended Euclidean GCD for 32-bit Inputs.}
@@ -1833,8 +1835,9 @@ Ideal class arithmetic uses a variant of the extended GCD where only $s$ and $U$
 
 \clearpage
 
-\subsection{Inputs larger than 31-bits but smaller than 64-bits}
+\subsection{64-bit Extended GCDs}
 
+Figures \ref{fig:gcdRef64} through \ref{fig:gcdBest64} show the average time to compute the extended GCD for a pair of pseudorandom positive integers of $k$ bits for $k$ from 1 through 63 using each of our 64-bit and 128-bit implementations of the extended GCD, as well as for the reference implementations.  For each bit size, $k$, 1,000,000 pairs of pseudorandom positive integers were generated and used as inputs for each implementation of the extended GCD.  In each case, our 64-bit implementation is faster than the corresponding 128-bit implementation.  Figure \ref{fig:gcdRef64} shows that for inputs of this size, Pari performs the fastest of the reference implementations.  Figure \ref{fig:gcdSteins64} shows each of our 64-bit implementations of Stein's right-to-left binary extended GCD for window sizes from 1-bit to 5-bits.  Of these implementations, the implementation using a 4-bit window is consistently faster than our other windowed implementations.  Finally, Figure \ref{fig:gcdBest64} shows each of our 64-bit implementations, as well as the fastest reference implementation, Pari.   This figure only includes timings for our 4-bit windowed implementation of Stein's right-to-left binary extended GCD.  This figure shows that for inputs larger than 31-bits but less than 64 bits that our simplified left-to-right binary extended GCD is the fastest and takes roughly 77\% of the time of the fastest reference implementation for this range.   Each of the implementations tested in this subsection produce correct results up to 63-bits, with the exception of our implementations of Stein's right-to-left binary extended GCD, which only produce correct results for inputs up to 60-bits.
 
 \mygraph{reference-impl-64}{fig:gcdRef64}{Reference Implementations for 64-bit Inputs.}
 \mygraph{divrem-64}{fig:gcdDivrem64}{Extended Euclidean GCD for 64-bit Inputs.}
@@ -1851,57 +1854,24 @@ Ideal class arithmetic uses a variant of the extended GCD where only $s$ and $U$
 
 \clearpage
 
-\subsection{Inputs larger than 63-bits}
+\subsection{128-bit Extended GCDs}
+
+Figures \ref{fig:gcdRef128} through \ref{fig:gcdBest128} show the performance timings of each of our 128-bit implementations of the extended GCD, including the reference implementations.  Figure \ref{fig:gcdBest128} shows that 
 
 \mygraph{reference-impl-128}{fig:gcdRef128}{Reference Implementations for 128-bit Inputs.}
 \mygraph{steins-128}{fig:gcdSteins128}{All 128-bit Implementations of Stein's Extended GCD.}
 \mygraph{lehmer-128}{fig:gcdLehmer128}{Lehmer's Extended GCD for 128-bit Inputs.}
-\mygraph{best-128}{fig:gcdBest64}{Best Extended GCDs for 128-bit Inputs.}
-
-
-For Lehmer's extended GCD, we precomputed a table of 8-bit inputs for the inner extended GCD computation -- see Figure \ref{fig:lehmer-32v64}. In each case, the 32-bit implementation is faster than the 64-bit implementation.
-%\mygraph{lehmer-32v64}{fig:lehmer-32v64}{Lehmer's extended GCD with 8-bit precomputed inner GCD.}
-
-The graphs in Figures \ref{fig:stein1-32v64}, \ref{fig:stein2-32v64}, \ref{fig:stein3-32v64}, \ref{fig:stein4-32v64}, and \ref{fig:stein5-32v64} show that for all window sizes from 1 to 5 bits, that the 32-bit version of the right-to-left binary GCD is faster than the 64-bit version.
-%\mygraph{stein1-32v64}{fig:stein1-32v64}{Right-to-Left Binary Extended GCD.}
-%\mygraph{stein2-32v64}{fig:stein2-32v64}{2-bit Windowed Right-to-Left Binary Extended GCD.}
-%\mygraph{stein3-32v64}{fig:stein3-32v64}{3-bit Windowed Right-to-Left Binary Extended GCD.}
-%\mygraph{stein4-32v64}{fig:stein4-32v64}{4-bit Windowed Right-to-Left Binary Extended GCD.}
-%\mygraph{stein5-32v64}{fig:stein5-32v64}{5-bit Windowed Right-to-Left Binary Extended GCD.}
+\mygraph{best-128}{fig:gcdBest128}{Best Extended GCDs for 128-bit Inputs.}
 
 \clearpage
-
-The left-to-right variant of the binary GCD proposed by Shallit and Sorenson is shown in figure \ref{fig:shallit-32v64}.  Here the 32-bit implementation is slightly faster than the 64-bit implementation.
-%\mygraph{shallit-32v64}{fig:shallit-32v64}{Left-to-Right Binary Extended GCD of Shallit and Sorenson.}
-
-Lastly, our simplified version of the left-to-right binary GCD is shown in figure \ref{fig:binary_l2r-32v64}.  In this case, the benefit, if any, to using a 32-bit implementation over a 64-bit implementation is negligible\footnote{Nanosecond differences between the two versions could be attributed to timing inaccuracies.}.
-%\mygraph{binary_l2r-32v64}{fig:binary_l2r-32v64}{Simplified Left-to-Right Binary  Extended GCD.}
-
-\clearpage
-
-Note that the 32-bit versions of the right-to-left binary extended GCD are only accurate up to 29-bits (ignoring sign), while the 64-bit versions are only accurate to 60-bits. All other 32-bit implementations are accurate to 31-bits\footnote{The input is less than or equal to 31-bits, since in a two's complement representation the sign of the input variable takes the most significant bit and accounts for all 32-bits.} and all other 64-bit implementations are accurate to 63-bits\footnote{Similar to the 32-bit implementation, the most significant bit represents the sign of the integer.}.
-
-Since the 32-bit implementation of each algorithm is at least no slower than the 64-bit implementation, when comparing the different algorithms, we always prefer the 32-bit implementation of each when the algorithm is known to be accurate for the size of the inputs.
-
-Both the Extended Euclidean Algorithm and Lehmer's GCD use division with remainder to compute their result, so we first compare our implementations of both.  Figure \ref{fig:divrem-vs-lehmer} shows that the Extended Euclidean Algorithm is always faster.
-%\mygraphX{divrem-vs-lehmer}{fig:divrem-vs-lehmer}{Extended Euclidean Algorithm compared to Lehmer's GCD using precomputed 8-bit words.}{EEA vs Lehmer's Extended GCD.}
-
-In Figure \ref{fig:steins}, we compare each of our windowed implementations of the right-to-left binary GCD.  Larger windows trade off precomputation against the likelihood that a number will be divisible by some power of two.  One can see that the non-windowed version is most efficient for inputs less than 16-bits in size, at which point the 3-bit windowed version is best until 30 bits.  After 30 bits, the 4-bit windowed version out performs other window sizes in the range with which we experimented.  In the 64-bit implementation, the slope of the 5-bit windowed version is the lowest and so presumably it would out perform the 4-bit window once inputs were large enough.
-%\mygraphTwo{steins-32}{steins-64}{fig:steins}{Windowed Right-to-Left Binary Extended GCDs.}
-
-Figure \ref{fig:shallit-vs-binary_l2r} compares the left-to-right binary GCD proposed by Shallit and Sorenson to our own simplified version.
-%\mygraph{shallit-vs-binary_l2r}{fig:shallit-vs-binary_l2r}{Shallit and Sorenson compared to our simplified left-to-right binary GCD.}
-
-Our implementation of the Euclidean Algorithm always out performs Lehmer's GCD.  For our implementations of the right-to-left binary GCD, among the 32-bit implementations, the non-windowed and the 3-bit windowed versions perform well.  For the 64-bit implementation, the 4-bit windowed version out performs the other window sizes.  Finally, for the left-to-right variants of the binary GCD, our simplified version always out performs the approach proposed by Shallit and Sorenson.  In Figure \ref{fig:all-gcd}, we compare these top performers.  For integer inputs less than 32-bits, the standard Euclidean Algorithm performs best, and for inputs between 32-bits and 64-bits, our simplified left-to-right binary GCD is fastest.
-%\mygraphTwo{all-32}{all-64}{fig:all-gcd}{Euclidean vs windowed right-to-left binary vs simplified left-to-right binary.}
-
-Since the Euclidean Algorithm and our simplified left-to-right binary GCD are our fastest implementations for inputs less than 64-bits, we extended both to work on 128-bit integers.  We also compared these with the implementation of the extended GCD algorithm from the GNU Multiple Precision (GMP) library.  Figure \ref{fig:mpzgcd} show that our implementations perform faster than the implementation in GMP for inputs smaller than 64-bits.
-%\mygraphX{mpzgcd}{fig:mpzgcd}{The extended Euclidean algorithm vs our simplified left-to-right binary GCD vs the $\textrm{mpz\_gcdext}$ function from the GNU Multiple Precision library.}{EEA vs simplified left-to-right binary vs GMP.}
-
-This chapter discussed methods that lead to practical improvements for computing the greatest common divisor of two integers, and this indirectly contributes to the performance of arithmetic in the ideal class group.  The chapter began with several methods for computing solutions to equations of the form $s=Ua + Vb$ where $s$ is the greatest common divisor of both $a$ and $b$, since arithmetic in the ideal class group is dominated by this operation.  We found that when the inputs $a$ and $b$ are bound by $2^{32}$, that the standard Extended Euclidean Algorithm performs best.  When $2^{32} \le a,b < 2^{64}$, a left-to-right binary GCD computation is fastest.  Finally, for $a,b \ge 2^{64}$ we defer to the implementation in the GNU Multiple Precision (GMP) library.
 
 
 \section{Summary}
+
+Restate the winners, and any limitations of each algorithm, such as Stein's not being correct all the way up to the full bit range.  For each implementation, we did not have to use arithmetic of a larger word size.  We could have used arithmetic of a larger word size for the right-to-left binary, but this would have made it slower than it currently is and we wanted each of our implementations to be as fast as possible.
+
+This chapter discussed methods that lead to practical improvements for computing the greatest common divisor of two integers, and this indirectly contributes to the performance of arithmetic in the ideal class group.  The chapter began with several methods for computing solutions to equations of the form $s=Ua + Vb$ where $s$ is the greatest common divisor of both $a$ and $b$, since arithmetic in the ideal class group is dominated by this operation.  We found that when the inputs $a$ and $b$ are bound by $2^{32}$, that the standard Extended Euclidean Algorithm performs best.  When $2^{32} \le a,b < 2^{64}$, a left-to-right binary GCD computation is fastest.  Finally, for $a,b \ge 2^{64}$ we defer to the implementation in the GNU Multiple Precision (GMP) library.
+
 
 TODO: Since there's no Partial in GMP, we implemented a partial extended Euclidean GCD.
 
