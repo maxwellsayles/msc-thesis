@@ -2277,21 +2277,6 @@ The next chapter brings together the improvements to ideal arithmetic and expone
 \chapter{SuperSPAR Experiments}
 \label{chap:ssparExperiments}
 
-% TODO: We are trying to minimize the average time to factor integers for each given bit size.
-
-%Also, I think I need to state a little more about my methodology for the SuperSPAR experiments in Chapter 8.   For GCD it's very fast (a few hundred nanoseconds), and I can time large sample sets (1,000,000 pairs for around 100 different bit sizes, for numerous different GCD algorithms) and get good timing estimates.   Ideal arithmetic is still pretty fast and again, I can time large sample sets (10,000,000 operations for over 100 different discriminant sizes, for three (now four) different implementations) and still have this complete in a reasonable amount of time.  The GCD experiments complete in a few minutes and the ideal experiments complete in a few hours.
-
-%SuperSPAR is a different beast.  A fast factorization is around 1 millisecond per integer, while slower factorizations were closer to 40 milliseconds (this is between 10,000 times and 400,000 times slower than a GCD).  And we have multiple dimensions of parameters to iterate (choice of largest prime in exponent, choice of prime power bounds, choice of primorial in search, choice of multiplier of primorial, choice of hashing technique, number of ideals before switching class groups, etc) and various bit sizes.   So even for small sets of integers (a few 1000), this can be quite slow.
-
-%For this reason, I did some statistical sampling (section 8.2) to try to eliminate some of these variables.   I was able to sample 250,000 integers instead of only 4000 (for the final parameter search).   Mining these samples takes a few minutes, while iterating on the final 4000 integer sample sets, using the method proposed in section 8.5.1 (even after hand optimizing the search range (I forgot to mention this)), still took over a day.  So it's quite slow even for a small sample set.
-
-%So the methodology in general was to emphasize empirical timings, except for when the timings took unreasonably long even for small sample sets.  Then we fell back to statistical data.
-
-This chapter discusses the experiments and results that directed our implementation of the SuperSPAR integer factoring algorithm, discussed in Section \ref{sec:superSpar}.  The goal of this chapter is to show that SPAR can be modified and implemented so that it is the fastest available factoring implementation for many integer sizes no larger than 128-bits.  One way in which factoring integers of these sizes is useful is after the sieve step of more powerful integer factoring algorithms, such as the number field sieve (see \cite[\S 6.2]{Crandall2001}).  Factoring integers no larger than 128-bits is of particular interest in this thesis since Chapter \ref{chap:xgcdExperiments} demonstrates practical improvements for computing the extended GCD using our 32-bit, 64-bit, and 128-bits implementations, while Chapter \ref{chap:idealExperiments} demonstrates practical improvements for ideal class group arithmetic for orders with discriminant no larger than 118-bits.  This is relevant to our implementation of SuperSPAR, since SuperSPAR is based on the SPAR factoring algorithm (discussed in Section \ref{sec:spar}), which is based on arithmetic in the ideal class group.
-
-SPAR factors an integer $N$ by attempting to compute the order of a random ideal class in an order of discriminant $-kN$ for some square free integer $k$.  SPAR uses a combination of exponentiation to a large power consisting of many small primes followed by a random walk search.  Our implementation of SuperSPAR improves upon SPAR by using a bounded primorial steps search, due to Sutherland \cite{Sutherland2007} and discussed in Subsection \ref{subsec:boundedPrimorialSteps}.  This is a practical improvement over a random walk search since a bounded primorial steps search has an asymptotically faster worst case (see Subsection \ref{subsec:boundedPrimorialSteps}).  Our implementation of SuperSPAR also improves upon the exponentiation stage of SPAR.  In this stage, SPAR exponentiates a random ideal class to the product of many small primes.  For SuperSPAR, we precompute 2,3 representations of these exponents based on the experiments in Chapter \ref{chap:powExperiments}, which demonstrates that the $L$ best approximations technique leads to an improvement over the binary exponentiation method in the context of our implementation of ideal class arithmetic.  
-
-
 \begin{itemize}
 \item Why we think we can improve SPAR
 \item Justify statistics over experimentation, but experimentation when possible
@@ -2300,16 +2285,46 @@ SPAR factors an integer $N$ by attempting to compute the order of a random ideal
 \item Briefly state the results that we are going to show.
 \end{itemize}
 
+The goal of this chapter is to show that the SPAR integer factoring algorithm (Section \ref{sec:spar}) can be modified and implemented so that, on average, it is the fastest available factoring implementation for integers of the size 50-bits to 62-bits -- this is an implementation of SuperSPAR (Section \ref{sec:superSpar}).  One way in which factoring integers of these sizes is useful is after the sieve step of more powerful integer factoring algorithms, such as the number field sieve (see \cite[\S 6.2]{Crandall2001}).  Factoring integers of these sizes is also of particular interest in this thesis since Chapter \ref{chap:xgcdExperiments} demonstrates performance improvements on average for computing the extended GCD using our 32-bit, 64-bit, and 128-bit implementations, while Chapter \ref{chap:idealExperiments} demonstrates performance improvements on average for ideal class group arithmetic for orders with discriminant no larger than 118-bits.  This is relevant to our implementation of SuperSPAR, since SuperSPAR is based on the SPAR factoring algorithm (discussed in Section \ref{sec:spar}), which is based on arithmetic in the ideal class group.
+
+SPAR factors an integer $N$ by attempting to compute the order of a random ideal class in an order with discriminant $\Delta = -kN$ for some square free integer $k$.  An implementation first exponentiates a random ideal class to the product of many small primes (the exponentiation stage) and then performs a random walk in an attempt to find an ambiguous ideal class (the search stage).  Our implementation of SuperSPAR improves upon the search stage of SPAR by using a bounded primorial steps search, due to Sutherland \cite{Sutherland2007} and discussed in Subsection \ref{subsec:boundedPrimorialSteps}.  This is a practical improvement over a random walk search since a bounded primorial steps search has an asymptotically faster worst case (see Subsection \ref{subsec:boundedPrimorialSteps}), which means that it requires fewer group operations to find the order of an ideal class.
+
+Our implementation of SuperSPAR also improves upon the exponentiation stage of SPAR.  In this stage, SPAR exponentiates a random ideal class to the product of many small primes.  Since our implementations of ideal class arithmetic include cubing, we take advantage of 2,3 representations for exponentiation, which is an improvement over binary exponentiation (see Section \ref{sec:expResults}).  For SuperSPAR, we precompute 2,3 representations using the $L$ best approximations technique of Section \ref{sec:expBestApproximations}, which Chapter \ref{chap:powExperiments} shows to perform the best on average for large exponents that are the product of many primes and for ideal classes for orders with discriminants no larger than 118-bits.
+
+Another way in which our implementation of SuperSPAR improves upon SPAR is by bounding the number of group operations used by each stage independently from each other and separate from the theoretically optimal values.  In SPAR, each stage uses $O(p_t)$ group operations where $p_t \approx N^{1/2r}$ and $r = \sqrt{\ln N / \ln \ln N}$ (see Subsection \ref{subsec:sparAlg} for additional details).  The value for $r$ is chosen to theoretically minimize the expected running time of the algorithm, since the assumption is that the order of a random ideal class $\aclass \in Cl_\Delta$ with $\Delta = -kN$ is $N^{1/2r}$ smooth with probability $r^{-r}$.  In practice, other values of $p_t$ are more efficient.  Furthermore, balancing both stages to use $O(p_t)$ group operations is not ideal.  This is partly because the actual cost of multiplication, squaring, and cubing differ, but also because the success of each stage depends on different properties of the class number.  The exponentiation stage is successful when the order of a random ideal class is smooth with respect to the exponent $E$ used in the exponentiation stage, while the search stage is successful when the non-smooth part of the order is sufficiently small.  Selecting bounds for each stage independently of $r$ varies the time spent during each stage inversely to the probability of its success.  As such, our implementation of SuperSPAR selects the largest prime $p_t$, used by the exponent $E = \prod {p_i}^{e_i}$ in the exponentiation stage, separately from the multiple of a primorial, $mP_w$, used in the search stage.  Note that the largest prime $p_t$ used during the exponentiation stage is larger than the largest prime $p_w$ used by the search stage, since the search stage assumes that the order of $\bclass = \aclass^E$ is coprime to $E$.
+
+Since there are several parameters affecting the performance of our implementation of SuperSPAR, we first say a little about the methodology used in this chapter.  Chapters \ref{chap:xgcdExperiments} and \ref{chap:idealExperiments} emphasize empirical results to demonstrate practical improvements when computing the extended GCD or performing ideal class arithmetic.  This chapter also emphasizes empirical results when such results are practical, however, factoring a single integer is considerably slower than computing a single extended GCD or performing a single arithmetic operation in the ideal class group.  In the case of computing the extended GCD, a single computation takes on average between a few nanoseconds to a few hundred nanoseconds.  This means that we can empirically test 1,000,000 computations for random integers of each size from 1-bit to 127-bits in a modest amount of time.  Even for ideal class arithmetic, multiplication, squaring, and cubing take between a few hundred nanoseconds to a few microseconds.  Again, because of this we are able to empirically time each operation on 10,000,000 random ideal classes for discriminants of size 16-bits to 140-bits in a few hours.  On the other hand, factoring a single integer with our implementation of SuperSPAR typically takes between 1 millisecond and 40 milliseconds -- this is roughly 10,000 times to 400,000 times slower than an extended GCD computation.  So even for small sets of integers (a few 1000), this is quite slow.
+
+To aid in the selection of efficient parameters for our implementation of SuperSPAR, Section \ref{sec:ssparFactorizationOfTheOrder} discusses the statistical analysis of a set of roughly 6,000,000 ideal classes in order to find bounds on several parameters.  Subsection \ref{subsec:ssparPrimePowerBound} shows that the prime factorization of the order of ideal classes consists of prime powers with exponents that are typically 1 for all but the smallest primes.  This informs our choice of the bound $e_i$ in the exponent $E$ for the exponentiation stage.  Schnorr and Lenstra \cite[p.293]{Schnorr1984} also advise the use of smaller exponents in practice.  Additionally, we found that the order of an ideal class $[\ideal a_1]$ was, with high probability (about 97.8\% in our experiments), either the same as or a multiple of the order of some other ideal class $[\mathfrak a_2]$ in the same class group (see Subsection~\ref{subsec:ssparDiffBtwOrder}).  For this reason, if the algorithm finds some $h'$ such that ${[\mathfrak a_1]^{h'}}^{\left(2^j\right)}$ is an ambiguous class for some $j$, but is unsuccessful at factoring $N$, the algorithm simply attempts to find an ambiguous class by repeated squaring of $[\mathfrak a_i]^{h'}$ for several $[\mathfrak a_i]$.  Since this may fail for several ideal classes, we let $c$ be the maximum number of ideal class classes tried before the algorithm starts over with a different multiplier $k$ for the discriminant.  Although the statistical data shows that in expectation a value of $c \approx 2$ is all that is needed (see Subsection \ref{subsec:ssparExpIdeals}), we rely on empirical testing to show that much larger values of $c$ perform better in practice.  
+
+% And we have multiple dimensions of parameters to iterate (choice of largest prime in exponent, choice of prime power bounds, choice of primorial in search, choice of multiplier of primorial, choice of hashing technique, number of ideals before switching class groups, etc) and various bit sizes.   So even for small sets of integers (a few 1000), this can be quite slow.
+
+%For this reason, I did some statistical sampling (section 8.2) to try to eliminate some of these variables.   I was able to sample 250,000 integers instead of only 4000 (for the final parameter search).   Mining these samples takes a few minutes, while iterating on the final 4000 integer sample sets, using the method proposed in section 8.5.1 (even after hand optimizing the search range (I forgot to mention this)), still took over a day.  So it's quite slow even for a small sample set.
+
+%So the methodology in general was to emphasize empirical timings, except for when the timings took unreasonably long even for small sample sets.  Then we fell back to statistical data.
+
+
+
+
 
 SuperSPAR works in two stages: an exponentiation stage and a search stage.  The search stage of SuperSPAR computes baby steps coprime to a multiple of a primorial.  Section \ref{sec:ssparCoprimeFinding}  discusses two techniques to find integers coprime to a primorial in a given range.  As discussed in Subsection \ref{subsec:boundedPrimorialSteps}, for the search stage to work, the order of the element should have no factors in common with the primorial used for the search stage.  Section \ref{sec:ssparFactorizationOfTheOrder} discusses the data and experiments used to bound the exponents of the prime factors of the exponent used in the exponentiation stage so that (with high probability) the order of the resulting ideal class will have no factors in common with the primorial used during the search stage.  This section also discusses the number of ideal classes to try in expectation for a given class group.  The search stage of the algorithm requires the use of a lookup table.  Section \ref{sec:ssparHashing} compares two implementations of such a table.  Then, to enable the discovery of bounds useful for the search stage, Section \ref{sec:ssparBabyStepBounds} discusses a method of generating suitable candidates.  With all this in place, Section \ref{sec:ssparEmpirical} discusses the method used to determine the exponent for the exponentiation stage and the bound for the search stage that work well in practice for integers of specific sizes.  Finally, a comparison of our implementation of SuperSPAR to several public implementations of factoring algorithms is provided.  We show that for random semiprime integers 50-bits or more and less than 64-bits, SuperSPAR performs the best on average of the implementations tested.
 
 The software used to generate timing information was developed using \compiler{} on Ubuntu 12.10 and a \cpu{} with 8Gb of RAM.  Never more than one of the four cores was used for experiments.
 
 
+% TODO: Exponentiation primorial must be larger than the search primorial
+
+
+
+
+
+Assuming good parameters are known, the SuperSPAR factoring algorithm used in practice is given in listing \ref{alg:superSpar}.  Chapter \ref{chap:ssparExperiments} discusses the experiments and results that lead to parameters for this algorithm that perform well in practice.  Notice, that parameters for Algorithm \ref{alg:superSpar} can be selected based on the theoretical analysis of SuperSPAR from the previous section.
+
+
+
+
 \section{Coprime Finding}
 \label{sec:ssparCoprimeFinding}
-
-% TODO: Should this section be a subsection of bounded primorial steps instead?
 
 The bounded primorial steps algorithm from Section \ref{sec:primorial} and used by the SuperSPAR factoring algorithm (Section \ref{sec:superSpar}) computes baby-steps $\aclass^i$ for $1 \le i \le s$ where $i$ is coprime to some primorial $P_w$ and $s$ is a multiple of $P_w$.  By considering only values coprime to $P_w$ the running time complexity of the bounded primorial steps algorithm achieves an upper bound of $O(\sqrt{M/\log \log M})$ group operations in the worst case.  If an implementation has to test whether each $i$ from $1$ to $P_w$ is coprime to $P_w$, the algorithm cannot achieve this.  As such, the algorithm assumes a set of values coprime to $P_w$ is globally available.  Of course, one can generate such a set by testing whether $\gcd(i, P_w) = 1$ for $i$ from $1$ to $P_w$, but there are more efficient methods.  This section discusses two such methods, namely sieving and wheeling.  Additional information on each technique can be found in \cite[pp.117--127]{Crandall2001} and \cite[p.494]{Sutherland2009}.
 
@@ -2432,123 +2447,6 @@ The second method of collision resolution considered is open addressing, and in 
 Figure \ref{fig:ssparHashing} shows the average time to split semiprime integers of the specified size using the collision resolution methods described above.  In this context and for each integer range tested, open addressing for collision resolution performs better.
 
 \mygraphX{hashing-open-vs-chained}{fig:ssparHashing}{The average time to split an integer using either open addressing or chaining with list heads for collision resolution in a hash table.}{Open addressing vs Chaining.}
-
-
-\section{SuperSPAR in Practice}
-\label{sec:ssparInPractice}
-
-% TODO: Exponentiation primorial must be larger than the search primorial
-
-In both SPAR and SuperSPAR, each stage uses $O(p_t)$ group operations where $p_t \approx N^{1/2r}$ and $r = \sqrt{\ln N / \ln \ln N}$.  The value for $r$ is chosen to theoretically minimize the expected running time of the algorithm.  However, the value for $r$ relates to the likelihood that the algorithm will find an ambiguous ideal class for a given discriminant\footnote{The assumption is that the order of a random ideal class is $N^{1/2r}$ smooth with probability $r^{-r}$.}.  Since $r$ is chosen to minimize the expected running time in theory, in practice other values may be more efficient, effectively trading off the number of group operations used for each class group against the number of class groups tried.
-
-Furthermore, balancing both stages of SuperSPAR to use $O(N^{1/2r})$ group operations is not ideal.  This is partly because the actual cost of multiplication, squaring, and cubing differ, but also because the success of each stage depends on different properties of the class number.  The exponentiation stage is successful when the order of a random ideal class is smooth with respect to some primorial $E$, while the search stage is successful when the non-smooth part of the order is sufficiently small.  In this sense, the efficiency of the factoring algorithm depends both on the smoothness of the order of a random ideal class $\aclass$ with respect to the primorial $E$, but also on the size of its non-smooth part with respect to the largest exponent reached by the search stage.  Selecting bounds for each stage independently of $r$ varies the time spent during each stage inversely to the probability of its success.
-
-Experimentally we found that the prime factorization of the order of ideal classes consists of prime powers with exponents that are typically 1 for all but the smallest primes (see Subsection \ref{subsec:ssparPrimePowerBound}).  Schnorr and Lenstra \cite[p.293]{Schnorr1984} also advise the use of smaller exponents in practice.  Additionally, we found that the order of an ideal class $[\ideal a_1]$ was, with high probability (about 97.8\% in our experiments), either the same as or a multiple of the order of some other ideal class $[\mathfrak a_2]$ in the same class group (see Subsection~\ref{subsec:ssparDiffBtwOrder}).  For this reason, if the algorithm finds some $h'$ such that ${[\mathfrak a_1]^{h'}}^{\left(2^j\right)}$ is an ambiguous class for some $j$, but is unsuccessful at factoring $N$, the algorithm simply attempts to find an ambiguous class by repeated squaring of $[\mathfrak a_i]^{h'}$ for several $[\mathfrak a_i]$.  If this fails for several ideal classes, the algorithm then starts over with a different multiplier $k$ for the discriminant.  Let $c$ be the maximum number of ideal classes tried.
-
-% NOTE: We give a test for an ambiguous ideal and a method of factoring the discriminant in section 4.1.1
-
-% -- Try to Find an Ambiguous Ideal Class -- %
-\begin{algorithm}[htb]
-\caption[Repeatedly Square]{Try to find an ambiguous ideal class by repeated squaring.}
-\label{alg:ssparRepeatedlySquare}
-\begin{algorithmic}[1]
-\Procedure{RepeatedlySquare}{$\bclass, \ell$}
-\For{$i$ from 1 to $\ell$ while $\bclass \neq \idclass$}
-	\If{$\bclass$ is an ambiguous ideal class}  \Comment{See Subsection \ref{subsec:forms}.}
-		\If{$\bclass$ leads to a non-trivial factor of $N$}
-			\State $d \gets$ a non-trivial factor of $N$
-			\State \Return ($\bclass$, $d$)
-		\Else
-			\State \Return ($\bclass$, 1)
-		\EndIf
-	\EndIf
-	\State $\bclass \gets \bclass^2$
-\EndFor
-\State \Return ($\bclass$, 1)
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-
-
-% -- Try Many Ideal Classes -- %
-\begin{algorithm}[htb]
-\caption[Try Many Ideal Classes.]{Try to factor $N$ using several ideal classes and a multiple of the order of a single ideal class.}
-\label{alg:ssparTryManyIdealClasses}
-\begin{algorithmic}[1]
-\Procedure{TryManyIdealClasses}{$\Delta$, $h$, $\ell$, $c$}
-\For{$2 \le i \le c$}
-	\State let $\idealclass{p_i}$ be the $i^{\textrm{th}}$ smallest prime ideal class in $Cl_\Delta$
-	\State $(\_, d) \gets$ \Call{RepeatedlySquare}{$\idealclass{p_i}^h$, $\ell$}
-	\If{$d \neq 1$}	\Return d \EndIf
-\EndFor
-\State \Return 1
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-
-% -- Main SuperSPAR -- %
-\begin{algorithm}[htb]
-\caption{SuperSPAR Integer Factoring Algorithm.}
-\label{alg:superSpar}
-\begin{algorithmic}[1]
-\Require $N \in \ZZgez$ odd and composite,
-\algnewline $E = \prod_{i=2}^t {p_i}^{e_i}$ for the exponentiation phase,
-\algnewline $s = mP_w$ a multiple of a primorial for the search phase,
-\algnewline $c \in \ZZgtz$ the number of ideal classes to try before switching multipliers,
-\State $\ell = \floor{\log_2 \left(\sqrt N \log N\right)}$ \Comment{bound for repeated squaring}
-\State $k \gets 1$  \Comment{square free multiplier}
-\State $\Delta \gets -kN$  \label{goto:newK}
-\If{$\Delta \not\equiv 0,1 \pmod 4$}
-	$\Delta \gets 4\Delta$
-\EndIf
-
-% -- Exponentiation Stage -- %
-\Statex \{-- exponentiation stage --\}
-\State let $\idealclass{p_1}$ be the smallest prime ideal class in $Cl_\Delta$
-\State $\idealclass{b'} \gets \idealclass{p_1}^E$
-\State $(\idealclass{b}, d) \gets$ \Call{RepeatedlySquare}{$\idealclass{b'}$, $\ell$}
-\If{$d \neq 1$} \Return d \EndIf
-\If{$\bclass$ is an ambiguous ideal class}
-	$h \gets 1$, and go to line \ref{goto:tryIdeals}
-\EndIf
-
-% -- Search Stage -- %
-\Statex \{-- search stage --\}
-\State initialize the lookup table
-\For{$1 \le i \le s$ where $\gcd(i,P_w)=1$}
-	\State compute $\bclass^i$ and store $\bclass^i \mapsto i$ in the lookup table \Comment{coprime baby-steps}
-	\If{$\bclass^i = \idclass$}
-		$h \gets i$, and go to line \ref{goto:foundOrder}
-	\EndIf
-\EndFor
-\For{$1 \le j \le m\phi(P_w)$}
-	\If{$\bclass^{2js}$ is in the table, first lookup $i$}
-		\State $h \gets$ odd part of $(2js - i)$, and go to line \ref{goto:foundOrder}  \Comment{positive giant-step}
-	\ElsIf{$\bclass^{-2js}$ is in the table, first lookup $i$}
-		\State $h \gets$ odd part of $(2js + i)$, and go to line \ref{goto:foundOrder} \Comment{inverted giant-step}
-	\EndIf
-\EndFor
-
-% -- Found a Multiple of the Order -- %
-\Statex \{-- found a multiple of the order --\}
-\State $(\_, d) \gets$ \Call{RepeatedlySquare}{$\idealclass{b'}^h$, $\ell$}
-\label{goto:foundOrder}
-\If{$d \neq 1$} \Return $d$	\EndIf	
-\State $d \gets$ \Call{TryManyIdealClasses}{$\Delta$, $E \cdot h$, $\ell$, $c$}
-\label{goto:tryIdeals}
-\If{$d \neq 1$} \Return $d$ \EndIf
-
-% -- Restart with Next Multiplier -- %
-\State $k \gets $ smallest square free integer $> k$
-\State start over at line \ref{goto:newK}
-\end{algorithmic}
-\end{algorithm}
-
-\clearpage
-
-
-Assuming good parameters are known, the SuperSPAR factoring algorithm used in practice is given in listing \ref{alg:superSpar}.  Chapter \ref{chap:ssparExperiments} discusses the experiments and results that lead to parameters for this algorithm that perform well in practice.  Notice, that parameters for Algorithm \ref{alg:superSpar} can be selected based on the theoretical analysis of SuperSPAR from the previous section.
-
 
 
 \section{Factorization of the Order of Ideal Classes}
@@ -2718,7 +2616,109 @@ Classes/Group & 32 bits & 40 bits & 48 bits & 56 bits & 64 bits & 72 bits & 80 b
 \label{tab:attemptedIdealClasses}
 \end{table}
 
-Figure \ref{fig:ssparIdealAttempts} indicates that for most multipliers, if the search stage of the algorithm is successful in finding a multiple of the order of an ideal class, then in expectation, two ideal classes need to be tried before a successful splitting of the integer $N$.  Although switching multipliers after at most two ideal classes does work in practice, our implementation of SuperSPAR is more efficient if many ideal classes are tried before switching multipliers and class groups.  This is possibly due to the cost of the search phase of the algorithm, which is executed with each class group\footnote{This is in contrast to the exponentiation stage, which is executed for each ideal class tried.}.  Table \ref{tab:attemptedIdealClasses} shows the average time to split integers\footnote{This uses the same set of semiprime integers as in Table \ref{tab:actualPrimePowerBound}.  Again, the exponent for the exponentiation stage, and the primorial and multiplier for the search stage where chosen to give good performance on average.} given an upper bound on the number of ideal classes tried before switching multipliers.  Our implementation of SuperSPAR bounds the number of ideal classes tried before switching class groups to the lowest time for each integer range.
+Figure \ref{fig:ssparIdealAttempts} indicates that for most multipliers, if the search stage of the algorithm is successful in finding a multiple of the order of an ideal class, then in expectation, roughly 2 ideal classes need to be tried before a successful splitting of the integer $N$.  Although switching multipliers after at most two ideal classes does work in practice, our implementation of SuperSPAR is more efficient if many ideal classes are tried before switching multipliers and class groups.  This is possibly due to the cost of the search phase of the algorithm, which is executed with each class group\footnote{This is in contrast to the exponentiation stage, which is executed for each ideal class tried.}.  Table \ref{tab:attemptedIdealClasses} shows the average time to split integers\footnote{This uses the same set of semiprime integers as in Table \ref{tab:actualPrimePowerBound}.  Again, the exponent for the exponentiation stage, and the primorial and multiplier for the search stage where chosen to give good performance on average.} given an upper bound on the number of ideal classes tried before switching multipliers.  Our implementation of SuperSPAR bounds the number of ideal classes tried before switching class groups to the lowest time for each integer range.
+
+\section{SuperSPAR Algorithm in Practice}
+
+% -- Try to Find an Ambiguous Ideal Class -- %
+\begin{algorithm}[htb]
+\caption[Repeatedly Square]{Try to find an ambiguous ideal class by repeated squaring (see Subsection \ref{subsec:forms}).}
+\label{alg:ssparRepeatedlySquare}
+\begin{algorithmic}[1]
+\Procedure{RepeatedlySquare}{$\bclass, \ell$}
+\For{$i$ from 1 to $\ell$ while $\bclass \neq \idclass$}
+	\If{$\bclass$ is an ambiguous ideal class}
+		\If{$\bclass$ leads to a non-trivial factor of $N$}
+			\State $d \gets$ a non-trivial factor of $N$
+			\State \Return ($\bclass$, $d$)
+		\Else
+			\State \Return ($\bclass$, 1)
+		\EndIf
+	\EndIf
+	\State $\bclass \gets \bclass^2$
+\EndFor
+\State \Return ($\bclass$, 1)
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
+% -- Try Many Ideal Classes -- %
+\begin{algorithm}[htb]
+\caption[Try Many Ideal Classes.]{Try to factor $N$ using several ideal classes and a multiple of the order of a single ideal class.}
+\label{alg:ssparTryManyIdealClasses}
+\begin{algorithmic}[1]
+\Procedure{TryManyIdealClasses}{$\Delta$, $h$, $\ell$, $c$}
+\For{$2 \le i \le c$}
+	\State let $\idealclass{p_i}$ be the $i^{\textrm{th}}$ smallest prime ideal class in $Cl_\Delta$
+	\State $(\_, d) \gets$ \Call{RepeatedlySquare}{$\idealclass{p_i}^h$, $\ell$}
+	\If{$d \neq 1$}	\Return d \EndIf
+\EndFor
+\State \Return 1
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+% -- Main SuperSPAR -- %
+\begin{algorithm}[htb]
+\caption{SuperSPAR Integer Factoring Algorithm.}
+\label{alg:superSpar}
+\begin{algorithmic}[1]
+\Require $N \in \ZZgez$ odd and composite,
+\algnewline $E = \prod_{i=2}^t {p_i}^{e_i}$ for the exponentiation phase,
+\algnewline $s = mP_w$ a multiple of a primorial for the search phase,
+\algnewline $c \in \ZZgtz$ the number of ideal classes to try before switching multipliers,
+\State $\ell = \floor{\log_2 \left(\sqrt N \log N\right)}$ \Comment{bound for repeated squaring}
+\State $k \gets 1$  \Comment{square free multiplier}
+\State $\Delta \gets -kN$  \label{goto:newK}
+\If{$\Delta \not\equiv 0,1 \pmod 4$}
+	$\Delta \gets 4\Delta$
+\EndIf
+
+% -- Exponentiation Stage -- %
+\Statex \{-- exponentiation stage --\}
+\State let $\idealclass{p_1}$ be the smallest prime ideal class in $Cl_\Delta$
+\State $\idealclass{b'} \gets \idealclass{p_1}^E$
+\State $(\idealclass{b}, d) \gets$ \Call{RepeatedlySquare}{$\idealclass{b'}$, $\ell$}
+\If{$d \neq 1$} \Return d \EndIf
+\If{$\bclass$ is an ambiguous ideal class}
+	$h \gets 1$, and go to line \ref{goto:tryIdeals}
+\EndIf
+
+% -- Search Stage -- %
+\Statex \{-- search stage --\}
+\State initialize the lookup table
+\For{$1 \le i \le s$ where $\gcd(i,P_w)=1$}
+	\State compute $\bclass^i$ and store $\bclass^i \mapsto i$ in the lookup table \Comment{coprime baby-steps}
+	\If{$\bclass^i = \idclass$}
+		$h \gets i$, and go to line \ref{goto:foundOrder}
+	\EndIf
+\EndFor
+\For{$1 \le j \le m\phi(P_w)$}
+	\If{$\bclass^{2js}$ is in the table, first lookup $i$}
+		\State $h \gets$ odd part of $(2js - i)$, and go to line \ref{goto:foundOrder}  \Comment{positive giant-step}
+	\ElsIf{$\bclass^{-2js}$ is in the table, first lookup $i$}
+		\State $h \gets$ odd part of $(2js + i)$, and go to line \ref{goto:foundOrder} \Comment{inverted giant-step}
+	\EndIf
+\EndFor
+
+% -- Found a Multiple of the Order -- %
+\Statex \{-- found a multiple of the order --\}
+\State $(\_, d) \gets$ \Call{RepeatedlySquare}{$\idealclass{b'}^h$, $\ell$}
+\label{goto:foundOrder}
+\If{$d \neq 1$} \Return $d$	\EndIf	
+\State $d \gets$ \Call{TryManyIdealClasses}{$\Delta$, $E \cdot h$, $\ell$, $c$}
+\label{goto:tryIdeals}
+\If{$d \neq 1$} \Return $d$ \EndIf
+
+% -- Restart with Next Multiplier -- %
+\State $k \gets $ smallest square free integer $> k$
+\State start over at line \ref{goto:newK}
+\end{algorithmic}
+\end{algorithm}
+
+\clearpage
+
 
 
 \section{Search Bounds}
@@ -3100,6 +3100,7 @@ Finally, in this thesis, we only consider double base number systems using bases
 \section{$\textrm{Super}^2\textrm{SPAR}$}
 \label{sec:futureSSPAR}
 
+% TODO: Metamorphosis of SPAR to SuperSPAR
 % TODO: Either implement the original SPAR for comparison, or mention that as future work.
 % TODO: Future work, interface directly with the Pari/GP library.
 
