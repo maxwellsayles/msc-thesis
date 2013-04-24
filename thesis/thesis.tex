@@ -579,13 +579,7 @@ which completes the derivation of Equation \ref{eq:idealProductB}.  Note that th
 \subsection{Fast Ideal Multiplication (NUCOMP)}
 \label{subsec:nucomp}
 
-% TODO: Additional work by Atkin, van der Poorten, and Jacobson p119 and 124 of Pell
-
 Shanks \cite{Shanks1989} gives an algorithm for multiplying two ideal class representatives such that their product is reduced or almost reduced.  The algorithm is known as NUCOMP and stands for ``New COMPosition''.  This algorithm is often faster in practice as the intermediate numbers are smaller and the final product requires at most two applications of the reduction operation to be converted to reduced form \cite[pp.439--441]{Jacobson2009}. The description of NUCOMP provided here is a high level description of the algorithm based on Jacobson and Williams \mbox{\cite[\S 5.4,~pp. 119-123]{Jacobson2009}}.
-
-%\footnote{According to \cite[p.441]{Jacobson2009}, experiments show that 88\% of the time the resulting product requires no applications of the reduction operation, 12\% of the time only one application is required, and very infrequently are two applications necessary.}
-
-% TODO: Point out that these recursions compute a step in the standard XGCD and refer to the XGCD experiments section.
 
 Equations \ref{eq:idealProductS}, \ref{eq:idealProductA}, and \ref{eq:idealProductB} from the previous subsection give a solution to the ideal product $\ideal a \ideal b = s[a, (b+\sqrt\Delta)/2]$.  In this case, the product ideal is not necessarily reduced.  Computing the reduced ideal class representative corresponds to computing the simple continued fraction expansion of $(b/2)/a$ \cite[p.119]{Jacobson2009}, but in this case, the coefficients $a$ and $b$ may be as large as $\Delta$ \cite[p.118]{Jacobson2009}.  Instead of computing the simple continued fraction expansion of $(b/2)/a$, Jacobson and Williams \cite[p.119]{Jacobson2009} use $sU/a_1$ where $U$ is given by Equation \ref{eq:idealProductU}.  To see why this is sufficient, recall from Subsection \ref{subsec:classNumber} that $a_1$ is approximately $\sqrt{|\Delta|}$ in size, so $s^2 / 2 a_1 \approx 1 / \sqrt{|\Delta|}$ and
 \[
@@ -2315,6 +2309,7 @@ The bounded primorial steps algorithm from Subsection \ref{subsec:boundedPrimori
 Sieving the values coprime to some primorial $P_w$ is straightforward since the factorization $P_w = 2 \times 3 \times \cdots \times p_w$ is known.  Let $[1,b]$ denote the range to be sieved.  First, create a table mapping the values $1$ through $b$ to \emph{true}.  Then for each prime factor $p_j$ of $P_w$, and for every multiple $mp_j$ such that $1 \le mp_j \le b$, set the table entry at index $mp_j$ to \emph{false}.  At this point, each index with a \emph{true} value is coprime to $P_w$.  To see this, note that an index $x$ is \emph{false} when there was some multiple $m$ of a prime $p_j$ dividing $P_w$ such that $mp_j = x$.  As such, the value of $x$ is false if and only if $x$ and $P_w$ share a common factor, namely $p_j$.
 
 \subsection{Coprime Wheel}
+\label{subsec:coprimeWheel}
 \newcommand{\coprimeset}{\set C}
 \newcommand{\coprimelist}{\set D}
 
@@ -2552,14 +2547,14 @@ Suppose the search stage of SuperSPAR determines $h'$, a multiple of the order o
 \label{tab:diffOfOrderOfTwoIdeals}
 \end{table}
 
-Assuming the above constraints, for two ideal classes from the same group $\idealclass u, \idealclass v \in Cl_\Delta$, Table \ref{tab:diffOfOrderOfTwoIdeals} shows the probability that the smallest set of primes $\set P = \{ p ~:~ p \textrm{ is prime}, p > 11 \}$ with $\ord({\idealclass v}^{2^\ell E})$ dividing $\ord({\idealclass u}^{2^\ell E}) \times \prod_{p \in \set P} p$ is of a given size.  Of the ideal class groups studied and assuming the above constraints, more than 97.7\% of the time, a multiple of the order of an ideal class is also a multiple of the order of some other ideal class in the same group.  For SuperSPAR, this means that once a multiple of the order of an ideal class is discovered, if this does not lead to a splitting of $N$, then with high probability, it is also a multiple of the order of some other ideal class in the same group.  Rather than starting over with a different ideal class, let $h'$ be the odd part of the multiple of the order and compute $\idealclass{a_2}^{h'}$ for some other ideal class $\idealclass{a_2} \in Cl_\Delta$.  SuperSPAR then tries to find an ambiguous class by repeated squaring of $\idealclass{a_2}^{h'}$ and, if successful, attempts to split $N$.  This process may be repeated for several different ideal classes in the same group.  However, if the algorithm is unsuccessful for more than an fixed number of ideal classes within the same class group, Subsection \ref{subsec:ssparExpIdeals} shows that changing class groups by changing multipliers is beneficial.
+Assuming the above constraints, for two ideal classes from the same group $\idealclass u, \idealclass v \in Cl_\Delta$, Table \ref{tab:diffOfOrderOfTwoIdeals} shows the probability that the smallest set of primes $\set P = \{ p ~:~ p \textrm{ is prime}, p > 11 \}$ with $\ord({\idealclass v}^{2^\ell E})$ dividing $\ord({\idealclass u}^{2^\ell E}) \times \prod_{p \in \set P} p$ is of a given size.  Of the ideal class groups studied and assuming the above constraints, more than 97.7\% of the time, if $2^\ell Eh'$ is a multiple of the order of an ideal class, then it is also a multiple of the order of some other ideal class in the same group.  For SuperSPAR, this means that once a multiple of the order of an ideal class is discovered, if this does not lead to a splitting of $N$, then with high probability, it is also a multiple of the order of some other ideal class in the same group.  Rather than starting over with a different ideal class, let $h'$ be the odd part of the multiple of the order and compute $\idealclass{a_2}^{h'}$ for some other ideal class $\idealclass{a_2} \in Cl_\Delta$.  SuperSPAR then tries to find an ambiguous class by repeated squaring of $\idealclass{a_2}^{h'}$ and, if successful, attempts to split $N$.  This process may be repeated for several different ideal classes in the same group.  However, if the algorithm is unsuccessful for more than an fixed number of ideal classes within the same class group, Subsection \ref{subsec:ssparExpIdeals} shows that changing class groups by changing multipliers is beneficial.
 
 \subsection{Best Multipliers}
 \label{subsec:ssparBestMultipliers}
 
 As in the previous subsection, assume that an exponent $E$ is chosen for the exponentiation stage such that $\ord(\idealclass{a_1}^{2^\ell E})$ is coprime to $E$.  Also, suppose that the search stage is successful in determining $h'$, a multiple of the order of $\idealclass{a_1}^{2^\ell E} \in Cl_\Delta$.  Our implementation of SuperSPAR will first attempt to split the integer $N$ associated with the discriminant $\Delta$ by searching for an ambiguous class via repeated squaring of the ideal class $\idealclass{a_1}^{Eh'}$.  Failing this, the algorithm tries again by repeated squaring of the ideal classes $\idealclass{a_2}^{Eh'}, \idealclass{a_3}^{Eh'}, ...$ and so on in sequence.  This subsection uses the data set $\idealDataSet$ to determine the expected number of ideal classes to try before a successful splitting of the integer $N$.
 
-The discriminant $\Delta$ associated with an integer $N$ and multiplier $k$ is chosen to be either $\Delta = -kN$ when $-kN \equiv 0, 1 \pmod 4$, or $\Delta = -4kN$.  As such, the data set $\idealDataSet$ is separated into subsets for $N \equiv 1 \pmod 4$ or $N \equiv 3 \pmod 4$\footnote{Notice that $N \equiv 0, 2 \pmod 4$ implies that 2 is a divisor of $N$ and so can be easily split.}, and again for each multiplier $k \in \{1, 2, 3, 5, 6, 7, 10\}$.  Figure \ref{fig:ssparIdealAttempts} shows the expected number of ideal classes to try before splitting $N$, assuming that an appropriate exponent $E$ for the exponentiation stage\footnote{Again, since our implementation of SuperSPAR does not step coprime to a primorial larger than $2 \times 3 \times 5 \times 7 \times 11$ (see Section \ref{sec:ssparEmpirical}), we assume that the exponent $E$ for the exponentiation stage removed all factors $\le 11$ from the order of $\idealclass{a_i}^E$.} is chosen and that a multiple of the order $h'$ was found during the search stage.
+The discriminant $\Delta$ associated with an integer $N$ and multiplier $k$ is chosen to be either $\Delta = -kN$ when $-kN \equiv 0, 1 \pmod 4$, or $\Delta = -4kN$.  As such, the data set $\idealDataSet$ is separated into subsets for $N \equiv 1 \pmod 4$ or $N \equiv 3 \pmod 4$, and again for each multiplier $k \in \{1, 2, 3, 5, 6, 7, 10\}$.  Figure \ref{fig:ssparIdealAttempts} shows the expected number of ideal classes to try before splitting $N$, assuming that an appropriate exponent $E$ for the exponentiation stage is chosen and that a multiple of the order $h'$ was found during the search stage.
 
 \mygraphTwo{attempts-n1}{attempts-n3}{fig:ssparIdealAttempts}{Attempts $N \equiv 1 \pmod 4$}
 
@@ -2568,7 +2563,9 @@ Given this separation of the integer $N$ and the multiplier $k$ in our data set 
 \subsection{Expected Number of Ideal Classes}
 \label{subsec:ssparExpIdeals}
 
-\begin{table}[t]
+Figure \ref{fig:ssparIdealAttempts} indicates that for most multipliers, if the search stage of the algorithm is successful in finding a multiple of the order of an ideal class, then in expectation, roughly 2 ideal classes need to be tried before a successful splitting of the integer $N$.  Although switching multipliers after at most two ideal classes does work in practice, our implementation of SuperSPAR is more efficient if many ideal classes are tried before switching class groups.  This is possibly due to the cost of the search phase of the algorithm, which is executed for each class group, in contrast to the exponentiation stage, which is executed for each ideal class tried.
+
+\begin{table}[htb]
 \centering
 \begin{tabular}{| r | r | r | r | r | r | r | r |}
 	\hline
@@ -2596,13 +2593,15 @@ Classes/Group & 32 bits & 40 bits & 48 bits & 56 bits & 64 bits & 72 bits & 80 b
 \label{tab:attemptedIdealClasses}
 \end{table}
 
-Figure \ref{fig:ssparIdealAttempts} indicates that for most multipliers, if the search stage of the algorithm is successful in finding a multiple of the order of an ideal class, then in expectation, roughly 2 ideal classes need to be tried before a successful splitting of the integer $N$.  Although switching multipliers after at most two ideal classes does work in practice, our implementation of SuperSPAR is more efficient if many ideal classes are tried before switching multipliers and class groups.  This is possibly due to the cost of the search phase of the algorithm, which is executed with each class group\footnote{This is in contrast to the exponentiation stage, which is executed for each ideal class tried.}.  Table \ref{tab:attemptedIdealClasses} shows the average time to split integers\footnote{This uses the same set of semiprime integers as in Table \ref{tab:actualPrimePowerBound}.  Again, the exponent for the exponentiation stage, and the primorial and multiplier for the search stage where chosen to give good performance on average.} given an upper bound on the number of ideal classes tried before switching multipliers.  Our implementation of SuperSPAR bounds the number of ideal classes tried before switching class groups to the lowest time for each integer range.
+Table \ref{tab:attemptedIdealClasses} shows the average time to split integers given an upper bound on the number of ideal classes tried before switching multipliers.  The times here are for the same set of 100,000 semiprime integers as in Table \ref{tab:actualPrimePowerBound}.  Again, the largest prime in the exponent for the exponentiation stage, and the multiple of a primorial for the search stage where chosen according to the theoretically optimal values of Section \ref{sec:superSpar}.  Our implementation of SuperSPAR bounds the number of ideal classes tried before switching class groups to the lowest time for each integer range in the table given.  For integer sizes not appearing in the table, they are rounded up to the nearest value appearing in the table, or for integer sizes greater than 80, the are linearly extrapolated by 1 class/group for each 8 bits.
 
 \section{SuperSPAR Algorithm in Practice}
 
+Recall how to test for an ambiguous ideal, recall how to split $N$ with an ambiguous ideal, recall how to hash an ideal and its inverse.  Talk about building up the $\idealclass{d_{2i}}$.  Talk about how the last baby step is $s+1$.
+
 % -- Try to Find an Ambiguous Ideal Class -- %
 \begin{algorithm}[htb]
-\caption[Repeatedly Square]{Try to find an ambiguous ideal class by repeated squaring (see Subsection \ref{subsec:forms}).}
+\caption[Repeatedly Square]{Try to find an ambiguous ideal class by repeated squaring (Subsection \ref{subsec:forms}).}
 \label{alg:ssparRepeatedlySquare}
 \begin{algorithmic}[1]
 \Procedure{RepeatedlySquare}{$\bclass, \ell$}
@@ -2631,7 +2630,7 @@ Figure \ref{fig:ssparIdealAttempts} indicates that for most multipliers, if the 
 \Procedure{TryManyIdealClasses}{$\Delta$, $h$, $\ell$, $c$}
 \For{$2 \le i \le c$}
 	\State let $\idealclass{p_i}$ be the $i^{\textrm{th}}$ smallest prime ideal class in $Cl_\Delta$
-	\State $(\_, d) \gets$ \Call{RepeatedlySquare}{$\idealclass{p_i}^h$, $\ell$}
+	\State $(\bclass, d) \gets$ \Call{RepeatedlySquare}{$\idealclass{p_i}^h$, $\ell$} \Comment{$\bclass$ is ignored}
 	\If{$d \neq 1$}	\Return d \EndIf
 \EndFor
 \State \Return 1
@@ -2646,9 +2645,11 @@ Figure \ref{fig:ssparIdealAttempts} indicates that for most multipliers, if the 
 \begin{algorithmic}[1]
 \Require $N \in \ZZgez$ odd and composite,
 \algnewline $E = \prod_{i=2}^t {p_i}^{e_i}$ for the exponentiation phase,
-\algnewline $s = mP_w$ a multiple of a primorial for the search phase,
+\algnewline $s = mP_w$ a multiple of a primorial for the search phase, and $\phi(P_w)$,
 \algnewline $c \in \ZZgtz$ the number of ideal classes to try before switching multipliers,
-\State $\ell = \floor{\log_2 \left(\sqrt N \log N\right)}$ \Comment{bound for repeated squaring}
+\algnewline a coprime delta list $\coprimelist_w = \delta_1, \delta_2, ..., \delta_{\phi(P_w)}$ for the primorial $P_w$ (see Subsection \ref{subsec:coprimeWheel}),
+\algnewline $\delta_{\textrm{max}} = \max \coprimelist_w$.
+\State $\ell = \floor{\log_2 \hdelta}$ \Comment{bound for repeated squaring}
 \State $k \gets 1$  \Comment{square free multiplier}
 \State $\Delta \gets -kN$  \label{goto:newK}
 \If{$\Delta \not\equiv 0,1 \pmod 4$}
@@ -2668,25 +2669,38 @@ Figure \ref{fig:ssparIdealAttempts} indicates that for most multipliers, if the 
 % -- Search Stage -- %
 \Statex \{-- search stage --\}
 \State initialize the lookup table
-\For{$1 \le i \le s$ where $\gcd(i,P_w)=1$}
-	\State compute $\bclass^i$ and store $\bclass^i \mapsto i$ in the lookup table \Comment{coprime baby-steps}
-	\If{$\bclass^i = \idclass$}
-		$h \gets i$, and go to line \ref{goto:foundOrder}
+\State compute $\idealclass{d_2} = \bclass^2$ and $\idealclass{d_{2i}} = \idealclass{d_{2(i-1)}} \cdot \idealclass{d_2}$ for $2 \le i \le \delta_{\textrm{max}}/2$
+\State $i \gets 1, j \gets 1, \cclass \gets \bclass$
+\While{$i \le s$} \Comment{coprime baby-steps}
+	\State store $\cclass \mapsto i$ in the lookup table
+	\If{$\cclass = \idclass$}
+		$h \gets i$, and go to line \ref{goto:foundOrder1}
 	\EndIf
-\EndFor
-\For{$1 \le j \le m\phi(P_w)$}
-	\If{$\bclass^{2js}$ is in the table, first lookup $i$}
-		\State $h \gets$ odd part of $(2js - i)$, and go to line \ref{goto:foundOrder}  \Comment{positive giant-step}
-	\ElsIf{$\bclass^{-2js}$ is in the table, first lookup $i$}
-		\State $h \gets$ odd part of $(2js + i)$, and go to line \ref{goto:foundOrder} \Comment{inverted giant-step}
+	\State $\cclass \gets \cclass \cdot \idealclass{d_{\delta_j}}, i \gets i + \delta_j$
+	\State $j \gets (j + 1) \bmod \phi(P_w)$
+\EndWhile
+
+\State $\cclass \gets (\cclass \cdot \bclass^{-1})^2$ \Comment{last baby-step was $s+1$, first giant-steps is $2s$}
+\State $\dclass \gets \cclass$
+\For{$1 \le j \le m\phi(P_w)$} \Comment{giant-steps}
+	\If{$\cclass$ is in the table, first lookup $i$}
+		\State $h \gets$ odd part of $(2js - i)$, $h_2 \gets$ odd part of $(2js + i)$
+		\State go to line \ref{goto:foundOrder2}
 	\EndIf
+	\State $\cclass \gets \cclass \cdot \dclass$
 \EndFor
 
 % -- Found a Multiple of the Order -- %
 \Statex \{-- found a multiple of the order --\}
-\State $(\_, d) \gets$ \Call{RepeatedlySquare}{$\idealclass{b'}^h$, $\ell$}
-\label{goto:foundOrder}
+\State $(\bclass, d) \gets$ \Call{RepeatedlySquare}{$\idealclass{b'}^{h_2}$, $\ell$}
+\label{goto:foundOrder2}
 \If{$d \neq 1$} \Return $d$	\EndIf	
+\If{$\bclass = \idclass$} $h \gets h_2$, and go to line \ref{goto:tryIdeals}. \EndIf
+
+\State $(\bclass, d) \gets$ \Call{RepeatedlySquare}{$\idealclass{b'}^h$, $\ell$} \Comment{$\bclass$ is ignored}
+\label{goto:foundOrder1}
+\If{$d \neq 1$} \Return $d$	\EndIf	
+
 \State $d \gets$ \Call{TryManyIdealClasses}{$\Delta$, $E \cdot h$, $\ell$, $c$}
 \label{goto:tryIdeals}
 \If{$d \neq 1$} \Return $d$ \EndIf
@@ -2923,7 +2937,7 @@ Assuming that Algorithm \ref{alg:noisyCurveSearch} computes some search bound th
 
 Table \ref{tab:ssparParams} shows the values used for the exponentiation and search stage in practice for various sized integers\footnote{For each bit size, 4,000 random semiprime integers $N = p \cdot q$ were generated.  We emphasize that this set is different from the set of semiprime integers used in Section \ref{sec:ssparComparison} so as to avoid training SuperSPAR on the same set of integers used for comparison with other factoring algorithms.}.  The range of exponents for the exponentiation stage was from a largest prime of 11 in the exponent to a largest prime of 2753.  The range for search bounds was given by the set $\stepBounds_{16384}$.  Algorithm \ref{alg:noisyCurveSearch} was configured to switch to a linear search when the size of the range was $\le 8$.  Notice that the largest primorial used for search bounds is $P_5$, which justifies our approach to bounding the values $e_i$ in the exponent $E = \prod {p_i}^{e_i}$ for values of $i \le 5$.
 
-\begin{table}[t]
+\begin{table}[htb]
 \centering
 \begin{tabular}{| r | r | r r r | r | r |}
 	\hline
@@ -2958,6 +2972,7 @@ Table \ref{tab:ssparParams} shows the values used for the exponentiation and sea
 \label{tab:ssparParams}
 \end{table}
 
+\clearpage
 
 \section{Comparison to Other Factoring Implementations}
 \label{sec:ssparComparison}
