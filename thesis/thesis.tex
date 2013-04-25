@@ -1351,9 +1351,9 @@ This chapter discusses SPAR, an integer factoring algorithm based on the ideal c
 \chapter{Extended Greatest Common Divisor Experiments}
 \label{chap:xgcdExperiments}
 
-% TODO: Tell more of a story.  Say that since the partial extended GCD is just one variable less than the extended GCD, that we assume that the best performing extended GCD is also the best performing partial extended GCD, but that future work would time each of these.
+% TODO: gotta finish up the conclusion section.  make sure to mention that our 128-bit l2r binary is great!
 
-% TODO: Incoporate Pari and MPIR XGCD timings as a reference.
+% TODO: Tell more of a story.  Say that since the partial extended GCD is just one variable less than the extended GCD, that we assume that the best performing extended GCD is also the best performing partial extended GCD, but that future work would time each of these.
 
 One contribution of this thesis is an efficient implementation of arithmetic in the ideal class group of imaginary quadratic number fields.  Much of the computational effort of ideal class multiplication (Algorithm \ref{alg:nucomp}) is in computing integral solutions to equations of the form
 \[
@@ -2401,6 +2401,8 @@ The SuperSPAR Algorithm \ref{alg:superSpar} (and more generally, the bounded pri
 Our implementation of idea class arithmetic represents an ideal class $\aclass \in Cl_\Delta$ using the triple $(a, b, c)$ where $\ideal a = [a, (b + \sqrt\Delta)/2]$ is a reduced representative for the ideal class and $c = (b^2 - \Delta)/4a$ (see Section \ref{sec:implementationOfIdealArithmetic}).  Since inversion of ideal classes is virtually free, SuperSPAR computes giant steps for ideal classes $\bclass^{2js}$ and $\bclass^{-2js}$, but rather than perform two table lookups, we take advantage of the way in which the inverse of an ideal class is computed.  Recall form Subsection \ref{subsec:idealClassInverse} that the inverse of an ideal class for a representative $[a, (b + \sqrt\Delta)/2]$ is given by the representative $[a, (-b + \sqrt\Delta)]$.  Since $|b| = \pm \sqrt{\Delta +4ac}$, we use the pair $(a, c)$ for the key and our implementation is able to look up both $\bclass^{2sj}$ and $\bclass^{-2js}$ using a single table lookup.  However, once a giant step finds a corresponding $\bclass^i$ in the table, both the exponents $2js-i$ and $2js+i$ must be tested to determine which one is a multiple of the order of $\bclass$.  Figure \ref{fig:ssparSingleLookup} contrasts this with an implementation using two lookups per giant step.  Both implementations use identical parameters on the same sets of semiprime integers, i.e.\ the executions of the two implementations only differ in the number of table lookups performed during the giant step portion of the search stage.  In the implementation using two table lookups per giant step, the pair $(a, b)$ is used for the hash key in order to distinguish between $\bclass^{2js}$ and $\bclass^{-2js}$, however, when some $\bclass^i$ is found, a multiple of the order is immediately known.
 
 \mygraphX{hashing-single-vs-double}{fig:ssparSingleLookup}{Average time to split an integer by either using a single lookup for each giant step, with exponentiation to verify a multiple of the order, or two lookups for each giant step, but without the need to verify a multiple of the order.}{Inversion aware hashing.}
+
+% TODO: This is enough for a 128-bit implementation since for the theoretically optimal number of steps, the largest exponent reached by the search stage fits within 29-bits!  woot
 
 In our implementation, the lookup table is implemented as a hash table with 32-bit keys and 32-bit values (both as unsigned integers).  Our implementation maps the pair $(a, c)$ associated with an ideal class to a 32-bit hash key by computing
 \[
