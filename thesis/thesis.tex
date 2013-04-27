@@ -1987,29 +1987,73 @@ Note, the last step above is obtained by rewriting $b = 2aq + r$ as
 \end{align*}
 Since $b - aq \in \ZZ$, the divide by 2 can be performed with an arithmetic bit shift right.
 
-The final performance improvement is for generating prime ideals.  For a given prime $p$, we would like to find an ideal of the form $[p, (b + \sqrt\Delta)/2]$.  Since $b^2 - 4pc = \Delta$, and $p$ is known, this gives $b^2 \equiv \Delta \pmod p$ and $b \equiv \pm \sqrt\Delta \pmod p$.  Computing $b$ is a matter of computing a square root modulo a prime, if one exists.  There are efficient algorithms for this (see Bach and Shallit \cite{Bach1996}), but since we are interested in finding some prime ideal, rather than a specific prime ideal, we instead precompute all square roots modulo each prime $p$ for sufficiently many small $p$.  For our purposes, all primes $p < 1000$ was enough.  Finding $b \equiv \pm\sqrt\Delta \pmod p$ is now a matter of looking up $\Delta \bmod p$ from a table.  Having found a value for $b$, we have not necessarily found a prime ideal $[p, (b + \sqrt\Delta)/2]$.  Since $\Delta = b^2 - 4pc$, this implies that $c = (b^2 - \Delta)/4p$ must have an integral solution.  Our implementation maintains the value $c$ for an ideal class, so we compute $c$ and if $c$ is an integer, than we have found a prime ideal.  Otherwise, we try again for some other prime (usually the smallest prime greater than $p$).  Note that the table of square roots modulo a prime is precomputed and compiled into our library and available as global data.  Also, an optimization overlooked in our implementation is to compute the square roots modulo $4p$ for $p$ prime.  This way, if a square root exists, $c$ is guaranteed to be integral.
+The final performance improvement is for generating prime ideals.  For a given prime $p$, we would like to find an ideal of the form $[p, (b + \sqrt\Delta)/2]$.  Since $b^2 - 4pc = \Delta$, and $p$ is known, this gives $b^2 \equiv \Delta \pmod p$ and $b \equiv \pm \sqrt\Delta \pmod p$.  Computing $b$ is a matter of computing a square root modulo a prime, if one exists.  There are efficient algorithms for this (see Bach and Shallit \cite{Bach1996}), but since we are interested in finding some prime ideal, rather than a specific prime ideal, we instead use a table of all square roots modulo each prime $p$ for sufficiently many small $p$.  Note, the size of the table is $O(n^2/\log n)$ for n primes.  For our purposes, all primes $p < 1000$ is enough.  Finding $b \equiv \pm\sqrt\Delta \pmod p$ is now a matter of looking up $\Delta \bmod p$ from a table.  
+
+Having found a value for $b$, we have not necessarily found a prime ideal $[p, (b + \sqrt\Delta)/2]$.  Since $\Delta = b^2 - 4pc$, this implies that $c = (b^2 - \Delta)/4p$ must have an integral solution.  Our implementation maintains the value $c$ for an ideal class, so we compute $c$ and if $c$ is an integer, than we have found a prime ideal.  Otherwise, we try again for some other prime (usually the smallest prime greater than $p$).  Note that the table of square roots modulo a prime is part of our library and available as global data.  Also, an optimization overlooked in our implementation is to compute the square roots modulo $4p$ for $p$ prime.  This way, if a square root exists, $c$ is guaranteed to be integral.
 
 
 \section{Average time for operations}
 
-% TODO: Emphasis that our specialized implementations are *much* faster than the reference implementation.  If possible, get some Pari/GP timings.
+% TODO: Say how we used Pari.
 
-This section demonstrates the performance of our implementations of ideal class arithmetic. Let $k$ be the target number of bits in the discriminant $\Delta$.  We iterate $k$ from 16 to 140, and for each $k$ we repeat the following 10,000 times: We compute two prime numbers $p$ and $q$ such that $p$ is $\floor{k/2}$ bits and $q$ is $k-\floor{k/2}$ bits.  We use the negative of their product $\Delta = -pq$ as the discriminant for a class group, unless $\Delta \not\equiv 1 \pmod 4$. In which case, we try again with a different $p$ and $q$.  We then pick a prime form, $[\mathfrak a]$, randomly from among the primes less than 1000.  To time the performance of squaring and cubing, we iterate 1000 times either $[\mathfrak a] \gets [\mathfrak a^2]$ or $[\mathfrak a] \gets [\mathfrak a^3]$ respectively.  Dividing the total cost by 10,000,000 gives the average time to square or cube an ideal.  For multiplication, we initially set $[\mathfrak b] \gets [\mathfrak a]$.  We then iterate 1000 times the sequence of operations $[\mathfrak c] \gets [\mathfrak a\mathfrak b]$, $[\mathfrak a] \gets [\mathfrak b]$, and $[\mathfrak b] \gets [\mathfrak c]$. Figures \ref{fig:idealCompose}, \ref{fig:idealSquare}, and \ref{fig:idealCube} show the results of these timings. For all discriminant sizes, our 64-bit implementation performs faster than our 128-bit implementation, which performs faster than our GMP implementation.
+This section compares the performance of our implementations of ideal class arithmetic with our reference implementation, \Pari{} \cite{PariGP}.   Let $k$ be the target number of bits in the discriminant $\Delta$.  We iterate $k$ from 16 to 140, and for each $k$ we repeat the following 10,000 times: We compute two prime numbers $p$ and $q$ such that $p$ is $\floor{k/2}$ bits and $q$ is $k-\floor{k/2}$ bits.  We use the negative of their product $\Delta = -pq$ as the discriminant for a class group, unless $\Delta \not\equiv 1 \pmod 4$. In which case, we try again with a different $p$ and $q$.  We then pick a prime ideal class, $[\mathfrak a]$, randomly from among the primes less than 1000.  One motivation for limiting this to primes less than 1000 is the size of the lookup table for $\sqrt{\Delta \bmod p} \pmod p$.
+
+For ideal multiplication, squaring, and cubing, we use Algorithms \ref{alg:nucomp}, \ref{alg:nudupl}, and \ref{alg:nucube} respectively.  For ideal reduction we use Algorithm \ref{alg:reduce}.  Each of the optimizations mentioned in this chapter are applied to each implementation, as well as the results from Chapter \ref{chap:xgcdExperiments} for computing the extended GCD.   The general strategy for our 64-bit implementation is to use 32-bit arithmetic when operands are less than 32-bits, otherwise to use 64-bit arithmetic, and only when this fails do we use 128-bit arithmetic.  For our 128-bit implementation, we use 64-bit arithmetic when operands are less than 64-bits, otherwise we use 128-bit arithmetic, and only when intermediates are larger than 128-bits do we use GMP arithmetic.
+
+To time the performance of squaring and cubing, we iterate 1000 times either $[\mathfrak a] \gets [\mathfrak a]^2$ or $\aclass \gets [\mathfrak a]^3$ respectively.  Dividing the total cost by 10,000,000 gives the average time to square or cube an ideal.  For multiplication, we initially set $\bclass \gets [\mathfrak a]$.  We then iterate 1000 times the sequence of operations $\cclass \gets \aclass \cdot \bclass$, $\aclass \gets \bclass$, and $\bclass \gets \cclass$.
+
+To time the performance of Pari, we statically link with the Pari library.  We determine the discriminant and prime ideal class in exactly the same way as with the other implementations.  We then convert the ideal class into a Pari \texttt{GEN} object using \texttt{qfi}, Pari's function to create a binary quadratic form.  The only operations timed are calls to \texttt{gmul}, in the case of multiplication, \texttt{gsqr}, in the case of squaring, and \texttt{gpowsg}, for cubing.  Pari does not appear to implement ideal class cubing and so we use the general powering function, \texttt{gpowsg}.  We perform garbage collection in Pari by recording Pari's stack pointer, \texttt{avma}, and then restoring it after all the timings are completed.
+
+Figures \ref{fig:idealCompose}, \ref{fig:idealSquare}, and \ref{fig:idealCube} show the average time for ideal multiplication, squaring, and cubing respectively, alongside the timings for each operation using the reference implementation from Pari.  For all discriminant sizes, our 64-bit implementation performs faster than our 128-bit implementation, which performs faster than our GMP implementation.  Table \ref{tab:relativeCostIdealArith} shows the relative costs on average for ideal multiplication, squaring, and cubing for each implementation compared with Pari. For our 64-bit implementation, we only average the times for discriminants less than 60-bits in size, for our 128-bit implementation, we use the times for discriminants less than 119-bits in size, and for our GMP implementation, we use the times for discriminants less than 140-bits in size.
+
+In Figures \ref{fig:cubingVs64}, \ref{fig:cubingVs128}, and \ref{fig:cubingVsMpz}, we compare the average time to cube against the average time to multiply a representative with its square.  One thing to notice is that our 128-bit implementation of cubing performs more poorly than that of multiplying an ideal with its square when the discriminant is larger than 69-bits.  This is possibly because when $a_1$ is large, computing modulo ${a_1}^2$ means the intermediate before reduction might be larger than $\Delta$ and as such larger than 128-bits.  In this case, we rely on GMP for multiple precision arithmetic.  Also, when computing the coefficients 
+\begin{align*}
+M_1 &\gets (R_ia_1 + C_iUa_1) / {a_1}^2 \\
+M_2 &\gets (R_i(b_1 + Ua_1) - sC_ic_1) / {a_1}^2
+\end{align*}
+in Algorithm \ref{alg:nucube}, the intermediate before dividing by ${a_1}^2$ may be larger than $\Delta$ in size, and as such will require the use of multiple precision arithmetic.  On the other hand, none of the intermediates in our 128-bit implementation of ideal multiplication or squaring are ever larger than $\Delta$ in size.  Contrast this to our 64-bit implementation that does not use GMP at all, and our GMP implementation that only uses GMP for arithmetic -- in both of these implementations, cubing is faster than multiplying an ideal with its square.
 
 \mygraph{compose-all}{fig:idealCompose}{Average Time to Multiply Reduced Ideal Class Representatives.}
 \mygraph{square-all}{fig:idealSquare}{Average Time to Square Reduced Ideal Class Representatives.}
 \mygraph{cube-all}{fig:idealCube}{Average Time to Cube Reduced Ideal Class Representatives.}
 
-In Figures \ref{fig:cubingVs64}, \ref{fig:cubingVs128}, and \ref{fig:cubingVsMpz} we compare the average time to cube against the average time to multiply a representative with its square.  One thing to notice is that our 128-bit implementation of cubing performs more poorly than that of multiplying an ideal with its square.  This is likely because we rely on GMP integers for overflow.  Contrast this to our 64-bit implementation that does not use GMP at all, and our GMP implementation that only uses GMP for arithmetic -- in both of these implementations, cubing is faster than multiplying an ideal with its square.
+\begin{table}[htb]
+\centering
+\begin{tabular}{| l | r |}
+	\hline
+	           & 64-bit Implementation / Pari \\
+	\hline
+Multiplication & 0.23405 \\
+Squaring       & 0.26703 \\
+Cubing         & 0.17120 \\
+	\hline
+	\hline
+	           & 128-bit Implementation / Pari \\
+	\hline
+Multiplication & 0.28567 \\
+Squaring       & 0.26703 \\
+Cubing         & 0.23718 \\
+	\hline
+	\hline
+	           & GMP Implementation / Pari \\
+	\hline
+Multiplication & 0.96476 \\
+Squaring       & 0.84217 \\
+Cubing         & 0.55412 \\
+	\hline
+\end{tabular}
+\caption[Relative Average Cost of Ideal Arithmetic.]{Relative cost of each implementation on average compared with Pari.}
+\label{tab:relativeCostIdealArith}
+\end{table}
+
 \mygraph{cube-vs-64}{fig:cubingVs64}{Time to compute $[\mathfrak a^3]$ in our 64-bit implementation.}
 \mygraph{cube-vs-128}{fig:cubingVs128}{Time to compute $[\mathfrak a^3]$ in our 128-bit implementation.}
 \mygraph{cube-vs-mpz}{fig:cubingVsMpz}{Time to compute $[\mathfrak a^3]$ in our GMP implementation.}
 
-Following this, we discussed specialized implementations of ideal arithmetic using 64-bit, 128-bit, and unbound arithmetic.  Our 64-bit implementation is known to work correctly for negative discriminants $-2^{60} < \Delta < 0$, while our 128-bit implementation works with negative discriminants $-2^{119} < \Delta < 0$. We discussed several low-level optimizations and showed an improvement in the performance of ideal class arithmetic over our reference implementation using GMP.
+\clearpage
 
-Lastly, this chapter measured the average cost of multiplication, squaring, and cubing for varying discriminant sizes.  The next chapter uses our implementation of arithmetic in the ideal class group in order to determine fast methods of exponentiation in practice.  We discuss methods for exponentiating not discussed previously in this thesis -- many of which take the average time to multiply, square, and cube into consideration.
+This chapter discussed our implementations of ideal class arithmetic.  We then demonstrate the average time for multiplication, squaring, and cubing.  We show that for discriminants smaller than 60-bits, our 64-bit implementation of ideal class arithmetic is significantly faster than the reference implementation provided by Pari, then for discriminants larger than 59-bits, but smaller than 119-bits, our 128-bit implementation of ideal class arithmetic is significantly faster than the reference implementation provided by Pari, and finally, for discriminants larger than 118-bits, our GMP implementation is still faster on average than the reference implementation provided by Pari.
 
-% TODO: Restart quantitatively how much faster s64 and s128 are than the reference GMP implementation.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % EXPONENTIATION EXPERIMENTS %
