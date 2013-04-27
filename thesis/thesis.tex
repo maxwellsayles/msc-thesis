@@ -14,7 +14,7 @@
 \author{Maxwell Sayles}
 \thesisyear{2013}
 \thesis{thesis}    % the word dissertation can be inserted between {}
-\newcommand{\thesistitle}{Title of Thesis}
+\newcommand{\thesistitle}{Improved Exponentiation in the Ideal Class Group of Imaginary Quadratic Number Fields with an Application to Integer Factoring}
 \monthname{June}
 \dept{COMPUTER SCIENCE}
 \degree{MASTER OF SCIENCE}
@@ -65,20 +65,22 @@
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator{\ord}{ord}
 \DeclareMathOperator{\sign}{sign}
+
 \newcommand{\CC}{\mathbb{C}}
 \newcommand{\NN}{\mathbb{N}}
 \newcommand{\RR}{\mathbb{R}}
-\newcommand{\KK}{\mathbb{K}}
-\newcommand{\MM}{\mathcal{M}}
-\newcommand{\OO}{\mathcal{O}}
 \newcommand{\ZZ}{\mathbb{Z}}
 \newcommand{\QQ}{\mathbb{Q}}
-\newcommand{\NP}{\textrm{NP}}
 \newcommand{\RRgtz}{\mathbb{R}_{>0}}
 \newcommand{\ZZgtz}{\mathbb{Z}_{>0}}
 \newcommand{\ZZgez}{\mathbb{Z}_{\ge 0}}
 \newcommand{\QQgtz}{\mathbb{Q}_{>0}}
 \newcommand{\QQgez}{\mathbb{Q}_{\ge 0}}
+
+\newcommand{\KK}{\mathcal{K}}
+\newcommand{\MM}{\mathcal{M}}
+\newcommand{\OO}{\mathcal{O}}
+
 \newcommand{\matrixto}[2]{\left[ \begin{array}{rr} #1 & #2 \end{array} \right]}
 \newcommand{\matrixot}[2]{\left[ \begin{array}{r} #1 \\ #2 \end{array} \right]}
 \newcommand{\matrixtt}[4]{\left[ \begin{array}{rr} #1 & #2 \\ #3 & #4 \end{array} \right]}
@@ -175,49 +177,29 @@
 \makethesistitle
 \pagenumbering{roman}     % resets page counter to one
 \setcounter{page}{1}
-%\chapter*{UNIVERSITY OF CALGARY \\ FACULTY OF GRADUATE STUDIES}
-%\thispagestyle{empty}
-%The undersigned certify that they have read, and recommend
-%to the Faculty of Graduate Studies for acceptance, a \Thesis\ entitled
-%``\thesistitle'' submitted by \Author\
-%in partial fulfillment of the requirements for the degree of
-%\Degree.\\
+\chapter*{UNIVERSITY OF CALGARY \\ FACULTY OF GRADUATE STUDIES}
+\thispagestyle{empty}
+The undersigned certify that they have read, and recommend
+to the Faculty of Graduate Studies for acceptance, a \Thesis\ entitled
+``\thesistitle'' submitted by \Author\
+in partial fulfillment of the requirements for the degree of
+\Degree.\\
 
 %
 %                 Substitute  List of Examiners
-%
-%\begin{signing}{Department of Academic Computing}
-%\signline
-%Chairman, Dr.~John D.~Doe \\
-%Department of Academic Computing \\
-%Services  \\
-%\signline
-%Chairman, Dr.~John D.~Doe \\
-%Department of Academic Computing \\
-%Services  \\
-%\signline
-%Chairman, Dr.~John D.~Doe \\
-%Department of Academic Computing \\
-%Services  \\
-%\signline
-%Chairman, Dr.~John D.~Doe \\
-%Department of Academic Computing \\
-%Services  \\
-%\newsigncolumn         use this command to start a new column if necessary
-%\newsigncolumn
-%\signline
-%Chairman, Dr.~John D.~Doe \\
-%Department of Academic Computing \\
-%Services  \\
-%\signline
-%Dr.~Jane Smith \\
-%Department of Academic Computing  \\
 
-%\signline
-%Dr.~A.~B.~Brown \\
-%Department of Academic Computing  \\
-%\end{signing}
-%
+\begin{signing}{Department of Computer Science}
+\signline
+Dr.~Michael J.~Jacobson, Jr. \\
+Department of Computer Science \\
+\signline
+Dr.~Renate Scheidler \\
+Department of Computer Science \\
+\signline
+Dr.~Kristine E.~Bauer \\
+Department of Mathematics and Statistics \\
+\end{signing}
+
 \newpage
 \phantomsection
 \altchapter{\bf{Abstract}}
@@ -269,18 +251,17 @@
 %%%%%%%%%%%%%%
 \chapter{Motivation}
 
-Ideal class group
+This thesis discusses practical improvements to exponentiation in the ideal class group of imaginary quadratic number fields.  Quadratic number fields are the simplest of all algebraic number fields \cite[p.77]{Jacobson2009}.  They are a degree 2 extension over the rational numbers, with the form $\KK = \QQ(\sqrt\Delta)$.  When the discriminant $\Delta$ is negative, then $\KK$ is a subset of the complex numbers and we call $\KK$ an \emph{imaginary} quadratic number field.  When $\Delta$ is positive, then $\KK$ is a subset of the real numbers and we call $\KK$ a \emph{real} quadratic number field.  There are many interesting problems related to the study of algebraic number fields, and since quadratic number fields are the simplest of algebraic number fields, they provide a good starting point for the study of ideals and class groups.
 
-Integer factoring
+The first published work on ideal class groups was the work of Carl Friedrich Gauss \cite{Gauss1986} in the \emph{Disquisitiones Arithmeticae}.  Gauss studied the theory of binary quadratic forms -- polynomials of the form $Q(x, y) = ax^2 + bxy + cy^2$ with $a, b, c \in \ZZ$.   We say that an integer $n$ is represented by a form $Q(x, y)$ if there exist integers $x$ and $y$ such that $Q(x, y) = n$.  Gauss introduced the notion of \emph{equivalence} of forms.  For a given form $Q(x, y)$, there exists a set of integers that can be represented by that form.  We say that two forms are equivalent if there exists a linear integral transformation of variables from one form to another, in other words, if the set of integers represented by each form are identical \cite[p.239]{Crandall2001}.  This notion of equivalence leads to \emph{equivalence classes}, i.e.\ all the forms equivalent to each other constitute and equivalence class.  Gauss defined an operation between equivalence classes, called \emph{composition}, and as such, the set of equivalence classes of binary quadratic forms with discriminant $\Delta$ form a finite Abelian group under composition \cite[p.136]{Cohn1980}.  Later this would be shown to be analogous to what is called the ideal class group of a quadratic field \cite{Frolich1993}.
 
-SPAR 
+There are many interesting problems relating to the ideal class group of imaginary quadratic number fields, such as computing the class number or group structure (see \cite{Ramachandran2006}) for a particular discriminant, or computing the discrete logarithm in a class group.  A related problem to computing the discrete logarithm is that of computing the order of an ideal class.  This problem is of particular interest in this thesis, since knowing the order of an ideal class can lead to the factorization of an integer associated with the discriminant.
 
-Bounded primorial steps
+Many methods exist for computing the order of an element in a generic group, such as Shank's baby-step giant-step method \cite{Shanks1971}.  In this thesis, we employ a new technique, due to Sutherland \cite{Sutherland2007}, for computing the order of an element.  This method is asymptotically faster than previous methods for generic groups, and is referred to as the bounded primorial steps algorithm \cite[\S 4.1]{Sutherland2007}.  A principal component of this algorithm is to exponentiate a group element to an exponent that is the product of the $w$ smallest prime powers -- a product that is referred to as a \emph{primorial}.
 
-2,3 representations + exponentiation
+To improve exponentiation in the ideal class group, we use the results of Imbert, Jacobson, and Schmidt \cite{Imbert2010}, which show that ideal class cubing can be made faster than multiplying an ideal class with its square.  As such, we are able to take advantage of double-base number systems, introduced by Dimitrov and Cooklev \cite{Dimitrov1995a, Dimitrov1995b}, when exponentiating in the ideal class group.  
 
-SuperSPAR
-
+With this in mind, this thesis focuses on practical improvements to arithmetic in the ideal class group of imaginary quadratic number fields, but also to that of exponentiating an element in this group to a primorial.  Such improvements are interesting in that they could be used to further the work of Ramachandran \cite{Ramachandran2006}.  However, for the purposes of this thesis, these improvements are interesting when applied to an extension of an integer factoring algorithm called SPAR \cite{Schnorr1984}.  This algorithm is based on arithmetic in the ideal class group, which works by computing the order of an ideal class.  In this thesis, we adapt this algorithm to use the ideal class cubing of Imbert, Jacobson, and Schmidt \cite{Imbert2010}, the bounded primorial steps algorithm of Sutherland \cite{Sutherland2007}, and the double base number system of Dimitrov and Cooklev \cite{Dimitrov1995a, Dimitrov1995b}.  We call this new algorithm ``SuperSPAR''.  Our implementation of SuperSPAR is the fastest integer factoring implementation on average for integers between 50-bits and 62-bits of size of the implementations tested.  
 
 \section{Faster ideal exponentiation on imaginary quadratic fields}
 
@@ -1220,7 +1201,7 @@ SPAR is an integer factoring algorithm that works by finding a reduced ambiguous
 %\[
 %	f(x, y) = ax^2 + bxy + cy^2
 %\]
-%where $a$, $b$, and $c$ are integer coefficients.  For a given form there is a set of integers represented by $f(x, y)$ for integers $x$ and $y$. Two forms are equivalent if the sets of integers they represent are identical \cite[pp.239-240]{Crandall2001}.  In which case, there exists an invertible integral linear change of variables that transforms one form into the other.  Necessarily, two equivalent forms have the same discriminant, which is $\Delta = b^2 - 4ac$.  The set of all forms equivalent to a given form comprises an equivalence class, and as shown by Gau\ss, representatives of equivalence classes of forms can be multiplied together to form a group.  In the case of a negative discriminant, each form is equivalent to a unique reduced form \cite[p.241]{Crandall2001}.  
+%where $a$, $b$, and $c$ are integer coefficients.  For a given form there is a set of integers represented by $f(x, y)$ for integers $x$ and $y$. Two forms are equivalent if the sets of integers they represent are identical \cite[pp.239-240]{Crandall2001}.  In which case, there exists an invertible integral linear change of variables that transforms one form into the other.  Necessarily, two equivalent forms have the same discriminant, which is $\Delta = b^2 - 4ac$.  The set of all forms equivalent to a given form comprises an equivalence class, and as shown by Gauss, representatives of equivalence classes of forms can be multiplied together to form a group.  In the case of a negative discriminant, each form is equivalent to a unique reduced form \cite[p.241]{Crandall2001}.  
 
 The description of SPAR (see \cite{Schnorr1984}) uses the group of equivalence classes of binary quadratic forms -- a group isomorphic to the ideal class group of imaginary quadratic fields (see Fr{\"o}lich and Taylor \cite{Frolich1993}).  Since this thesis discusses the ideal class group, SPAR is described in that setting here.  This thesis uses reduced representatives for elements of the ideal class group, and the equivalence class $[\mathfrak a]$ for a reduced representative $\mathfrak a$ is denoted using the $\ZZ$\mbox{-}module $\mathfrak a = [a, (b + \sqrt\Delta)/2]$.  Our implementation also maintains a third term $c = (b^2 - \Delta)/4a$.
 
