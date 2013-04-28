@@ -1690,19 +1690,19 @@ Lehmer's original description \cite{Lehmer1938} uses the extended Euclidean algo
 
 Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and \ref{subsec:nucube} describe algorithms to perform ideal class multiplication (NUCOMP), squaring (NUDUPL), and cubing (NUCUBE) respectively, where the result requires at most two reduction operations to be reduced.  Each of these techniques involve computing a simple continued fraction, which is done using an extended GCD computation (see \cite[\S 3.2]{Jacobson2009}).  Unlike the extended GCD algorithms previously described in this chapter, the extended GCD used to compute the simple continued fraction for ideal multiplication terminates once the next remainder computed is within a given bound.  As such, this computation is referred to as the \emph{partial extended GCD}.
 
-The descriptions of NUCUBE, NUDUPL, and NUCUBE use the variables $R_i$ and $C_i$.  We relate these variables to the descriptions of the extended GCD in this chapter using
+The descriptions of NUCUBE, NUDUPL, and NUCUBE use the variables $R_i$ and $C_i$.  These variables can be related to the description of the extended Euclidean algorithm (see Section \ref{sec:gcdEEA}) using
 \[
-	\matrixThreeTwo{s}{U}{V}{t}{X}{Y} = \matrixThreeTwo{R_{i-1}}{C_{i-1}}{D_{i-1}}{R_i}{C_i}{D_i}
+	\matrixThreeTwo{s}{U}{V}{t}{X}{Y} = \matrixThreeTwo{R_{i-1}}{C_{i-1}}{B_{i-1}}{R_i}{C_i}{B_i}
 \]
-for integers $D_i$.  To expand the simple continued fraction $a/b$, let
+for integers $B_i$.  To expand the simple continued fraction $a/b$, let
 \[
-\matrixThreeTwo{R_{-2}}{C_{-2}}{D_{-2}}{R_{-1}}{C_{-1}}{D_{-1}} = \matrixThreeTwo{a}{-1}{0}{b}{0}{1}
+\matrixThreeTwo{R_{-2}}{C_{-2}}{B_{-2}}{R_{-1}}{C_{-1}}{B_{-1}} = \matrixThreeTwo{a}{-1}{1}{b}{0}{0}
 \]
-and perform an extended GCD computation on the left hand side.  As such, the coefficients of the partial extended GCD represent solutions to the equation
+and perform the extended Euclidean algorithm on the left hand side.  Invariants of the partial extended GCD are that $R_{i-1} \ge R_i$ and from \cite[p.5]{Imbert2010} that
 \[
-	R_i = -C_i a + D_i b.
+	C_i = (-1)^{i+1}B_i.
 \]
-Since the coefficients $D_i$ are never used, our implementation of the partial extended GCD does not compute them.  This is similar to the case of computing the extended GCD in Equation \ref{eq:idealProductS}, since the coefficient $Y$ is never used.
+Since the coefficients $B_i$ are never used, our implementation of the partial extended GCD does not compute them.  This is similar to the case of computing the extended GCD in Equation \ref{eq:idealProductS}, since the coefficient $Y$ is never used.
 
 By \cite[\S 5.6.1]{Crandall2001}, two ideals are equivalent if there exists an invertible integral linear change of variables from one ideal to the other.  As such, each of the operations performed on the matrix
 \[
