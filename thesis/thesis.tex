@@ -261,47 +261,32 @@ Many methods exist for computing the order of an element in a generic group, suc
 
 To improve exponentiation in the ideal class group, we use the results of Imbert, Jacobson, and Schmidt \cite{Imbert2010}, which show that ideal class cubing can be made faster than multiplying an ideal class with its square.  As such, we are able to take advantage of double-base number systems, introduced by Dimitrov and Cooklev \cite{Dimitrov1995a, Dimitrov1995b}, when exponentiating in the ideal class group.  
 
-With this in mind, this thesis focuses on practical improvements to arithmetic in the ideal class group of imaginary quadratic number fields, but also to that of exponentiating an element in this group to a primorial.  Such improvements are interesting in that they could be used to further the work of Ramachandran \cite{Ramachandran2006}.  However, for the purposes of this thesis, these improvements are interesting when applied to an extension of an integer factoring algorithm called SPAR \cite{Schnorr1984}.  This algorithm is based on arithmetic in the ideal class group, which works by computing the order of an ideal class.  In this thesis, we adapt this algorithm to use the ideal class cubing of Imbert, Jacobson, and Schmidt \cite{Imbert2010}, the bounded primorial steps algorithm of Sutherland \cite{Sutherland2007}, and the double base number system of Dimitrov and Cooklev \cite{Dimitrov1995a, Dimitrov1995b}.  We call this new algorithm ``SuperSPAR''.  Our implementation of SuperSPAR is the fastest integer factoring implementation on average for integers between 50-bits and 62-bits of size of the implementations tested.  
+With this in mind, this thesis focuses on practical improvements to arithmetic in the ideal class group of imaginary quadratic number fields, but also to that of exponentiating an element in this group to a primorial.  Such improvements are interesting in that they could be used to further the work of Ramachandran \cite{Ramachandran2006}.  However, for the purposes of this thesis, these improvements are interesting when applied to an extension of an integer factoring algorithm called SPAR \cite{Schnorr1984}.  This algorithm is based on arithmetic in the ideal class group, which works by computing the order of an ideal class.  In this thesis, we adapt this algorithm to use the ideal class cubing of Imbert, Jacobson, and Schmidt \cite{Imbert2010}, the bounded primorial steps algorithm of Sutherland \cite{Sutherland2007}, and the double base number system of Dimitrov and Cooklev \cite{Dimitrov1995a, Dimitrov1995b}.  We call this new algorithm ``SuperSPAR''.  Our implementation of SuperSPAR is the fastest integer factoring implementation on average for integers between 50-bits and 62-bits of size of the implementations tested.
 
-\section{Faster ideal exponentiation on imaginary quadratic fields}
 
-\section{Exponentiation with fixed exponents}
+\section{Organization and Contributions of this Thesis}
 
-Remember to list all the contributions in the exponentiation section: the greedy pruned extensions, $L$ best approximations, the $\pm$ 16-bit chains, and the search method for chains.
+As mentioned previously, a contribution of this thesis is improved arithmetic in the ideal class group of imaginary quadratic number fields.  Chapter \ref{chap:idealArithmetic} discusses the background material on the ideal class group necessary for the reader to understand the improvements discussed in this thesis.  Much of the computational effort of ideal class multiplication is in computing solutions of the extended greatest common divisor.  Chapter \ref{chap:xgcdExperiments}, discusses several solutions to this problem, as well as an adaptation to a left-to-right binary extended GCD that we propose in Section \ref{sec:gcdL2R}.  The results in Section \ref{sec:gcdResults} show that this method is the fastest on average for a large range of integer sizes, when compared against \Pari{} \cite{PariGP} and \GMP{} \cite{Gmp} as reference implementation.  The background material on the ideal class group in Chapter \ref{chap:idealArithmetic} is also the basis of our implementation of ideal class arithmetic.  The experiments that lead to our improved implementation are discussed in Chapter \ref{chap:idealExperiments}.  The results in Section \ref{sec:idealResults} show that our implementation, on average, improves upon the implementation of \Pari{} \cite{PariGP}, which we use as a reference implementation.
 
-\section{Faster class group computations}
+Another contribution of this thesis is improved exponentiation in the ideal class group.  Chapter \ref{chap:exponentiation} discusses some methods from the literature for exponentiating group elements.  In particular, we discuss double base number systems and some approaches from the literature for computing double base representations useful for exponentiation.  In Chapter \ref{chap:powExperiments}, we propose several adaptations to these methods.  In particular, we propose a method that we call the \emph{$L$ best approximations} in Section \ref{sec:expBestApproximations}, and in Section \ref{sec:expResults} we provides results that show that for our implementation of ideal class arithmetic and when exponentiating by large primorials, that the $L$ best approximations technique performs the fastest on average.
 
-\section{Applications in cryptography}
+A final contribution of this thesis is an improved integer factoring algorithm, named SuperSPAR.  Chapter \ref{chap:superspar} discusses the original SPAR factoring algorithm , published by Schnorr and Lenstra \cite{Schnorr1984}, but named after Shanks, Pollard, Atkin, and Rickert \cite[p.484]{Lenstra1992}.  Our implementation employs the results of Chapters \ref{chap:xgcdExperiments}, \ref{chap:idealExperiments}, and \ref{chap:powExperiments}, as well as the bounded primorial steps algorithm of Sutherland \cite{Sutherland2007}, and several modifications to the original algorithm.  The result, demonstrated in Section \ref{sec:ssparComparison}, is an implementation of an integer factoring algorithm that is the fastest on average for semiprime integers of the size 50-bits to 62-bits of the implementations tested.  
 
-\section{Examples of fast ideal exponentiation in SuperSPAR}
+All the software for this thesis was developed using the \compiler{} on Ubuntu 12.10.  Timing experiments were run on a \cpu{} with 8Gb of memory.  The CPU has four cores, only one of which was used during timing experiments.
 
-\section{Contributions}
+%\item A really fast implementation of the Extended Euclidean Algorithm for integers bound by 32, 64, and 128 bits.
 
-Major contributions
+%\item Optimized implementations of ideal class arithmetic for discriminants bound by 64 and 128 bits.
 
-\begin{enumerate}
-\item A really fast implementation of the Extended Euclidean Algorithm for integers bound by 32, 64, and 128 bits.
+%\item An improvement in the wall clock running time to exponentiate in the ideal class group when the exponent is known in advance.
 
-\item Optimized implementations of ideal class arithmetic for discriminants bound by 64 and 128 bits.
+%\item The fastest implementation that we tested for integer factoring in the range of 54bit integers to 62bit integers.
 
-\item An improvement in the wall clock running time to exponentiate in the ideal class group when the exponent is known in advance.
+%\item A library for optimized 32-bit, 64-bit, and 128-bit arithmetic is available at \url{https://www.github.com/maxwellsayles/liboptarith}
 
-\item The fastest implementation that we tested for integer factoring in the range of 54bit integers to 62bit integers.
+%\item A library for arithmetic in the class group of imaginary quadratic number fields, specialized for 64-bit, 128-bit, and unbound discriminants is available at \url{https://www.github.com/maxwellsayles/libqform}
 
-\item A library for optimized 32-bit, 64-bit, and 128-bit arithmetic is available at \url{https://www.github.com/maxwellsayles/liboptarith}
-
-\item A library for arithmetic in the class group of imaginary quadratic number fields, specialized for 64-bit, 128-bit, and unbound discriminants is available at \url{https://www.github.com/maxwellsayles/libqform}
-
-\item An integer factoring library (SuperSPAR) suitable for non-cryptographic sizes is available at \url{https://www.github.com/maxwellsayles/libsspar}  (COMING SOON)
-
-\end{enumerate}
-
-Minor contributions:  Algorithm to compute a list of candidate search bounds, binary search on 2d values, some types of exponentiation, simplified left-to-right binary XGCD.
-
-The software was developed using the \compiler{} on Ubuntu 12.10. The hardware platform was a \cpu{} with 8Gb of memory.  The CPU has four cores, only one of which was used during timing experiments.
-
-\section{Overview of Thesis}
-
+%\item An integer factoring library (SuperSPAR) suitable for non-cryptographic sizes is available at \url{https://www.github.com/maxwellsayles/libsspar}  (COMING SOON)
 
 
 %%%%%%%%%%%%%%%%%%%%
@@ -1192,7 +1177,7 @@ One contribution of this thesis is to improve the speed of arithmetic in the ide
 \section{SPAR}
 \label{sec:spar}
 
-SPAR is an integer factoring algorithm that works by finding a reduced ambiguous class with a discriminant associated with the integer to be factored.  The algorithm was published by Schnorr and Lenstra \cite{Schnorr1984}, but was independently discovered by Atkin and Rickert who named it SPAR after Shanks, Pollard, Atkin, and Rickert \cite[p.182]{Jacobson1999}.
+SPAR is an integer factoring algorithm that works by finding a reduced ambiguous class with a discriminant associated with the integer to be factored.  The algorithm was published by Schnorr and Lenstra \cite{Schnorr1984}, but is named SPAR after Shanks, Pollard, Atkin, and Rickert \cite[p.484]{Lenstra1992}.
 
 \subsection{Ambiguous Classes and the Factorization of the Discriminant}
 \label{subsec:forms}
@@ -1983,7 +1968,8 @@ The final performance improvement is for generating prime ideals.  For a given p
 Having found a value for $b$, we have not necessarily found a prime ideal $[p, (b + \sqrt\Delta)/2]$.  Since $\Delta = b^2 - 4pc$, this implies that $c = (b^2 - \Delta)/4p$ must have an integral solution.  Our implementation maintains the value $c$ for an ideal class, so we compute $c$ and if $c$ is an integer, than we have found a prime ideal.  Otherwise, we try again for some other prime (usually the smallest prime greater than $p$).  Note that the table of square roots modulo a prime is part of our library and available as global data.  Also, an optimization overlooked in our implementation is to compute the square roots modulo $4p$ for $p$ prime.  This way, if a square root exists, $c$ is guaranteed to be integral.
 
 
-\section{Average time for operations}
+\section{Average Time for Operations}
+\label{sec:idealResults}
 
 % TODO: Say how we used Pari.
 
