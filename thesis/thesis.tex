@@ -599,7 +599,7 @@ We then compute
 	a &= (-1)^{i+1} (R_i M_1  - C_i M_2), \nonumber \\
 	b &= \left( \frac{2(R_i a_2 /s - C_{i-1} a)}{C_i} - b_2 \right) \bmod 2a \label{eq:bNUCOMP}
 \end{align}
-for the product $\mathfrak a \mathfrak b = [a, (b + \sqrt\Delta)/2]$ where $\ideal a \ideal b$ is at most two steps from being reduced.  Note that this procedure assumes that $\mathcal N(\mathfrak a) \ge \mathcal N(\mathfrak b)$ and that if $a_1 < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4}$ then $R_{-1}$ and $R_{-2}$ satisfy Equation \ref{eq:nucompBound} and we compute the product $\mathfrak a \mathfrak b$ as in the previous subsection without expanding the simple continued fraction $sU/a_1$.  When $a_1 \ge \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4}$, at least one iteration of the recurrence \ref{eq:recurCNUCOMP} is performed and so $C_i \neq 0$ and there will not be a division by zero in Equation \ref{eq:bNUCOMP}.
+for the product $\mathfrak a \mathfrak b = [a, (b + \sqrt\Delta)/2]$ where $\ideal a \ideal b$ is at most two steps from being reduced \cite[p.122]{Jacobson2009}.  Note that this procedure assumes that $\mathcal N(\mathfrak a) \ge \mathcal N(\mathfrak b)$ and that if $a_1 < \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4}$ then $R_{-1}$ and $R_{-2}$ satisfy Equation \ref{eq:nucompBound} and we compute the product $\mathfrak a \mathfrak b$ as in the previous subsection without expanding the simple continued fraction $sU/a_1$.  When $a_1 \ge \sqrt{a_1/a_2} ~ |\Delta/4|^{1/4}$, at least one iteration of the recurrence \ref{eq:recurCNUCOMP} is performed and so $C_i \neq 0$ and there will not be a division by zero in Equation \ref{eq:bNUCOMP}.
 
 Our implementation of fast ideal multiplication includes many practical optimizations developed by Imbert, Jacobson, and Schmidt \cite[Algorithm~6]{Imbert2010}.  For example, by Equation \ref{eq:idealProductS}, $s ~|~ a_1$ and $s ~|~ a_2$, and so after computing $s$, we use ${a_1}' = a_1/s$ and ${a_2}' = a_2/s$ throughout.  Furthermore, they separate Equation \ref{eq:idealProductS} into the following computations. Let
 \begin{align}
@@ -1688,7 +1688,7 @@ Lehmer's original description \cite{Lehmer1938} uses the extended Euclidean algo
 \section{Partial Extended GCD}
 \label{sec:gcdPartial}
 
-Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and \ref{subsec:nucube} describe algorithms to perform ideal class multiplication (NUCOMP), squaring (NUDUPL), and cubing (NUCUBE) respectively, where the result requires at most two reduction operations to be reduced.  Each of these techniques involve computing a simple continued fraction, which is done using an extended GCD computation (see \cite[\S 3.2]{Jacobson2009}).  Unlike the extended GCD algorithms previously described in this chapter, the extended GCD used to compute the simple continued fraction for ideal multiplication terminates once the next remainder computed is within a given bound.  As such, this computation is referred to as the \emph{partial extended GCD}.
+Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and \ref{subsec:nucube} describe algorithms to perform ideal class multiplication (NUCOMP), squaring (NUDUPL), and cubing (NUCUBE) respectively, where the result requires at most two reduction operations to be reduced \cite[p.122]{Jacobson2009}.  Each of these algorithms involve computing a simple continued fraction, which is done using an extended GCD computation (see \cite[\S 3.2]{Jacobson2009}).  Unlike the extended GCD algorithms previously described in this chapter, the extended GCD used to compute the simple continued fraction for ideal multiplication terminates once the next remainder computed is within a given bound.  As such, this computation is referred to as the \emph{partial extended GCD}.
 
 The descriptions of NUCUBE, NUDUPL, and NUCUBE use the variables $R_i$ and $C_i$.  These variables can be related to the description of the extended Euclidean algorithm (see Section \ref{sec:gcdEEA}) using
 \[
@@ -1698,17 +1698,20 @@ for integers $B_i$.  To expand the simple continued fraction $a/b$, let
 \[
 \matrixThreeTwo{R_{-2}}{C_{-2}}{B_{-2}}{R_{-1}}{C_{-1}}{B_{-1}} = \matrixThreeTwo{a}{-1}{1}{b}{0}{0}
 \]
-and perform the extended Euclidean algorithm on the left hand side.  Invariants of the partial extended GCD are that $R_{i-1} \ge R_i$ and from \cite[p.5]{Imbert2010} that
-\[
-	C_i = (-1)^{i+1}B_i.
-\]
-Since the coefficients $B_i$ are never used, our implementation of the partial extended GCD does not compute them.  This is similar to the case of computing the extended GCD in Equation \ref{eq:idealProductS}, since the coefficient $Y$ is never used.
+and apply the recurrences
+\begin{align*}
+	q_i &= \floor{R_{i-2} ~/~ R_{i-1}} \\
+	R_i &= R_{i-2} - q_i R_{i-1} \\
+	C_i &= C_{i-2} - q_i C_{i-1} \\
+	B_i &= B_{i-2} - q_i B_{i-1}
+\end{align*}
+until we have $R_i$ less than or equal to the given termination bound.  This is essentially the same as computing the extended GCD except for the starting matrix and the termination bound.  Invariants of this method are $R_{i-1} \ge R_i$ and $C_i = (-1)^{i+1}B_i$, which can be shown by induction (for additional details, see \cite[p.5]{Imbert2010} and \cite[Equation 3.4]{Avanzi2010}).  Since the coefficients $B_i$ are never used, our implementations of the partial extended GCD does not compute them.
 
 By \cite[\S 5.6.1]{Crandall2001}, two ideals are equivalent if there exists an invertible integral linear change of variables from one ideal to the other.  As such, each of the operations performed on the matrix
 \[
 \matrixtt{R_{i-1}}{C_{i-1}}{R_i}{C_i}
 \]
-during the partial extended GCD must be representable by an invertible $2 \times 2$ matrix with determinant $\pm 1$ (known as a \emph{unimodular} matrix).  This is because the resulting coefficients are applied to an ideal in order to reduce it, and so must have determinant $\pm 1$ for the ideal to remain in the same equivalence class.  This is important since only extended GCD computations that are restricted to operations representable using invertible $2 \times 2$ matrices can be used for the partial extended GCD.
+during the partial extended GCD must be representable by an invertible $2 \times 2$ matrix with determinant $\pm 1$ (known as a \emph{unimodular} matrix).  This is necessary in order to make sure that the reduced ideal (after applying the coefficients from the partial extended GCD) is in the same equivalence class as the product ideal.  This is important since only extended GCD computations that are restricted to operations representable using invertible $2 \times 2$ matrices can be used for the partial extended GCD.
 
 Of the extended GCD algorithms in this chapter, only the right-to-left binary extended GCD of Section \ref{sec:gcdR2LBin} (and its windowed variants of Subsection \ref{subsec:gcdR2LWindowed}) cannot be adapted to the partial extended GCD.  The reason is due to the step where $t$ is reduced by 2.  The algorithm uses the computation
 \[
