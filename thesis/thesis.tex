@@ -350,29 +350,41 @@ When a quadratic order $\OO$ consists of all the quadratic integers in $\QQ(\sqr
 where $\overline{\xi}$ denotes complex conjugation.
 \end{defn}
 
-Then by Ramachandran \cite[p.13]{Ramachandran2006}, the discriminant $\Delta$ of the maximal order $\OO_\KK = [1, \omega]$ can be written as
+Following Ramachandran \cite[p.13]{Ramachandran2006}, the discriminant $\Delta$ of the maximal order $\OO_\KK = [1, \omega]$ can be written as
 \[
 \Delta = \begin{cases}
 	4D & \textrm{when } D \equiv 2, 3 \pmod 4 \\
 	D  & \textrm{when } D \equiv 1 \pmod 4,
 \end{cases}
 \]
-and is an invariant of the quadratic field $\QQ(\sqrt D)$.  A discriminant of a maximal order is called a \emph{fundamental discriminant}.
+and is an invariant of the quadratic field $\QQ(\sqrt D)$.  A discriminant of a maximal order is called a \emph{fundamental discriminant}.  When $\OO'$ is a non-maximal order of $\QQ(\sqrt D)$, we have the following proposition (see \cite[p.216]{Cohn1980} for a proof).
+
+\begin{prop}
+Let $\OO'$ be a non-maximal order of $\QQ(\sqrt D)$ with discriminant $\Delta'$.  Then $\Delta' = f^2 \Delta$ for some integer $f$, and $\Delta$ a fundamental discriminant.
+\end{prop}
+
+\noindent
+We call $f$ the \emph{conductor} of the non-maximal order $\OO'$.
+
 
 \section{Ideals of $\OO_\Delta$}
 \label{sec:idealsInOrderOfIntegers}
 
 \begin{defn}
-An \emph{ideal} $\mathfrak a$ is an additive subgroup of an order $\OO$ with the property that for any $a \in \mathfrak a$ and $\xi \in \OO$, it holds that $\xi a$ and $a \xi$ are both elements of the ideal $\mathfrak a$.
+An (integral) \emph{ideal} $\mathfrak a$ is an additive subgroup of an order $\OO$ with the property that for any $a \in \mathfrak a$ and $\xi \in \OO$, it holds that $\xi a$ and $a \xi$ are both elements of the ideal $\mathfrak a$.
 \end{defn}
 
-When $\OO_\Delta$ is a maximal order, for $\alpha, \beta \in \OO_\Delta$, the set $\ideal a = \{x \alpha + y \beta : x, y \in \OO_\Delta\}$ is an ideal in the order $\OO_\Delta$ and is denoted $(\alpha, \beta)$ \cite[p.16]{Ramachandran2006}.  Every ideal of a quadratic order $\OO_\Delta$ can be represented by at most two generators \cite[p.125--126,~\S~10]{Cohn1980}, while some can be represented by a single generator.  An ideal represented by a single generator is a \emph{principal} ideal and is denoted $(\alpha) = \{ x \alpha : x \in \OO_\Delta \}$ \cite[p.87]{Jacobson2009}.
+Let $\OO_\Delta$ be a maximal order.  Then for $\alpha, \beta \in \OO_\Delta$, the set $\ideal a = \{x \alpha + y \beta : x, y \in \OO_\Delta\}$ is an ideal in the order $\OO_\Delta$ and is denoted $(\alpha, \beta)$ \cite[p.16]{Ramachandran2006}.  Every ideal of a quadratic order $\OO_\Delta$ can be represented by at most two generators \cite[p.125--126]{Cohn1980}, while some can be represented by a single generator.  An ideal represented by a single generator is a \emph{principal} ideal and is denoted $(\alpha) = \{ x \alpha : x \in \OO_\Delta \}$ \cite[p.87]{Jacobson2009}.
 
 For two ideals, $\ideal a = (\alpha_1, \beta_1)$ and $\ideal b = (\alpha_2, \beta_2)$ in $\OO_\Delta$, their product is
 \begin{equation}
 	\ideal a \ideal b = (\alpha_1 \alpha_2, \alpha_1 \beta_2, \beta_1 \alpha_2, \beta_1 \beta_2) = (\alpha_3, \beta_3) \label{eq:idealProduct}
 \end{equation}
-for some $\alpha_3, \beta_3 \in \OO_\Delta$ and is also an ideal in $\OO_\Delta$. The principal ideal $(1) = \OO_\Delta$ is the \emph{identity} ideal since $\ideal a = \ideal a \OO_\Delta = \OO_\Delta \ideal a$.  If there exists an ideal $\ideal c$ such that $\ideal a \ideal c = \ideal b$, then $\ideal a$ \emph{divides} $\ideal b$ and we write $\ideal a ~|~ \ideal b$.  If the ideal $\ideal a$ divides the identity ideal $\OO_\Delta$, then $\ideal a$ has an \emph{inverse}, which is denoted $\ideal a^{-1}$.  Finally, an ideal $\ideal p \neq (1)$ is \emph{prime} when $\ideal p ~|~ \ideal a \ideal b$ implies that either $\ideal p ~|~ \ideal a$ or $\ideal p ~|~ \ideal b$.  As such, a prime ideal is divisible only by the identity ideal and itself.
+for some $\alpha_3, \beta_3 \in \OO_\Delta$ and is also an ideal in $\OO_\Delta$. The principal ideal $(1) = \OO_\Delta$ is the \emph{identity} ideal since $\ideal a = \ideal a \OO_\Delta = \OO_\Delta \ideal a$.  If there exists an ideal $\ideal c$ such that $\ideal a \ideal c = \ideal b$, then $\ideal a$ \emph{divides} $\ideal b$ and we write $\ideal a ~|~ \ideal b$.  Finally, an ideal $\ideal p \neq (1)$ is \emph{prime} when $\ideal p ~|~ \ideal a \ideal b$ implies that either $\ideal p ~|~ \ideal a$ or $\ideal p ~|~ \ideal b$.  As such, a prime ideal is divisible only by the identity ideal and itself.
+
+
+% TODO: Move on to inverses.
+If the ideal $\ideal a$ divides the identity ideal $\OO_\Delta$, then $\ideal a$ has an \emph{inverse}, which is denoted $\ideal a^{-1}$. 
 
 \begin{thm}
 \label{thm:idealZModule}
