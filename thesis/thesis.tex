@@ -806,7 +806,7 @@ In Sections \ref{sec:binaryExp} and \ref{sec:naf} we discuss standard exponentia
 
 \section{Binary Exponentiation}
 \label{sec:binaryExp}
-The simplest method of exponentiation is binary exponentiation.  Let $g$ be an element in a group $G$ and $n$ a positive integer.  To compute $g^n$, we first represent $n$ in binary as
+The simplest method of exponentiation is binary exponentiation (see \cite[\S 9.1.1]{Cohen2006}).  Let $g$ be an element in a group $G$ and $n$ a positive integer.  To compute $g^n$, we first represent $n$ in binary as
 \[
 	n = \sum_{i=0}^{\floor{\log_2 n}} b_i 2^i
 \]
@@ -822,7 +822,7 @@ Binary exponentiation algorithms require $\floor{\log_2 n}$ squarings and $\left
 \section{Non-Adjacent Form Exponentiation}
 \label{sec:naf}
 
-The Non-Adjacent Form (NAF) of an integer is a \emph{signed} base two representation such that no two non-zero terms in the representation are adjacent. Each integer, $n$, has a unique representation in non-adjacent form. Formally, an integer $n$ is represented by
+The Non-Adjacent Form (NAF) of an integer is a \emph{signed} base two representation such that no two non-zero terms in the representation are adjacent (see \cite[\S 9.1.4]{Cohen2006}).  Each integer, $n$, has a unique representation in non-adjacent form. Formally, an integer $n$ is represented by
 \[
 	n = \sum_{i=0}^{\floor{\log_2 n}+1} s_i 2^i
 \]
