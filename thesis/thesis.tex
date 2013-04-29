@@ -246,12 +246,11 @@ Department of Mathematics and Statistics \\
 
 
 %%%%%%%%%%%%%%
-% CHAPTER 1  %
 % MOTIVATION %
 %%%%%%%%%%%%%%
 \chapter{Motivation}
 
-This thesis discusses practical improvements to exponentiation in the ideal class group of imaginary quadratic number fields.  Quadratic number fields are the simplest of all algebraic number fields \cite[p.77]{Jacobson2009}.  They are a degree 2 extension over the rational numbers, with the form $\KK = \QQ(\sqrt\Delta)$.  When the discriminant $\Delta$ is negative, then $\KK$ is a subset of the complex numbers and we call $\KK$ an \emph{imaginary} quadratic number field.  When $\Delta$ is positive, then $\KK$ is a subset of the real numbers and we call $\KK$ a \emph{real} quadratic number field.  There are many interesting problems related to the study of algebraic number fields, and since quadratic number fields are the simplest of algebraic number fields, they provide a good starting point for the study of ideals and class groups.
+There are many interesting problems related to the study of algebraic number fields, and since quadratic number fields are the simplest of algebraic number fields \cite[p.77]{Jacobson2009}, they provide a good starting point for the study of ideals and class groups.  This thesis discusses practical improvements to exponentiation in the ideal class group of imaginary quadratic number fields.  Quadratic number fields are a degree 2 extension over the rational numbers, with the form $\KK = \QQ(\sqrt\Delta)$.  When the discriminant $\Delta$ is negative, then $\KK$ is a subset of the complex numbers and we call $\KK$ an \emph{imaginary} quadratic number field.  When $\Delta$ is positive, then $\KK$ is a subset of the real numbers and we call $\KK$ a \emph{real} quadratic number field.  
 
 The first published work on ideal class groups was the work of Carl Friedrich Gauss in the \emph{Disquisitiones Arithmeticae} \cite{Gauss1986}.  Gauss studied the theory of binary quadratic forms -- polynomials of the form $Q(x, y) = ax^2 + bxy + cy^2$ with $a, b, c \in \ZZ$.   We call $\Delta = b^2 - 4ac$ the \emph{discriminant} of the form, and say that an integer $n$ is represented by a form $Q(x, y)$ if there exist integers $x$ and $y$ such that $Q(x, y) = n$.  Gauss introduced the notion of \emph{equivalence} of forms.  For a given form $Q(x, y)$, there exists a set of integers that can be represented by that form.  We say that two forms are equivalent if there exists a linear integral transformation of variables from one form to another, in other words, if the set of integers represented by each form are identical \cite[p.239]{Crandall2001}.  This notion of equivalence leads to \emph{equivalence classes}, i.e.\ all the forms equivalent to each other constitute an equivalence class.  Gauss defined an operation between equivalence classes, called \emph{composition}, and as such, the set of equivalence classes of binary quadratic forms with discriminant $\Delta$ form a finite Abelian group under composition \cite[p.136]{Cohn1980}.  Later this would be shown to be analogous to what is called the ideal class group of a quadratic field \cite{Frolich1993}.
 
@@ -367,12 +366,16 @@ Let $\OO'$ be a non-maximal order of $\QQ(\sqrt D)$ with discriminant $\Delta'$.
 We call $f$ the \emph{conductor} of the non-maximal order $\OO'$.
 
 
-\section{Ideals of $\OO_\Delta$}
-\label{sec:idealsInOrderOfIntegers}
+\section{Ideals and the Class Group}
+\label{sec:classGroup}
 
 \begin{defn}
 An (integral) \emph{ideal} $\mathfrak a$ is an additive subgroup of an order $\OO$ with the property that for any $a \in \mathfrak a$ and $\xi \in \OO$, it holds that $\xi a$ and $a \xi$ are both elements of the ideal $\mathfrak a$.
 \end{defn}
+
+%\begin{defn}
+%An ideal $\ideal a$ is called \emph{primitive} if it cannot be written $\ideal a = m \ideal b$ for some ideal $\ideal b \in \OO_\Delta$ and $|m| > 1, m \in \ZZ$.
+%\end{defn}
 
 Let $\OO_\Delta$ be a maximal order.  Then for $\alpha, \beta \in \OO_\Delta$, the set $\ideal a = \{x \alpha + y \beta : x, y \in \OO_\Delta\}$ is an ideal in the order $\OO_\Delta$ and is denoted $(\alpha, \beta)$ \cite[p.16]{Ramachandran2006}.  Every ideal of a quadratic order $\OO_\Delta$ can be represented by at most two generators \cite[p.125--126]{Cohn1980}, while some can be represented by a single generator.  An ideal represented by a single generator is a \emph{principal} ideal and is denoted $(\alpha) = \{ x \alpha : x \in \OO_\Delta \}$ \cite[p.87]{Jacobson2009}.
 
@@ -382,45 +385,63 @@ For two ideals, $\ideal a = (\alpha_1, \beta_1)$ and $\ideal b = (\alpha_2, \bet
 \end{equation}
 for some $\alpha_3, \beta_3 \in \OO_\Delta$ and is also an ideal in $\OO_\Delta$. The principal ideal $(1) = \OO_\Delta$ is the \emph{identity} ideal since $\ideal a = \ideal a \OO_\Delta = \OO_\Delta \ideal a$.  If there exists an ideal $\ideal c$ such that $\ideal a \ideal c = \ideal b$, then $\ideal a$ \emph{divides} $\ideal b$ and we write $\ideal a ~|~ \ideal b$.  Finally, an ideal $\ideal p \neq (1)$ is \emph{prime} when $\ideal p ~|~ \ideal a \ideal b$ implies that either $\ideal p ~|~ \ideal a$ or $\ideal p ~|~ \ideal b$.  As such, a prime ideal is divisible only by the identity ideal and itself.
 
-
-% TODO: Move on to inverses.
-If the ideal $\ideal a$ divides the identity ideal $\OO_\Delta$, then $\ideal a$ has an \emph{inverse}, which is denoted $\ideal a^{-1}$. 
-
-\begin{thm}
-\label{thm:idealZModule}
-\cite[p.13]{Jacobson1999} When $\OO_\Delta = [1, f\omega_0]$ is an order of a quadratic field, a \mbox{non-zero} ideal $\ideal a$ of $\OO_\Delta$ can be uniquely written as a two dimensional $\ZZ$-module 
-\[
-	\ideal a = s\left[a, \frac{b+\sqrt{\Delta}}{2} \right]
-\]
-for $a, b \in \ZZ, s > 0, a > 0$, $\gcd(a, b, (b^2-\Delta)/4a)=1$, $b^2 \equiv \Delta \pmod{4a}$, and $b$ is unique $\bmod ~2a$.
-\end{thm}
+Equation \ref{eq:idealProduct} shows that ideals are closed under multiplication, and by \cite[p.117]{Cohn1980}, they are associative, commutative, and have identity.  For ideals to form a group, we need inverses, and for this we define \emph{fractional ideals}.
 
 \begin{defn}
-For an ideal $\ideal a = s [a, (b + \sqrt\Delta)/2]$, when $s \in \ZZ$, $\ideal a$ is an \emph{integral} ideal, and when $s \in \QQ$, $\ideal a$ is a \emph{fractional} ideal.  Finally, when $s = 1$, $\ideal a$ is a \emph{primitive} ideal.
+\cite[Definition 2.13]{Ramachandran2006} An $\ideal a$ of $\OO_\Delta$ is a \emph{fractional ideal} if there exists an ideal $\ideal b$ and a non-zero $c \in \OO_\Delta$ such that $\ideal a = c^{-1} \ideal b$.
 \end{defn}
 
-For a prime ideal $\ideal p \in \OO_\Delta$ it can be shown \cite[p.19]{Jacobson1999} that $\ideal p \cap \ZZ = p\ZZ$ for some prime integer $p \in \ZZ$. Let
-\[
-	\ideal p = s\left[a, \frac{b + \sqrt{\Delta}}{2}\right]
-\]
-and it follows that either $s=p$ and $a=1$, or $s=1$ and $a=p$.  In the first case $\ideal p = p\OO_\Delta$, while in the second case, if there exists $b = \sqrt{\Delta} \pmod {4p}$, then $\ideal p = [p, (b + \sqrt{\Delta})/2]$.  This follows since $\Delta = b^2-4ac$, $a = p$, and $b, c \in \ZZ$. As such $c = (b^2-\Delta)/4p$ and \mbox{$b^2 \equiv \Delta \pmod {4p}$}.
+Using fractional ideals, we are able to define inverses.
 
-The inverse of an ideal $\ideal a = s[a, (b + \sqrt\Delta)/2]$ with $\gcd(a, b, (b^2 - \Delta)/4a) = 1$ is given by \cite[pp.14--15]{Jacobson1999}
+\begin{prop}
+\cite[Proposition 2.14]{Ramachandran2006} Let $\ideal a$ be a fractional ideal in $\OO_\Delta$, where $\OO_\Delta$ is a maximal order in the quadratic field $\QQ(\sqrt \Delta)$.  The inverse of $\ideal a$ is then
+\[
+	\ideal a^{-1} = \{ c \in \QQ(\sqrt \Delta) : c \ideal a \subseteq \OO_\Delta \}
+\]
+such that $\ideal a \ideal a^{-1} = \ideal a^{-1} \ideal a = \OO_\Delta$.
+\end{prop}
+
+All fractional ideals in $\OO_\Delta$ are invertible, and the set of invertible ideals forms a group under ideal multiplication.  We can now define an equivalence relation on the invertible ideals of $\OO_\Delta$.
+
+\begin{defn}
+\cite[p.88]{Jacobson2009} Two invertible ideals $\ideal a$ and $\ideal b$ are \emph{equivalent} if there exists $\alpha, \beta \in \OO_\Delta$ such that $\alpha \beta \neq 0$ and $(\alpha)\ideal a = (\beta) \ideal b$.
+\end{defn}
+
+We write $\aclass$ to denote the set of all ideals equivalent to $\ideal a$, and call this an \emph{ideal class}.  The \emph{ideal class group}, denoted $Cl_\Delta$, is the set of all equivalence classes of invertible ideals, with the group operation defined as the product of class representatives.  By \cite[p.136]{Cohn1980}, the ideal class group is a finite Abelian group.
+
+\begin{defn}
+The number of ideal classes in the class group $Cl_\Delta$ is the \emph{class number} and is denoted $h_\Delta$ \cite[p.153]{Jacobson2009}.
+\end{defn}
+
+Cohen \cite[p.247]{Crandall2001} states a bound on the number of elements in the class group $Cl_\Delta$ as
+\begin{equation}
+\label{eq:hDelta}
+	h_\Delta < \frac{1}{\pi} \sqrt{|\Delta|}\log{|\Delta|} \textrm{ when } \Delta < -4,
+\end{equation}
+and C. Siegel \cite[p.247]{Crandall2001} shows that 
+\begin{equation}
+\label{eq:hDeltaInfty}
+h_\Delta = |\Delta|^{1/2 + o(1)} \textrm{ as } \Delta \rightarrow -\infty.
+\end{equation}
+These bounds on the class number will be useful in Chapters \ref{chap:superspar} and \ref{chap:ssparExperiments}.
+
+\section{Ideal Arithmetic}
+\label{sec:idealArithmetic}
+
+When performing ideal arithmetic, we choose to represent invertible ideals following Jacobson \cite[p.13, Equation 2.1]{Jacobson1999} using the $\ZZ$-module
+\[
+	\ideal a = q\left[a, \frac{b+\sqrt{\Delta}}{2} \right]
+\]
+for $a, b, \in \ZZ, q \in \QQ, q, a > 0$, $\gcd(a, b, (b^2-\Delta)/4a) = 1$, $b^2 \equiv \Delta \pmod{4a}$, and $b$ is unique $\bmod ~2a$.  We also use $q(a, b)$, for short, to represent the ideal $\ideal a$.  When $q = 1$, $\ideal a$ is a \emph{primitive} ideal, and we use the pair $(a, b)$ to represent $\ideal a$.  Our implementation of ideal arithmetic also maintains the value $c = (b^2 - \Delta)/4a$, which will be useful throughout the remainder of this chapter.
+
+Using this representation, the inverse $\ideal a^{-1}$ of an ideal is given by \cite[pp.14--15]{Jacobson1999} as
 \begin{equation}
 \label{eq:idealInverse}
-	{\ideal a}^{-1} = \frac{s}{\mathcal N(\mathfrak a)} \left[a, \frac{-b+\sqrt{\Delta}}{2} \right]
+	{\ideal a}^{-1} = \frac{q}{\mathcal N(\mathfrak a)} \left[a, \frac{-b+\sqrt{\Delta}}{2} \right]
 \end{equation}
-where $\mathcal N(\ideal a) = s^2a$ is the norm of $\ideal a$ and is multiplicative. Notice that the resulting ideal $\ideal a^{-1}$ may be a fractional ideal.  When $\OO_\Delta$ is maximal, all ideals of $\OO_\Delta$ have inverses, and the set of invertible ideals forms a group under ideal multiplication.
+where $\mathcal N(\ideal a) = q^2a$ is the norm of $\ideal a$ and is multiplicative.  For a primitive invertible ideal $(a, b)$, the inverse is given by $\frac{1}{a}(a, -b)$.  Let $\aclass$ be an ideal class represented by the primitive ideal $\ideal a$.  The inverse $\idealclass{a^{-1}}$ is then given simply by $(a, -b)$ \cite[p.20]{Ramachandran2006}.  As such, computing the inverse of an ideal class is virtually free. 
 
-
-\section{Ideal Class Group}
-
-Two ideals $\ideal a$ and $\ideal b$ are \emph{equivalent} if there exists $\alpha, \beta \in \OO_\Delta$ such that $\alpha \beta \neq 0$ and \mbox{$(\alpha)\ideal a = (\beta) \ideal b$} \cite[p.88]{Jacobson2009}.  We use $[\mathfrak a]$ to denote the \emph{ideal class} of all ideals equivalent to the \emph{representative} ideal $\ideal a$. The \emph{ideal class group}, $Cl_\Delta$, is the set of all equivalence classes of invertible ideals, with the group operation defined as the product of class representatives. By \cite[p.136]{Cohn1980}, the ideal class group is a finite Abelian group.
-
-Our implementation uses the primitive ideal $\ideal a = [a, (b + \sqrt\Delta)/2]$ as a representative for the ideal class $\aclass$.  Additionally, we maintain the value $c = (b^2 - \Delta)/4a$.  The class group is represented by the discriminant $\Delta$.  Since an ideal class contains an infinitude of ideals, we work with reduced representatives.  This also makes arithmetic faster, since the size of generators are typically smaller.
-
-Subsection \ref{subsec:reduction} defines the reduced form of a representative and gives an algorithm for finding the reduced form.  For two reduced class representatives, Subsection \ref{subsec:idealMultiply} shows how to compute their product. Subsection \ref{subsec:nucomp} discusses how to perform multiplication such that the result is a reduced or almost reduced representative.  This is then extended to the case of computing the square (Subsection \ref{subsec:nudupl}) and cube (Subsection \ref{subsec:nucube}) of an ideal class.  
-
+Since an ideal class contains an infinitude of ideals, we work with reduced representatives.  This also makes arithmetic faster, since the size of generators are typically smaller.  Subsection \ref{subsec:reduction} defines the reduced form of a representative and gives an algorithm for finding the reduced form.  For two reduced class representatives, Subsection \ref{subsec:idealMultiply} shows how to compute their product.  Subsection \ref{subsec:nucomp} discusses how to perform multiplication such that the result is a reduced or almost reduced representative.  This is then extended to the case of computing the square (Subsection \ref{subsec:nudupl}) and cube (Subsection \ref{subsec:nucube}) of an ideal class.  
 
 \subsection{Reduced Representatives}
 \label{subsec:reduction}
@@ -473,33 +494,8 @@ Since $c = (b^2 - \Delta)/4a$ we have
 \end{equation}
 As such, the first step is to reduce $a$ by setting $\ideal a = [c, (-b + \sqrt\Delta)/2]$, if $a > c$.  Then $b$ is reduced since $b$ is unique modulo $2a$.  These steps are repeated while $\ideal a$ is not reduced. In the case that $a = c$, we use the absolute value of $b$, since by Equation \ref{eq:idealSwapAC} the ideals $[a, (b + \sqrt\Delta)/2]$ and $[c, (-b+\sqrt\Delta)/2]$ are equivalent.  Algorithm \ref{alg:reduce} gives Pseudo-code.
 
-\subsection{Class Number}
-\label{subsec:classNumber}
+We point out here that by Definition \ref{defn:reducedIdeal}, $|b| \le a$.  It follows that $-\Delta = 4ac - b^2 \ge 4ac -a^2$, and using $a \le c$, we have $|b| \le a \le \sqrt{|\Delta|/3}$.  These bounds will be useful to our implementations of ideal class arithmetic in Chapter \ref{chap:idealExperiments}.
 
-% TODO: Something about the distribution of the class number for discriminants of the same size.
-
-Using $|b| \le a$ from the definition of a reduced representative \ref{defn:reducedIdeal}, $-\Delta = 4ac - b^2 \ge 4ac -a^2$, and using $a \le c$, it follows that $|b| \le a \le \sqrt{|\Delta|/3}$.  Since $a$ and $b$ are bounded and $c$ is determined by $a$, $b$, and $\Delta$, it follows that the number of ideal classes in the class group $Cl_\Delta$ is finite \cite[p.153]{Jacobson2009}.
-\begin{defn}
-The number of ideal classes in the class group $Cl_\Delta$ is the \emph{class number} and is denoted $h_\Delta$ \cite[p.153]{Jacobson2009}.
-\end{defn}
-Cohen \cite[p.247]{Crandall2001} states a bound on the number of elements in the class group $Cl_\Delta$ as
-\begin{equation}
-\label{eq:hDelta}
-	h_\Delta < \frac{1}{\pi} \sqrt{|\Delta|}\log{|\Delta|} \textrm{ when } \Delta < -4,
-\end{equation}
-and C. Siegel shows that $h_\Delta = |\Delta|^{1/2 + o(1)}$ as $\Delta \rightarrow -\infty$ \cite[p.247]{Crandall2001}.
-
-\subsection{Inverse of Ideal Class}
-\label{subsec:idealClassInverse}
-Recall from Equation \ref{eq:idealInverse} that the inverse of an ideal $\ideal a = [a, (b + \sqrt\Delta)/2]$ is the (possibly fractional) ideal
-\[
-	{\ideal a}^{-1} = \frac{s}{\mathcal N(\ideal a)} \left[a, \frac{-b+\sqrt{\Delta}}{2} \right].
-\]
-As such, the ideals $\ideal a^{-1}$ and $[a, (-b + \sqrt\Delta)/2]$ are equivalent since
-\[
-\left(\mathcal N(\ideal a)\right) \ideal a^{-1} =  (s) \left[a, \frac{-b+\sqrt{\Delta}}{2} \right]
-\]
-and both $s, \mathcal N(\ideal a) \in \OO_\Delta$.  The inverse of an ideal class $\idealclass a$ for the representative $\ideal a = [a, (b + \sqrt\Delta)/2]$ is then given by the representative $[a, (-b + \sqrt\Delta)/2]$ and by Definition \ref{defn:reducedIdeal} is reduced.  As such, computing the inverse of an ideal class is virtually free. 
 
 \subsection{Ideal Class Multiplication}
 \label{subsec:idealMultiply}
@@ -592,7 +588,7 @@ which completes the derivation of Equation \ref{eq:idealProductB}.  Note that th
 
 Shanks \cite{Shanks1989} gives an algorithm for multiplying two ideal class representatives such that their product is reduced or almost reduced.  The algorithm is known as NUCOMP and stands for ``New COMPosition''.  This algorithm is often faster in practice as the intermediate numbers are smaller and the final product requires at most two applications of the reduction operation to be converted to reduced form \cite[pp.439--441]{Jacobson2009}. The description of NUCOMP provided here is a high level description of the algorithm based on Jacobson and Williams \mbox{\cite[\S 5.4,~pp. 119-123]{Jacobson2009}}.
 
-Equations \ref{eq:idealProductS}, \ref{eq:idealProductA}, and \ref{eq:idealProductB} from the previous subsection give a solution to the ideal product $\ideal a \ideal b = s[a, (b+\sqrt\Delta)/2]$.  In this case, the product ideal is not necessarily reduced.  Computing the reduced ideal class representative corresponds to computing the simple continued fraction expansion of $(b/2)/a$ \cite[p.119]{Jacobson2009}, but in this case, the coefficients $a$ and $b$ may be as large as $\Delta$ \cite[p.118]{Jacobson2009}.  Instead of computing the simple continued fraction expansion of $(b/2)/a$, Jacobson and Williams \cite[p.119]{Jacobson2009} use $sU/a_1$ where $U$ is given by Equation \ref{eq:idealProductU}.  To see why this is sufficient, recall from Subsection \ref{subsec:classNumber} that $a_1$ is approximately $\sqrt{|\Delta|}$ in size, so $s^2 / 2 a_1 \approx 1 / \sqrt{|\Delta|}$ and
+Equations \ref{eq:idealProductS}, \ref{eq:idealProductA}, and \ref{eq:idealProductB} from the previous subsection give a solution to the ideal product $\ideal a \ideal b = s[a, (b+\sqrt\Delta)/2]$.  In this case, the product ideal is not necessarily reduced.  Computing the reduced ideal class representative corresponds to computing the simple continued fraction expansion of $(b/2)/a$ \cite[p.119]{Jacobson2009}, but in this case, the coefficients $a$ and $b$ may be as large as $\Delta$ \cite[p.118]{Jacobson2009}.  Instead of computing the simple continued fraction expansion of $(b/2)/a$, Jacobson and Williams \cite[p.119]{Jacobson2009} use $sU/a_1$ where $U$ is given by Equation \ref{eq:idealProductU}.  To see why this is sufficient, recall from Subsection \ref{subsec:reduction} that $a_1$ is approximately $\sqrt{|\Delta|}$ in size, so $s^2 / 2 a_1 \approx 1 / \sqrt{|\Delta|}$ and
 \[
 	\frac{b}{2a} = \frac{b_2 + 2Ua_2/s}{2a_1a_2/s^2} 
 	= \frac{s^2 b_2+s2Ua_2}{2a_1a_2}
@@ -1231,7 +1227,7 @@ Suppose we wish to find a factor of an odd integer $N$. Since $\Delta = b^2 - 4a
 \subsection{SPAR Algorithm}
 \label{subsec:sparAlg}
 
-The SPAR factoring algorithm uses two stages, an exponentiation stage and a search stage, in order to find an ambiguous class with a discriminant associated with the integer to factor.  Recall from Subsection \ref{subsec:classNumber} that for a negative discriminant $\Delta$, the ideal class group $Cl_\Delta$ has a finite number of elements.  This means that for a random ideal class $\aclass$, there exists an integer $h$ such that $\aclass^h = \idclass$. We say that $h$ is the \emph{order} of the element $\aclass$ and denote this by $h = \ord(\aclass)$.  When the order is even, then $\bclass = \aclass^{h/2}$ is an ambiguous ideal class, because $\bclass^2 = \idclass$.   The exponentiation stage of SPAR chooses an exponent $E$ such that, with a certain probability, $E$ is a multiple of the odd part of the order of $\aclass$, and by repeated squaring of $\aclass^E$, the algorithm will find an ambiguous class.  Failing this, the search stage performs a random walk on the ideal class generated by the first stage in an attempt to find a multiple of the order of $\aclass$.  Knowing a multiple of the order of $\aclass$, the algorithm then attempts to find an ambiguous class and a factor of $N$.
+The SPAR factoring algorithm uses two stages, an exponentiation stage and a search stage, in order to find an ambiguous class with a discriminant associated with the integer to factor.  Recall from Section \ref{sec:classGroup} that for a negative discriminant $\Delta$, the ideal class group $Cl_\Delta$ has a finite number of elements.  This means that for a random ideal class $\aclass$, there exists an integer $h$ such that $\aclass^h = \idclass$. We say that $h$ is the \emph{order} of the element $\aclass$ and denote this by $h = \ord(\aclass)$.  When the order is even, then $\bclass = \aclass^{h/2}$ is an ambiguous ideal class, because $\bclass^2 = \idclass$.   The exponentiation stage of SPAR chooses an exponent $E$ such that, with a certain probability, $E$ is a multiple of the odd part of the order of $\aclass$, and by repeated squaring of $\aclass^E$, the algorithm will find an ambiguous class.  Failing this, the search stage performs a random walk on the ideal class generated by the first stage in an attempt to find a multiple of the order of $\aclass$.  Knowing a multiple of the order of $\aclass$, the algorithm then attempts to find an ambiguous class and a factor of $N$.
 
 Following Schnorr and Lenstra \cite{Schnorr1984}, the exponentiation stage takes the first $t$ primes $p_1 = 2, p_2 = 3, ..., p_t \le N^{1/2r}$ for $r = \sqrt{\ln N / \ln \ln N}$.  Let $E = \prod_{i=2}^t {p_i}^{e_i}$ for $e_i = \max \{ v : {p_i}^v \le {p_t}^2 \}$ and compute $\bclass = \aclass^E$.  Notice that we exponentiate $\aclass$ to the product of only \emph{odd} prime powers.  The reason for this is that if $\ord(\aclass)$ divides $2^j E$ for some $j$, then we can compute $\bclass^{\left(2^j\right)}$ for the smallest $j$ such that $\bclass^{\left(2^j\right)} = \idclass$.  It follows that $\bclass^{\left(2^{j-1}\right)}$ is an ambiguous ideal class and we attempt to factor $N$.  Since $\ord(\aclass)$ may not divide $2^jE$, Schnorr and Lenstra \cite[p.291]{Schnorr1984} bound $j$ to be no larger than $\ell = \floor{\log_2{\sqrt N}}$.  If this stage fails to find $\bclass^{\left(2^j\right)} = \idclass$ for some $j$, the algorithm continues with the search stage.
 
@@ -1945,7 +1941,7 @@ We further approximate the computation of integer square roots when computing th
 \end{equation*}
 where $\floor{\log_2x+1}$ is the number of bits in the binary representation of $x$.  Using this approximation, we compute the integer square root of $x$ as roughly $\floor{x / 2^{\floor{\floor{\log_2x+1}/2}}}$.  This is simply a bit shift right by half the number of bits in $x$.
 
-Other practical considerations are to minimize the size of variables and intermediate values, as smaller operands often lead to faster arithmetic.  Recall from Subsection \ref{subsec:classNumber} that $|b| \le a \le \sqrt{\Delta/3}$.  As such, the variables $a$ and $b$ only require half the memory needed to store $\Delta$.
+Other practical considerations are to minimize the size of variables and intermediate values, as smaller operands often lead to faster arithmetic.  Recall from Subsection \ref{subsec:reduction} that $|b| \le a \le \sqrt{\Delta/3}$.  As such, the variables $a$ and $b$ only require half the memory needed to store $\Delta$.
 
 In our 64-bit implementation, $\Delta$ and $c$ take 64-bits of storage, while both $a$ and $b$ require only 32-bits at most.  As such, we take advantage of 32-bit operations when possible (such as our 32-bit implementation of the extended Euclidean GCD from Section \ref{sec:gcdEEA}).  Similarly in our 128-bit implementation, $\Delta$ and $c$ fit within 128-bits of storage, and both $a$ and $b$ fit within one 64-bit machine word.  Again, we use 64-bit arithmetic when possible (such as our simplified 64-bit left-to-right binary extended GCD from Section \ref{sec:gcdL2R}), and even 32-bit when operands are small.  However, since intermediates may be larger, we sometimes require the full 64-bits or 128-bits of the implementation.  Cubing sometimes requires even larger intermediates, for example, when computing modulo ${a_1}^2$.  Since ${a_1}^2$ can be as large as $\Delta$, intermediates before modulo might be larger than $\Delta$ in size.  As such, our 64-bit implementation of cubing requires some 128-bit arithmetic, while our 128-bit implementation uses GMP when necessary.
 
@@ -2474,7 +2470,7 @@ Our implementation of SuperSPAR computes baby steps coprime to a multiple of a p
 
 The SuperSPAR Algorithm \ref{alg:superSpar} (and more generally, the bounded primorial steps algorithm \ref{alg:primorialSteps}) requires a lookup table mapping group elements $\bclass^i$ to exponents $i$.  The baby steps generate group elements $\bclass^i$ with $i$ coprime to some primorial $P_w$ and store the mapping $\bclass^i \mapsto i$ in the lookup table. The giant steps lookup group elements $\bclass^{2js}$ and $\bclass^{-2js}$ from the lookup table.  As such, the performance of the algorithm directly corresponds to the performance of the lookup table.  This section describes the experimental results for SuperSPAR using two different implementations of lookup tables, as well as the method used to map group elements to exponents in our implementation.
 
-Our implementation of idea class arithmetic represents an ideal class $\aclass \in Cl_\Delta$ using the triple $(a, b, c)$ where $\ideal a = [a, (b + \sqrt\Delta)/2]$ is a reduced representative for the ideal class and $c = (b^2 - \Delta)/4a$ (see Section \ref{sec:implementationOfIdealArithmetic}).  Since inversion of ideal classes is virtually free, SuperSPAR computes giant steps for ideal classes $\bclass^{2js}$ and $\bclass^{-2js}$, but rather than perform two table lookups, we take advantage of the way in which the inverse of an ideal class is computed.  Recall form Subsection \ref{subsec:idealClassInverse} that the inverse of an ideal class for a representative $[a, (b + \sqrt\Delta)/2]$ is given by the representative $[a, (-b + \sqrt\Delta)]$.  Since $|b| = \pm \sqrt{\Delta +4ac}$, we use the pair $(a, c)$ for the key and our implementation is able to look up both $\bclass^{2sj}$ and $\bclass^{-2js}$ using a single table lookup.  However, once a giant step finds a corresponding $\bclass^i$ in the table, both the exponents $2js-i$ and $2js+i$ must be tested to determine which one is a multiple of the order of $\bclass$.  Figure \ref{fig:ssparSingleLookup} contrasts this with an implementation using two lookups per giant step.  Both implementations use identical parameters on the same sets of semiprime integers, i.e.\ the executions of the two implementations only differ in the number of table lookups performed during the giant step portion of the search stage.  In the implementation using two table lookups per giant step, the pair $(a, b)$ is used for the hash key in order to distinguish between $\bclass^{2js}$ and $\bclass^{-2js}$, however, when some $\bclass^i$ is found, a multiple of the order is immediately known.
+Our implementation of ideal class arithmetic represents an ideal class $\aclass \in Cl_\Delta$ using the triple $(a, b, c)$ where $\ideal a = [a, (b + \sqrt\Delta)/2]$ is a reduced representative for the ideal class and $c = (b^2 - \Delta)/4a$ (see Section \ref{sec:implementationOfIdealArithmetic}).  Since inversion of ideal classes is virtually free, SuperSPAR computes giant steps for ideal classes $\bclass^{2js}$ and $\bclass^{-2js}$, but rather than perform two table lookups, we take advantage of the way in which the inverse of an ideal class is computed.  Recall form Section \ref{sec:idealArithmetic} that the inverse of an ideal class for a representative $[a, (b + \sqrt\Delta)/2]$ is given by the representative $[a, (-b + \sqrt\Delta)]$.  Since $|b| = \pm \sqrt{\Delta +4ac}$, we use the pair $(a, c)$ for the key and our implementation is able to look up both $\bclass^{2sj}$ and $\bclass^{-2js}$ using a single table lookup.  However, once a giant step finds a corresponding $\bclass^i$ in the table, both the exponents $2js-i$ and $2js+i$ must be tested to determine which one is a multiple of the order of $\bclass$.  Figure \ref{fig:ssparSingleLookup} contrasts this with an implementation using two lookups per giant step.  Both implementations use identical parameters on the same sets of semiprime integers, i.e.\ the executions of the two implementations only differ in the number of table lookups performed during the giant step portion of the search stage.  In the implementation using two table lookups per giant step, the pair $(a, b)$ is used for the hash key in order to distinguish between $\bclass^{2js}$ and $\bclass^{-2js}$, however, when some $\bclass^i$ is found, a multiple of the order is immediately known.
 
 \mygraphX{hashing-single-vs-double}{fig:ssparSingleLookup}{Average time to split an integer by either using a single lookup for each giant step, with exponentiation to verify a multiple of the order, or two lookups for each giant step, but without the need to verify a multiple of the order.}{Inversion aware hashing.}
 
@@ -2519,7 +2515,7 @@ Subsection \ref{subsec:ssparPrimePowerBound} uses data about the prime power fac
 
 SPAR (Section \ref{sec:spar}) exponentiates an ideal class $\aclass$ to an exponent $E$ where $E = \prod_{i=2}^t {p_i}^{e_i}$, $p_i$ are prime, and $e_i = \max \{ v : {p_i}^v \le {p_t}^2 \}$ for some appropriately chosen prime $p_t$ \cite[p.290]{Schnorr1984}.  In practice however, Schnorr and Lenstra recommend using smaller exponents $e_i$ such that $e_i = \max \{ v : {p_i}^v \le p_t \}$ \cite[p.293]{Schnorr1984}.  Doing so means that the exponentiation stage uses fewer group operations (and so takes less time), at the risk that the order of the resulting ideal class $\bclass = \aclass ^ E$ may still have small prime factors.  Here we consider bounds for the exponents $e_i$ for use with our implementation of SuperSPAR, assuming the range in which it is a competitive integer factoring tool.
 
-The exponentiation stage of SuperSPAR computes $\bclass = \aclass ^{2^\ell E}$ with $\ell = \floor{\log_2 \hdelta}$.  The search stage then computes baby steps $\bclass^i$ for $i$ coprime to some primorial $P_w$.  However, if $\ord(\bclass)$ and $P_w$ have a common factor $p$, then $p$ is not coprime to $P_w$ and $\bclass^p$ will not be added to the lookup table used by the coprime baby steps.  If this is the case, the search phase is guaranteed to fail since it cannot find any $\bclass^{2js}$ such that $2js \equiv 0 \pmod p$ in the lookup table.  In order to ensure that the order of $\bclass$ is coprime to $E$, the exponents in $E$ would have to be chosen such that $e_i = \floor{\log_{p_i} \hdelta}$, where $\hdelta$ is a bound on $h_\Delta$ (see Subsection \ref{subsec:classNumber}).  However, in practice it is more efficient to choose smaller values of $e_i$ at the risk that additional class groups are tried.  For this reason, the exponent $E$ is chosen to remove, with high probability, the factors from the order of $\aclass$ that are common with the primorial $P_w$ used by the search stage.  In this subsection, we assume that the largest prime $p_t$ dividing $E$ in the exponentiation stage is larger than the largest prime $p_w$ diving $P_w$ in the search stage.  Here we are only concerned with determining bounds on $e_i$, the exponent of each prime factor of $E$.
+The exponentiation stage of SuperSPAR computes $\bclass = \aclass ^{2^\ell E}$ with $\ell = \floor{\log_2 \hdelta}$.  The search stage then computes baby steps $\bclass^i$ for $i$ coprime to some primorial $P_w$.  However, if $\ord(\bclass)$ and $P_w$ have a common factor $p$, then $p$ is not coprime to $P_w$ and $\bclass^p$ will not be added to the lookup table used by the coprime baby steps.  If this is the case, the search phase is guaranteed to fail since it cannot find any $\bclass^{2js}$ such that $2js \equiv 0 \pmod p$ in the lookup table.  In order to ensure that the order of $\bclass$ is coprime to $E$, the exponents in $E$ would have to be chosen such that $e_i = \floor{\log_{p_i} \hdelta}$, where $\hdelta$ is a bound on $h_\Delta$ (see Section \ref{sec:classGroup}).  However, in practice it is more efficient to choose smaller values of $e_i$ at the risk that additional class groups are tried.  For this reason, the exponent $E$ is chosen to remove, with high probability, the factors from the order of $\aclass$ that are common with the primorial $P_w$ used by the search stage.  In this subsection, we assume that the largest prime $p_t$ dividing $E$ in the exponentiation stage is larger than the largest prime $p_w$ diving $P_w$ in the search stage.  Here we are only concerned with determining bounds on $e_i$, the exponent of each prime factor of $E$.
 
 For each ideal in our data set $\idealDataSet$, let the factorization of the order be represented by $\ord(\aclass) = \prod {p_i}^{e_i}$ for $p_i$ prime.  For each prime power factor $3^{e_2}$, $5^{e_3}$, $7^{e_4}$, $11^{e_5}$, $13^{e_6}$, and $17^{e_7}$, more than 99\% of the ideals studied had either $e_2 \le 4$, $e_3 \le 2$, $e_4 \le 2$, $e_5 \le 1$, $e_6 \le 1$, or $e_7 \le 1$.  This is captured by Table \ref{tab:ninetyNine}.  This is not to say that more than 99\% of the ideals in the data set were such that $\ord(\aclass^{3^4 5^2 7^2 11^1 13^1 17^1})$ is coprime to $3 \times 5 \times 7 \times 11 \times 13 \times 17$, but only that $\ord(\aclass^{3^4})$ is coprime to 3, and so on. 
 
@@ -2727,7 +2723,7 @@ Once a multiple of the order of an ideal class is known, Algorithm \ref{alg:sspa
 
 Algorithm \ref{alg:superSpar} is the main factoring algorithm.  It takes as input an odd composite positive integer $N$, and the configuration parameters.  The configuration parameters are determined by the size of the input integer $N$ and are looked up from a skeleton function that invokes the main algorithm.  The previous sections in this chapter constrain the majority of the configuration parameters with the exception of the largest prime $p_t$ used in the exponent $E = \prod_{i=2}^t {p_i}^{e_i}$ for the exponentiation stage, and the multiple of a primorial $mP_w$ used for the search stage.  We give pseudo-code for our implementation of SuperSPAR here, since these two parameters are empirically determined in Section \ref{sec:ssparEmpirical} by running the main algorithm on sets of semiprime integers for various values of $E$ and $mP_w$, by using Algorithm \ref{alg:noisyCurveSearch} to search for a local minimum in 2 dimensions.
 
-The main algorithm first computes $\ell = \floor{\log_2 \hdelta}$ where $\hdelta$ is a bound on the class number given in Subsection \ref{subsec:classNumber}, and then sets the square free multiplier index $k$ to 1.  The algorithm then computes a discriminant $\Delta$ for $N$ and the multiplier corresponding to the index $k$, and then begins the exponentiation stage.
+The main algorithm first computes $\ell = \floor{\log_2 \hdelta}$ where $\hdelta$ is a bound on the class number given in Section \ref{subsec:classGroup}, and then sets the square free multiplier index $k$ to 1.  The algorithm then computes a discriminant $\Delta$ for $N$ and the multiplier corresponding to the index $k$, and then begins the exponentiation stage.
 
 The exponentiation stage first finds an ideal class $\idealclass{p_1} \in Cl_\Delta$ such that $\ideal{p_1} = [p, (b + \sqrt\Delta)/2]$ for the smallest prime $p$ with $\gcd(p, \Delta) = 1$ and $4p ~|~ b^2 - \Delta$. Next, the algorithm computes $\idealclass{b'} \gets \idealclass{p_1}^E$.  In our implementation, $E$ is given as a 2,3 representation precomputed using the $L$ best approximations method of Section \ref{sec:expBestApproximations}.  As such, we use Algorithm \ref{alg:yaos} to perform the exponentiation.  The last step of the exponentiation stage is to use Algorithm \ref{alg:ssparRepeatedlySquare} to repeatedly square $\idealclass{b'}$, test for an ambiguous form, and attempt to factor the input integer $N$.  Failing this, the exponentiation stage has computed $\bclass = \idealclass{p_1}^{2^\ell E}$ and the algorithm continues with the search stage.
 

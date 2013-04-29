@@ -188,6 +188,39 @@ The maximal order $\OO_\Delta = [1, \omega_0]$ of $\QQ(\sqrt\Delta)$ is the ring
 
 
 
+\section{Inverses}
+
+
+\begin{thm}
+\label{thm:idealZModule}
+\cite[p.13]{Jacobson1999} When $\OO_\Delta = [1, f\omega_0]$ is an order of a quadratic field, a \mbox{non-zero} ideal $\ideal a$ of $\OO_\Delta$ can be uniquely written as a two dimensional $\ZZ$-module 
+\[
+	\ideal a = s\left[a, \frac{b+\sqrt{\Delta}}{2} \right]
+\]
+for $a, b \in \ZZ, s > 0, a > 0$, $\gcd(a, b, (b^2-\Delta)/4a)=1$, $b^2 \equiv \Delta \pmod{4a}$, and $b$ is unique $\bmod ~2a$.
+\end{thm}
+
+\begin{defn}
+For an ideal $\ideal a = s [a, (b + \sqrt\Delta)/2]$, when $s \in \ZZ$, $\ideal a$ is an \emph{integral} ideal, and when $s \in \QQ$, $\ideal a$ is a \emph{fractional} ideal.  Finally, when $s = 1$, $\ideal a$ is a \emph{primitive} ideal.
+\end{defn}
+
+For a prime ideal $\ideal p \in \OO_\Delta$ it can be shown \cite[p.19]{Jacobson1999} that $\ideal p \cap \ZZ = p\ZZ$ for some prime integer $p \in \ZZ$. Let
+\[
+	\ideal p = s\left[a, \frac{b + \sqrt{\Delta}}{2}\right]
+\]
+and it follows that either $s=p$ and $a=1$, or $s=1$ and $a=p$.  In the first case $\ideal p = p\OO_\Delta$, while in the second case, if there exists $b = \sqrt{\Delta} \pmod {4p}$, then $\ideal p = [p, (b + \sqrt{\Delta})/2]$.  This follows since $\Delta = b^2-4ac$, $a = p$, and $b, c \in \ZZ$. As such $c = (b^2-\Delta)/4p$ and \mbox{$b^2 \equiv \Delta \pmod {4p}$}.
+
+The inverse of an ideal $\ideal a = s[a, (b + \sqrt\Delta)/2]$ with $\gcd(a, b, (b^2 - \Delta)/4a) = 1$ is given by \cite[pp.14--15]{Jacobson1999}
+\begin{equation}
+\label{eq:idealInverse}
+	{\ideal a}^{-1} = \frac{s}{\mathcal N(\mathfrak a)} \left[a, \frac{-b+\sqrt{\Delta}}{2} \right]
+\end{equation}
+where $\mathcal N(\ideal a) = s^2a$ is the norm of $\ideal a$ and is multiplicative. Notice that the resulting ideal $\ideal a^{-1}$ may be a fractional ideal.  When $\OO_\Delta$ is maximal, all ideals of $\OO_\Delta$ have inverses, and the set of invertible ideals forms a group under ideal multiplication.
+
+\section{Class Number}
+
+Using $|b| \le a$ from the definition of a reduced representative \ref{defn:reducedIdeal}, $-\Delta = 4ac - b^2 \ge 4ac -a^2$, and using $a \le c$, it follows that $|b| \le a \le \sqrt{|\Delta|/3}$.  Since $a$ and $b$ are bounded and $c$ is determined by $a$, $b$, and $\Delta$, it follows that the number of ideal classes in the class group $Cl_\Delta$ is finite \cite[p.153]{Jacobson2009}.
+
 
 \end{document}
 
