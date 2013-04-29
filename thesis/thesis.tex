@@ -306,7 +306,7 @@ A quadratic number field is an algebraic number field of degree 2 over the ratio
 \[
 	\QQ(\alpha) = \{u + v\alpha : u,v \in \QQ\}
 \]
-for some quadratic irrational $\alpha \in \CC$.  Any quadratic field can be written as $\QQ(\sqrt D)$ for some square-free integer $D$ \cite[p.188]{Ireland1990}, and $D$ is called the \emph{radicand} of the quadratic field $\QQ(\sqrt D)$ \cite[p.10]{Ramachandran2006}.  When $D < 0$, then $\QQ(\sqrt D)$ is a subset of the complex numbers and we call $\QQ(\sqrt D)$ an \emph{imaginary} quadratic number field.  When $D > 0$, then $\QQ(\sqrt D)$ is a subset of the real numbers and we call $\QQ(\sqrt D)$ a \emph{real} quadratic number field.  The assumption throughout this thesis is that $D$ is negative.
+for some quadratic irrational $\alpha \in \CC$.  The element $\alpha$ must be a root of a quadratic polynomial $ax^2 + bx + c$ with integer coefficients.  Following \cite[p.188]{Ireland1990}, let $A = b^2-4ac$, then $\QQ(\sqrt A) = \QQ(\alpha)$, and when $A = f^2 D$ for integers $f$ and $D$ with $D$ square-free, then $\QQ(\sqrt D) = \QQ(\alpha)$.  When $D < 0$, then $\QQ(\sqrt D)$ is a subset of the complex numbers and we call $\QQ(\sqrt D)$ an \emph{imaginary} quadratic number field.  When $D > 0$, then $\QQ(\sqrt D)$ is a subset of the real numbers and we call $\QQ(\sqrt D)$ a \emph{real} quadratic number field.  The assumption throughout this thesis is that $D$ is negative.
 
 When $\xi \in \QQ(\sqrt D)$ is a root of a \emph{monic} quadratic polynomial with integer coefficients, then $\xi$ is a \emph{quadratic integer}, or more simply an integer of $\QQ(\sqrt D)$.
 
@@ -324,7 +324,7 @@ for integers $x$ and $y$.  See \cite[p.189]{Ireland1990} for a proof.
 
 Let $[\omega_1, \omega_2]$ denote the $\ZZ$-module represented by the algebraic integers $\omega_1$ and $\omega_2$, as
 \[
-	\omega_1 \ZZ + \omega_2 \ZZ = \{ x\omega_1 + y\omega_2 : x, y \in \ZZ \}.
+	\omega_1 \ZZ + \omega_2 \ZZ = \{ \omega_1 x + \omega_2 y : x, y \in \ZZ \}.
 \]
 Then by Proposition \ref{prop:quadInts}, $\xi$ is a quadratic integer of $\QQ(\sqrt D)$ if and only if $\xi = [1, \omega]$ where
 \[
