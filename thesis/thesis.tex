@@ -253,7 +253,7 @@ Department of Mathematics and Statistics \\
 
 This thesis discusses practical improvements to exponentiation in the ideal class group of imaginary quadratic number fields.  Quadratic number fields are the simplest of all algebraic number fields \cite[p.77]{Jacobson2009}.  They are a degree 2 extension over the rational numbers, with the form $\KK = \QQ(\sqrt\Delta)$.  When the discriminant $\Delta$ is negative, then $\KK$ is a subset of the complex numbers and we call $\KK$ an \emph{imaginary} quadratic number field.  When $\Delta$ is positive, then $\KK$ is a subset of the real numbers and we call $\KK$ a \emph{real} quadratic number field.  There are many interesting problems related to the study of algebraic number fields, and since quadratic number fields are the simplest of algebraic number fields, they provide a good starting point for the study of ideals and class groups.
 
-The first published work on ideal class groups was the work of Carl Friedrich Gauss in the \emph{Disquisitiones Arithmeticae} \cite{Gauss1986}.  Gauss studied the theory of binary quadratic forms -- polynomials of the form $Q(x, y) = ax^2 + bxy + cy^2$ with $a, b, c \in \ZZ$.   We call $\Delta = b^2 - 4ac$ the \emph{discriminant} of the form, and say that an integer $n$ is represented by a form $Q(x, y)$ if there exist integers $x$ and $y$ such that $Q(x, y) = n$.  Gauss introduced the notion of \emph{equivalence} of forms.  For a given form $Q(x, y)$, there exists a set of integers that can be represented by that form.  We say that two forms are equivalent if there exists a linear integral transformation of variables from one form to another, in other words, if the set of integers represented by each form are identical \cite[p.239]{Crandall2001}.  This notion of equivalence leads to \emph{equivalence classes}, i.e.\ all the forms equivalent to each other constitute and equivalence class.  Gauss defined an operation between equivalence classes, called \emph{composition}, and as such, the set of equivalence classes of binary quadratic forms with discriminant $\Delta$ form a finite Abelian group under composition \cite[p.136]{Cohn1980}.  Later this would be shown to be analogous to what is called the ideal class group of a quadratic field \cite{Frolich1993}.
+The first published work on ideal class groups was the work of Carl Friedrich Gauss in the \emph{Disquisitiones Arithmeticae} \cite{Gauss1986}.  Gauss studied the theory of binary quadratic forms -- polynomials of the form $Q(x, y) = ax^2 + bxy + cy^2$ with $a, b, c \in \ZZ$.   We call $\Delta = b^2 - 4ac$ the \emph{discriminant} of the form, and say that an integer $n$ is represented by a form $Q(x, y)$ if there exist integers $x$ and $y$ such that $Q(x, y) = n$.  Gauss introduced the notion of \emph{equivalence} of forms.  For a given form $Q(x, y)$, there exists a set of integers that can be represented by that form.  We say that two forms are equivalent if there exists a linear integral transformation of variables from one form to another, in other words, if the set of integers represented by each form are identical \cite[p.239]{Crandall2001}.  This notion of equivalence leads to \emph{equivalence classes}, i.e.\ all the forms equivalent to each other constitute an equivalence class.  Gauss defined an operation between equivalence classes, called \emph{composition}, and as such, the set of equivalence classes of binary quadratic forms with discriminant $\Delta$ form a finite Abelian group under composition \cite[p.136]{Cohn1980}.  Later this would be shown to be analogous to what is called the ideal class group of a quadratic field \cite{Frolich1993}.
 
 There are many interesting problems relating to the ideal class group of imaginary quadratic number fields, such as computing the class number or group structure for a particular discriminant (see \cite{Ramachandran2006}), or computing the discrete logarithm in a class group.  A related problem to computing the discrete logarithm is that of computing the order of an ideal class.  This problem is of particular interest in this thesis, since knowing the order of an ideal class can lead to the factorization of an integer associated with the discriminant.
 
@@ -266,7 +266,9 @@ With this in mind, this thesis focuses on practical improvements to arithmetic i
 
 \section{Organization and Contributions of this Thesis}
 
-As mentioned previously, a contribution of this thesis is improved arithmetic in the ideal class group of imaginary quadratic number fields.  Chapter \ref{chap:idealArithmetic} discusses the background material on the ideal class group necessary for the reader to understand the improvements discussed in this thesis.  Much of the computational effort of ideal class multiplication is in computing solutions of the extended greatest common divisor.  Chapter \ref{chap:xgcdExperiments}, discusses several solutions to this problem, as well as an adaptation to a left-to-right binary extended GCD that we propose in Section \ref{sec:gcdL2R}.  The results in Section \ref{sec:gcdResults} show that this method is the fastest on average for a large range of integer sizes, when compared against \Pari{} \cite{PariGP} and \GMP{} \cite{Gmp} as reference implementation.  The background material on the ideal class group in Chapter \ref{chap:idealArithmetic} is also the basis of our implementation of ideal class arithmetic.  The experiments that lead to our improved implementation are discussed in Chapter \ref{chap:idealExperiments}.  The results in Section \ref{sec:idealResults} show that our implementation, on average, improves upon the implementation of \Pari{} \cite{PariGP}, which we use as a reference implementation, at least for arithmetic in class groups with negative discriminants of the sizes studied.
+Chapters \ref{chap:idealArithmetic}, \ref{chap:exponentiation}, and \ref{chap:superspar} cover background material, while Chapters \ref{chap:xgcdExperiments}, \ref{chap:idealExperiments}, \ref{chap:powExperiments}, and \ref{chap:ssparExperiments} discuss our implementations in detail.
+
+To begin, one contribution of this thesis is improved arithmetic in the ideal class group of imaginary quadratic number fields.  The background material on ideal class groups useful in understanding the improvements discussed in this thesis are covered in Chapter \ref{chap:idealArithmetic}.  Much of the computational effort of ideal class multiplication is in computing solutions of the extended greatest common divisor.  Chapter \ref{chap:xgcdExperiments}, discusses several solutions to this problem, as well as an adaptation to a left-to-right binary extended GCD that we propose in Section \ref{sec:gcdL2R}.  The results in Section \ref{sec:gcdResults} show that this method is the fastest on average for a large range of integer sizes, when compared against \Pari{} \cite{PariGP} and \GMP{} \cite{Gmp} as reference implementation.  The background material on the ideal class group in Chapter \ref{chap:idealArithmetic} is also the basis of our implementation of ideal class arithmetic.  The experiments that lead to our improved implementation are discussed in Chapter \ref{chap:idealExperiments}.  The results in Section \ref{sec:idealResults} show that our implementation, on average, improves upon the implementation of \Pari{} \cite{PariGP}, which we use as a reference implementation, at least for arithmetic in class groups with negative discriminants of the sizes studied.
 
 Another contribution of this thesis is improved exponentiation in the ideal class group.  Chapter \ref{chap:exponentiation} discusses some methods from the literature for exponentiating group elements.  In particular, we discuss double base number systems and some approaches from the literature for computing double base representations useful for exponentiation.  In Chapter \ref{chap:powExperiments}, we propose several adaptations to these methods.  In particular, we propose a method that we call the \emph{$L$ best approximations} in Section \ref{sec:expBestApproximations}, and in Section \ref{sec:expResults} we provides results that show that for our implementation of ideal class arithmetic and when exponentiating by large primorials, that the $L$ best approximations technique performs the best on average.
 
@@ -300,54 +302,62 @@ A focus of this thesis is arithmetic and exponentiation in the ideal class group
 
 \section{Quadratic Number Fields}
 
-A quadratic number field $\KK$ is an algebraic number field of degree 2 over the rational numbers $\QQ$, and is defined as
+A quadratic number field is an algebraic number field of degree 2 over the rational numbers $\QQ$, and is defined as
 \[
-	\KK = \QQ(\alpha) = \{u + v\alpha : u,v \in \QQ\}
+	\QQ(\alpha) = \{u + v\alpha : u,v \in \QQ\}
 \]
-for some quadratic irrational $\alpha \in \CC$.   Following Jacobson and Williams \cite[p.77]{Jacobson2009}, let $\alpha$ be a root of a polynomial $f(x) = ax^2 + bx + c$ with integer coefficients and $f(x)$ is irreducible over the rationals.  As such
-\[
-	\alpha = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}.
-\]
-The \emph{discriminant} of the polynomial $f(x)$ is $\Delta = b^2 - 4ac$, and our number field $\KK = \QQ(\alpha) = \QQ(\sqrt \Delta)$.  Notice that $\Delta \equiv 0, 1 \pmod 4$ and $\sqrt \Delta \not\in \QQ$ since $f(x)$ is irreducible.  Also, if $\Delta = f^2\Delta_0$ where $\Delta_0$ is square free, then $\QQ(\sqrt\Delta) = \QQ(\sqrt{\Delta_0})$.  When $\Delta$ or $\Delta / 4$ is square free then $\Delta$ is a \emph{fundamental discriminant}.  In the case that $\Delta$ is positive, $\KK$ is a subset of the real numbers, $\RR$, and is a \emph{real} quadratic number field. When $\Delta$ is negative, $\KK$ is a subset of the complex numbers, $\CC$, and is an \emph{imaginary} quadratic number field.  Throughout this thesis, the assumption is that $\Delta$ is negative.
+for some quadratic irrational $\alpha \in \CC$.  Any quadratic field can be written as $\QQ(\sqrt D)$ for some square-free integer $D$ \cite[p.188]{Ireland1990}, and $D$ is called the \emph{radicand} of the quadratic field $\QQ(\sqrt D)$ \cite[p.10]{Ramachandran2006}.  When $D < 0$, then $\QQ(\sqrt D)$ is a subset of the complex numbers and we call $\QQ(\sqrt D)$ an \emph{imaginary} quadratic number field.  When $D > 0$, then $\QQ(\sqrt D)$ is a subset of the real numbers and we call $\QQ(\sqrt D)$ a \emph{real} quadratic number field.  The assumption throughout this thesis is that $D$ is negative.
 
+When $\xi \in \QQ(\sqrt D)$ is a root of a \emph{monic} quadratic polynomial with integer coefficients, then $\xi$ is a \emph{quadratic integer}, or more simply an integer of $\QQ(\sqrt D)$.
 
-
-\section{Quadratic Integers}
-
-A polynomial with a leading coefficient of 1 is a \emph{monic} polynomial, and the root $\alpha$ of a monic polynomial $f(x)$ with integer coefficients is an \emph{algebraic integer}. The rational numbers are degree 1 algebraic numbers since they are roots of degree 1 polynomials $bx-a$, and the roots of monic degree 1 polynomials with integer coefficients are the integers, $\ZZ$, sometimes called the \emph{rational integers}.  When $f(x)$ is a monic quadratic polynomial with integer coefficients, the root $\alpha$ is a \emph{quadratic integer}.
-
-\begin{thm}
-\cite[Theorem 4.10]{Jacobson2009} A quadratic integer $\alpha$ is an algebraic integer of $\QQ(\sqrt{\Delta_0})$ where $\alpha$ can be written as $\alpha = x + y \omega_0$ for $x, y \in \ZZ$ where
+\begin{prop}
+\label{prop:quadInts}
+\cite[Proposition 13.1.1]{Ireland1990} The integers of a quadratic field $\QQ(\sqrt D)$ can be written as
 \begin{equation*}
-	\omega_0 = \begin{cases}
-		\sqrt{\Delta_0} & \textrm{ when } \Delta_0 \not\equiv 1 \pmod 4 \\
-		\frac{1+\sqrt{\Delta_0}}{2} & \textrm{ when } \Delta_0 \equiv 1 \pmod 4.
+\xi = \begin{cases}
+	x + y \sqrt D & \textrm{ when } D \equiv 2, 3 \pmod 4 \\
+	x + y \frac{1 + \sqrt D}{2} & \textrm{ when } D \equiv 1 \pmod 4
 	\end{cases}
 \end{equation*}
-\end{thm}
+for integers $x$ and $y$.  See \cite[p.189]{Ireland1990} for a proof.
+\end{prop}
 
-
-\section{Maximal Order of Algebraic Integers}
-
-The \emph{maximal order} of a field $\KK$ is the set of all algebraic integers contained within $\KK$ and is characterized using a $\ZZ$-module.
-
-\begin{defn}
-Let $X = \{ \xi_1, \xi_2, \xi_3, ..., \xi_n \}$ be a subset of a number field $\KK$.  In this case, a \emph{$\ZZ$\mbox{-}module}, $\MM$, is an additive Abelian group such that
-\begin{align*}
-	\MM &= [ \xi_1, \xi_2, ..., \xi_n ] \\
-	& =  \xi_1 \ZZ + \xi_2 \ZZ + \cdots + \xi_n \ZZ \\
-	& = \left \{ \sum_{i}^n x_i \xi_i : x_i \in \ZZ, \xi_i \in X \right \}.
-\end{align*}
-\end{defn}
-
-\begin{defn}
-A \emph{quadratic order} $\OO$ of $\QQ(\sqrt\Delta)$ is a sub-ring of the quadratic integers of $\QQ(\sqrt\Delta)$ containing 1.  Following Jacobson and Williams \cite[p.81]{Jacobson2009}, we write $\OO$ as
+Let $[\omega_1, \omega_2]$ denote the $\ZZ$-module represented by the algebraic integers $\omega_1$ and $\omega_2$, as
 \[
-	\left[ 1, \frac{\Delta + \sqrt{\Delta}}{2} \right] = [1, f\omega_0].
+	\omega_1 \ZZ + \omega_2 \ZZ = \{ x\omega_1 + y\omega_2 : x, y \in \ZZ \}.
 \]
-The maximal order $\OO_\Delta = [1, \omega_0]$ of $\QQ(\sqrt\Delta)$ is the ring of all quadratic integers in $\QQ(\sqrt\Delta)$, and is maximal since any order $\OO = [1, f\omega_0]$ is a sub-ring of $\OO_\Delta$.
+Then by Proposition \ref{prop:quadInts}, $\xi$ is a quadratic integer of $\QQ(\sqrt D)$ if and only if $\xi = [1, \omega]$ where
+\[
+\omega = \begin{cases}
+	\sqrt D & \textrm{ when } D \equiv 2,3 \pmod 4 \\
+	\frac{1 + \sqrt D}{2} & \textrm{ when } D \equiv 1 \pmod 4.
+\end{cases}
+\]
+The set of all the quadratic integers in $\QQ(\sqrt D)$ forms a ring \cite[p.47]{Cohn1980}, which leads us to the concept of a \emph{quadratic order}.
+
+\begin{defn}
+A \emph{quadratic order} $\OO$ of $\QQ(\sqrt D)$ is a sub-ring of the quadratic integers of $\QQ(\sqrt D)$ containing 1.
 \end{defn}
 
+When a quadratic order $\OO$ consists of all the quadratic integers in $\QQ(\sqrt D)$ then it is called the \emph{maximal order}, since it is not contained within any larger order.  Following \mbox{\cite[p.80]{Jacobson2009}}, the $\ZZ$-module $[1, \omega]$ is an order of $\KK = \QQ(\sqrt D)$ and we denote this $\OO_{\KK}$.
+
+\begin{defn}
+\cite[Definition 4.16]{Jacobson2009} Let $\OO = [\xi_1, \xi_2]$ be any order of $\QQ(\sqrt D)$.  Then the \emph{discriminant} $\Delta$ of $\OO$ is defined as
+\[
+	\Delta = {\left| \begin{array}{rr} \xi_1 & \xi_2 \\ \overline{\xi_1} & \overline{\xi_2} \end{array} \right|}^2
+	       = (\xi_1 \overline{\xi_2} - \overline{\xi_1} \xi_2)^2
+\]
+where $\overline{\xi}$ denotes complex conjugation.
+\end{defn}
+
+Then by Ramachandran \cite[p.13]{Ramachandran2006}, the discriminant $\Delta$ of the maximal order $\OO_\KK = [1, \omega]$ can be written as
+\[
+\Delta = \begin{cases}
+	4D & \textrm{when } D \equiv 2, 3 \pmod 4 \\
+	D  & \textrm{when } D \equiv 1 \pmod 4,
+\end{cases}
+\]
+and is an invariant of the quadratic field $\QQ(\sqrt D)$.  A discriminant of a maximal order is called a \emph{fundamental discriminant}.
 
 \section{Ideals of $\OO_\Delta$}
 \label{sec:idealsInOrderOfIntegers}
@@ -3190,14 +3200,14 @@ Furthermore, additional techniques for computing the extended GCD should be expl
 
 Also useful is a more thorough study of each of the extended GCD techniques discussed in Chapter \ref{chap:xgcdExperiments} in the context of ideal class arithmetic.  What is proposed here is to time the performance of ideal class arithmetic for each of the different techniques mentioned, this includes each technique applied to a full, left-only, and partial extended GCD in the context of ideal class arithmetic.
 
-This thesis compares our implementations of ideal class arithmetic to that our Pari.  With future improvements to ideal class arithmetic, comparisons with additional implementations would be useful, such as with Sage \cite{Sage} and Magma \cite{Magma}.  Finally, one could study practical improvements to other types of ideal arithmetic, such as the class group of real quadratic fields and hyperelliptic curves.
+This thesis compares our implementations of ideal class arithmetic to that of Pari.  With future improvements to ideal class arithmetic, comparisons with additional implementations would be useful, such as with Sage \cite{Sage} and Magma \cite{Magma}.  Finally, one could study practical improvements to other types of ideal arithmetic, such as the class group of real quadratic fields and hyperelliptic curves.
 
 \section{Exponentiation}
 \label{sec:futureExponentiation}
 
 The ideal class exponentiation experiments of Chapter \ref{chap:powExperiments} assume that the exponents are primorials and that representations can be precomputed, and then easily retrieved for use.  Future experiments should also study the behaviour of exponentiating using the techniques for computing 2,3 representations on different types of exponents, such as random integers or large primes.
 
-Other possibilities are to study the time to generate 2,3 representations against the time to exponentiate using such representations.  Our expectation is that representations that lead to faster exponentiations also take longer to generate, and that the time to generate better representations grows faster than the time saved by the better representations.  Along this line, several of the techniques discussed in Chapter \ref{chap:powExperiments} have not been rigorously analysed, namely several of the greedy pruned trees from Section \ref{sec:expGreedyTrees}, the $L$ best approximations technique proposed in Section \ref{sec:expBestApproximations}, the strictly chained partition techniques proposed in Section \ref{sec:expAddChains}, and finally, the method of incrementally searching for unchained 2,3 representations in Section \ref{sec:expIncrSearch}.
+Other possibilities are to study the time to generate 2,3 representations against the time to exponentiate using such representations.  Our expectation is that representations that lead to faster exponentiations also take longer to generate, and that the time to generate better representations grows faster than the time saved by the better representations.  Along this line, several of the techniques discussed in Chapter \ref{chap:powExperiments} remain to be rigorously analysed, namely several of the greedy pruned trees from Section \ref{sec:expGreedyTrees}, the $L$ best approximations technique proposed in Section \ref{sec:expBestApproximations}, the strictly chained partition techniques proposed in Section \ref{sec:expAddChains}, and finally, the method of incrementally searching for unchained 2,3 representations in Section \ref{sec:expIncrSearch}.
 
 The $L$ best approximations technique of Section \ref{sec:expBestApproximations} generates 2,3 representations for large primorials that work well in practice.  This algorithm iterates on the $L$ \emph{smallest} partial representations.  Future work could consider other heuristics on which to prune candidates, such as approximating the cost of the complete chain based on the partial chain and retaining the $L$ best approximate costs.
 
@@ -3215,9 +3225,9 @@ As an extension of this thesis, future work should include a reference implement
 
 Furthermore, most of the parameters of our implementation were chosen to work well in practice.  Often many class groups are tried before a successful splitting of the input integer $N$.  Future work should include a study of the number of multipliers of $N$ used, perhaps rigorously bounding the number of multipliers needed in expectation.  Subsection \ref{subsec:ssparBestMultipliers} showed that for $N \bmod 4$, the expected number of ideal classes to try before a splitting of $N$ was different for different multipliers.  Studying the behaviour of multipliers might be useful in the parallelization of SuperSPAR -- simply put, the algorithm could be implemented to run on several multipliers in parallel.  One possible highly parallel platform for consideration would be an implementation of SuperSPAR for GPUs.
 
-There are many open questions surrounding the running time of SuperSPAR.  Incomplete investigations show that the majority of integers only require a single multiplier before a successful splitting of the integer, however, a small number of integers require a very large number of multipliers.  These few \emph{hard} numbers tend to skew the average running time.  Future work should include quartile timings and 5-number summaries of samples of integers to be split.  Although the results of Lenstra and Pomerance \cite[\S 11]{Lenstra1992} preclude a sub-exponential worst case running time for SuperSPAR, additional work should include a rigorous analysis of the \emph{median} asymptotic complexity of SuperSPAR.  The hope is that an exponential running time is limited to a few hard numbers and that a median case analysis might give a sub-exponential result.  Not necessarily related to SuperSPAR would be a theoretical analysis of the factorization of the order of ideal classes, such as the probabilities of certain divisors of the order.  This would be a theoretical extension of the work in Section \ref{sec:ssparFactorizationOfTheOrder}.
+There are many open questions surrounding the running time of SuperSPAR.  Brief investigations show that the majority of integers only require a single multiplier before a successful splitting of the integer, however, a small number of integers require a very large number of multipliers.  These few \emph{hard} numbers tend to skew the average running time.  Future work should include quartile timings and 5-number summaries of samples of integers to be split.  Although the results of Lenstra and Pomerance \cite[\S 11]{Lenstra1992} preclude a sub-exponential worst case running time for SuperSPAR, additional work should include a rigorous analysis of the \emph{median} asymptotic complexity of SuperSPAR.  The hope is that an exponential running time is limited to a few hard numbers and that a median case analysis might give a sub-exponential result.  Not necessarily related to SuperSPAR would be a theoretical analysis of the factorization of the order of ideal classes, such as the probabilities of certain divisors of the order.  This would be a theoretical extension of the work in Section \ref{sec:ssparFactorizationOfTheOrder}.
 
-Finally, future improvements to SuperSPAR should involve comparisons with the factoring implementations used in this thesis and others that are available.  Our recommendation for future comparisons is to interface directly with the factoring implementation when possible so that timing operations are limited to only the integer factoring operation.  In this thesis, we were not able to do this for GMP-ECM \cite{Ecm}, MSieve \cite{Msieve}, YAFU \cite{Yafu}, and Maple \cite{Maple}, however, each of these projects (except Maple) are open source and it should be possible to modify these sources in order to do so.  Lastly, future work would inspect the source of these factoring implementations in order to determine the factoring algorithm being used for integers of the sizes studied in this thesis.
+Finally, future improvements to SuperSPAR should involve comparisons with the factoring implementations used in this thesis and others that are available.  Our recommendation for future comparisons is to interface directly with the factoring implementation when possible so that timing operations are limited to only the integer factoring operation.  Several of the factoring implementations compared in this thesis, namely GMP-ECM \cite{Ecm}, MSieve \cite{Msieve}, YAFU \cite{Yafu}, are open source, and future work should modify these sources so that the integer factoring routine can be better timed in isolation.  Lastly, future work would inspect these sources in order to determine the factoring algorithm used for integers of the sizes studied in this thesis.
 
 
 %%%%%%%%%%%%%%%%

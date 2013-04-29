@@ -139,5 +139,55 @@ Since the prime exponents $e_i$ in Stage 1 are bound by $\floor{\log_{p_i} {p_t}
 %\subsection{Comparison with Original SPAR}
 
 
+\section{Old Quadratic Number Fields}
+
+
+Following Jacobson and Williams \cite[p.77]{Jacobson2009}, let $\alpha$ be a root of a polynomial $f(x) = ax^2 + bx + c$ with integer coefficients and $f(x)$ is irreducible over the rationals.  As such
+\[
+	\alpha = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}.
+\]
+The \emph{discriminant} of the polynomial $f(x)$ is $\Delta = b^2 - 4ac$, and our number field $\KK = \QQ(\alpha) = \QQ(\sqrt \Delta)$.  Notice that $\Delta \equiv 0, 1 \pmod 4$ and $\sqrt \Delta \not\in \QQ$ since $f(x)$ is irreducible.  Also, if $\Delta = f^2\Delta_0$ where $\Delta_0$ is square free, then $\QQ(\sqrt\Delta) = \QQ(\sqrt{\Delta_0})$.  When $\Delta$ or $\Delta / 4$ is square free then $\Delta$ is a \emph{fundamental discriminant}.  In the case that $\Delta$ is positive, $\KK$ is a subset of the real numbers, $\RR$, and is a \emph{real} quadratic number field. When $\Delta$ is negative, $\KK$ is a subset of the complex numbers, $\CC$, and is an \emph{imaginary} quadratic number field.  
+
+
+
+\section{Quadratic Integers}
+
+A polynomial with a leading coefficient of 1 is a \emph{monic} polynomial, and the root $\alpha$ of a monic polynomial $f(x)$ with integer coefficients is an \emph{algebraic integer}. The rational numbers are degree 1 algebraic numbers since they are roots of degree 1 polynomials $bx-a$, and the roots of monic degree 1 polynomials with integer coefficients are the integers, $\ZZ$, sometimes called the \emph{rational integers}.  When $f(x)$ is a monic quadratic polynomial with integer coefficients, the root $\alpha$ is a \emph{quadratic integer}.
+
+\begin{thm}
+\cite[Theorem 4.10]{Jacobson2009} A quadratic integer $\alpha$ is an algebraic integer of $\QQ(\sqrt{\Delta_0})$ where $\alpha$ can be written as $\alpha = x + y \omega_0$ for $x, y \in \ZZ$ where
+\begin{equation*}
+	\omega_0 = \begin{cases}
+		\sqrt{\Delta_0} & \textrm{ when } \Delta_0 \not\equiv 1 \pmod 4 \\
+		\frac{1+\sqrt{\Delta_0}}{2} & \textrm{ when } \Delta_0 \equiv 1 \pmod 4.
+	\end{cases}
+\end{equation*}
+\end{thm}
+
+
+\section{Maximal Order of Algebraic Integers}
+
+The \emph{maximal order} of a field $\KK$ is the set of all algebraic integers contained within $\KK$ and is characterized using a $\ZZ$-module.
+
+\begin{defn}
+Let $X = \{ \xi_1, \xi_2, \xi_3, ..., \xi_n \}$ be a subset of a number field $\KK$.  In this case, a \emph{$\ZZ$\mbox{-}module}, $\MM$, is an additive Abelian group such that
+\begin{align*}
+	\MM &= [ \xi_1, \xi_2, ..., \xi_n ] \\
+	& =  \xi_1 \ZZ + \xi_2 \ZZ + \cdots + \xi_n \ZZ \\
+	& = \left \{ \sum_{i}^n x_i \xi_i : x_i \in \ZZ, \xi_i \in X \right \}.
+\end{align*}
+\end{defn}
+
+\begin{defn}
+A \emph{quadratic order} $\OO$ of $\QQ(\sqrt\Delta)$ is a sub-ring of the quadratic integers of $\QQ(\sqrt\Delta)$ containing 1.  Following Jacobson and Williams \cite[p.81]{Jacobson2009}, we write $\OO$ as
+\[
+	\left[ 1, \frac{\Delta + \sqrt{\Delta}}{2} \right] = [1, f\omega_0].
+\]
+The maximal order $\OO_\Delta = [1, \omega_0]$ of $\QQ(\sqrt\Delta)$ is the ring of all quadratic integers in $\QQ(\sqrt\Delta)$, and is maximal since any order $\OO = [1, f\omega_0]$ is a sub-ring of $\OO_\Delta$.
+\end{defn}
+
+
+
+
 \end{document}
 
