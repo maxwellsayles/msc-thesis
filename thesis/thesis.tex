@@ -837,10 +837,11 @@ and in non-adjacent form we have
 	23814216 = 2^3+2^6-2^{13}-2^{15}-2^{18}-2^{20}-2^{23}+2^{25}.
 \end{equation}
 Similar to the binary case, we compute
-\[
+\begin{equation}
+\label{eq:nafWithInv}
 	g^n = \prod _{i=0}^{\floor{\log_2 n}+1} g^{s_i 2^i}.
-\]
-When computing in the ideal class group, the cost of inversion is negligible, but when inversion is expensive, we can instead compute
+\end{equation}
+Since $s_i \in \{0, 1, -1\}$, exponentiation using the non-adjacent form requires inversion.  However, when computing in the ideal class group, the cost of inversion is negligible (see Section \ref{sec:idealArithmetic}).  When inversion is expensive, we can instead compute
 \[
 	g^n = \left( \prod_{i : s_i=1} g^{2^i} \right) \cdot \left( \prod_{i : s_i=-1} g^{2^i} \right)^{-1}
 \]
@@ -921,8 +922,6 @@ A partition of an integer $n = x_1 \pm x_2 \pm \cdots \pm x_k$ is \emph{chained}
 \noindent
 Binary and non-adjacent form are special types of strictly chained partitions, since for any two non-zero terms where $i < j$, we have $x_i = 2^i$, $x_j = 2^j$, $ x_i ~|~ x_j$, and $x_i < x_j$.  The 2,3 representation of $23814216 = 2^3 3^2 - 2^{13} 3^2 + 2^{15} 3^6$ is another example of a strictly chained partition, since $2^3 3^2 ~|~ 2^{13} 3^2 ~|~ 2^{15} 3^6$.
 
-The benefit of restricting 2,3 representations to chained representations is the ease with which one can compute $g^n$ when $n$ is given as a chain.  For example $g^{23814216} = g^{2^3 3^2 - 2^{13} 3^2 + 2^{15} 3^6}$ can be computed by first computing $x_0 = g$, $x_1 = g^{2^3 3^2}$, $x_2 = {x_1}^{2^{10}}$, $x_3 = {x_2}^{2^2 3^4}$, each term being computed by repeated squaring and cubing from the previous term.  Finally $g^{23814216} = x_1 \cdot {x_2}^{-1} \cdot x_3$.  When $n$ is given as a chained 2,3 representation, Algorithm \ref{alg:expWithChain} will compute $g^n$ using exactly $a_k$ squares, $b_k$  cubes, $k-1$ multiplications, and at most $k$ inverses.  Since $x_i ~|~ x_{i+1}$, an implementation need only retain $x_i$ in order to compute $x_{i+1}$, and so only requires storage of a constant number of group elements.
-
 \begin{algorithm}[htb]
 \caption{Computes $g^n$ given $n$ as a chained 2,3 partition (Dimitrov et al \cite{Dimitrov2005}).}
 \label{alg:expWithChain}
@@ -950,14 +949,16 @@ The benefit of restricting 2,3 representations to chained representations is the
 \end{algorithmic}
 \end{algorithm}
 
+The benefit of restricting 2,3 representations to chained representations is the ease with which one can compute $g^n$ when $n$ is given as a chain.  For example $g^{23814216} = g^{2^3 3^2 - 2^{13} 3^2 + 2^{15} 3^6}$ can be computed by first computing $x_0 = g$, $x_1 = g^{2^3 3^2}$, $x_2 = {x_1}^{2^{10}}$, $x_3 = {x_2}^{2^2 3^4}$, each term being computed by repeated squaring and cubing from the previous term.  Finally $g^{23814216} = x_1 \cdot {x_2}^{-1} \cdot x_3$.  When $n$ is given as a chained 2,3 representation, Algorithm \ref{alg:expWithChain} will compute $g^n$ using exactly $a_k$ squares, $b_k$  cubes, $k-1$ multiplications, and at most $k$ inverses.  Since $x_i ~|~ x_{i+1}$, an implementation need only retain $x_i$ in order to compute $x_{i+1}$, and so only requires storage of a constant number of group elements.
+
 Recall that when inversion is expensive, the product of terms with negative exponents can be computed separately from terms with positive exponents -- the inverse is then computed only once for this product.  Since computing inverses is negligible in the ideal class group, we instead compute the product of all terms directly.
 
 
 \subsection{Unchained 2,3 Representations}
 
-There is evidence \cite{Imbert2010} that the shortest possible chained representations require a linear number of terms in relation to the size of the input.  This is in contrast to unchained representations for which there are algorithms where the number of terms in the representation is provably sublinear in the length of the input \cite{Dimitrov2008, Ciet2005}, however, these algorithms still require $O(\log n)$ operations overall.
+There is evidence \cite{Imbert2010} that the shortest possible chained representations require a linear number of terms in relation to the size of the input.  This is in contrast to unchained representations for which there are algorithms where the number of terms in the representation is provably sublinear in the length of the input \cite{Dimitrov2008, Ciet2005}.
 
-Given an unchained 2,3 representation for an integer $n = \sum s_i 2^{a_i} 3^{b_i}$, M\'{e}loni and Hasan \cite[Section 3.2]{Meloni2009} give an algorithm that achieves the same bound on the number of operations as in algorithm \ref{alg:expWithChain}, but with a bound of $O(\min \{\max a_i, \max b_i\})$ on the memory used.  Suppose $\max b_i < \max a_i$ and that the terms are labelled and sorted such that $a_1 \ge ... \ge a_k$.  The algorithm works by precomputing a table of $T_b = g^{3^b}$ for $0 \le b \le \max b_i$.  Let $i=1$ and begin with the first term $s_i2^{a_i}3^{b_i}$.  Look up $T_{b_i} = g^{3^{b_i}}$ and, after applying the sign $s_i$, multiply ${T_{b_i}}^{s_i}$ with the running result.  Let $a' = a_i - a_{i+1}$ when $i < k$ and $a' = a_k$ when $i = k$.  Then square the running result $a'$ times.  The algorithm then removes the term $s_i2^{a_i}3^{b_i}$ from the list of terms, and continues in this way with the next largest $a_i$.  The algorithm terminates when there are no more terms in the list.  Algorithm  \ref{alg:yaos} gives pseudo-code for this approach and requires the storage of $O(\max b_i)$ group elements.  When $\max a_i < \max b_i$, we use a related algorithm that requires the terms to be sorted such that $b_1 \ge ... \ge b_k$; it precomputes $T_a = g^{2^a}$ for $0 \le a \le \max a_i$ and works similar to Algorithm \ref{alg:yaos} but with cubing and squaring appropriately swapped.
+Given an unchained 2,3 representation for an integer $n = \sum s_i 2^{a_i} 3^{b_i}$, M\'{e}loni and Hasan \cite[Section 3.2]{Meloni2009} give an algorithm that achieves the same bound on the number of group operations, i.e.\ $O(\log n)$, as in Algorithm \ref{alg:expWithChain}, but with a bound of $O(\min \{\max a_i, \max b_i\})$ on the number of group elements stored.  Suppose $\max b_i < \max a_i$ and that the terms are labelled and sorted such that $a_1 \ge ... \ge a_k$.  The algorithm works by precomputing a table of $T_b = g^{3^b}$ for $0 \le b \le \max b_i$.  Let $i=1$ and begin with the first term $s_i2^{a_i}3^{b_i}$.  Look up $T_{b_i} = g^{3^{b_i}}$ and, after applying the sign $s_i$, multiply ${T_{b_i}}^{s_i}$ with the running result.  Let $a' = a_i - a_{i+1}$ when $i < k$ and $a' = a_k$ when $i = k$.  Then square the running result $a'$ times.  The algorithm then removes the term $s_i2^{a_i}3^{b_i}$ from the list of terms, and continues in this way with the next largest $a_i$.  The algorithm terminates when there are no more terms in the list.  Algorithm  \ref{alg:yaos} gives pseudo-code for this approach and requires the storage of $O(\max b_i)$ group elements.  When $\max a_i < \max b_i$, we use a related algorithm that requires the terms to be sorted such that $b_1 \ge ... \ge b_k$; it precomputes $T_a = g^{2^a}$ for $0 \le a \le \max a_i$ and works similar to Algorithm \ref{alg:yaos} but with cubing and squaring appropriately swapped.
 
 \begin{algorithm}[htb]
 \caption{Compute $g^n$ for a 2,3 representation of $n$ (\cite[Section 3.2]{Meloni2009}).}
@@ -982,14 +983,18 @@ Given an unchained 2,3 representation for an integer $n = \sum s_i 2^{a_i} 3^{b_
 \end{algorithmic}
 \end{algorithm}
 
-For example, the 2,3 representation $23814216 = 2^{15} 3^6 - 2^8 3^5 - 2^4 3^6 + 2^3 3^3$ is sorted by decreasing $a_i$.  The algorithm first computes $T_b = g^{3^b}$ for $0 \le b \le 6$.  Note that it is sufficient to store only the values of $g^{3^{b_i}}$ that actually occur in terms (in this case $T_3$, $T_5$, and $T_6$).  Let $R_j$ represent the partial exponentiation of the first $j$ terms with the largest $a_i$ such that $g^{2^{a_{j+1}}}$ is factored out.  Let $R_0 = 1_G$ and then compute 
+For example, the 2,3 representation $23814216 = 2^{15} 3^6 - 2^8 3^5 - 2^4 3^6 + 2^3 3^3$ is sorted by decreasing $a_i$.  The algorithm first computes $T_b = g^{3^b}$ for $0 \le b \le 6$.  Note that it is sufficient to store only the values of $g^{3^{b_i}}$ that actually occur in terms (in this case $T_3$, $T_5$, and $T_6$).  Figure \ref{fig:yao1} depicts the following steps to compute $g^{2^{15} 3^6 - 2^8 3^5 - 2^4 3^6 + 2^3 3^3}$.  Let $R_0 = 1_G$ and then compute
 \begin{align*}
-	R_1 &= \left( T_6 \right)^{2^7} &&\Rightarrow g^{2^7 3^6}, \\
-	R_2 &= \left( R_1 {T_5}^{-1} \right)^{2^4} &&\Rightarrow g^{-2^4 3^5 + 2^{11} 3^6}, \\
-	R_3 &= \left( R_2 {T_6}^{-1} \right)^{2^1} &&\Rightarrow g^{-2^1 3^6 -2^5 3^5 + 2^{12} 3^6}, \\
-	R_4 &= \left( R_3 T_3 \right) ^ {2^3} &&\Rightarrow g^{2^3 3^3 -2^4 3^6 -2^8 3^5 + 2^{15} 3^6},
+	R_1 &= R_0 T_6  && \Rightarrow g^{3^6}, \\
+	R_2 &= {R_1}^{2^7} && \Rightarrow g^{2^7 3^6}, \\
+	R_3 &= R_2 {T_5}^{-1} && \Rightarrow g^{2^7 3^6 -3^5}, \\		
+	R_4 &= {R_3}^{2^4} && \Rightarrow g^{2^{11} 3^6 -2^4 3^5}, \\
+	R_5 &= R_4 {T_6}^{-1} && \Rightarrow g^{2^{11} 3^6 -2^4 3^5 -3^6}, \\
+	R_6 &= {R_5}^{2^1} && \Rightarrow g^{2^{12} 3^6 -2^5 3^5 -2^1 3^6}, \\
+	R_7 &= R_6 T_3 && \Rightarrow g^{2^{12} 3^6 -2^5 3^5 -2^1 3^6 +3^3}, \\
+	R_8 &= {R_7}^{2^3} && \Rightarrow g^{2^{15} 3^6 -2^8 3^5 -2^4 3^6 +2^3 3^3},
 \end{align*}
-using 15 squares, 6 cubes, 2 inverses, and 3 multiplications.  The result of the computation is $R_4 = g^{23814216}$ and the steps (executed from left-to-right, top-to-bottom) are depicted by figure \ref{fig:yao1}.
+using 15 squares, 6 cubes, 2 inverses, and 3 multiplications.  The result of the computation is $R_8 = g^{23814216}$.
 
 % figure of exponentiating 23814216 with unchained representation
 \begin{figure}[H]
