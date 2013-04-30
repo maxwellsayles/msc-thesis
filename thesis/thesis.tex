@@ -2226,17 +2226,17 @@ We point out that the functions $s'(n)$ and $f(n)$ are highly redundant in their
 % TODO: This is also a contribution.
 % TODO: It's not obvious that we are computing representations rather than chains.
 
-For small inputs, the number of additive 2,3 chains is sufficiently reduced that we can compute all such chains in order to find the fastest.  Here we consider a different approach to searching for representations -- for a function generating a set of representations, we record the cheapest representation for each integer represented by the set.
+Section \ref{sec:expAddChains} imposes additional constraints on 2,3 chains such that we are able to compute all such chains for a given input.  Here we propose a function for generating a set of representations.  We then record the \emph{cheapest} representation for each integer represented by the set.
 
-We first iterate over all single term representations $2^{a_1}3^{b_1}$ for $0 \le a_1 \le A$ and $0 \le b_1 \le B$, and then all two term representations $2^{a_1}3^{b_1} \pm 2^{a_2}3^{b_2}$ for $0 \le a_1 < a_2 \le A$ and $0 \le b_1 < b_2 \le B$.  In general, we compute the set of representations
+We first iterate over all single term representations $2^{a_1}3^{b_1}$ for $0 \le a_1 \le A$ and $0 \le b_1 \le B$, and then all two term representations $2^{a_1}3^{b_1} \pm 2^{a_2}3^{b_2}$ for $0 \le a_1 < a_2 \le A$, $0 \le b_1 \le B$, and $0 \le b_2 \le B$.   In general, we compute the set of representations
 \[
 R = R_1 \cup R_2 \cup ... \cup R_m
 \]
 for some maximum number of terms $m$ where
 \[
-R_k = \left\{\sum_{i=1}^k\pm 2^{a_i}3^{b_i} ~:~ 0 \le a_1 < \cdots < a_k \le A \textrm{ and } 0 \le b_1 < \cdots < b_k \le B \right\}.
+R_k = \left\{\sum_{i=1}^k\pm 2^{a_i}3^{b_i} : 0 \le a_1 < \cdots < a_k \le A \textrm{ and } 0 \le b_j \le B \textrm{ for } 1 \le j \le k \right\}.
 \]
-We iterate over the set $R$ and for each integer represented, we record the lowest cost representation for that integer in $R$.
+We iterate over the set $R$ and for each integer represented, we record the \emph{lowest cost} representation for that integer in $R$.  Notice that the powers of 2 are constrained such that $0 \le a_i < a_j \le A$ for each $i < j$, while the powers of 3 are only constrained such that $0 \le b_j \le B$.  This removes a dimension of redundancy, while still allowing for representations to be unchained.
 
 In our experiments, we search for representations for 16-bit integers. We initially chose $A = \ceil{\log_2\left(2^{16}\right)} = 16$, $B = \ceil{\log_3 \left(2^{16}\right)} = 11$, and iterated the number of terms $k$ from 1 through 5. For representations of $k = 6$ terms, our implementation did not complete after a week of execution.  We then ran our search again using $A=18$ and $B=12$ and found that none of our minimal representations were improved.
 
@@ -2282,7 +2282,7 @@ Two of the techniques in the previous section compute $g^n$ using a series of sm
 	Method & 59-bit Discriminants & 118-bit Discriminants \\
 	\hline
 	Left-to-Right 2,3 Representation & 2536 & 7097 \\
-	4 Best $\left||x|-2^a3^b\right|$ & 9091 & 7230 \\
+	$L=4$ Best $\left||x|-2^a3^b\right|$ & 9091 & 7230 \\
 	4 Best $(x \pm 2^a3^b)/(2^c3^d)$ & 47969 & 45468 \\
 	4 Best $(x \pm 2^a \pm 3^b)/(2^c3^c)$ & 3333 & 2756 \\
 	Recursive $\sum 2^a3^b$ Chains & 2406 & 2970 \\
@@ -2322,7 +2322,7 @@ To determine the best method to exponentiate a random ideal by a primorial, we c
 
 We found that for both our 64-bit and 128-bit implementations and for all primorials tested, the method of iterating on the 4 best $\left||x| - 2^a3^b\right|$ approximations leads to representations with the fastest time to exponentiate.  This is in contrast to the method of iterating on the 4 best partial representations $(x \pm 2^a3^b)/(2^c3^d)$ that lead to the best timings for 16-bit integers.  Naturally, we can improve these results by iterating on the $L$ best partial representations for $L > 4$ at the expense of longer precomputation.
 
-Figures \ref{fig:expBinNaf64} and \ref{fig:expBinNaf128} compare binary exponentiation against right-to-left non-adjacent form representation.  The non-adjacent form representation leads to faster exponentiations in all cases.  Figures \ref{fig:expDbnsR2L64} and \ref{fig:expDbnsR2L128} compare the non-windowed right-to-left 2,3 chain method to the $2^2 3^2$ windowed method.  The $2^23^2$ windowed method out performs the non-windowed method for all exponents.  Figures \ref{fig:expDbnsL2R64} and \ref{fig:expDbnsL2R128} compare left-to-right 2,3 representations with that of maintaining the 4 best $\left||x|-2^a3^b\right|$ approximations.  In this case, maintaining the 4 best approximations performs best.  Figures \ref{fig:expPmVariants64} and \ref{fig:expPmVariants128} compare the three different techniques of adding or subtracting a value to a partial representation and then reducing by a power of 2 and 3.  Here, computing candidates $(x-2^a3^b)/(2^c3^d)$ leads to representations that exponentiate the fastest.  Figures \ref{fig:expBlockList64} and \ref{fig:expBlockList128} compare the two methods that rely on the best found 16-bit representations.  In this case, when the factorization of the exponent is easily known, it is faster to exponentiation by the list of prime factors than it is to represent the exponent using 16-bit blocks.  Finally, Figures \ref{fig:expWinners64} and \ref{fig:expWinners128} compare the best performer from each category.
+Figures \ref{fig:expBinNaf64} and \ref{fig:expBinNaf128} compare binary exponentiation against right-to-left non-adjacent form representation.  The non-adjacent form representation leads to faster exponentiations in all cases.  Figures \ref{fig:expDbnsR2L64} and \ref{fig:expDbnsR2L128} compare the non-windowed right-to-left 2,3 chain method to the $2^2 3^2$ windowed method.  The $2^23^2$ windowed method out performs the non-windowed method for all exponents.  Figures \ref{fig:expDbnsL2R64} and \ref{fig:expDbnsL2R128} compare left-to-right 2,3 representations with that of maintaining the 4 best $\left||x|-2^a3^b\right|$ approximations.  In this case, maintaining the 4 best approximations performs best.  Figures \ref{fig:expPmVariants64} and \ref{fig:expPmVariants128} compare the three different techniques of adding or subtracting a value to a partial representation and then reducing by a power of 2 and 3.  Here, computing candidates $(x-2^a3^b)/(2^c3^d)$ leads to representations that exponentiate the fastest.  Figures \ref{fig:expBlockList64} and \ref{fig:expBlockList128} compare the two methods that rely on the best found 16-bit representations.  In this case, when the factorization of the exponent is easily known, it is faster to exponentiate by the list of prime factors than it is to represent the exponent using 16-bit blocks.  Finally, Figures \ref{fig:expWinners64} and \ref{fig:expWinners128} compare the best performer from each category.
 
 \mygraph{binary_vs_naf-64}{fig:expBinNaf64}{Base 2 Exponentiation (59-bit Discriminants).}
 \mygraph{binary_vs_naf-128}{fig:expBinNaf128}{Base 2 Exponentiation (118-bit Discriminants).}
@@ -2345,9 +2345,7 @@ Figures \ref{fig:expBinNaf64} and \ref{fig:expBinNaf128} compare binary exponent
 
 \section{Summary}
 
-This chapter presented the approach and results used to improve exponentiation in the ideal class group of imaginary quadratic number fields.  Several methods for exponentiation including novel extensions to methods for computing 2,3 chains and representations were explored.  We found that for 16-bit exponents, the method of iterating on the $L$ best partial representations $x + \sum s_i2^{a_i}3^{b_i}$ such that each $x$ generates new terms of the form $(x \pm 2^a 3^b)/(2^c3^d) \in \ZZ$ gives the fastest representation on average.  For large primorial exponents, generating new terms of the form $\left||x|-2^a3^b\right|$ gave the fastest representations on average.
-
-The next chapter brings together the improvements to ideal arithmetic and exponentiation in our implementation of SuperSPAR -- an algorithm with the fastest average time to factor integers $n$ in the range $2^{54} \le n < 2^{63}$ of the integer factoring algorithms that we tested.
+This chapter presented the approach and results used to improve exponentiation in the ideal class group of imaginary quadratic number fields.  Several methods for exponentiation including novel extensions to methods for computing 2,3 chains and representations were explored.  We found that for 16-bit exponents, the method of iterating on the $L$ best partial representations $x + \sum s_i2^{a_i}3^{b_i}$ such that each $x$ generates new terms of the form $(x \pm 2^a 3^b)/(2^c3^d) \in \ZZ$ gives the fastest representation on average.  For large primorial exponents, generating new terms of the form $\left||x|-2^a3^b\right|$ gave the fastest representations on average.  The next chapter brings together the improvements to ideal arithmetic and exponentiation in our implementation of SuperSPAR.
 
 
 
