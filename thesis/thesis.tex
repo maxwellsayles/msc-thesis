@@ -2159,7 +2159,10 @@ In Subsection \ref{subsec:pm1Tree}, we discussed a tree based method, from Doche
 Here we propose two variations to the approach of maintaining the $L$ smallest partial representations. The first variation we consider is to generate several new nodes with integer values of the form $(x \pm 2^a3^b)/(2^c3^d)$, while the second variation is to include two terms such that each node generates values of the form $(x \pm 2^a \pm 3^b) / (2^c 3^d)$.  Notice that the first variation includes the forms $(x \pm 1)/(2^c 3^d)$ and so tends to give representations no worse than the method suggested by Doche and Habsieger \cite{Doche2008} (covered in Subsection \ref{subsec:pm1Tree}).  The assumption is that by adjusting $x$ by more than just 1, we increase the likelihood of finding a multiple of a large $2^c3^d$ window.
 
 \mygraphTwoX{pm2a3b_vary_max-64}{pm2a3b_vary_max-128}{fig:pm2a3bVaryMax}{Performance of varying the bounds $a, b \le U$ on $(x \pm 2^a3^b)/(2^c3^d)$ when exponentiating by the primorial $P_{1000}$.}{Global bounds on $(x \pm 2^a3^b)/(2^c3^d)$.}
+
 For both variations, we bound $a$ and $b$ such that $0 \le a \le U$ and $0 \le b \le U$.  Figure \ref{fig:pm2a3bVaryMax} shows the average time to exponentiate by the $1000^{\textrm{th}}$ primorial as the bound $U$ increases (using the $k=4$ best partial representations).  As $U$ increases, computing representations using this approach quickly becomes intractable.  We found that for our purposes, $U=16$ is an acceptable trade off between the average time to exponentiate and the time to generate the 2,3 representation.
+
+\clearpage
 
 
 \section{The $L$ Best Approximations}
@@ -2275,6 +2278,7 @@ Another way we can use 16-bit representations is when we know the prime factoriz
 One reason to improve the performance of exponentiation in the ideal class group is to improve the performance of order finding in this group.  In particular, we exponentiate a random ideal class to a primorial so that the order of the resulting ideal class is likely to be coprime to our exponent.
 
 Two of the techniques in the previous section compute $g^n$ using a series of smaller exponentiations $g^b$ such that $0 \le b < 2^{16}$.  So we begin by determining the best method to exponentiate using 16-bit exponents.  To do so, we compute the average time to exponentiate for exponents 1 through 65535 using 59-bit and 118-bit discriminants.  Table \ref{tab:exp16bitWinners} shows the number of exponents for which each method was the fastest (methods that were not the fastest for any of the exponents tested are not shown).
+
 \begin{table}[htb]
 \centering
 \begin{tabular}{| l | r | r |}
@@ -2292,7 +2296,10 @@ Two of the techniques in the previous section compute $g^n$ using a series of sm
 \caption[Best 16-bit exponentiation techniques.]{The number of 16-bit exponents where an exponentiation technique was fastest.}
 \label{tab:exp16bitWinners}
 \end{table}
+
 For each exponent, we then normalized the time of each method relative to the best time.  Table \ref{tab:exp16bitTimes} shows the average of these normalized times.
+
+% TODO: Do not normalize times.
 \begin{table}[htb]
 \centering
 \begin{tabular}{| l | c | c |}
@@ -2316,9 +2323,10 @@ For each exponent, we then normalized the time of each method relative to the be
 \caption{Normalized time to exponentiate 16-bit exponents.}
 \label{tab:exp16bitTimes}
 \end{table}
+
 The method that maintains the 4 best partial representations of the form $(x \pm 2^a3^b)/(2^c3^d)$ was the best performer in general.  However, since we were interested in precomputing 16-bit representations for use with a block exponentiation and exponentiation by a list of prime factors, we used the best representation available for each exponent.
 
-To determine the best method to exponentiate a random ideal by a primorial, we compute the average time to exponentiate for the primorials $P_{250k}$ for $1 \le k \le 100$.  We categorized the different exponentiation techniques as those that use only base 2, those that generate 2,3 chains from right-to-left, from left-to-right, that add or subtract to a partial representation and then reduce by $2^c3^d$, and those that make use of the best 16-bit representations.  We then compared the average time to exponentiate each method from a category, and finally compared the best performers of each category to determine the best performer overall.
+To determine the best method to exponentiate a random ideal class by a primorial, we compute the average time to exponentiate for the primorials $P_{10k}$ for $1 \le k \le 100$.  We categorized the different exponentiation techniques as those that use only base 2, those that generate 2,3 chains from right-to-left, from left-to-right, that add or subtract to a partial representation and then reduce by $2^c3^d$, and those that make use of the best 16-bit representations.  We then compared the average time to exponentiate each method from a category, and finally compared the best performers of each category to determine the best performer overall.
 
 We found that for both our 64-bit and 128-bit implementations and for all primorials tested, the method of iterating on the 4 best $\left||x| - 2^a3^b\right|$ approximations leads to representations with the fastest time to exponentiate.  This is in contrast to the method of iterating on the 4 best partial representations $(x \pm 2^a3^b)/(2^c3^d)$ that lead to the best timings for 16-bit integers.  Naturally, we can improve these results by iterating on the $L$ best partial representations for $L > 4$ at the expense of longer precomputation.
 
@@ -2342,10 +2350,12 @@ Figures \ref{fig:expBinNaf64} and \ref{fig:expBinNaf128} compare binary exponent
 \mygraph{winners-64}{fig:expWinners64}{The best performers from each category (59-bit Discriminants).}
 \mygraph{winners-128}{fig:expWinners128}{The best performers from each category (118-bit Discriminants).}
 
+\clearpage
+
 
 \section{Summary}
 
-This chapter presented the approach and results used to improve exponentiation in the ideal class group of imaginary quadratic number fields.  Several methods for exponentiation including novel extensions to methods for computing 2,3 chains and representations were explored.  We found that for 16-bit exponents, the method of iterating on the $L$ best partial representations $x + \sum s_i2^{a_i}3^{b_i}$ such that each $x$ generates new terms of the form $(x \pm 2^a 3^b)/(2^c3^d) \in \ZZ$ gives the fastest representation on average.  For large primorial exponents, generating new terms of the form $\left||x|-2^a3^b\right|$ gave the fastest representations on average.  The next chapter brings together the improvements to ideal arithmetic and exponentiation in our implementation of SuperSPAR.
+This chapter presented the approach and results used to improve exponentiation in the ideal class group of imaginary quadratic number fields.  Several methods for exponentiation including novel extensions to methods for computing 2,3 chains and representations were explored.  We found that for 16-bit exponents, using a greedy pruned trees approach and iterating on the 4 best partial representations $x + \sum s_i2^{a_i}3^{b_i}$ such that each $x$ generates new terms of the form $(x \pm 2^a 3^b)/(2^c3^d) \in \ZZ$ gives the fastest representation on average.  For large primorial exponents, the $L$ best approximations technique gave the fastest representations on average.  The next chapter brings together the improvements to ideal arithmetic and exponentiation in our implementation of SuperSPAR.
 
 
 
@@ -3196,6 +3206,7 @@ Bits & ECM & Flint & Maple & Msieve & Pari/GP & SQUFOF & SSPAR & Yafu \\
 \label{tab:factoringTimes}
 \end{table}
 
+\clearpage
 
 %%%%%%%%%%%%%%%
 % FUTURE WORK %
