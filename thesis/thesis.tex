@@ -2194,7 +2194,7 @@ For an integer $x$ we say that $2^a3^b$ is a \emph{best approximation} of $|x|$ 
 
 % TODO: Small contribution here.
 
-Imbert and Philippe \cite{Imbert2010b} give a method (see Subsection \ref{subsec:shortAddChains}) to compute the shortest additive strictly chained 2,3 partition, suitable for smaller integers.  Such partitions do not permit subtraction and every term is strictly less than and divides all subsequent terms. These representations take the form
+Imbert and Philippe \cite{Imbert2010b} provide a method (see Subsection \ref{subsec:shortAddChains}) to compute the shortest additive strictly chained 2,3 partition, suitable for smaller integers.  Such partitions do not permit subtraction and every term is strictly less than and divides all subsequent terms. These representations take the form
 \[
 	n = \sum_{i=0}^k 2^{a_i}3^{b_i}
 \]
@@ -2228,7 +2228,7 @@ f(n) = \begin{cases}
 \end{equation*}
 again, where $f(1) = 0$, $f(2) = S$, and $f(3) = C$ are the base cases.  One thing to notice is that the function $s'$ computes a subset of the representations computed by the function $f$.  As such, the average cost to exponentiate using a representation computed by $f$ should be no worse than the average cost to exponentiate using a representation computed by $s'$.  We were able to confirm this for each exponent $n$ such that $1 \le n < 65536$.
 
-We point out that the functions $s'(n)$ and $f(n)$ are highly redundant in their computation.  As such, our implementations memoize the result for each input in order to improve the running time.  Furthermore, since we compute the result for each exponent $n$ for $1 \le n < 65536$, computing $s'(n)$ can benefit from the computation of $s'(m)$ for each $m < n$, for example.  This reduces the running time to compute representations for all exponents $n$ for $1 \le n < 65536$, but even so, the running time of each algorithm appears to be exponential in the size of the largest input and so we only use these functions up to 16-bit inputs.  We recommend a thorough analysis of the running time as future work.
+We point out that the functions $s'(n)$ and $f(n)$ are highly redundant in their computation.  As such, our implementations memoize the result for each input in order to improve the running time.  Furthermore, since we compute the result for each exponent $n$ for $1 \le n < 65536$, computing $s'(n)$ benefits from the computation of $s'(m)$ for each $m < n$, and the same holds for $f(n)$ respectively.  This reduces the running time to compute representations for all exponents $n$ for $1 \le n < 65536$, but even so, the running time of each algorithm appears to be exponential in the size of the largest input and so we only use these functions up to 16-bit inputs.  We recommend a thorough analysis of the running time as future work.
 
 
 \section{Incremental Searching}
@@ -2251,7 +2251,7 @@ We iterate over the set $R$ and for each integer represented, we record the \emp
 
 In our experiments, we search for representations for 16-bit integers. We initially chose $A = \ceil{\log_2\left(2^{16}\right)} = 16$, $B = \ceil{\log_3 \left(2^{16}\right)} = 11$, and iterated the number of terms $k$ from 1 through 5. For representations of $k = 6$ terms, our implementation did not complete after a week of execution.  We then ran our search again using $A=18$ and $B=12$ and found that none of our minimal representations were improved.
 
-Since both the incremental search of this section and the two functions from the previous section are computationally expensive, we are only able to compute chains for small exponents.  This is still useful when we consider methods that partition large exponents into smaller blocks using their binary representation, or when we consider multiple exponentiations by a list of prime powers.
+Since both the incremental search of this section and the two functions from the previous section are computationally expensive, we only computed chains for 16-bit exponents.  This is still useful when we consider methods that partition large exponents into smaller blocks using their binary representation, or when we consider multiple exponentiations by a list of prime powers.
 
 
 \section{Big Exponents from Small Exponents}
