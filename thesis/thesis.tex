@@ -206,7 +206,7 @@ Department of Mathematics and Statistics \\
 
 This thesis proposes practical improvements to arithmetic and exponentiation in the ideal class group of imaginary quadratic number fields for the Intel x64 architecture.  This is useful in tabulating the class number and class group structure, but also as an application to a novel integer factoring algorithm called ``SuperSPAR'', which builds upon SPAR using ideas from Sutherland.
 
-Since the target architecture has 64-bit machine words, we specialize two implementations of ideal class arithmetic: one for quadratic fields where the size of the discriminant $\Delta$ is less than 64-bits, and another where the size of $\Delta$ is less than 128-bits.  In each case, our results show an improvement in the average performance of ideal class arithmetic over reference implementations.  Much of the computational effort is in computing the extended greatest common divisor, and so this thesis studies the average performance of several implementations for computing the extended greatest common divisor and shows an improvement over reference implementations of this.  Dimitrov and Cooklev propose the double base number system, and Imbert, Jacobson, and Schmidt propose a method of ideal class cubing.  Using these ideas, we explore several techniques for exponentiation using 2,3 number systems and demonstrate an improvement in the average performance of exponentiation in the ideal class group over that of binary exponentiation.  Lastly, each of these improvements are applied to our implementation of the SuperSPAR factoring algorithm, and our results show an improvement in the average performance to factor integers for a specific range of integer sizes.
+Since the target architecture has 64-bit machine words, we specialize two implementations of ideal class arithmetic: one for quadratic fields where the size of the discriminant $\Delta$ is less than 64-bits, and another where the size of $\Delta$ is less than 128-bits.  In each case, our results show an improvement in the average performance of ideal class arithmetic over reference implementations.  Since much of the effort of ideal class arithmetic is in computing the extended greatest common divisor, this thesis studies the average performance of several implementations of this and shows an improvement for some over reference implementations.  Dimitrov and Cooklev propose the double base number system, and Imbert, Jacobson, and Schmidt propose a method of ideal class cubing.  Using these ideas, we explore several techniques for exponentiation using 2,3 number systems and demonstrate an improvement in the average performance of exponentiation in the ideal class group over that of binary exponentiation.  Lastly, each of these improvements are applied to our implementation of the SuperSPAR factoring algorithm, and our results show an improvement in the average performance to factor integers for a specific range of integer sizes.
 
 \newpage
 \phantomsection
@@ -1073,7 +1073,7 @@ Algorithm \ref{alg:rtolDbnsChain} describes a non-recursive function with group 
 To see the correctness of the above procedure, consider a modification to the recursive function $\rtol$ such that it returns a partition of the input $n$ as a list of terms $s_i2^{a_i}3^{b_i}$. When the result of the recursive call is squared, this corresponds to incrementing $a_i$ in each term of the list.  Similarly, when the result is cubed, this corresponds to incrementing $b_i$ in each term of the list. When the result is multiplied with $g$, we prepend a term of $+1$ to the partition, and when the result is multiplied with $g^{-1}$, we prepend a term of $-1$ to the partition. On each iteration of the loop, either $n \equiv 0 \pmod 2$ or $n \equiv 0 \pmod 3$, so either $a$ increases or $b$ increases. Since every term $|s_i2^{a_i}3^{b_i}|$ is strictly less than $|s_j2^{a_j}3^{b_j}|$ when $i < j$, the partition is strictly chained.
 
 
-\subsection{Left-to-Right Chains (from high-order to low-order)}
+\subsection{Left-to-Right Representations (from high-order to low-order)}
 \label{subsec:ltorChains}
 
 \newcommand{\greedyltor}{\textrm{greedy}}
@@ -2090,7 +2090,7 @@ A non-adjacent form exponentiation uses a signed base 2 representation of the ex
 
 
 \section{Right-to-Left 2,3 Chains}
-\label{sec:rtolChains}
+\label{sec:expR2LChains}
 
 In Subsection \ref{subsec:rtolChains}, we describe a method from Ciet et al \cite[Figure 8]{Ciet2006} for computing 2,3 chains from low-order to high-order that is a natural extension of the binary representation or non-adjacent form of an exponent.  In this method, we reduce the exponent $n$ by 2 while it is even, and by 3 while it is divisible by 3.  At which point either $n \equiv 1 \pmod 6$ or $n \equiv 5 \pmod 6$ and we add or subtract 1 so that $n$ is a multiple of 6.  The resulting partition of $n$ is then reversed such that the number of squares or cubes in successive terms is monotonically increasing and we can use Algorithm \ref{alg:expWithChain} from Chapter \ref{chap:exponentiation} to compute the exponentiation.
 
@@ -2139,7 +2139,7 @@ and recursively write $\floor{n/64} \pmod 9$.  To compute $n \bmod 9$, we partit
 
 
 \section{Left-to-Right 2,3 Representations and Chains}
-\label{sec:ltorChains2}
+\label{sec:expL2RChains}
 
 In Subsection \ref{subsec:ltorChains} we described a greedy algorithm for computing 2,3 representations from high-order to low-order by Berth{\'e} and Imbert \cite{Berthe2009}.  Briefly, for a given exponent $n$ and for $a_i, b_i \in \ZZgez$ and \mbox{$s_i \in \{-1, 1\}$}, we compute the term $s_i2^{a_i}3^{b_i}$ such that $\left|n-s_i2^{a_i}3^{b_i}\right|$ is as small as possible.  We then recurse on the result $n - s_i2^{a_i}3^{b_i}$.  As is, this produces unchained representations, but a chain can be generated by restricting each $a_i$ and $b_i$ such that it is no greater than the $a_{i-1}$ and $b_{i-1}$ from the previous term.  Placing a bound on the number of squares and cubes can also be done globally, i.e.\ for every $a_i, b_i$ we have $0 \le a_i \le A$ and $0 \le b_i \le B$. When a bound is applied globally, the cost of a left-to-right chain or representation varies as the global bound varies.
 
@@ -2154,18 +2154,16 @@ Figure \ref{fig:dbnsL2rVaryBounds} shows the time to exponentiate using a precom
 
 In general, bounding the maximum number of squares and cubes give representations that lead to faster exponentiation in the ideal class group than representations where the number of squares or cubes is left unbound.  For this particular exponent, a representation generated without a global bound takes approximately 7.3 milliseconds for a 59-bit discriminant and 17.2 milliseconds for a 118-bit discriminant.  This is slower than all bounded representations for both implementations.
 
-\section{Greedy Pruned Trees}
+\section{Pruned Trees}
 \label{sec:expGreedyTrees}
 
-% TODO: There are contributions in here. See the left-to-right best approximations section for more info.
+A right-to-left 2,3 chain can be generated by repeatedly reducing the exponent by 2 and 3 and then either adding or subtracting 1 and repeating this process until the exponent is 1 \cite[Figure 8]{Ciet2006}.  In the windowed variant \cite{Doche2006}, after reducing the exponent by 2 and 3, we had 12 residues modulo $2^2 3^2$ and this lead to $2^{12}$ different strategies for adding or subtracting 1 from the residue.
 
-A right-to-left 2,3 chain can be generated by repeatedly reducing the exponent by 2 and 3 and then either adding or subtracting 1 and repeating this process until the exponent is 1.  In the windowed variant, after reducing the exponent by 2 and 3, we had 12 residues modulo $2^2 3^2$ and this lead to $2^{12}$ different strategies for adding or subtracting 1 from the residue.
+In Subsection \ref{subsec:pm1Tree}, we discuss a tree based method, from Doche and Habsieger \cite{Doche2008}, where a set of at most $L$ \emph{partial representations} is maintained (a partial representation can be written as $n = x + \sum s_i2^{a_i}3^{b_i}$).  At each iteration, the $x$ term from each partial representation generates two new elements $x-1$ and $x+1$.  After reducing each new element by powers of 2 and 3, at most $L$ representations with the \emph{smallest} $x$ are kept (or for two partial representations with the same $x$, when the cost of the 2,3 summation is less).  More formally, an element $x$ generates new integral elements $(x \pm 1)/(2^c3^d)$.
 
-In Subsection \ref{subsec:pm1Tree}, we discussed a tree based method, from Doche and Habsieger \cite{Doche2008}, where a set of at most $L$ \emph{partial representations} is maintained (a partial representation can be written as $n = x + \sum s_i2^{a_i}3^{b_i}$).  At each iteration, the $x$ term from each partial representation generates two new elements $x-1$ and $x+1$.  After reducing each new element by powers of 2 and 3, at most $L$ representations with the \emph{smallest} $x$ are kept (or for two partial representations with the same $x$, when the cost of the 2,3 summation is less).  More formally, an element $x$ generates new integral elements $(x \pm 1)/(2^c3^d)$.
+Doche and Habsieger suggest a generalization of this approach where each element $x$ generates a set of integral elements $(x \pm y)/(2^c3^d)$ for values of $y$ chosen from some fixed set \cite[\S 5]{Doche2008}.  Here we consider two possibilities.  The first is to generate several new nodes with integer values of the form $(x \pm 2^a3^b)/(2^c3^d)$, while the second is to include two terms such that each node generates values of the form $(x \pm 2^a \pm 3^b) / (2^c 3^d)$.  Notice that the first variation includes the forms $(x \pm 1)/(2^c 3^d)$ and so tends to give representations no worse than the method suggested by Doche and Habsieger \cite{Doche2008} (covered in Subsection \ref{subsec:pm1Tree}).  The assumption is that by adjusting $x$ by more than just 1, we increase the likelihood of finding a multiple of a large $2^c3^d$ window.
 
-Here we propose two variations to the approach of maintaining the $L$ smallest partial representations. The first variation we consider is to generate several new nodes with integer values of the form $(x \pm 2^a3^b)/(2^c3^d)$, while the second variation is to include two terms such that each node generates values of the form $(x \pm 2^a \pm 3^b) / (2^c 3^d)$.  Notice that the first variation includes the forms $(x \pm 1)/(2^c 3^d)$ and so tends to give representations no worse than the method suggested by Doche and Habsieger \cite{Doche2008} (covered in Subsection \ref{subsec:pm1Tree}).  The assumption is that by adjusting $x$ by more than just 1, we increase the likelihood of finding a multiple of a large $2^c3^d$ window.
-
-\mygraphTwoX{pm2a3b_vary_max-64}{pm2a3b_vary_max-128}{fig:pm2a3bVaryMax}{Performance of varying the bounds $a, b \le U$ on $(x \pm 2^a3^b)/(2^c3^d)$ when exponentiating by the primorial $P_{1000}$.}{Global bounds on $(x \pm 2^a3^b)/(2^c3^d)$.}
+\mygraphTwoX{pm2a3b_vary_max-64}{pm2a3b_vary_max-128}{fig:pm2a3bVaryMax}{Performance of the bounds $a, b \le U$ when exponentiating by the primorial $P_{1000}$.}{Global Bounds on Pruned Trees.}
 
 For both variations, we bound $a$ and $b$ such that $0 \le a \le U$ and $0 \le b \le U$.  Figure \ref{fig:pm2a3bVaryMax} shows the average time to exponentiate by the $1000^{\textrm{th}}$ primorial as the bound $U$ increases (using the $k=4$ best partial representations).  As $U$ increases, computing representations using this approach quickly becomes intractable.  We found that for our purposes, $U=16$ is an acceptable trade off between the average time to exponentiate and the time to generate the 2,3 representation.
 
@@ -2184,14 +2182,17 @@ For both variations, we bound $a$ and $b$ such that $0 \le a \le U$ and $0 \le b
 
 % I can't remember whether this was the method of choice for any parameter sizes.  If it is, you need to include mention of your original method in the intro to the exponentiation chapter, as well as in Ch 1 when describing your contributions.  Otherwise, you describe it as an attempt to improve that was tried, but unfortunately didn't help in practice.
 
+In this section, we propose a method combining the approach of maintaining a set of the $L$ best partial representations, suggested by Doche and Habsieger \cite{Doche2008} (see Section \ref{sec:expGreedyTrees}), with that of computing left-to-right 2, 3 representations, suggested by Berth{\'e} and Imbert \cite{Berthe2009} (see Section \ref{sec:expL2RChains}).  The results of Section \ref{sec:expResults} show that this method gives the best performance on average of the methods studied when exponentiating by power primorials.
 
-The approach of maintaining a set of the $L$ best partial representations of an exponent can be adapted to that of the left-to-right 2,3 representation from Subsections \ref{subsec:ltorChains} and \ref{sec:ltorChains2}.  For an integer $x$ we say that $2^a3^b$ is a best approximation of $|x|$ when $\left||x| - 2^a3^b \right|$ is minimal.  The algorithm for the left-to-right representation (Subsection \ref{subsec:ltorChains}) finds a best approximation for $x$ and then repeats on the positive difference. However, instead of only iterating on the best approximation, each value from the set of partial representations generates new values of the form $\left||x| - 2^a3^b\right|$ (being careful to record the sign of $x$), and the $L$ best partial representations are retained.  In this case, we iterate $b$ from $0 \le b \le B$ and let $a_1 = \floor{\log_2 (x/3^b)}$ and $a_2 = \ceil{\log_2 (x/3^b)}$ bounding both $a_1, a_2 \le A$.  Note that using $a_2 = a_1 + 1$ is sufficient since either $\ceil{\log_2 (x/3^b)} = \floor{\log_2 (x/3^b)}$ or $\ceil{\log_2 (x/3^b)} = \floor{\log_2 (x/3^b)} + 1$.  We then use $\left||x|-2^{a_1}3^b\right|$ and $\left||x|-2^{a_2}3^b\right|$ as candidates for the new set.  As before, iterating the bound on the number of squares and cubes varies the cost of the representations generated.  
+For an integer $x$ we say that $2^a3^b$ is a \emph{best approximation} of $|x|$ when $\left||x| - 2^a3^b \right|$ is minimal.  The algorithm for the left-to-right representation (Algorithm \ref{alg:greedyltor}) finds a best approximation for $x$ and then repeats on the positive difference.  What is proposed here is that instead of only iterating on the best approximation, each value from the set of partial representations generates new values of the form $\left||x| - 2^a3^b\right|$ (being careful to record the sign of $x$), and the $L$ best partial representations are retained.  In this case, we iterate $b$ from $0 \le b \le B$ and let $a_1 = \floor{\log_2 (x/3^b)}$ and $a_2 = \ceil{\log_2 (x/3^b)}$ bounding both $a_1, a_2 \le A$.  Note that using $a_2 = a_1 + 1$ is sufficient since either $\ceil{\log_2 (x/3^b)} = \floor{\log_2 (x/3^b)}$ or $\ceil{\log_2 (x/3^b)} = \floor{\log_2 (x/3^b)} + 1$.  We then use $\left||x|-2^{a_1}3^b\right|$ and $\left||x|-2^{a_2}3^b\right|$ as candidates for the new set.  As before, iterating the bound on the number of squares and cubes varies the cost of the representations generated.  
+
+% TODO: Elaborate on this technique and give the full algorithm here.
 
 
 \section{Additive 2,3 Chains}
 \label{sec:expAddChains}
 
-% Small contribution here.
+% TODO: Small contribution here.
 
 Imbert and Philippe \cite{Imbert2010b} give a method (see Subsection \ref{subsec:shortAddChains}) to compute the shortest additive strictly chained 2,3 partition, suitable for smaller integers.  Such partitions do not permit subtraction and every term is strictly less than and divides all subsequent terms. These representations take the form
 \[
