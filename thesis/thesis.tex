@@ -379,31 +379,31 @@ An (integral) \emph{ideal} $\mathfrak a$ is an additive subgroup of an order $\O
 %An ideal $\ideal a$ is called \emph{primitive} if it cannot be written $\ideal a = m \ideal b$ for some ideal $\ideal b \in \OO_\Delta$ and $|m| > 1, m \in \ZZ$.
 %\end{defn}
 
-Let $\OO_\Delta$ be a maximal order.  Then for $\alpha, \beta \in \OO_\Delta$, the set $\ideal a = \{x \alpha + y \beta : x, y \in \OO_\Delta\}$ is an ideal in the order $\OO_\Delta$ and is denoted $(\alpha, \beta)$ \cite[p.16]{Ramachandran2006}.  Every ideal of a quadratic order $\OO_\Delta$ can be represented by at most two generators \cite[p.125--126]{Cohn1980}, while some can be represented by a single generator.  An ideal represented by a single generator is a \emph{principal} ideal and is denoted $(\alpha) = \{ x \alpha : x \in \OO_\Delta \}$ \cite[p.87]{Jacobson2009}.
+Let $\OO_\Delta$ be a maximal order.  Then for $\alpha, \beta \in \OO_\Delta$, the set $\ideal a = \{x \alpha + y \beta : x, y \in \OO_\Delta\}$ is an ideal of the order $\OO_\Delta$ and is denoted $(\alpha, \beta)$ \cite[p.16]{Ramachandran2006}.  Every ideal of a quadratic order $\OO_\Delta$ can be represented by at most two generators \cite[p.125--126]{Cohn1980}, while some can be represented by a single generator.  An ideal represented by a single generator is a \emph{principal} ideal and is denoted $(\alpha) = \{ x \alpha : x \in \OO_\Delta \}$ \cite[p.87]{Jacobson2009}.
 
-For two ideals, $\ideal a = (\alpha_1, \beta_1)$ and $\ideal b = (\alpha_2, \beta_2)$ in $\OO_\Delta$, their product is
+For two ideals, $\ideal a = (\alpha_1, \beta_1)$ and $\ideal b = (\alpha_2, \beta_2)$ of $\OO_\Delta$, their product is
 \begin{equation}
 	\ideal a \ideal b = (\alpha_1 \alpha_2, \alpha_1 \beta_2, \beta_1 \alpha_2, \beta_1 \beta_2) = (\alpha_3, \beta_3) \label{eq:idealProduct}
 \end{equation}
-for some $\alpha_3, \beta_3 \in \OO_\Delta$ and is also an ideal in $\OO_\Delta$. The principal ideal $(1) = \OO_\Delta$ is the \emph{identity} ideal since $\ideal a = \ideal a \OO_\Delta = \OO_\Delta \ideal a$.  If there exists an ideal $\ideal c$ such that $\ideal a \ideal c = \ideal b$, then $\ideal a$ \emph{divides} $\ideal b$ and we write $\ideal a ~|~ \ideal b$.  Finally, an ideal $\ideal p \neq (1)$ is \emph{prime} when $\ideal p ~|~ \ideal a \ideal b$ implies that either $\ideal p ~|~ \ideal a$ or $\ideal p ~|~ \ideal b$.  As such, a prime ideal is divisible only by the identity ideal and itself.
+for some $\alpha_3, \beta_3 \in \OO_\Delta$ and is also an ideal of $\OO_\Delta$. The principal ideal $(1) = \OO_\Delta$ is the \emph{identity} ideal since $\ideal a = \ideal a \OO_\Delta = \OO_\Delta \ideal a$.  If there exists an ideal $\ideal c$ such that $\ideal a \ideal c = \ideal b$, then $\ideal a$ \emph{divides} $\ideal b$ and we write $\ideal a ~|~ \ideal b$.  Finally, an ideal $\ideal p \neq (1)$ is \emph{prime} when $\ideal p ~|~ \ideal a \ideal b$ implies that either $\ideal p ~|~ \ideal a$ or $\ideal p ~|~ \ideal b$.  As such, a prime ideal is divisible only by the identity ideal and itself.
 
 Equation \ref{eq:idealProduct} shows that ideals are closed under multiplication, and by \cite[p.117]{Cohn1980}, they are associative, commutative, and have identity.  For ideals to form a group, we need inverses, and for this we define \emph{fractional ideals}.
 
 \begin{defn}
-\cite[Definition 2.13]{Ramachandran2006} An $\ideal a$ of $\OO_\Delta$ is a \emph{fractional ideal} if there exists an ideal $\ideal b$ and a non-zero $c \in \OO_\Delta$ such that $\ideal a = c^{-1} \ideal b$.
+\cite[Definition 2.13]{Ramachandran2006} An ideal $\ideal a$ of $\OO_\Delta$ is a \emph{fractional ideal} if there exists an ideal $\ideal b$ and a non-zero $c \in \OO_\Delta$ such that $\ideal a = c^{-1} \ideal b$.
 \end{defn}
 
 Using fractional ideals, we are able to define inverses.
 
 \begin{prop}
-\cite[Proposition 2.14]{Ramachandran2006} Let $\ideal a$ be a fractional ideal in $\OO_\Delta$, where $\OO_\Delta$ is a maximal order in the quadratic field $\QQ(\sqrt \Delta)$.  The inverse of $\ideal a$ is then
+\cite[Proposition 2.14]{Ramachandran2006} Let $\ideal a$ be a fractional ideal of $\OO_\Delta$, where $\OO_\Delta$ is a maximal order in the quadratic field $\QQ(\sqrt \Delta)$.  The inverse of $\ideal a$ is then
 \[
 	\ideal a^{-1} = \{ c \in \QQ(\sqrt \Delta) : c \ideal a \subseteq \OO_\Delta \}
 \]
 such that $\ideal a \ideal a^{-1} = \ideal a^{-1} \ideal a = \OO_\Delta$.
 \end{prop}
 
-All fractional ideals in $\OO_\Delta$ are invertible, and the set of invertible ideals forms a group under ideal multiplication.  We now define an equivalence relation on the invertible ideals of $\OO_\Delta$.
+All fractional ideals of $\OO_\Delta$ are invertible, and the set of invertible ideals forms a group under ideal multiplication.  We now define an equivalence relation on the invertible ideals of $\OO_\Delta$.
 
 \begin{defn}
 \cite[p.88]{Jacobson2009} Two invertible ideals $\ideal a$ and $\ideal b$ are \emph{equivalent} if there exists principal ideals $\alpha, \beta \in \OO_\Delta$ such that $\alpha \beta \neq 0$ and $(\alpha)\ideal a = (\beta) \ideal b$.
@@ -415,17 +415,20 @@ We write $\aclass$ to denote the set of all ideals equivalent to $\ideal a$, and
 The number of ideal classes in the class group $Cl_\Delta$ is the \emph{class number} and is denoted $h_\Delta$ \cite[p.153]{Jacobson2009}.
 \end{defn}
 
-Cohen \cite[p.247]{Crandall2001} states a bound on the number of elements in the class group $Cl_\Delta$ as
-\begin{equation}
-\label{eq:hDelta}
-	h_\Delta < \frac{1}{\pi} \sqrt{|\Delta|}\log{|\Delta|} \textrm{ when } \Delta < -4,
-\end{equation}
-and C. Siegel \cite[p.247]{Crandall2001} shows that 
-\begin{equation}
-\label{eq:hDeltaInfty}
-h_\Delta = |\Delta|^{1/2 + o(1)} \textrm{ as } \Delta \rightarrow -\infty.
-\end{equation}
-These bounds on the class number will be useful in Chapters \ref{chap:superspar} and \ref{chap:ssparExperiments}.
+\noindent
+C. Siegel \cite[p.247]{Crandall2001} shows that $h_\Delta = |\Delta|^{1/2 + o(1)}$ as $\Delta \rightarrow -\infty$, which will be useful in Chapters \ref{chap:superspar} and \ref{chap:ssparExperiments}.
+
+%Cohen \cite[p.247]{Crandall2001} states a bound on the number of elements in the class group $Cl_\Delta$ as
+%\begin{equation}
+%\label{eq:hDelta}
+%	h_\Delta < \frac{1}{\pi} \sqrt{|\Delta|}\log{|\Delta|} \textrm{ when } \Delta < -4,
+%\end{equation}
+%and C. Siegel \cite[p.247]{Crandall2001} shows that 
+%\begin{equation}
+%\label{eq:hDeltaInfty}
+%h_\Delta = |\Delta|^{1/2 + o(1)} \textrm{ as } \Delta \rightarrow -\infty.
+%\end{equation}
+%These bounds on the class number will be useful in Chapters \ref{chap:superspar} and \ref{chap:ssparExperiments}.
 
 \section{Ideal Arithmetic}
 \label{sec:idealArithmetic}
@@ -434,14 +437,14 @@ When performing ideal arithmetic, we choose to represent invertible ideals follo
 \[
 	\ideal a = q\left[a, \frac{b+\sqrt{\Delta}}{2} \right]
 \]
-for $a, b, \in \ZZ, q \in \QQ, q, a > 0$, $\gcd(a, b, (b^2-\Delta)/4a) = 1$, $b^2 \equiv \Delta \pmod{4a}$, and $b$ is unique $\bmod ~2a$.  We also use $q(a, b)$, for short, to represent the ideal $\ideal a$.  When $q = 1$, $\ideal a$ is a \emph{primitive} ideal, and we use the pair $(a, b)$ to represent $\ideal a$.  Our implementation of ideal arithmetic also maintains the value $c = (b^2 - \Delta)/4a$, which will be useful throughout the remainder of this chapter.
+for $a, b, \in \ZZ, q \in \QQgtz, a > 0$, $\gcd(a, b, (b^2-\Delta)/4a) = 1$, $b^2 \equiv \Delta \pmod{4a}$, and $b$ is unique $\bmod ~2a$.  We also use $q(a, b)$, for short, to represent the ideal $\ideal a$.  When $q = 1$, $\ideal a$ is a \emph{primitive} ideal, and we use the pair $(a, b)$ to represent $\ideal a$.  Our implementation of ideal arithmetic also maintains the value $c = (b^2 - \Delta)/4a$, which will be useful throughout the remainder of this chapter.
 
 Using this representation, the inverse $\ideal a^{-1}$ of an ideal is given by \cite[pp.14--15]{Jacobson1999} as
 \begin{equation}
 \label{eq:idealInverse}
 	{\ideal a}^{-1} = \frac{q}{\mathcal N(\mathfrak a)} \left[a, \frac{-b+\sqrt{\Delta}}{2} \right]
 \end{equation}
-where $\mathcal N(\ideal a) = q^2a$ is the norm of $\ideal a$ and is multiplicative.  For a primitive invertible ideal $(a, b)$, the inverse is given by $\frac{1}{a}(a, -b)$.  Let $\aclass$ be an ideal class represented by the primitive ideal $\ideal a$.  The inverse $\idealclass{a^{-1}}$ is given simply by $(a, -b)$ \cite[p.20]{Ramachandran2006}.  As such, computing the inverse of an ideal class is virtually free. 
+where $\mathcal N(\ideal a) = q^2a$ is the norm of $\ideal a$ and is multiplicative.  For a primitive invertible ideal $(a, b)$, the inverse is given by $\frac{1}{a}(a, -b)$.  Let $\aclass$ be an ideal class represented by the primitive ideal $\ideal a$.  Then the inverse $\idealclass{a^{-1}}$ is given simply as $(a, -b)$ \cite[p.20]{Ramachandran2006}.  As such, computing the inverse of an ideal class is virtually free. 
 
 Since an ideal class contains an infinitude of ideals, we work with reduced representatives.  This also makes arithmetic faster, since the size of generators are typically smaller.  Subsection \ref{subsec:reduction} defines the reduced form of a representative and gives an algorithm for finding the reduced form.  For two reduced class representatives, Subsection \ref{subsec:idealMultiply} shows how to compute their product.  Subsection \ref{subsec:nucomp} discusses how to perform multiplication such that the result is a reduced or almost reduced representative.  This is then extended to the case of computing the square (Subsection \ref{subsec:nudupl}) and cube (Subsection \ref{subsec:nucube}) of an ideal class.  
 
