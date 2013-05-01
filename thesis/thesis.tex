@@ -2002,8 +2002,6 @@ Having found a value for $b$, we have not necessarily found a prime ideal $[p, (
 \section{Average Time for Operations}
 \label{sec:idealResults}
 
-% TODO: Say how we used Pari.
-
 This section compares the performance of our implementations of ideal class arithmetic with our reference implementation, \Pari{} \cite{PariGP}.   Let $k$ be the target number of bits in the discriminant $\Delta$.  We iterate $k$ from 16 to 140, and for each $k$ we repeat the following 10,000 times: We compute two prime numbers $p$ and $q$ such that $p$ is $\floor{k/2}$ bits and $q$ is $k-\floor{k/2}$ bits.  We use the negative of their product $\Delta = -pq$ as the discriminant for a class group, unless $\Delta \not\equiv 1 \pmod 4$. In which case, we try again with a different $p$ and $q$.  We then pick a prime ideal class, $[\mathfrak a]$, randomly from among the primes less than 1000.  One motivation for limiting this to primes less than 1000 is the size of the lookup table for $\sqrt{\Delta \bmod p} \pmod p$.
 
 For ideal multiplication, squaring, and cubing, we use Algorithms \ref{alg:nucomp}, \ref{alg:nudupl}, and \ref{alg:nucube} respectively.  For ideal reduction we use Algorithm \ref{alg:reduce}.  Each of the optimizations mentioned in this chapter are applied to each implementation, as well as the results from Chapter \ref{chap:xgcdExperiments} for computing the extended GCD.   The general strategy for our 64-bit implementation is to use 32-bit arithmetic when operands are less than 32-bits, otherwise to use 64-bit arithmetic, and only when this fails do we use 128-bit arithmetic.  For our 128-bit implementation, we use 64-bit arithmetic when operands are less than 64-bits, otherwise we use 128-bit arithmetic, and only when intermediates are larger than 128-bits do we use GMP arithmetic.
@@ -2021,9 +2019,6 @@ M_2 &\gets (R_i(b_1 + Ua_1) - sC_ic_1) / {a_1}^2
 \end{align*}
 in Algorithm \ref{alg:nucube}, the intermediate before dividing by ${a_1}^2$ may be larger than $\Delta$ in size, and as such will require the use of multiple precision arithmetic.  On the other hand, none of the intermediates in our 128-bit implementation of ideal multiplication or squaring are ever larger than $\Delta$ in size.  Contrast this to our 64-bit implementation that does not use GMP at all, and our GMP implementation that only uses GMP for arithmetic -- in both of these implementations, cubing is faster than multiplying an ideal with its square.
 
-\mygraph{compose-all}{fig:idealCompose}{Average Time to Multiply Reduced Ideal Class Representatives.}
-\mygraph{square-all}{fig:idealSquare}{Average Time to Square Reduced Ideal Class Representatives.}
-\mygraph{cube-all}{fig:idealCube}{Average Time to Cube Reduced Ideal Class Representatives.}
 
 \begin{table}[htb]
 \centering
@@ -2054,11 +2049,17 @@ Cubing         & 0.55412 \\
 \label{tab:relativeCostIdealArith}
 \end{table}
 
+\mygraph{compose-all}{fig:idealCompose}{Average Time to Multiply Reduced Ideal Class Representatives.}
+\mygraph{square-all}{fig:idealSquare}{Average Time to Square Reduced Ideal Class Representatives.}
+\mygraph{cube-all}{fig:idealCube}{Average Time to Cube Reduced Ideal Class Representatives.}
+
 \mygraph{cube-vs-64}{fig:cubingVs64}{Time to compute $[\mathfrak a^3]$ in our 64-bit implementation.}
 \mygraph{cube-vs-128}{fig:cubingVs128}{Time to compute $[\mathfrak a^3]$ in our 128-bit implementation.}
 \mygraph{cube-vs-mpz}{fig:cubingVsMpz}{Time to compute $[\mathfrak a^3]$ in our GMP implementation.}
 
 \clearpage
+
+\section{Summary}
 
 This chapter discussed our implementations of ideal class arithmetic.  We then demonstrate the average time for multiplication, squaring, and cubing.  We show that for discriminants smaller than 60-bits, our 64-bit implementation of ideal class arithmetic is significantly faster than the reference implementation provided by Pari, then for discriminants larger than 59-bits, but smaller than 119-bits, our 128-bit implementation of ideal class arithmetic is significantly faster than the reference implementation provided by Pari, and finally, for discriminants larger than 118-bits, our GMP implementation is still faster on average than the reference implementation provided by Pari.
 
