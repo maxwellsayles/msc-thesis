@@ -1723,28 +1723,28 @@ Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and \ref{subsec:nucube} de
 
 The descriptions of NUCUBE, NUDUPL, and NUCUBE use the variables $R_i$ and $C_i$.  These variables can be related to the description of the extended Euclidean algorithm (see Section \ref{sec:gcdEEA}) using
 \[
-	\matrixThreeTwo{s}{U}{V}{t}{X}{Y} = \matrixThreeTwo{R_{i-1}}{C_{i-1}}{B_{i-1}}{R_i}{C_i}{B_i}
+	\matrixtt{s}{U}{t}{X} = \matrixtt{R_{i-1}}{C_{i-1}}{R_i}{C_i}.
 \]
-for integers $B_i$.  To expand the simple continued fraction $a/b$, let
+Since the coefficients $V$ and $Y$ of the extended GCD are not used, our implementations of the partial extended GCD do not compute them.
+To expand the simple continued fraction $a/b$, let
 \[
-\matrixThreeTwo{R_{-2}}{C_{-2}}{B_{-2}}{R_{-1}}{C_{-1}}{B_{-1}} = \matrixThreeTwo{a}{-1}{1}{b}{0}{0}
+\matrixtt{R_{-2}}{C_{-2}}{R_{-1}}{C_{-1}} = \matrixtt{a}{-1}{b}{0}
 \]
-and apply the recurrences
+and then apply the recurrences
 \begin{align*}
 	q_i &= \floor{R_{i-2} ~/~ R_{i-1}} \\
 	R_i &= R_{i-2} - q_i R_{i-1} \\
-	C_i &= C_{i-2} - q_i C_{i-1} \\
-	B_i &= B_{i-2} - q_i B_{i-1}
+	C_i &= C_{i-2} - q_i C_{i-1}
 \end{align*}
-until we have $R_i$ less than or equal to the given termination bound.  This is essentially the same as computing the extended GCD except for the starting matrix and the termination bound.  Invariants of this method are $R_{i-1} \ge R_i$ and $C_i = (-1)^{i+1}B_i$, which can be shown by induction (for additional details, see \cite[p.5]{Imbert2010} and \cite[Equation 3.4]{Avanzi2010}).  Since the coefficients $B_i$ are never used, our implementations of the partial extended GCD does not compute them.
+until we have $R_i$ less than or equal to the given termination bound.  This is essentially the same as computing the extended GCD except for the starting matrix, the termination bound, and one set of coefficients.  An invariant of this method is that $R_{i-1} \ge R_i$.
 
 By \cite[\S 5.6.1]{Crandall2001}, two ideals are equivalent if there exists an invertible integral linear change of variables from one ideal to the other.  As such, each of the operations performed on the matrix
 \[
 \matrixtt{R_{i-1}}{C_{i-1}}{R_i}{C_i}
 \]
-during the partial extended GCD must be representable by an invertible $2 \times 2$ matrix with determinant $\pm 1$ (known as a \emph{unimodular} matrix).  This is necessary in order to make sure that the reduced ideal (after applying the coefficients from the partial extended GCD) is in the same equivalence class as the product ideal.  This is important since only extended GCD computations that are restricted to operations representable using invertible $2 \times 2$ matrices can be used for the partial extended GCD.
+during the partial extended GCD must be representable by an invertible $2 \times 2$ matrix with determinant $\pm 1$ (known as a \emph{unimodular} matrix).  This is necessary in order to ensure that the reduced ideal (after applying the coefficients from the partial extended GCD) is in the same equivalence class as the product ideal.  This is important since only extended GCD computations that are restricted to operations representable using invertible $2 \times 2$ matrices can be used for the partial extended GCD.
 
-Of the extended GCD algorithms in this chapter, only the right-to-left binary extended GCD of Section \ref{sec:gcdR2LBin} (and its windowed variants of Subsection \ref{subsec:gcdR2LWindowed}) cannot be adapted to the partial extended GCD.  The reason is due to the step where $t$ is reduced by 2.  The algorithm uses the computation
+Of the extended GCD algorithms in this chapter, only the right-to-left binary extended GCD of Section \ref{sec:gcdR2LBin} (and its windowed variants of Subsection \ref{subsec:gcdR2LWindowed}) cannot be adapted to the partial extended GCD.  The reason is due to the step where $t$ is reduced by 2.  The algorithm computes
 \[
 	(t, X, Y) \gets \begin{cases}
 		\left( \frac{t}{2}, \frac{X}{2}, \frac{Y}{2} \right) &
@@ -1758,7 +1758,7 @@ The step $(t, X, Y) \gets (t/2, (X+b)/2, (Y-a)/2)$ cannot be expressed as a unim
 
 The other extended GCD algorithms of this chapter can be adapted to the partial extended GCD by letting
 \[
-	\matrixtt{R_{i-1}}{C_{i-1}}{R_i}{C_i} = \matrixtt{s}{U}{t}{X}
+	\matrixtt{s}{U}{t}{X} = \matrixtt{R_{i-1}}{C_{i-1}}{R_i}{C_i}.
 \]
 and dropping the terms $V$ and $Y$ from the computation.
 
