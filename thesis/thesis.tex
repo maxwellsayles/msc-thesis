@@ -734,7 +734,7 @@ Finally, compute the representative $\mathfrak a^3 = [a, (b + \sqrt\Delta)/2]$ u
 \begin{align*}
 	M_1 &= \frac{(R_ia_1 + C_iUa_1)}{{a_1}^2}, \\
 	M_2 &= \frac{R_i(b_1 + Ua_1) - sC_ic_1}{{a_1}^2}, \\
-	a &= (-1)^{i+1} R_i M_1 - C_i M_2, \\
+	a &= (-1)^{i+1} (R_i M_1 - C_i M_2), \\
 	b &= \left( \frac{2(R_ia_1/s - C_{i-1}a)}{C_i} - b_1 \right) \bmod 2a.
 \end{align*}
 By \cite[p.15~Theorem~5.1]{Imbert2010}, the ideal $[a, (b + \sqrt\Delta)/2]$ is at most two reduction steps from being reduced.  Pseudo-code for our implementation of fast ideal cubing is given in Algorithm \ref{alg:nucube}.
@@ -772,7 +772,7 @@ By \cite[p.15~Theorem~5.1]{Imbert2010}, the ideal $[a, (b + \sqrt\Delta)/2]$ is 
 
 \State $M_1 \gets (R_ia_1 + C_iUa_1) / {a_1}^2$
 \State $M_2 \gets (R_i(b_1 + Ua_1) - sC_ic_1) / {a_1}^2$
-\State $a \gets (-1)^{i+1} R_i M_1 - C_i M_2$
+\State $a \gets (-1)^{i+1} (R_i M_1 - C_i M_2)$
 \State $b \gets (2(R_ia_1/s - C_{i-1}a)/C_i - b_1) \bmod 2a$
 \State \Return $[a, (b+\sqrt\Delta)/2]$
 \end{algorithmic}
