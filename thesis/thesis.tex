@@ -900,7 +900,7 @@ There may be many possible 2,3 representations for a given number, and different
 
 One way to classify algorithms that compute 2,3 representations is by the constraints placed on the partition of an integer $n$.
 
-\begin{defn}
+\begin{defn} \cite[\S 1]{Imbert2010}
 A \emph{partition} of $n$ is written $n = x_1 \pm x_2 \pm \cdots \pm x_k$ where the terms $x_i$ are monotonically increasing by absolute value.
 \end{defn}
 
@@ -908,7 +908,7 @@ A \emph{partition} of $n$ is written $n = x_1 \pm x_2 \pm \cdots \pm x_k$ where 
 One such constraint is on the divisibility of subsequent terms.
 
 \begin{defn}
-\label{defn:chained}
+\label{defn:chained} \cite[\S 1]{Imbert2010}
 A partition of an integer $n = x_1 \pm x_2 \pm \cdots \pm x_k$ is \emph{chained} if every term $x_i$ divides every term $x_j$ for $i < j$ and $x_i \le x_j$. A partition is said to be \emph{strictly chained} if it is chained and $x_i$ is \emph{strictly} less than $x_j$ for each $i < j$.
 \end{defn}
 
@@ -919,10 +919,7 @@ Binary and non-adjacent form are special types of strictly chained partitions, s
 \caption{Computes $g^n$ given $n$ as a chained 2,3 partition (Dimitrov et al \cite{Dimitrov2005}).}
 \label{alg:expWithChain}
 \begin{algorithmic}[1]
-\Require $g \in G$, $n = \sum_{i=1}^k s_i2^{a_i}3^{b_i},$
-\algnewline $s_1,...,s_k \in \{-1, 1\}$,
-\algnewline $0 \le a_1 \le ...\le a_k \in \ZZ$,
-\algnewline $0 \le b_1 \le ... \le b_k \in \ZZ$.
+\Require $g \in G$, $n = \sum_{i=1}^k s_i2^{a_i}3^{b_i}$, $s_1,...,s_k \in \{-1, 1\}$, $0 \le a_1 \le ...\le a_k \in \ZZ$, $0 \le b_1 \le ... \le b_k \in \ZZ$.
 \State $i \gets 1$
 \State $a \gets 0$ \Comment{current power of 2}
 \State $b \gets 0$ \Comment{current power of 3}
@@ -1005,7 +1002,7 @@ using 15 squares, 6 cubes, 2 inverses, and 3 multiplications.  The result of the
 
 The section discusses some of the methods from the literature for computing 2,3 representations. The first method generates strict chains from low order to high order (right-to-left), while the second method generates representations (both chained and unchained) from high order to low order (left-to-right).  The third technique generates strict chains using a tree-based approach, while the final method computes additive only strict chains of shortest length in a manner similar to chains generated from low order to high order.  
 
-These methods trade off the time to compute a representation against the time to exponentiate using that representation.  When the exponent is known in advance, the corresponding chain or representation best suited to the application can also be computed in advance.  Chapter \ref{chap:superspar} discusses two factoring algorithms that use representations of exponents, computed in advance, in order to speed their computations.  While none of the methods presented in this chapter take into account the relative cost of multiplying, squaring, or cubing ideals, Chapter \ref{chap:powExperiments} looks at additional techniques that attempt to minimize the cost of exponentiation given the average costs of group operations.  
+These methods trade off the time to compute a representation against the time to exponentiate using that representation.  When the exponent is known in advance, the corresponding chain or representation best suited to the application can also be computed in advance.  Chapter \ref{chap:superspar} discusses two factoring algorithms that use representations of exponents, computed in advance, in order to speed their computations.  While none of the methods presented in this chapter take into account the relative cost of multiplying, squaring, or cubing ideals, Chapter \ref{chap:powExperiments} looks at additional techniques based on these methods that attempt to minimize the cost of exponentiation given the average costs of group operations.  
 
 \subsection{Right-to-Left Chains (from low-order to high-order)}
 \label{subsec:rtolChains}
@@ -1156,7 +1153,7 @@ The next technique for finding strictly chained 2,3 partitions was suggested by 
 \end{algorithmic}
 \end{algorithm}
 
-Larger values of $L$ sometimes produce chains with fewer terms, but take longer to compute.  When the the input integer $n$ is known in advance, this might not be a problem, however, large values of $L$ can still be prohibitively expensive.  Empirically, the authors found that $L=4$ was a good compromise between the length of the chain generated and the time to compute the chain. 
+Larger values of $L$ sometimes produce chains with fewer terms, but take longer to compute.  When the input integer $n$ is known in advance, this might not be a problem, however, large values of $L$ can still be prohibitively expensive.  Empirically, the authors found that $L=4$ was a good compromise between the length of the chain generated and the time to compute the chain. 
 
 
 \subsection{Shortest Additive 2, 3 Chains}
@@ -1589,7 +1586,7 @@ otherwise, compute
 	\matrixThreeTwo{s}{U}{V}{t}{X}{Y} =
 		\matrixtt{0}{1}{-1}{2q'} \cdot \matrixThreeTwo{s}{U}{V}{t}{X}{Y}.
 \]
-Notice that after this step $s$ has the previous value of $t$ and that the binary representation of $t$ is one digit shorter than the binary representation of the previous value of $s$, i.e.\ the the left most set bit of the previous value of $s$ is now cleared.  As with the extended Euclidean Algorithm, maintain the invariant that $s \ge t$; if after the above operation $s < t$, then swap the rows of the matrix to restore the invariant. The complete algorithm is given in Algorithm \ref{alg:shallitGcd}.
+Notice that after this step $s$ has the previous value of $t$ and that the binary representation of $t$ is one digit shorter than the binary representation of the previous value of $s$, i.e.\ the left most set bit of the previous value of $s$ is now cleared.  As with the extended Euclidean Algorithm, maintain the invariant that $s \ge t$; if after the above operation $s < t$, then swap the rows of the matrix to restore the invariant. The complete algorithm is given in Algorithm \ref{alg:shallitGcd}.
 
 \begin{algorithm}[htb]
 \caption{Shallit and Sorenson Left-to-Right Binary Extended GCD (\cite{Shallit1994}).}
@@ -2940,7 +2937,7 @@ and Algorithm \ref{alg:stepBounds} can be used to generate such a set.
 \end{algorithmic}
 \end{algorithm}
 
-First the algorithm generates all pairs $(m, w)$ such that $\stepCount(m, w) \le B$.  There is a finite number of these pairs, since there are a finite number of primorials no larger than $B$, and for a given $w$ there are $\floor{B / 2\phi(P_w)}$ possible values of $m$.  The algorithm then sorts these pairs in ascending order by the total number of steps $\stepCount(m, w)$, breaking ties by sorting in descending order of the search range $\lastStep(m, w)$.  The first pair in the list is chosen as a candidate $(m, w)$ for the set $\stepBounds_B$.  This pair is always in the solution set since by Equation \ref{eq:stepBounds} and the ordering imposed on the list, all other pairs either take more steps, or an equal number of steps, but have a smaller search range.  The algorithm then iterates over the remaining pairs, and the search range of each pair is compared with that of the candidate pair.  If the search range is greater, then the candidate pair is output to the set $\stepBounds_B$ and the current pair becomes the next candidate pair.  The correctness of this follows from the fact that pairs in the list are monotonically increasing by the total number of steps, and successive candidate pairs are strictly increasing in their search range.  As such, when the candidate pair $(m, w)$ is compared with the pair $(m_i, w_i)$ from the list, if the search range of the list pair is less than that of the candidate pair, the the list pair uses at least as many steps, but does not search as far, and therefore is not a member of the set $\stepBounds_B$.  Otherwise, when the list pair has a larger search range, this implies that it uses more steps (since ties are broken by sorting in descending order of search range), and the candidate pair is guaranteed to be a member of the set $\stepBounds_B$.  This holds since all the pairs remaining in the list use more steps, and all the previous pairs from the list either had a smaller search range, or were rejected because they required more steps.
+First the algorithm generates all pairs $(m, w)$ such that $\stepCount(m, w) \le B$.  There is a finite number of these pairs, since there are a finite number of primorials no larger than $B$, and for a given $w$ there are $\floor{B / 2\phi(P_w)}$ possible values of $m$.  The algorithm then sorts these pairs in ascending order by the total number of steps $\stepCount(m, w)$, breaking ties by sorting in descending order of the search range $\lastStep(m, w)$.  The first pair in the list is chosen as a candidate $(m, w)$ for the set $\stepBounds_B$.  This pair is always in the solution set since by Equation \ref{eq:stepBounds} and the ordering imposed on the list, all other pairs either take more steps, or an equal number of steps, but have a smaller search range.  The algorithm then iterates over the remaining pairs, and the search range of each pair is compared with that of the candidate pair.  If the search range is greater, then the candidate pair is output to the set $\stepBounds_B$ and the current pair becomes the next candidate pair.  The correctness of this follows from the fact that pairs in the list are monotonically increasing by the total number of steps, and successive candidate pairs are strictly increasing in their search range.  As such, when the candidate pair $(m, w)$ is compared with the pair $(m_i, w_i)$ from the list, if the search range of the list pair is less than that of the candidate pair, the list pair uses at least as many steps, but does not search as far, and therefore is not a member of the set $\stepBounds_B$.  Otherwise, when the list pair has a larger search range, this implies that it uses more steps (since ties are broken by sorting in descending order of search range), and the candidate pair is guaranteed to be a member of the set $\stepBounds_B$.  This holds since all the pairs remaining in the list use more steps, and all the previous pairs from the list either had a smaller search range, or were rejected because they required more steps.
 
 As an example, the set $\stepBounds_{512}$ restricted to pairs using no more than 512 steps, and ordered according to Algorithm \ref{alg:stepBounds}, is
 \begin{align*}
