@@ -204,9 +204,9 @@ Department of Mathematics and Statistics \\
 \phantomsection
 \altchapter{\bf{Abstract}}
 
-This thesis proposes practical improvements to arithmetic and exponentiation in the ideal class group of imaginary quadratic number fields for the Intel x64 architecture.  This is useful in tabulating the class number and class group structure, but also as an application to a novel integer factoring algorithm called ``SuperSPAR'', which builds upon SPAR using ideas from Sutherland.
+This thesis proposes practical improvements to arithmetic and exponentiation in the ideal class group of imaginary quadratic number fields for the Intel x64 architecture.  This is useful in tabulating the class number and class group structure, but also as an application to a novel integer factoring algorithm called ``SuperSPAR''.  SuperSPAR builds upon SPAR using an idea from Sutherland, namely a bounded primorial steps search, as well as by using optimized double-based representations of exponents, and general improvements to arithmetic in the ideal class group.
 
-Since the target architecture has 64-bit machine words, we specialize two implementations of ideal class arithmetic: one for quadratic fields where the size of the discriminant $\Delta$ is less than 64-bits, and another where the size of $\Delta$ is less than 128-bits.  In each case, our results show an improvement in the average performance of ideal class arithmetic over reference implementations.  Since much of the effort of ideal class arithmetic is in computing the extended greatest common divisor, this thesis studies the average performance of several implementations of this and shows an improvement for some over reference implementations.  Dimitrov and Cooklev propose the double base number system, and Imbert, Jacobson, and Schmidt propose a method of ideal class cubing.  Using these ideas, we explore several techniques for exponentiation using 2,3 number systems and demonstrate an improvement in the average performance of exponentiation in the ideal class group over that of binary exponentiation.  Lastly, each of these improvements are applied to our implementation of the SuperSPAR factoring algorithm, and our results show an improvement in the average performance to factor integers for a specific range of integer sizes.
+Since the target architecture has 64-bit machine words, we specialize two implementations of ideal class arithmetic: one using 64-bit arithmetic, and the other using 128-bit arithmetic.  In each case, our results show an improvement in the average performance of ideal class arithmetic over reference implementations.  Since much of the effort of ideal class arithmetic is in computing the extended greatest common divisor, this thesis studies the average performance of several implementations of this and shows an improvement for some over reference implementations.  Dimitrov and Cooklev propose the double base number system, and Imbert, Jacobson, and Schmidt propose a method of ideal class cubing.  Using these ideas, we explore several techniques for exponentiation using 2,3 number systems and demonstrate an improvement in the average performance of exponentiation in the ideal class group over that of binary exponentiation.  Lastly, each of these improvements are applied to our implementation of the SuperSPAR factoring algorithm, and our results show an improvement in the average time to factor integers 49-bits to 64-bits in size.
 
 \newpage
 \phantomsection
@@ -282,7 +282,7 @@ A final contribution of this thesis is an improved integer factoring algorithm, 
 \chapter{Ideal Arithmetic}
 \label{chap:idealArithmetic}
 
-A focus of this thesis is arithmetic and exponentiation in the ideal class group of imaginary quadratic number fields.  We begin with with the relevant theory of quadratic number fields, then discuss quadratic orders and ideals of quadratic orders.  Finally, we discuss arithmetic in the ideal class group.  The theory presented here is available in detail in reference texts on algebraic number theory such as \cite{Cohn1980}, \cite{Hua2012}, or \cite{Ireland1990}. 
+A focus of this thesis is arithmetic and exponentiation in the ideal class group of imaginary quadratic number fields.  We begin with the relevant theory of quadratic number fields, then discuss quadratic orders and ideals of quadratic orders.  Finally, we discuss arithmetic in the ideal class group.  The theory presented here is available in detail in reference texts on algebraic number theory such as \cite{Cohn1980}, \cite{Hua2012}, or \cite{Ireland1990}. 
 
 
 \section{Quadratic Number Fields}
@@ -369,20 +369,23 @@ For two ideals, $\ideal a = (\alpha_1, \beta_1)$ and $\ideal b = (\alpha_2, \bet
 \begin{equation}
 	\ideal a \ideal b = (\alpha_1 \alpha_2, \alpha_1 \beta_2, \beta_1 \alpha_2, \beta_1 \beta_2) = (\alpha_3, \beta_3) \label{eq:idealProduct}
 \end{equation}
-for some $\alpha_3, \beta_3 \in \OO_\Delta$ and is also an ideal of $\OO_\Delta$. The principal ideal $(1) = \OO_\Delta$ is the \emph{identity} ideal since $\ideal a = \ideal a \OO_\Delta = \OO_\Delta \ideal a$.  If there exists an ideal $\ideal c$ such that $\ideal a \ideal c = \ideal b$, then $\ideal a$ \emph{divides} $\ideal b$ and we write $\ideal a ~|~ \ideal b$.  Finally, an ideal $\ideal p \neq (1)$ is \emph{prime} when $\ideal p ~|~ \ideal a \ideal b$ implies that either $\ideal p ~|~ \ideal a$ or $\ideal p ~|~ \ideal b$.  As such, a prime ideal is divisible only by the identity ideal and itself.
+for some $\alpha_3, \beta_3 \in \OO_\Delta$ and is also an ideal of $\OO_\Delta$. The principal ideal $(1) = \OO_\Delta$ is the \emph{identity} element with respect to ideal multiplication, since $\ideal a = \ideal a \OO_\Delta = \OO_\Delta \ideal a$.  If there exists an ideal $\ideal c$ such that $\ideal a \ideal c = \ideal b$, then $\ideal a$ \emph{divides} $\ideal b$ and we write $\ideal a ~|~ \ideal b$.  Finally, an ideal $\ideal p \neq (1)$ is \emph{prime} when $\ideal p ~|~ \ideal a \ideal b$ implies that either $\ideal p ~|~ \ideal a$ or $\ideal p ~|~ \ideal b$.  As such, a prime ideal is divisible only by the identity ideal and itself.
 
 Equation \ref{eq:idealProduct} shows that ideals are closed under multiplication, and by \cite[p.117]{Cohn1980}, they are associative, commutative, and have identity.  For ideals to form a group, we need inverses, and for this we define \emph{fractional ideals}.
 
 \begin{defn}
-\cite[Definition 2.13]{Ramachandran2006} An ideal $\ideal a$ of $\OO_\Delta$ is a \emph{fractional ideal} if there exists an ideal $\ideal b$ and a non-zero $c \in \OO_\Delta$ such that $\ideal a = c^{-1} \ideal b$.
+\cite[\S 2.1]{Jacobson2009} A \emph{fractional ideal} of $\OO_\Delta$ is a subset $\ideal a$ of $\QQ(\sqrt \Delta)$ such that $d \ideal a$ is an integral ideal of $\OO_\Delta$ for some $d \in \ZZgtz$.
 \end{defn}
+%\begin{defn}
+%\cite[Definition 2.13]{Ramachandran2006} An ideal $\ideal a$ of $\OO_\Delta$ is a \emph{fractional ideal} if there exists an ideal $\ideal b$ and a non-zero $c \in \OO_\Delta$ such that $\ideal a = c^{-1} \ideal b$.
+%\end{defn}
 
 Using fractional ideals, we are able to define inverses.
 
 \begin{prop}
 \cite[Proposition 2.14]{Ramachandran2006} Let $\ideal a$ be a fractional ideal of $\OO_\Delta$, where $\OO_\Delta$ is a maximal order in the quadratic field $\QQ(\sqrt \Delta)$.  The inverse of $\ideal a$ is then
 \[
-	\ideal a^{-1} = \{ c \in \QQ(\sqrt \Delta) : c \ideal a \subseteq \OO_\Delta \}
+	\ideal a^{-1} = \{ d \in \QQ(\sqrt \Delta) : d \ideal a \subseteq \OO_\Delta \}
 \]
 such that $\ideal a \ideal a^{-1} = \ideal a^{-1} \ideal a = \OO_\Delta$.
 \end{prop}
@@ -466,15 +469,11 @@ A primitive ideal $\ideal a = [a, (b+\sqrt{\Delta})/2]$ with $\Delta < 0$ is a \
 In an imaginary quadratic field, every ideal class contains exactly one reduced ideal \cite[p.20]{Ramachandran2006}.  There are several algorithms to compute a reduced ideal, many of which are listed in \cite{Jacobson2006}.  Here we present the algorithm we use.  We adapt the work presented in \cite[p.90]{Jacobson2006} and \cite[p.99]{Jacobson2009}. If $\ideal a = [a, (b + \sqrt\Delta)/2]$ is a representative of the class $\aclass$ then
 \begin{equation}
 \label{eq:idealSwapNorm}
-	\ideal b = \left[ -\mathcal N((b + \sqrt\Delta)/2)/a, -(b - \sqrt\Delta)/2 \right]
+	\ideal b = \left[ \frac{b^2-\Delta}{4a}, \frac{-b + \sqrt\Delta}{2} \right]
 \end{equation}
 is equivalent, which can be verified by
 \[
 	\left(-(b - \sqrt\Delta)/2 \right) \ideal a = (a) \ideal b.
-\]
-Simplifying Equation \ref{eq:idealSwapNorm} gives
-\[
-	\ideal b = \left[ \frac{b^2-\Delta}{4a}, \frac{-b + \sqrt\Delta}{2} \right].
 \]
 Since $c = (b^2 - \Delta)/4a$ we have
 \begin{equation}
@@ -499,12 +498,17 @@ The ideal class group operation is multiplication of ideal class representatives
 	\mathfrak a \mathfrak b & = s\left[a, \frac{b + \sqrt{\Delta}}{2}\right]. \nonumber
 \end{align}
 
-The remainder of this subsection is used to derive the above equations.  We adapt much of the presentation given in \cite[pp.117--118]{Jacobson2009}. Equation \ref{eq:idealProduct} for the product of two ideals, $\ideal a$ and $\ideal b$, using module notation is
+The remainder of this subsection is used to derive the above equations.  We adapt much of the presentation given in \cite[pp.117--118]{Jacobson2009}. Using Equation \ref{eq:idealProduct} for the product of two ideals, $\ideal a$ and $\ideal b$, gives
 \begin{equation}
 \label{eq:productExpanded}
 \mathfrak{a} \mathfrak{b} =
-\left[ a_1a_2, \frac{a_1b_2 + a_1\sqrt{\Delta}}{2}, \frac{a_2b_1 + a_2\sqrt{\Delta}}{2}, \frac{b_1b_2 + (b_1+b_2)\sqrt{\Delta} + \Delta}{4} \right].
+a_1 a_2 \ZZ + \frac{a_1b_2 + a_1\sqrt{\Delta}}{2} \ZZ + \frac{a_2b_1 + a_2\sqrt{\Delta}}{2} \ZZ + \frac{b_1b_2 + (b_1+b_2)\sqrt{\Delta} + \Delta}{4} \ZZ.
 \end{equation}
+%\begin{equation}
+%\label{eq:productExpanded}
+%\mathfrak{a} \mathfrak{b} =
+%\left[ a_1a_2, \frac{a_1b_2 + a_1\sqrt{\Delta}}{2}, \frac{a_2b_1 + a_2\sqrt{\Delta}}{2}, \frac{b_1b_2 + (b_1+b_2)\sqrt{\Delta} + \Delta}{4} \right].
+%\end{equation}
 
 \noindent
 By the multiplicative property of the norm we have
@@ -624,7 +628,7 @@ Chapter \ref{chap:xgcdExperiments} discusses practical optimizations for computi
 \Require Reduced representatives $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$, $\mathfrak b = [a_2, (b_2+\sqrt\Delta)/2]$
 \algnewline with $c_1 = ({b_1}^2-\Delta)/4a_1$, $c_2 = ({b_2}^2-\Delta)/4a_2$, and discriminant $\Delta$.
 \Ensure A reduced or almost reduced representative $\mathfrak a \mathfrak b$.
-\State ensure $\mathcal N(\mathfrak a) < \mathcal N(\mathfrak b)$ by swapping $\mathfrak a$ with $\mathfrak b$ if $a_1 < a_2$
+\State ensure $\mathcal N(\ideal a) > \mathcal N(\ideal b)$ by swapping $\mathfrak a$ with $\mathfrak b$ if $a_1 < a_2$
 \State compute $s', V' \in \ZZ$ such that $s' = \gcd(a_1, a_2) = Y'a_1 + V'a_2$ for $Y' \in \ZZ$
 \State $s \gets 1$
 \State $U \gets V'(b_1 - b_2)/2 \bmod a_1$
@@ -646,11 +650,11 @@ Chapter \ref{chap:xgcdExperiments} discusses practical optimizations for computi
 	\State $R_i = R_{i-2}-q_i R_{i-1}$
 	\State $C_i=C_{i-2}-q_i C_{i-1}$
 \EndWhile
-\State $M_1 \gets (R_i a_2 + C_i(b_1-b_2)/2)/a_1$
+\State $M_1 \gets (R_i a_2 + C_i(b_1-b_2)/2)/a_1$ \Comment{$(b_1 - b_2)/2$ is reused from above}
 \State $M_2 \gets (R_i (b_1+b_2)/2 -sC_i c_2)/a_1$
 \State $a \gets (-1)^{i+1}(R_i M_1 - C_i M_2)$
-\State $b \gets ((2(R_i a_2 - C_{i-1} a)/C_i) - b_2) \bmod{2a}$
-\State \Return $[a, (b+\sqrt\Delta)/2]$
+\State $b \gets ((2(R_i a_2 - C_{i-1} a)/C_i) - b_2) \bmod{2a}$ \Comment{$R_i a_2$ is reused from above}
+\State \Return $[a, (b+\sqrt\Delta)/2]$ \Comment{optionally return $c = (b^2-\Delta)/4a$}
 \end{algorithmic}
 \end{algorithm}
 
@@ -702,7 +706,7 @@ Pseudo-code for our implementation is given in Algorithm \ref{alg:nudupl}.
 \State $M_2 \gets (R_i b_1 -sC_i c_1)/a_1$
 \State $a \gets (-1)^{i+1}({R_i}^2 - C_i M_2)$
 \State $b \gets ((2(R_i a_1 + C_{i-1} a)/C_i)-b_1) \bmod{2a}$
-\State \Return $[a, (b+\sqrt\Delta)/2]$
+\State \Return $[a, (b+\sqrt\Delta)/2]$ \Comment{optionally return $c = (b^2 -\Delta)/4a$}
 \end{algorithmic}
 \end{algorithm}
 
@@ -715,11 +719,11 @@ Similar to ideal squaring, compute integers $s'$ and $Y'$ such that
 \[
 s' = \gcd(a_1, b_1) = X'a_1 + Y'b_1.
 \]
-Note that $X'$ is unused. If $s' \neq 1$, compute
+Note that $X'$ is unused and need not be computed.  If $s' \neq 1$, compute
 \[
 s = \gcd(s'a_1, {b_1}^2 - a_1c_1) = Xs'a_1 + Y({b_1}^2 - a_1c_1)
 \]
-for $s, X, Y \in \ZZ$.  If $s' = 1$ then let $s = 1$ too.  Then compute $U$ using
+for $s, X, Y \in \ZZ$.  If $s' = 1$ then let $s = 1$, too.  Then compute $U$ using
 \[
 U = \begin{cases}
 		Y'c_1(Y'(b_1 - Y'c_1a_1) - 2) \bmod {a_1}^2 & \textrm{ if } s' = 1 \\
@@ -758,7 +762,7 @@ By \cite[p.15~Theorem~5.1]{Imbert2010}, the ideal $[a, (b + \sqrt\Delta)/2]$ is 
 \If {${a_1}^2/s < \sqrt{a_1} ~ |\Delta/4|^{1/4}$}
 	\State $a \gets {a_1}^3/s^2$
 	\State $b \gets (b_1 + 2Ua_1/s) \bmod 2a$
-	\State \Return $[a, (b+\sqrt\Delta)/2]$
+	\State \Return $[a, (b+\sqrt\Delta)/2]$ \Comment{optionally return $c = (b^2 - \Delta)/4a$}
 \EndIf
 
 \State $\matrixtt{R_{-2}}{C_{-2}}{R_{-1}}{C_{-1}} \gets \matrixtt{U}{-1}{{a_1}^2/s}{0}$
@@ -770,15 +774,16 @@ By \cite[p.15~Theorem~5.1]{Imbert2010}, the ideal $[a, (b + \sqrt\Delta)/2]$ is 
 	\State $C_i=C_{i-2}-q_i C_{i-1}$
 \EndWhile
 
-\State $M_1 \gets (R_ia_1 + C_iUa_1) / {a_1}^2$
+\State $M_1 \gets (R_i + C_iU) / a_1$
 \State $M_2 \gets (R_i(b_1 + Ua_1) - sC_ic_1) / {a_1}^2$
 \State $a \gets (-1)^{i+1} (R_i M_1 - C_i M_2)$
 \State $b \gets (2(R_ia_1/s - C_{i-1}a)/C_i - b_1) \bmod 2a$
-\State \Return $[a, (b+\sqrt\Delta)/2]$
+\State \Return $[a, (b+\sqrt\Delta)/2]$ \Comment{optionally return $c = (b^2 - \Delta)/4a$}
 \end{algorithmic}
 \end{algorithm}
 
 The next chapter discusses some exponentiation techniques that use the ideal arithmetic presented in this chapter, namely fast multiplication, squaring, and cubing.
+
 
 
 %%%%%%%%%%%%%%%%%%
