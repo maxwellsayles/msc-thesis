@@ -1221,6 +1221,8 @@ According to \cite[p.303]{Schnorr1984}, every reduced representative of an ambig
 
 Suppose we wish to find a factor of an odd integer $N$. Since $\Delta = b^2 - 4ac$ we must have $\Delta \equiv 0, 1 \pmod 4$.  Therefore, for some square free integer $k$, let $\Delta = -kN$ when $-kN \equiv 1 \pmod 4$ and $\Delta = -4kN$ otherwise.  Now to find a factor of $N$, we find a reduced ambiguous class representative with discriminant $\Delta$.  For a reduced ambiguous class representative, compute $d = \gcd(a, N)$ if $b = 0$ or $a = b$, and $d = \gcd(b-2a, N)$ otherwise.  If we are lucky, $d$ is a proper factor of $N$. See Chapter \ref{chap:xgcdExperiments} for a discussion on how to compute $\gcd(N, m)$.
 
+% TODO: Quantify "lucky" and explain.
+
 
 \subsection{SPAR Algorithm}
 \label{subsec:sparAlg}
@@ -1254,8 +1256,6 @@ This section discusses SuperSPAR -- an integer factoring algorithm and our motiv
 
 \subsection{Bounded Primorial Steps}
 \label{subsec:boundedPrimorialSteps}
-
-% TODO: Something about the median complexity being $O(M^{0.344})$ ?
 
 The bounded primorial steps algorithm \cite{Sutherland2007} is an order finding algorithm for generic groups with a worst case asymptotic complexity of $o(\sqrt M)$ group operations where $M$ is a bound on the order of the group element.  This is asymptotically better than previously known order finding algorithms for generic groups, such as the Pollard-Brent method \cite{Brent1980} and Shanks' baby-step giant-step method \cite{Shanks1971}, both of which have complexity $O(\sqrt M)$.  The algorithm improves upon Shanks' baby-step giant-step method by using a group element whose order is known to not have any small divisors.
 
@@ -1351,22 +1351,12 @@ This chapter discusses SPAR, an integer factoring algorithm based on the ideal c
 %%%%%%%%%%%%%%%%%%%%
 \chapter{Extended Greatest Common Divisor Experiments}
 \label{chap:xgcdExperiments}
-% Summarize that 32-bit EEA takes only 63\% of the time as the fastest reference implementation, i.e.\ Pari.  64-bit is our simplified l2r which takes only 77\% of the time as Pari.  
-
-
-% TODO: Tell more of a story.  Say that since the partial extended GCD is just one variable less than the extended GCD, that we assume that the best performing extended GCD is also the best performing partial extended GCD, but that future work would time each of these.
-
-%One contribution of this thesis is efficient implementations of algorithms that compute the extended greatest common divisor (GCD), useful for ideal class arithmetic.  This chapter discusses each of our implementations and their average performance, and compares each implementation to several reference implementations, namely \Pari{} \cite{PariGP}, \GMP{} \cite{Gmp}, and \MPIR{} \cite{Mpir}.  Our
-
-%Our best 32-bit implementation (the 32-bit extended Euclidean algorithm from Section \ref{sec:gcdEEA}) takes on average only 63\% of the time as the best reference implementation. Our best 64-bit implementation (a simplified left-to-right binary extended GCD introduced in Section \ref{sec:gcdL2R}) takes on average only 77\% of the time as the best reference implementation.  Finally, our best 128-bit implementations take between 95\% and 88\% of the time of the best reference implementations on average.   For integers larger than 31-bits and smaller than 127-bits, our best performing implementations use a variant of Shallit and Sorenson's left-to-right binary extended GCD \cite{Shallit1994}, which we introduce and refer to as a simplified left-to-right binary extended GCD.  On average, our 32-bit simplified left-to-right binary extended GCD uses only 78\% of the time as our 32-bit implementation of Shallit and Sorenson's left-to-right binary extended GCD.  For our 64-bit and 128-bit implementations the advantage is even larger.  Our 64-bit implementation uses on average only 71\% of the time, while our 128-bit implementation uses on average on 45\% of the time.
 
 One contribution of this thesis is an efficient implementation of arithmetic in the ideal class group of imaginary quadratic number fields.  Much of the computational effort of ideal class multiplication (Algorithm \ref{alg:nucomp}) is in computing integral solutions to equations of the form
 \[
 	s = Ua + Vb
 \]
 where $a$ and $b$ are fixed integers given as input, and $s$ is the greatest common divisor of both $a$ and $b$.  Solutions to this equation are referred to as the \emph{extended greatest common divisor} (or extended GCD for short).  A first step to improving the performance of arithmetic in the ideal class group is to improve the performance of extended GCD computations.  This chapter discusses several algorithms for computing solutions to the extended GCD.
-
-%, as well as a novel algorithm based on Shallit and Sorenson's left-to-right binary extended GCD \cite{Shallit1994}, that we refer to as a simplified left-to-right binary extended GCD.  
 
 Section \ref{sec:gcdEEA} discuses the standard extended Euclidean Algorithm, which uses multiplication and division.  Binary extended GCD computations, in contrast, emphasize bit shifting instead of multiplication and division.  Section \ref{sec:gcdR2LBin} discusses an extended GCD algorithm that works from low-order to high-order, referred to as \emph{right-to-left} as this is the order in which bits are operated on in the binary representation.  Subsection \ref{subsec:gcdR2LWindowed} discusses a windowed variant of this algorithm that operates on several bits of the input for each iteration.  An extended GCD can also be computed from high-order to low-order, and is referred to as \emph{left-to-right}.  One such technique, suggested by Shallit and Sorenson \cite{Shallit1994}, is discussed in Section \ref{sec:gcdL2R}.  There we propose a simplification of this algorithm that performs more than twice as fast on average for 128-bit inputs.  When the inputs are larger than a single machine word, Lehmer \cite{Lehmer1938} observed that much of the computation of the extended GCD can still be performed using just the most significant machine word of the intermediates.  Section \ref{sec:gcdLehmer} discusses Lehmer's standard extended GCD as well as some variations that we tried, namely precomputing intermediate solutions for 8-bit machine words and the use of a binary extended GCD for 64-bit machine words.  Section \ref{sec:gcdPartial} briefly describes each of these extended GCD computations in the context of the partial extended GCD, which is useful for computing the simple continued fraction expansion used by NUCOMP, NUDUPL, and NUCUBE from Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and \ref{subsec:nucube} respective.
 
@@ -1499,8 +1489,6 @@ otherwise let
 \]
 This ensures that $s$ is odd, $t$ is even, and that both $s$ and $t$ are positive.  Repeat the steps of reducing $t$ by powers of 2 and then subtracting one row from the other until $t=0$.  The complete algorithm is given in Algorithm \ref{alg:r2lBinGcd}.  Note that in practice, integer division by 2 is performed using a bit shift right.
 
-% TODO: Double check that this algorithm is correct!!!
-
 \begin{algorithm}[htb]
 \caption{Right-to-left Binary Extended GCD (Stein \cite{Stein1967}).}
 \label{alg:r2lBinGcd}
@@ -1620,8 +1608,6 @@ Notice that after this step $s$ has the previous value of $t$ and that the binar
 \end{algorithm}
 In practice, to find $q=2^k$ we compute the number of bits in both $s$ and $t$ and then use the difference as a candidate for $k$.  Let $k' = (\floor{\log_2s} + 1) - (\floor{\log_2t}+1) = \floor{\log_2s} - \floor{\log_2t}$ be our candidate.  If $t2^{k'} \le s$ then $k = k'$, otherwise $k = k'-1$.  Notice that either $k=k'$ in which case $t2^k=t2^{k'}$, or $k=k'-1$ and then $t2^{k+1} = t2^{k'}$.  Either way $t2^{k'}$ can be reused for one half of the comparison of $s-qt < 2qt - s$.  Also, if $k' = 0$ then $t \le s$ (by our invariant) and so there is no possibility of using $t2^{-1}$, since we will use $t2^{k'}$ and $t2^{k'+1}$ in the comparison.
 
-% TODO: Introduce Brent's method and state that ours is slightly different.  \cite{Brenth1976}
-
 This approach requires us to first compare $t2^{k'}$ to $s$ and then compare one of $t2^{k'-1}$ or $t2^{k'+1}$ to $s$ in order to find which is closer.  Because of this, we also experimented with a simplified version of the algorithm.  We only compute $k = \floor{\log_2s}-\floor{\log_2t}$.  Let $q=2^k$ and compute
 \[
 	\matrixThreeTwo{s}{U}{V}{t}{X}{Y} =
@@ -1632,8 +1618,6 @@ If $qt > s$ then the resulting value for $s-qt$ is negative, and so we negate th
 
 \section{Lehmer's Extended GCD}
 \label{sec:gcdLehmer}
-
-% TODO: Talk about Lehmer's with 64-bit EEA and 64-bit L2R.
 
 In the extended Euclidean algorithm (Section \ref{sec:gcdEEA}), each iteration subtracts a multiple, \mbox{$q = \floor{s / t}$}, of the smaller number from the larger number.  Derrick Henry Lehmer \cite{Lehmer1938} noticed that most of the quotients, $q$, were small and that those small quotients could be computed from the leading digits (or machine word) of the numerator and denominator.
 
@@ -2056,14 +2040,6 @@ This chapter discussed our implementations of ideal class arithmetic.  We then d
 \chapter{Exponentiation Experiments}
 \label{chap:powExperiments}
 
-% TODO: Come up with examples for each.
-% TODO: We might need to use 23814216 as an example everywhere since Yao's graph uses that and it was a lot of work.
-
-% TODO: The goal of this chapter is to find a method that works well with primorials since that's mostly what we'll use in SuperSPAR.
-
-% TODO: Mention our proposed methods in the introduction.
-% TODO: Mention alternate names for methods so people recognize them in the graphs.
-
 Subection \ref{subsec:boundedPrimorialSteps} discusses the bounded primorial steps algorithm of Sutherland \cite[\S 4.1]{Sutherland2007} -- an order finding algorithm for generic groups.  Part of this algorithm is to exponentiate a group element to a power primorial, i.e.\ the product of many small prime powers.  Since this exponent is determined by a given bound, when the range of bounds is known in advance, an efficient representation of each exponent can also be computed in advance.  Section \ref{sec:superSpar} discusses the SuperSPAR integer factoring algorithm.  This algorithm uses a variant of the bounded primorial steps algorithm to compute the order of an ideal class.  C. Siegel \cite[p.247]{Crandall2001} gives a bound on the class number (see Section \ref{sec:classGroup}), and as such, efficient representations of the exponent used by the bounded primorial steps portion of the SuperSPAR algorithm can be computed in advance.  This also holds for any algorithm using the bounded primorial steps algorithm where bounds on a group element are known in advance.
 
 This chapter discusses several approaches to exponentiating an ideal class to large exponents that are the product of all prime powers less than some bound (known as \emph{power primorials}), particularly where the set of exponents is known in advance.  We begin by recalling exponentiation techniques from Chapter \ref{chap:exponentiation}.  These include techniques that use signed and unsigned base 2 representations, right-to-left and left-to-right double base representations (for bases 2 and 3), and a tree-based approach.  
@@ -2170,15 +2146,6 @@ For both variations, we bound $a$ and $b$ such that $0 \le a \le U$ and $0 \le b
 
 \section{Left-to-Right Best Approximations}
 \label{sec:expBestApproximations}
-
-% TODO: State that we came up with this method.
-% In this section, we introduce a novel method for exponentiation that we call L best approximations."  Follow this with some motivation, including things like
-% - reason/motivation for developing the new method
-% - derivation (eg. is this a proposed/suggested improvement over an existing method)
-% - what was the main idea behind the method, improvements
-% - does it actually yield improvements in practice
-
-% I can't remember whether this was the method of choice for any parameter sizes.  If it is, you need to include mention of your original method in the intro to the exponentiation chapter, as well as in Ch 1 when describing your contributions.  Otherwise, you describe it as an attempt to improve that was tried, but unfortunately didn't help in practice.
 
 In this section, we propose a method that combines the approach of maintaining a set of the $L$ best partial representations, suggested by Doche and Habsieger \cite{Doche2008} (see Section \ref{sec:expGreedyTrees}), with that of computing left-to-right 2, 3 representations, suggested by Berth{\'e} and Imbert \cite{Berthe2009} (see Section \ref{sec:expL2RChains}).  The results of Section \ref{sec:expResults} show that this method gives the best performance on average of the methods studied when exponentiating by power primorials.
 
@@ -2409,8 +2376,6 @@ The sections in this chapter are as follows.  Section \ref{sec:ssparCoprimeFindi
 \section{Coprime Finding}
 \label{sec:ssparCoprimeFinding}
 
-% TODO: State our coprime wheel as a contribution.
-
 The bounded primorial steps algorithm from Subsection \ref{subsec:boundedPrimorialSteps} and adapted by the SuperSPAR factoring algorithm (Section \ref{sec:superSpar}) computes baby-steps $\aclass^i$ for $1 \le i \le s$ where $i$ is coprime to some primorial $P_w$ and $s$ is a multiple of $P_w$.  By considering only values coprime to $P_w$ the running time complexity of the bounded primorial steps algorithm achieves an upper bound of $O(\sqrt{M/\log \log M})$ group operations in the worst case.  If an implementation has to test whether each $i$ from $1$ to $P_w$ is coprime to $P_w$, the algorithm cannot achieve this.  As such, the algorithm assumes a set of values coprime to $P_w$ is globally available.  Of course, one can generate such a set by testing whether $\gcd(i, P_w) = 1$ for $i$ from $1$ to $P_w$, but there are more efficient methods.  This section discusses two such methods, namely sieving and wheeling.  Additional information on each technique can be found in \cite[pp.117--127]{Crandall2001} and \cite[p.494]{Sutherland2009}.
 
 \subsection{Coprime Sieve}
@@ -2602,7 +2567,6 @@ While almost any bounds on $e_i$ work in practice, the purpose of this chapter i
 
 % NOTE: interesting that after determining the best primorial for each bit size,
 %       that the power bound seems to be roughly 10x the number of primes used.
-% TODO: Redo table using theoretically optimal $p_t$ and $mP_w$.
 \begin{table}[htb]
 \centering
 \begin{tabular}{| r c r | r | r | r | r | r | r | r |}
@@ -2632,8 +2596,6 @@ While almost any bounds on $e_i$ work in practice, the purpose of this chapter i
 
 \subsection{Difference between the Order of Two Ideal Classes}
 \label{subsec:ssparDiffBtwOrder}
-
-% TODO: The factorization usually only contains one large prime found by the search stage, so searching on additional ideals is unnecessary in the sense that either the search failed on the first one, so it's unlikely to succeed on another due to the same large prime, or it succeeded on the first one and found the large prime and so only small primes remain (which should be removed by the exponentiation stage) in other ideal classes
 
 The purpose of this subsection is to justify a strategy where once $h'$, a multiple of the order of an ideal class $\idealclass{a_1}^{2^\ell E}$ for $\idealclass{a_1} \in Cl_\Delta$, is known, our implementation then attempts to find an ambiguous ideal by repeated squaring (up to at most $\ell = \floor{\log_2 \hdelta}$ times) of $\idealclass{a_i}^{Eh'}$ for several other ideal classes $\idealclass{a_i} \in Cl_\Delta$.  If both stages of the algorithm fail to find $h'$, then a different multiplier $k$ for the discriminant of the class group is tried.  Intuitively, the hope is that the factorization of the order of each ideal class $\idealclass{a_i}$ consists of one large prime and several small primes, and that the large prime is the same among each ideal class.  The exponentiation stage computes $\idealclass{b_1} = \idealclass{a_1}^{2^\ell E}$ for some exponent $E$ chosen so that the factorization of the order of $\idealclass{b_1}$ is likely to be free of small primes.  In which case, either the search stage successfully computes $h'$, which is hopefully also a multiple of the order of some other ideal class $\idealclass{a_i}^{2^\ell E}$, or the search stage was unsuccessful in determining the order of $\idealclass{b_1}$ because of the large prime factor dividing its order, and as such, the search stage will be unlikely to determine the order of some other ideal class $\idealclass{a_i}^{2^\ell E}$.
 
@@ -3147,10 +3109,6 @@ Table \ref{tab:ssparParams} shows the values used for the exponentiation and sea
 
 \section{Comparison to Other Factoring Implementations}
 \label{sec:ssparComparison}
-
-% TODO: The numbers being tested should never triger the worst case suggested by Lenstra and Pomerance since $N$ is square free.  Make sure that this is actually necessary to trigger the worst case.
-
-% TODO: Mention what factoring algorithm each implementation uses, e.g.\ Flint uses MPQS, etc.
 
 To demonstrate the performance of our implementation of SuperSPAR, several factoring implementations were compared, namely Pari/GP \cite{PariGP}, Msieve \cite{Msieve}, GMP-ECM \cite{Ecm}, YAFU \cite{Yafu}, Flint \cite{Flint}, Maple \cite{Maple}, and a custom implementation of SQUFOF \cite{Gower2008} adapted from the source code of Pari/GP.
 
