@@ -252,17 +252,17 @@ Finally, I would like to thank my wife, Faye, for being by my side, and for her 
 %%%%%%%%%%%%%%
 \chapter{Motivation}
 
-There are many interesting problems related to the study of algebraic number fields, and since quadratic number fields are the simplest of algebraic number fields \cite[p.77]{Jacobson2009}, they provide a good starting point for the study of ideals and class groups.  This thesis discusses practical improvements for arithmetic in the ideal class group of imaginary quadratic number fields.  Quadratic number fields are a degree 2 extension over the rational numbers, with the form $\KK = \QQ(\sqrt\Delta)$.  When the discriminant $\Delta$ is negative, then $\KK$ is a subset of the complex numbers and is referred to as an \emph{imaginary} quadratic number field.  When $\Delta$ is positive, then $\KK$ is a subset of the real numbers and is a \emph{real} quadratic number field.
+There are many interesting problems related to the study of algebraic number fields, and since quadratic number fields are the simplest of algebraic number fields \cite[p.77]{Jacobson2009}, they provide a good starting point for the study of ideals and class groups.  This thesis discusses practical improvements for arithmetic in the ideal class group of imaginary quadratic number fields.  Quadratic number fields are a degree 2 extension over the rational numbers, with the form $\KK = \QQ(\sqrt\Delta)$.  When the discriminant $\Delta$ is negative, then $\KK$ is referred to as an \emph{imaginary} quadratic number field, and when $\Delta$ is positive, then $\KK$ is referred to as a \emph{real} quadratic number field.
 
 The first published work on ideal class groups was the work of Carl Friedrich Gauss in the \emph{Disquisitiones Arithmeticae} \cite{Gauss1986}.  Gauss studied the theory of binary quadratic forms -- polynomials of the form $Q(x, y) = ax^2 + bxy + cy^2$ with $a, b, c \in \ZZ$.   We call $\Delta = b^2 - 4ac$ the \emph{discriminant} of the form, and say that an integer $n$ is represented by a form $Q(x, y)$ if there exist integers $x$ and $y$ such that $Q(x, y) = n$.  Gauss introduced the notion of \emph{equivalence} of forms.  For a given form $Q(x, y)$, there exists a set of integers that can be represented by that form.  We say that two forms are equivalent if there exists a linear integral transformation of variables from one form to another, in other words, if the set of integers represented by each form are identical \cite[p.239]{Crandall2001}.  This notion of equivalence leads to \emph{equivalence classes}, i.e.\ all the forms equivalent to each other constitute an equivalence class.  Gauss defined an operation between equivalence classes, called \emph{composition}, under which the set of equivalence classes of binary quadratic forms with discriminant $\Delta$ form a finite Abelian group \cite[p.136]{Cohn1980}.  Later this would be shown to be analogous to what is called the ideal class group of a quadratic field \cite{Frolich1993}.
 
 There are also many interesting problems related to the ideal class group of imaginary quadratic number fields, such as computing the class number or group structure for a particular field (see \cite{Ramachandran2006}), or solving the discrete logarithm problem in the class group.  A related problem to computing the discrete logarithm is that of computing the order of an ideal class.  This problem is of particular relevance to this thesis, since knowing the order of an ideal class can lead to the factorization of an integer associated with the discriminant.
 
-Many methods exist for computing the order of an element in a generic group, such as Shank's baby-step giant-step method \cite{Shanks1971}.  In this thesis, we employ a new technique of Sutherland \cite{Sutherland2007} for computing the order of an element.  This method is asymptotically faster than previous methods for generic groups, and is referred to as the \emph{bounded primorial steps algorithm} \cite[\S 4.1]{Sutherland2007}.  A principal component of this algorithm is to exponentiate a group element to an exponent that is the product of the $w$ smallest prime powers -- a product that is referred to as a \emph{primorial}.
+Many methods exist for computing the order of an element in a generic group, such as Shanks' baby-step giant-step method \cite{Shanks1971}.  In this thesis, we employ a new technique of Sutherland \cite{Sutherland2007} for computing the order of an element.  This method is asymptotically faster than previous methods for generic groups, and is referred to as the \emph{bounded primorial steps algorithm} \cite[\S 4.1]{Sutherland2007}.  A principal component of this algorithm is to exponentiate a group element to an exponent that is the product of the $w$ smallest prime powers -- a product that is referred to as a \emph{primorial}.
 
 To improve exponentiation in the ideal class group, we use the results of Imbert, Jacobson, and Schmidt \cite{Imbert2010}, which show that ideal class cubing can be made faster than multiplying an ideal class with its square.  Using this, we are able to take advantage of double-base number systems, introduced by Dimitrov and Cooklev \cite{Dimitrov1995a, Dimitrov1995b}, when exponentiating in the ideal class group.  
 
-With this in mind, this thesis focuses on practical improvements to arithmetic in the ideal class group of imaginary quadratic number fields with discriminants less than 128-bits in size, but also to that of exponentiating an element in this group to a primorial.  For the purposes of this thesis, these improvements are applied to an extension of an integer factoring algorithm called SPAR \cite{Schnorr1984}.  This algorithm is based on arithmetic in the ideal class group, and works by computing the order of an ideal class.  In this thesis, we adapt this algorithm to use the ideal class cubing of Imbert, Jacobson, and Schmidt \cite{Imbert2010}, the bounded primorial steps algorithm of Sutherland \cite{Sutherland2007}, and the double base number system of Dimitrov and Cooklev \cite{Dimitrov1995a, Dimitrov1995b}.  We call this new algorithm ``SuperSPAR''.  Of all the factoring algorithms tested, our implementation of SuperSPAR is the fastest on average for integers of size between 50-bits and 62-bits.  A possible application of this new factoring algorithm is for factoring left-overs after sieving in algorithms like the number field sieve using multiple large primes (see \cite[\S 6.1.4]{Crandall2001}).
+With this in mind, this thesis focuses on practical improvements to arithmetic in the ideal class group of imaginary quadratic number fields with discriminants less than 128-bits in size, but also to that of exponentiating an element in this group to a primorial.  For the purposes of this thesis, these improvements are applied to an extension of an integer factoring algorithm called SPAR \cite{Schnorr1984}.  This algorithm is based on arithmetic in the ideal class group, and works by computing the order of an ideal class.  In this thesis, we adapt this algorithm to use the ideal class cubing of Imbert, Jacobson, and Schmidt \cite{Imbert2010}, the bounded primorial steps algorithm of Sutherland \cite{Sutherland2007}, and the double base number system of Dimitrov and Cooklev \cite{Dimitrov1995a, Dimitrov1995b}.  We call this new algorithm ``SuperSPAR''.  Of all the factoring algorithms tested, our implementation of SuperSPAR is the fastest on average for integers of size between 50-bits and 62-bits.  A possible application of this new factoring algorithm is for factoring left overs after sieving in algorithms like the number field sieve using multiple large primes (see \cite[\S 6.1.4]{Crandall2001}).
 
 
 \section{Organization and Contributions of this Thesis}
@@ -273,7 +273,7 @@ To begin, one contribution of this thesis is improved arithmetic in the ideal cl
 
 Another contribution of this thesis is improved exponentiation by large power primorials in the ideal class group.  Again, these results are useful to our implementation of SuperSPAR.  Chapter \ref{chap:exponentiation} discusses some methods from the literature for exponentiating.  In particular, we discuss double base number systems and some approaches for computing double base representations useful for exponentiation.  In Chapter \ref{chap:powExperiments}, we propose several adaptations to these methods.  In particular, we propose a method that we call \emph{left-to-right best approximations} in Section \ref{sec:expBestApproximations}.  In Section \ref{sec:expResults} we provide results that show that for our implementation of ideal class arithmetic and when exponentiating by large power primorials, a left-to-right best approximations technique performs the best on average.  This is the technique used to compute 2,3 representations of power primorials used in our implementation of SuperSPAR.
 
-A final contribution of this thesis is an improved integer factoring algorithm, named \mbox{SuperSPAR}.  Chapter \ref{chap:superspar} discusses the original SPAR factoring algorithm, published by Schnorr and Lenstra \cite{Schnorr1984}, but named after Shanks, Pollard, Atkin, and Rickert \cite[p.484]{Lenstra1992}.  Our implementation employs the results of Chapters \ref{chap:xgcdExperiments}, \ref{chap:idealExperiments}, and \ref{chap:powExperiments}, as well as the bounded primorial steps algorithm of Sutherland \cite{Sutherland2007}, and several modifications to the original algorithm.  The result, demonstrated in Section \ref{sec:ssparComparison}, is an implementation of an integer factoring algorithm that is the fastest on average for semiprime integers of the size 50-bits to 62-bits of the implementations tested.  Again, this is useful for factoring left-overs after sieving in factoring algorithms like the number field sieve using multiple large primes \cite[\S 6.1.4]{Crandall2001}.
+A final contribution of this thesis is an improved integer factoring algorithm, named \mbox{SuperSPAR}.  Chapter \ref{chap:superspar} discusses the original SPAR factoring algorithm, published by Schnorr and Lenstra \cite{Schnorr1984}, but named after Shanks, Pollard, Atkin, and Rickert \cite[p.484]{Lenstra1992}.  Our implementation employs the results of Chapters \ref{chap:xgcdExperiments}, \ref{chap:idealExperiments}, and \ref{chap:powExperiments}, as well as the bounded primorial steps algorithm of Sutherland \cite{Sutherland2007}, and several modifications to the original algorithm.  The result, demonstrated in Section \ref{sec:ssparComparison}, is an implementation of an integer factoring algorithm that is the fastest on average for semiprime integers of the size 50-bits to 62-bits of the implementations tested.  Again, this is useful for factoring left overs after sieving in factoring algorithms like the number field sieve using multiple large primes \cite[\S 6.1.4]{Crandall2001}.
 
 
 %%%%%%%%%%%%%%%%%%%%
@@ -287,11 +287,13 @@ A focus of this thesis is arithmetic and exponentiation in the ideal class group
 
 \section{Quadratic Number Fields}
 
+% TODO: Fix the use of $A = b^2 - 4ac$
+
 A quadratic number field is an algebraic number field of degree 2 over the rational numbers $\QQ$, and is defined as
 \[
 	\QQ(\alpha) = \{u + v\alpha : u,v \in \QQ\}
 \]
-for some quadratic irrational $\alpha \in \CC$.  The element $\alpha$ must be a root of a quadratic polynomial $ax^2 + bx + c$ with integer coefficients.  Following \cite[p.188]{Ireland1990}, let $A = b^2-4ac$, then $\QQ(\sqrt A) = \QQ(\alpha)$, and when $A = f^2 D$ for $f, D \in \ZZ$ with $D$ square-free, then $\QQ(\sqrt D) = \QQ(\alpha)$ also.  When $D < 0$, then $\QQ(\sqrt D)$ is a subset of the complex numbers and we call $\QQ(\sqrt D)$ an \emph{imaginary} quadratic number field.  When $D > 0$, then $\QQ(\sqrt D)$ is a subset of the real numbers and we call $\QQ(\sqrt D)$ a \emph{real} quadratic number field.  The assumption throughout this thesis is that $D$ is negative.
+for some quadratic irrational $\alpha \in \CC$.  The element $\alpha$ must be a root of a quadratic polynomial $ax^2 + bx + c$ with integer coefficients.  Following \cite[p.188]{Ireland1990}, let $A = b^2-4ac$, then $\QQ(\sqrt A) = \QQ(\alpha)$, and when $A = f^2 D$ for $f, D \in \ZZ$ with $D$ square-free, then $\QQ(\sqrt D) = \QQ(\alpha)$ also.  When $D < 0$, then we call $\QQ(\sqrt D)$ an \emph{imaginary} quadratic number field, and when $D > 0$, then we call $\QQ(\sqrt D)$ a \emph{real} quadratic number field.  The assumption throughout this thesis is that $D$ is negative.
 
 When $\xi \in \QQ(\sqrt D)$ is a root of a \emph{monic} quadratic polynomial with integer coefficients, then $\xi$ is a \emph{quadratic integer}, or more simply an integer of $\QQ(\sqrt D)$.
 
@@ -387,13 +389,13 @@ Using fractional ideals, we are able to define inverses.
 \[
 	\ideal a^{-1} = \{ d \in \QQ(\sqrt \Delta) : d \ideal a \subseteq \OO_\Delta \}
 \]
-such that $\ideal a \ideal a^{-1} = \ideal a^{-1} \ideal a = \OO_\Delta$.
+and satisfies $\ideal a \ideal a^{-1} = \ideal a^{-1} \ideal a = \OO_\Delta$.
 \end{prop}
 
 All fractional ideals of $\OO_\Delta$ are invertible, and the set of invertible ideals forms a group under ideal multiplication.  We now define an equivalence relation on the invertible ideals of $\OO_\Delta$.
 
 \begin{defn}
-\cite[p.88]{Jacobson2009} Two invertible ideals $\ideal a$ and $\ideal b$ are \emph{equivalent} if there exists principal ideals $\alpha, \beta \in \OO_\Delta$ such that $\alpha \beta \neq 0$ and $(\alpha)\ideal a = (\beta) \ideal b$.
+\cite[p.88]{Jacobson2009} Two invertible ideals $\ideal a$ and $\ideal b$ are \emph{equivalent} if there exist principal ideals $\alpha, \beta \in \OO_\Delta$ such that $\alpha \beta \neq 0$ and $(\alpha)\ideal a = (\beta) \ideal b$.
 \end{defn}
 
 We write $\aclass$ to denote the set of all ideals equivalent to $\ideal a$, and call this an \emph{ideal class}.  The \emph{ideal class group}, denoted $Cl_\Delta$, is the set of all equivalence classes of invertible ideals, with the group operation defined as the product of class representatives.  By \cite[p.136]{Cohn1980}, the ideal class group is a finite Abelian group.
@@ -403,7 +405,7 @@ The number of ideal classes in the class group $Cl_\Delta$ is the \emph{class nu
 \end{defn}
 
 \noindent
-C. Siegel \cite[p.247]{Crandall2001} shows that $h_\Delta = |\Delta|^{1/2 + o(1)}$ as $\Delta \rightarrow -\infty$, which will be useful in Chapters \ref{chap:superspar} and \ref{chap:ssparExperiments}.
+C. Siegel \cite[p.247]{Crandall2001} showed that $h_\Delta = |\Delta|^{1/2 + o(1)}$ as $\Delta \rightarrow -\infty$, which will be useful in Chapters \ref{chap:superspar} and \ref{chap:ssparExperiments}.
 
 %Cohen \cite[p.247]{Crandall2001} states a bound on the number of elements in the class group $Cl_\Delta$ as
 %\begin{equation}
@@ -480,7 +482,7 @@ Since $c = (b^2 - \Delta)/4a$ we have
 \label{eq:idealSwapAC}
 	\ideal b = \left[ c, \frac{-b + \sqrt\Delta}{2} \right].
 \end{equation}
-The first step is to reduce $a$ by setting $\ideal a = [c, (-b + \sqrt\Delta)/2]$, if $a > c$.  Then $b$ is reduced since $b$ is unique modulo $2a$.  These steps are repeated while $\ideal a$ is not reduced. In the case that $a = c$, we use the absolute value of $b$, since by Equation \ref{eq:idealSwapAC} the ideals $[a, (b + \sqrt\Delta)/2]$ and $[c, (-b+\sqrt\Delta)/2]$ are equivalent.  Algorithm \ref{alg:reduce} gives Pseudo-code.
+The first step is to decrease $a$ by setting $\ideal a = [c, (-b + \sqrt\Delta)/2]$, if $a > c$.  Then $b$ is reduced since $b$ is unique modulo $2a$.  These steps are repeated while $\ideal a$ is not reduced. In the case that $a = c$, we use the absolute value of $b$, since by Equation \ref{eq:idealSwapAC} the ideals $[a, (b + \sqrt\Delta)/2]$ and $[c, (-b+\sqrt\Delta)/2]$ are equivalent.  Algorithm \ref{alg:reduce} gives Pseudo-code.
 
 We point out here that by Definition \ref{defn:reducedIdeal}, $|b| \le a$.  It follows that $-\Delta = 4ac - b^2 \ge 4ac -a^2$, and using $a \le c$, we have $|b| \le a \le \sqrt{|\Delta|/3}$.  These bounds will be useful to our implementations of ideal class arithmetic in Chapter \ref{chap:idealExperiments}.
 
@@ -579,7 +581,7 @@ which completes the derivation of Equation \ref{eq:idealProductB}.  Note that th
 \subsection{Fast Ideal Multiplication (NUCOMP)}
 \label{subsec:nucomp}
 
-Shanks \cite{Shanks1989} gives an algorithm for multiplying two ideal class representatives such that their product is reduced or almost reduced.  The algorithm is known as NUCOMP and stands for ``New COMPosition''.  This algorithm is often faster in practice as the intermediate numbers are smaller and the final product requires at most two applications of the reduction operation to be converted to reduced form \cite[pp.439--441]{Jacobson2009}. The description of NUCOMP provided here is a high level description of the algorithm based on Jacobson and Williams \mbox{\cite[\S 5.4,~pp. 119-123]{Jacobson2009}}.
+Shanks \cite{Shanks1989} gave an algorithm for multiplying two ideal class representatives such that their product is reduced or almost reduced.  The algorithm is known as NUCOMP and stands for ``New COMPosition''.  This algorithm is often faster in practice as the intermediate numbers are smaller and the final product requires at most two applications of the reduction operation to be converted to reduced form \cite[pp.439--441]{Jacobson2009}. The description of NUCOMP provided here is a high level description of the algorithm based on Jacobson and Williams \mbox{\cite[\S 5.4,~pp. 119-123]{Jacobson2009}}.
 
 Equations \ref{eq:idealProductS}, \ref{eq:idealProductA}, and \ref{eq:idealProductB} from the previous subsection give a solution to the ideal product $\ideal a \ideal b = s[a, (b+\sqrt\Delta)/2]$.  In this case, the product ideal is not necessarily reduced.  Computing the reduced ideal class representative corresponds to computing the simple continued fraction expansion of $(b/2)/a$ \cite[p.119]{Jacobson2009}, but in this case, the coefficients $a$ and $b$ may be as large as $\Delta$ \cite[p.118]{Jacobson2009}.  Instead of computing the simple continued fraction expansion of $(b/2)/a$, Jacobson and Williams \cite[p.119]{Jacobson2009} use $sU/a_1$ where $U$ is given by Equation \ref{eq:idealProductU}.  To see why this is sufficient, recall from Subsection \ref{subsec:reduction} that $a_2$ is approximately $\sqrt{|\Delta|}$ in size, so $s^2 / 2 a_2 \approx 1 / \sqrt{|\Delta|}$ and
 \[
@@ -792,9 +794,9 @@ The next chapter discusses some exponentiation techniques that use the ideal ari
 \chapter{Exponentiation}
 \label{chap:exponentiation}
 
-Exponentiation has many applications. Diffie-Hellman key exchange uses exponentiation so that two parties may jointly establish a shared secret key over an insecure channel.  An application discussed in detail in this thesis is that of computing the order of an ideal class.  The approach used in Chapter \ref{chap:superspar} is to exponentiate an ideal class to the product, $E$, of several small primes.  The result is an ideal class whose order is likely to not be divisible by any of these primes.  The order is then computed using a variant of Shanks' baby-step giant-step algorithm where only powers relatively prime to $E$ are computed.  Computing the order of several ideal classes is one method to factor an integer associated with the ideal class group.  Faster exponentiation means the approach used there is faster.
+Exponentiation has many applications. Diffie-Hellman key exchange uses exponentiation so that two parties may jointly establish a shared secret key over an insecure channel.  An application discussed in detail in this thesis is that of computing the order of an ideal class.  The approach used in Chapter \ref{chap:superspar} is to exponentiate an ideal class by the product, $E$, of several small primes.  The result is an ideal class whose order is likely to not be divisible by any of these primes.  The order is then computed using a variant of Shanks' baby-step giant-step algorithm where only powers relatively prime to $E$ are computed.  Computing the order of several ideal classes is one method to factor an integer associated with the ideal class group.  Faster exponentiation means the approach used there is faster.
 
-In Sections \ref{sec:binaryExp} and \ref{sec:naf} we discuss standard exponentiation techniques that rely on a base 2 representation of the exponent.  In Section \ref{sec:dbns} we describe double-base number systems, which, as the name implies, are number systems that make use of two bases in the representation of a number.  We are particularly interested in representations that use bases 2 and 3, since our implementation of ideal class group arithmetic provides multiplication, squaring, and cubing. In Section \ref{sec:dbnsMethods} we discuss some methods to compute double-base representations found in the literature.  Throughout this chapter, the running time and space complexities are given in terms of the number of group operations and elements required. They do not take into consideration the binary costs associated with each.
+In Sections \ref{sec:binaryExp} and \ref{sec:naf} we discuss standard exponentiation techniques that rely on a base 2 representation of the exponent.  In Section \ref{sec:dbns} we describe double-base number systems, which, as the name implies, are number systems that make use of two bases in the representation of a number.  We are particularly interested in representations that use bases 2 and 3, since our implementation of ideal class group arithmetic provides multiplication, squaring, and cubing. In Section \ref{sec:dbnsMethods} we discuss some methods to compute double-base representations found in the literature.  Throughout this chapter, the running time and space complexities are given in terms of the number of group operations and elements required, respectively. They do not take into consideration the binary costs associated with each.
 
 
 \section{Binary Exponentiation}
@@ -809,7 +811,7 @@ where $b_i \in \{0, 1\}$ such that $b_i$ represents the $i^{\textrm{th}}$ bit of
 \]
 and compute $g^{2^i}$ by repeated squaring of $g$.  The result, $g^n$, is the product of each $g^{2^i}$ where $b_i = 1$.  This description is known as right-to-left binary exponentiation because the result is computed by generating the terms of the product from right to left in the written binary representation of $n$.  The left-to-right variant evaluates the bits of the exponent $n$ from high order to lower order by repeatedly squaring an accumulator and multiplying this with the base element $g$ when $b_i = 1$.  The left-to-right variant has the advantage that one of the values in each multiplication, namely $g$, remains fixed throughout the evaluation.  There also exist windowed variants where $g^w$ is precomputed for each $w$ in some window $0 \le w < 2^k$ for some $k$ (typically chosen to be cache efficient). The exponent $n$ is then expressed in base $2^k$.  For further discussion of windowed techniques, see \cite[Subsection~9.1.3.~p.149]{Cohen2006}.
 
-Binary exponentiation algorithms require $\floor{\log_2 n}$ squarings and $\left(\floor{\log_2~n} + 1 \right)/2$ multiplications on average, since a multiplication is only necessary when $b_i = 1$ and the probability of $b_i = 1$ is 1/2.
+For a randomly chosen exponent, binary exponentiation requires $\floor{\log_2 n}$ squarings and $\left(\floor{\log_2~n} + 1 \right)/2$ multiplications in expectation.  This is the case since a multiplication is only necessary when $b_i = 1$ and the probability of $b_i = 1$, for a randomly chosen exponent, is 1/2.
 
 
 \section{Non-Adjacent Form Exponentiation}
@@ -819,7 +821,7 @@ The Non-Adjacent Form (NAF) of an integer is a \emph{signed} base two representa
 \[
 	n = \sum_{i=0}^{\floor{\log_2 n}+1} s_i 2^i
 \]
-where $s_i \in \{0, 1, -1\}$ and $s_i \cdot s_{i+1} = 0$.  For example, suppose $n = 23814216$.  In binary we have
+where $s_i \in \{0, 1, -1\}$ and $s_i \cdot s_{i+1} = 0$, for $0 \le i \le \floor{\log_2(n)} + 1$.  For example, suppose $n = 23814216$.  In binary we have
 \begin{equation}
 \label{eq:binaryEg}
 	23814216 = 2^3+2^6+2^{13}+2^{14}+2^{16}+2^{17}+2^{19}+2^{21}+2^{22}+2^{24}
@@ -849,6 +851,7 @@ In our experiments, we use a variation of the above, originally due to Reitwiesn
 \label{alg:nafR2LImmutable}
 \begin{algorithmic}[1]
 \Require $g \in G, n \in \ZZgez$
+\Ensure $g^n$
 \State $c \gets 0$ \Comment{carry flag}
 \State $T \gets g$ \Comment{invariant: $T = g^{2^i}$}
 \State $R \gets 1_G$
@@ -869,7 +872,7 @@ In our experiments, we use a variation of the above, originally due to Reitwiesn
 \end{algorithmic}
 \end{algorithm}
 
-An advantage of non-adjacent form is that it requires at most $\floor{\log_2 n}+1$ squares and on average $(\floor{\log_2 n}+2)/3$ multiplications, as opposed to $(\floor{\log_2 n}+1)/2$ for binary exponentiation.  To see this, recall that non-adjacent form requires that no two non-zero terms be adjacent.  Consider any two adjacent terms.  The possible outcomes are $(0,0)$, $(s, 0)$, or $(0, s$) where $s \in \{-1, 1\}$. This means that 2/3 of the time, 1/2 of the terms will be non-zero, and so the probability of any given term being non-zero is 1/3.
+An advantage of the non-adjacent form is that it requires at most $\floor{\log_2 n}+1$ squares and on average $(\floor{\log_2 n}+2)/3$ multiplications, as opposed to $(\floor{\log_2 n}+1)/2$ for binary exponentiation.  To see this, recall that non-adjacent form requires that no two non-zero terms be adjacent.  Consider any two adjacent terms.  The possible outcomes are $(0,0)$, $(s, 0)$, or $(0, s$) where $s \in \{-1, 1\}$. This means that 2/3 of the time, 1/2 of the terms will be non-zero, and so the probability of any given term being non-zero is 1/3.
 
 As with binary exponentiation, there exist windowed variants of non-adjacent form (see \cite[Algorithm~9.20.~p.153]{Cohen2006}).   In this case, $g^w$ is computed for each $w$ in some window $-2^{k-1} < w \le 2^{k-1}$, and the exponent $n$ is repeatedly evaluated modulo $2^k$ using the smallest residue in absolute value, i.e.\ the residue $w$ such that $-2^{k-1} < w \le 2^{k-1}$.
 
@@ -892,7 +895,7 @@ Another possible representation is
 \label{eq:chainedEg2}
 	23814216 = 2^3 3^2 -2^{13} 3^2 +2^{15} 3^6.
 \end{equation}
-There may be many possible 2,3 representations for a given number, and different representations will trade off between cubings, squarings, and the number of terms.  Exponentiation using Equation \ref{eq:chainedEg1} requires 10 squarings, 9 cubings, 1 inverse, and 5 multiplications, while Equation \ref{eq:chainedEg2} requires 15 squarings, 6 cubings, 1 inverse, and 3 multiplications.  Contrast this with the binary representation (\ref{eq:binaryEg}), which requires 24 squarings, 0 inverses, and 9 multiplications, and the non-adjacent form (\ref{eq:nafEg}), which requires 25 squarings, 5 inverses, and 7 multiplications.  The best representation will depend on the needs of the application and the cost of each operation.  Later, we shall see some algorithms that take this into account (see Chapter \ref{chap:powExperiments}), but many are designed to either find representations quickly, of a special form, or with few terms.
+There may be many possible 2,3 representations for a given number, and different representations will trade off between cubings, squarings, and the number of terms.  Exponentiation using Equation \ref{eq:chainedEg1} requires 10 squarings, 9 cubings, 1 inversion, and 5 multiplications, while Equation \ref{eq:chainedEg2} requires 15 squarings, 6 cubings, 1 inversion, and 3 multiplications.  Contrast this with the binary representation (\ref{eq:binaryEg}), which requires 24 squarings, 0 inversions, and 9 multiplications, and the non-adjacent form (\ref{eq:nafEg}), which requires 25 squarings, 5 inversions, and 7 multiplications.  The best representation will depend on the needs of the application and the cost of each operation.  Later, we shall see some algorithms that take this into account (see Chapter \ref{chap:powExperiments}), but many are designed to either find representations quickly, of a special form, or with few terms.
 
 
 \subsection{Chained 2,3 Representations}
@@ -901,15 +904,15 @@ There may be many possible 2,3 representations for a given number, and different
 One way to classify algorithms that compute 2,3 representations is by the constraints placed on the partition of an integer $n$.
 
 \begin{defn} \cite[\S 1]{Imbert2010}
-A \emph{partition} of $n$ is written $n = x_1 \pm x_2 \pm \cdots \pm x_k$ where the terms $x_i$ are monotonically increasing by absolute value.
+A \emph{partition} of $n$ is written $n = \pm x_1 \pm x_2 \pm \cdots \pm x_k$ where the terms $x_i$ are monotonically increasing positive integers.
 \end{defn}
 
 \noindent
-One such constraint is on the divisibility of subsequent terms.
+One such constraint is on the divisibility of consecutive terms.
 
 \begin{defn}
 \label{defn:chained} \cite[\S 1]{Imbert2010}
-A partition of an integer $n = x_1 \pm x_2 \pm \cdots \pm x_k$ is \emph{chained} if every term $x_i$ divides every term $x_j$ for $i < j$ and $x_i \le x_j$. A partition is said to be \emph{strictly chained} if it is chained and $x_i$ is \emph{strictly} less than $x_j$ for each $i < j$.
+A partition of an integer $n = x_1 \pm x_2 \pm \cdots \pm x_k$ is \emph{chained} if every term $x_i$ divides every term $x_j$ for $i < j$. A partition is said to be \emph{strictly chained} if it is chained and $x_i$ is \emph{strictly} less than $x_j$ for each $i < j$.
 \end{defn}
 
 \noindent
@@ -949,7 +952,7 @@ Recall that when inversion is expensive, the product of terms with negative expo
 
 There is evidence \cite{Imbert2010} that the shortest possible chained representations require a linear number of terms in relation to the size of the input.  This is in contrast to unchained representations for which there are algorithms where the number of terms in the representation is provably sublinear in the length of the input \cite{Dimitrov2008, Ciet2005}.
 
-Given an unchained 2,3 representation for an integer $n = \sum s_i 2^{a_i} 3^{b_i}$, M\'{e}loni and Hasan \cite[Section 3.2]{Meloni2009} give an algorithm that achieves the same bound on the number of group operations, i.e.\ $O(\log n)$, as in Algorithm \ref{alg:expWithChain}, but with a bound of $O(\min \{\max a_i, \max b_i\})$ on the number of group elements stored.  Suppose $\max b_i < \max a_i$ and that the terms are labelled and sorted such that $a_1 \ge ... \ge a_k$.  The algorithm works by precomputing a table of $T_b = g^{3^b}$ for $0 \le b \le \max b_i$.  Let $i=1$ and begin with the first term $s_i2^{a_i}3^{b_i}$.  Look up $T_{b_i} = g^{3^{b_i}}$ and, after applying the sign $s_i$, multiply ${T_{b_i}}^{s_i}$ with the running result.  Let $a' = a_i - a_{i+1}$ when $i < k$ and $a' = a_k$ when $i = k$.  Then square the running result $a'$ times.  The algorithm then removes the term $s_i2^{a_i}3^{b_i}$ from the list of terms, and continues in this way with the next largest $a_i$.  The algorithm terminates when there are no more terms in the list.  Algorithm  \ref{alg:yaos} gives pseudo-code for this approach and requires the storage of $O(\max b_i)$ group elements.  When $\max a_i < \max b_i$, we use a related algorithm that requires the terms to be sorted such that $b_1 \ge ... \ge b_k$; it precomputes $T_a = g^{2^a}$ for $0 \le a \le \max a_i$ and works similar to Algorithm \ref{alg:yaos} but with cubing and squaring appropriately swapped.
+Given an unchained 2,3 representation for an integer $n = \sum s_i 2^{a_i} 3^{b_i}$, M\'{e}loni and Hasan \cite[Section 3.2]{Meloni2009} gave an algorithm that achieves the same bound on the number of group operations, i.e.\ $O(\log n)$, as Algorithm \ref{alg:expWithChain}, but with a bound of $O(\min \{\max a_i, \max b_i\})$ on the number of group elements stored.  Suppose $\max b_i < \max a_i$ and that the terms are labelled and sorted such that $a_1 \ge ... \ge a_k$.  The algorithm works by precomputing a table of $T_b = g^{3^b}$ for $0 \le b \le \max b_i$.  Let $i=1$ and begin with the first term $s_i2^{a_i}3^{b_i}$.  Look up $T_{b_i} = g^{3^{b_i}}$ and, after applying the sign $s_i$, multiply ${T_{b_i}}^{s_i}$ with the running result.  Let $a' = a_i - a_{i+1}$ when $i < k$ and $a' = a_k$ when $i = k$.  Then square the running result $a'$ times.  The algorithm then removes the term $s_i2^{a_i}3^{b_i}$ from the list of terms, and continues in this way with the next largest $a_i$.  The algorithm terminates when there are no more terms in the list.  Algorithm  \ref{alg:yaos} gives pseudo-code for this approach and requires the storage of $O(\max b_i)$ group elements.  When $\max a_i < \max b_i$, we use a related algorithm that requires the terms to be sorted such that $b_1 \ge ... \ge b_k$; it precomputes $T_a = g^{2^a}$ for $0 \le a \le \max a_i$ and works similar to Algorithm \ref{alg:yaos} but with cubing and squaring appropriately swapped.
 
 \begin{algorithm}[htb]
 \caption{Compute $g^n$ for a 2,3 representation of $n$ (\cite[Section 3.2]{Meloni2009}).}
@@ -991,7 +994,7 @@ using 15 squares, 6 cubes, 2 inverses, and 3 multiplications.  The result of the
 \begin{figure}[H]
 \centering
 \includegraphics{yao1}
-\caption[The construction of $2^{15} 3^6 - 2^8 3^5 - 2^4 3^6 + 2^3 3^3$.]{The construction of $2^{15} 3^6 - 2^8 3^5 - 2^4 3^6 + 2^3 3^3$ using algorithm \ref{alg:yaos}.  Steps are executed from left-to-right, top-to-bottom.  Positive terms in the exponent are indicated with green, while negative terms use red.}
+\caption[The construction of $2^{15} 3^6 - 2^8 3^5 - 2^4 3^6 + 2^3 3^3$.]{The construction of $2^{15} 3^6 - 2^8 3^5 - 2^4 3^6 + 2^3 3^3$ using Algorithm \ref{alg:yaos}.  Steps are executed from left-to-right, top-to-bottom.  Positive terms in the exponent are indicated with green, while negative terms use red.}
 \label{fig:yao1}
 \end{figure}
 %\clearpage
@@ -1011,8 +1014,8 @@ The first method we present computes a strictly chained 2,3 partition that is ge
 \begin{align*}
 \textrm{bin}(g, n) &= \begin{cases}
                1 & \textrm{if $n = 0$} \\
-               {\textrm{bin}(g, n/2)}^2 & \textrm{if $n \equiv 0 \pmod 2$} \\
-               \textrm{bin}(g, n-1) \cdot g & \textrm{if $n \equiv 1 \pmod 2$} \\
+               {\textrm{bin}(g, n/2)}^2 & \textrm{if $n > 0$ and $n \equiv 0 \pmod 2$} \\
+               \textrm{bin}(g, n-1) \cdot g & \textrm{if $n > 0$ and $n \equiv 1 \pmod 2$} \\
 	       \end{cases}
 \end{align*}
 will compute the binary exponentiation of $g^n$ from low order to high order. This algorithm repeatedly removes factors of 2 from $n$.  When $n$ is not divisible by 2, it subtracts 1 such that the input to the recursive call will be divisible by 2.  The recursion terminates with the base case of $n=0$.
@@ -1023,14 +1026,14 @@ This concept is extended to a 2,3 number system by repeatedly removing factors o
 \begin{align*}
 \rtol(g, n) &= \begin{cases}
                1 & \textrm{if $n = 0$} \\
-               {\rtol(g, n/2)}^2 & \textrm{if $n \equiv 0 \pmod 2$} \\
-               {\rtol(g, n/3)}^3 & \textrm{if $n \equiv 0 \pmod 3$} \\
-               \rtol(g, n-1) \cdot g & \textrm{if $n \equiv 1 \pmod 3$} \\
-               \rtol(g, n+1) \cdot g^{-1} & \textrm{if $n \equiv 2 \pmod 3$}. \\
+               {\rtol(g, n/2)}^2 & \textrm{if $n > 0$ and $n \equiv 0 \pmod 2$} \\
+               {\rtol(g, n/3)}^3 & \textrm{if $n > 0$ and $n \equiv 0 \pmod 3$} \\
+               \rtol(g, n-1) \cdot g & \textrm{if $n > 0$ and $n \equiv 1 \pmod 3$} \\
+               \rtol(g, n+1) \cdot g^{-1} & \textrm{if $n > 0$ and $n \equiv 2 \pmod 3$}. \\
 	       \end{cases}
 \end{align*}
 
-Algorithm \ref{alg:rtolDbnsChain} describes a non-recursive function with group operations that correspond to those generated by the function $\rtol$.  The idea is as follows: let $a = 0$, $b=0$, and $i=1$.  While $n > 0$, repeatedly remove factors of 2 from $n$ and increment $a$ for each factor of 2 removed. Then repeatedly remove factors of 3 from $n$ and increment $b$ for each factor of 3 removed. At this point, either $n \equiv 1 \pmod 6$ or $n \equiv 5 \pmod 6$ and so continue on $n-1$ or $n+1$ respectively.  When we continue on $n-1$, this corresponds to adding the current term, so we set $s_i=1$, and when we continue on $n+1$, this corresponds to subtracting the current term, so we set $s_i=-1$. Let $a_i = a$ and $b_i = b$ and then increment $i$ and then repeat this process while $n > 0$.  We then use Algorithm \ref{alg:expWithChain} to compute the exponentiation given the strictly chained 2,3 partition.  When we are not able to compute the chain in advance, it is relatively straightforward to interleave the computation of the partition with the computation of the exponentiation, since the terms $s_i2^{a_i}3^{b_i}$ are computed in increasing order for $i=1..k$.
+Algorithm \ref{alg:rtolDbnsChain} describes a non-recursive function with group operations that correspond to those generated by the function $\rtol$.  The idea is as follows: let $a = 0$, $b=0$, and $i=1$.  While $n > 0$, repeatedly remove factors of 2 from $n$ and increment $a$ for each factor of 2 removed. Then repeatedly remove factors of 3 from $n$ and increment $b$ for each factor of 3 removed. At this point, either $n \equiv 1 \pmod 6$ or $n \equiv 5 \pmod 6$ and so continue on $n-1$ or $n+1$ respectively.  When we continue on $n-1$, this corresponds to adding the current term, so we set $s_i=1$, and when we continue on $n+1$, this corresponds to subtracting the current term, so we set $s_i=-1$. Let $a_i = a$ and $b_i = b$ and then increment $i$ and repeat this process while $n > 0$.  We then use Algorithm \ref{alg:expWithChain} to compute the exponentiation given the strictly chained 2,3 partition.  When we are not able to compute the chain in advance, it is relatively straightforward to interleave the computation of the partition with the computation of the exponentiation, since the terms $s_i2^{a_i}3^{b_i}$ are computed in increasing order for $i=1..k$.
 
 \begin{algorithm}[htb]
 \caption{2,3 strict chains from low order to high order (Ciet et al \cite{Ciet2006}).}
@@ -1159,7 +1162,7 @@ Larger values of $L$ sometimes produce chains with fewer terms, but take longer 
 \subsection{Shortest Additive 2, 3 Chains}
 \label{subsec:shortAddChains}
 
-In the previous subsection, the search for a 2,3 chain iterates on $\pm 1$ the value of the $L$ smallest candidates.  When we further restrict a chain to contain only positive terms, the number of possible 2,3 chains is reduced.  Imbert and Philippe \cite[\S 3]{Imbert2010b} consider searching for additive 2,3 strictly chained partitions that contain as few terms as possible.  They give the following recursive function to compute the minimum number of terms in such a chain. Let $s(n)$ denote the smallest $k$ such that $n$ can be represented as $n = \sum_{i=1}^k 2^{a_i} 3^{b_i}$. We define $s(n)$ as
+In the previous subsection, the search for a 2,3 chain iterates on $\pm 1$ the value of the $L$ smallest candidates.  When we further restrict a chain to contain only positive terms, the number of possible 2,3 chains is reduced.  Imbert and Philippe \cite[\S 3]{Imbert2010b} considered searching for additive 2,3 strictly chained partitions that contain as few terms as possible.  They gave the following recursive function to compute the minimum number of terms in such a chain.  Let $s(n)$ denote the smallest $k$ such that $n$ can be represented as $n = \sum_{i=1}^k 2^{a_i} 3^{b_i}$.  They define $s(n)$ as
 \begin{equation*}
 s(n) = \begin{cases}
 	\min\{s(n/3), s(n/2)\} & \textrm{when } n \equiv 0 \pmod 6 \\
@@ -1179,7 +1182,7 @@ The corresponding 2,3 chain is computed by memoizing a shortest chain for each s
 
 This chapter outlined some exponentiation techniques from the literature.  We started with binary exponentiation based on a binary representation of the exponent.  Next we described non-adjacent form using a signed base 2 encoding of the exponent.  Since cubing is often faster than combined multiplication with squaring, we discussed 2,3 number systems where an integer can have many representations as the sum of the products of 2 and 3.  Exponentiation based on 2,3 representations fall under two classes: chained and unchained.  Chained representations can typically be computed while interleaved with the exponentiation operation.  They also require storage of only a constant number of group elements in addition to the input arguments.  Unchained representations often have fewer terms or operations in their representation.  Exponentiation of a group element using an unchained representation of the exponent can be performed using a linear number of group elements in the size of the exponent.
 
-Coming up, Chapter \ref{chap:powExperiments} discusses several variations of chained and unchained 2,3 representations, many of which take into account the average time to multiply, square, and cube elements from the ideal class group.  The actual performance of these variations guide our implementation of a factoring algorithm called ``SuperSPAR''.  In the next chapter, we provide the background for SPAR and the SuperSPAR factoring algorithm.
+Chapter \ref{chap:powExperiments} discusses several variations of chained and unchained 2,3 representations, many of which take into account the average time to multiply, square, and cube elements from the ideal class group.  The actual performance of these variations guide our implementation of a factoring algorithm called ``SuperSPAR''.  In the next chapter, we provide the background for SPAR and the SuperSPAR factoring algorithm.
 
 
 %%%%%%%%%%%%%
