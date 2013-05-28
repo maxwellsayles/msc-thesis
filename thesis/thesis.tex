@@ -282,6 +282,8 @@ A final contribution of this thesis is an improved integer factoring algorithm, 
 \chapter{Ideal Arithmetic}
 \label{chap:idealArithmetic}
 
+% TODO: An example for every definition?
+
 A focus of this thesis is arithmetic and exponentiation in the ideal class group of imaginary quadratic number fields.  We begin with the relevant theory of quadratic number fields, then discuss quadratic orders and ideals of quadratic orders.  Finally, we discuss arithmetic in the ideal class group.  The theory presented here is available in detail in reference texts on algebraic number theory such as \cite{Cohn1980}, \cite{Hua2012}, or \cite{Ireland1990}. 
 
 
@@ -293,7 +295,15 @@ A quadratic number field is an algebraic number field of degree 2 over the ratio
 \[
 	\QQ(\alpha) = \{u + v\alpha : u,v \in \QQ\}
 \]
-for some quadratic irrational $\alpha \in \CC$.  The element $\alpha$ must be a root of a quadratic polynomial $ax^2 + bx + c$ with integer coefficients.  Following \cite[p.188]{Ireland1990}, let $A = b^2-4ac$, then $\QQ(\sqrt A) = \QQ(\alpha)$, and when $A = f^2 D$ for $f, D \in \ZZ$ with $D$ square-free, then $\QQ(\sqrt D) = \QQ(\alpha)$ also.  When $D < 0$, then we call $\QQ(\sqrt D)$ an \emph{imaginary} quadratic number field, and when $D > 0$, then we call $\QQ(\sqrt D)$ a \emph{real} quadratic number field.  The assumption throughout this thesis is that $D$ is negative.
+for some quadratic irrational $\alpha \in \CC$.  The element $\alpha$ must be a root of a quadratic polynomial $ax^2 + bx + c$ with integer coefficients.  By the quadratic formula
+\[
+	\alpha = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
+\]
+and therefore,
+\[
+	\QQ(b^2-4ac) = \QQ(\alpha).
+\]
+Let $f^2 D = b^2-4ac$ for $f, D \in \ZZ$ and $D$ square-free, then $\QQ(\sqrt D) = \QQ(\alpha)$ also.  When $D < 0$, then we call $\QQ(\sqrt D)$ an \emph{imaginary} quadratic number field, and when $D > 0$, we call $\QQ(\sqrt D)$ a \emph{real} quadratic number field.  The assumption throughout this thesis is that $D$ is negative.
 
 When $\xi \in \QQ(\sqrt D)$ is a root of a \emph{monic} quadratic polynomial with integer coefficients, then $\xi$ is a \emph{quadratic integer}, or more simply an integer of $\QQ(\sqrt D)$.
 
@@ -309,7 +319,7 @@ When $\xi \in \QQ(\sqrt D)$ is a root of a \emph{monic} quadratic polynomial wit
 for $x, y \in \ZZ$.  See \cite[p.189]{Ireland1990} for a proof.
 \end{prop}
 
-Let $[\omega_1, \omega_2]$ denote the $\ZZ$-module represented by the algebraic integers $\omega_1$ and $\omega_2$, as
+Let $[\omega_1, \omega_2]$ denote the $\ZZ$-module represented by the quadratic integers $\omega_1$ and $\omega_2$, as
 \[
 	\omega_1 \ZZ + \omega_2 \ZZ = \{ \omega_1 x + \omega_2 y : x, y \in \ZZ \}.
 \]
@@ -328,6 +338,10 @@ A \emph{quadratic order} $\OO$ of $\QQ(\sqrt D)$ is a sub-ring of the quadratic 
 
 When a quadratic order $\OO$ consists of all the quadratic integers in $\QQ(\sqrt D)$ then it is called the \emph{maximal order}, since it is not contained within any larger order.  Following \mbox{\cite[p.80]{Jacobson2009}}, the $\ZZ$-module $[1, \omega]$ is an order of $\KK = \QQ(\sqrt D)$ and we denote this $\OO_{\KK}$.
 
+\begin{example}
+Let $i^2 = -1$, then $[1, 2i]$ is an order of $\QQ(i)$ that is \emph{not} maximal since it is contained in the order $[1, i]$.
+\end{example}
+
 \begin{defn}
 \cite[Definition 4.16]{Jacobson2009} Let $\OO = [\xi_1, \xi_2]$ be any order of $\QQ(\sqrt D)$.  Then the \emph{discriminant} $\Delta$ of $\OO$ is defined as
 \[
@@ -337,7 +351,19 @@ When a quadratic order $\OO$ consists of all the quadratic integers in $\QQ(\sqr
 where $\overline{\xi}$ denotes the complex conjugate of $\xi$.
 \end{defn}
 
-Following Ramachandran \cite[p.13]{Ramachandran2006}, the discriminant $\Delta$ of the maximal order $\OO_\KK = [1, \omega]$ can be written as
+\begin{example}
+\label{ex:discriminant}
+The discriminant $\Delta'$ of the non-maximal order $[1,2i]$ is
+\[
+	\Delta' = {\left| \begin{array}{rr} 1 & 2i \\ 1 & -2i \end{array} \right|}^2 = (-4i)^2 = -16,
+\]
+while the discriminant $\Delta$ of the maximal order $[1,i]$ is
+\[
+	\Delta = {\left| \begin{array}{rr} 1 & i \\ 1 & -i \end{array} \right|}^2 = (-2i)^2 = -4.
+\]
+\end{example}
+
+By \cite[p.13]{Ramachandran2006}, the discriminant $\Delta$ of the maximal order $\OO_\KK = [1, \omega]$ can be written as
 \[
 \Delta = \begin{cases}
 	4D & \textrm{when } D \equiv 2, 3 \pmod 4 \\
@@ -351,15 +377,28 @@ Let $\OO'$ be a non-maximal order of $\QQ(\sqrt D)$ with discriminant $\Delta'$.
 \end{prop}
 
 \noindent
-We call $f$ the \emph{conductor} of the non-maximal order $\OO'$.
+We call $f$ the \emph{conductor} of the non-maximal order $\OO'$.  Note that in Example \ref{ex:discriminant}, we had $\Delta' = -16 = 4(-4) = f^2\Delta$ where $f = 2$ and $\Delta = -4$.
 
 
 \section{Ideals and the Class Group}
 \label{sec:classGroup}
 
-\begin{defn}
-An (integral) \emph{ideal} $\mathfrak a$ is an additive subgroup of an order $\OO$ with the property that for any $a \in \mathfrak a$ and $\xi \in \OO$, it holds that $\xi a$ and $a \xi$ are both elements of the ideal $\mathfrak a$.
+\begin{defn} \cite[Definition 4.20]{Jacobson2009}
+An (integral) \emph{ideal} $\ideal a$ is an additive subgroup of an order $\OO$ with the property that for any $a \in \ideal a$ and $\xi \in \OO$, it holds that $\xi a$ is an element of the ideal $\ideal a$.
 \end{defn}
+
+\begin{example}
+Let $\OO = [1, i]$ for $i^2 = -1$ be a maximal order, and $\ideal a = \{2 x + y i : x, y \in \OO\}$ be an additive subgroup of $\OO$.  Then by Proposition \ref{prop:quadInts}, for some $\xi \in \OO$ we have $\xi = u + v i$ for $u,v \in \ZZ$ and for some $\alpha \in \ideal a$ we have $\alpha = 2 \omega_1 + \omega_2 i$ for $\omega_1, \omega_2 \in \OO$.  Since $\omega_1, \omega_2 \in \OO$, there exists $x_1, y_1, x_2, y_2 \in \ZZ$ with $\omega_1 = 2 x_1 + y_1 i$ and $\omega_2 = 2 x_2 + y_2 i$.  Now it follows that
+\begin{align*}
+\xi \alpha &= (u + v i)(2 \omega_1 + \omega_2 i) \\
+&= (u + v i)(2 (x_1 + y_1 i) + (x_2 + y_2 i) i) \\
+&= (u + v i)(2 x_1 + 2 y_1 i + x_2 i - y_2) \\
+&= 2 x_1 u + 2 y_1 u i + x_2 u i - y_2 u
+ + 2 x_1 v i - 2 y_1 v + x_2 v - y_2 v i \\
+&= 2 ((x_1 u - y_1 v) + (y_1u + x_1v)i) + ((x_2 u - y_2 v) + (y_2 u - x_2 v) i) i.
+\end{align*}
+Let $\zeta_1 = (x_1 u - y_1 v) + (y_1u + x_1v)i$ and $\zeta_2 = (x_2 u - y_2 v) + (y_2 u - x_2 v) i$.  Since $\zeta_1, \zeta_2 \in \OO$, it follows that $\xi \alpha = 2 \zeta_1 + \zeta_2 i$ and $\xi \alpha \in \ideal a$.  Therefore, $\ideal a$ is an ideal of $\OO$.
+\end{example}
 
 %\begin{defn}
 %An ideal $\ideal a$ is called \emph{primitive} if it cannot be written $\ideal a = m \ideal b$ for some ideal $\ideal b \in \OO_\Delta$ and $|m| > 1, m \in \ZZ$.
@@ -555,7 +594,7 @@ It remains to compute $b \pmod{2a}$.  Recall that $a = a_1a_2/s^2$.  This time, 
 \end{align}
 
 \noindent
-This gives $b$.  However, Equation \eqref{eq:bMod2a} can be rewritten with fewer multiplies and divides.  Equation \eqref{eq:sAsGCD} gives
+This gives $b$.  However, Equation \eqref{eq:bMod2a} can be rewritten with fewer products and quotients.  Equation \eqref{eq:sAsGCD} gives
 \begin{align*}
 	s & = Ya_1 + Va_2 + W\frac{b_1+b_2}{2} \\
 	1 & = Y\frac{a_1}{s} + V\frac{a_2}{s} + W\frac{b_1+b_2}{2s} \\
