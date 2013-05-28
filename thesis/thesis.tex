@@ -1987,9 +1987,7 @@ s = \gcd(a_1, a_2, (b_1+b_2)/2) = Ya_1 + Va_2 + W(b_1+b_2)/2
 \]
 into two GCD computations, the second of which is only computed if the first GCD is not equal to 1.  Additional optimizations discussed in this section are an approximation of the termination bound, minimizing the size of intermediates, branch free reduction operations, and the computation of prime ideal classes.
 
-In Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and \ref{subsec:nucube} we gave algorithms for fast ideal class multiplication, squaring, and cubing.  These compute a termination bound for the partial extended GCD useful for computing partially reduced coefficients of the product ideal class.  The termination bound for ideal multiplication is $\sqrt{a_1/a_2}|\Delta/4|^{1/4}$, for ideal squaring it is $|\Delta/4|^{1/4}$, and for ideal cubing it is $\sqrt{a_1}|\Delta/4|^{1/4}$.  In our implementations of ideal class arithmetic, we approximate each of these termination bounds, however, future work is necessary to demonstrate that this approach actually leads to a performance improvement.
-
-% TODO: Insert graph showing that this is faster!
+In Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and \ref{subsec:nucube} we gave algorithms for fast ideal class multiplication, squaring, and cubing.  These compute a termination bound for the partial extended GCD useful for computing partially reduced coefficients of the product ideal class.  The termination bound for ideal multiplication is $\sqrt{a_1/a_2}|\Delta/4|^{1/4}$, for ideal squaring it is $|\Delta/4|^{1/4}$, and for ideal cubing it is $\sqrt{a_1}|\Delta/4|^{1/4}$.  In our implementations of ideal class arithmetic, we approximate each of these termination bounds.  The results in Section \ref{sec:idealResults}, particularly in Figures \ref{fig:idealComposeSqrt64}, \ref{fig:idealCubeSqrt64}, \ref{fig:idealComposeSqrt128}, and \ref{fig:idealCubeSqrt128}, show that using an approximate termination bound is faster on average.
 
 Each of the termination bounds is approximated as follows.  In each case, the termination bound contains the coefficient $|\Delta/4|^{1/4}$.  Since the coefficients of the partial extended GCD are integers, once the discriminant $\Delta$ of the class group $Cl_\Delta$ is known, we store both $\ceil{|\Delta/4|^{1/4}}$ and $\ceil{|\Delta/4|^{1/2}}$ along side $\Delta$ in our representation of the class group.  These values are computed as accurately as possible, since these are only computed once per class group.  The termination bound for ideal class multiplication is approximated as
 \[
@@ -2065,6 +2063,8 @@ To time the performance of squaring and cubing, we iterate 1000 times either $[\
 
 To time the performance of Pari, we statically link with the Pari library.  We determine the discriminant and prime ideal class in exactly the same way as with the other implementations.  We then convert the ideal class into a Pari \texttt{GEN} object using \texttt{qfi}, Pari's function to create a binary quadratic form.  The only operations timed are calls to \texttt{gmul}, in the case of multiplication, \texttt{gsqr}, in the case of squaring, and \texttt{gpowsg}, for cubing.  Pari does not appear to implement ideal class cubing and so we use the general powering function, \texttt{gpowsg}.  We perform garbage collection in Pari by recording Pari's stack pointer, \texttt{avma}, and then restoring it after all the timings are completed.
 
+Figures \ref{fig:idealComposeSqrt64}, \ref{fig:idealCubeSqrt64}, \ref{fig:idealComposeSqrt128}, and \ref{fig:idealCubeSqrt128} compare the average time to multiply two ideals or to cube an ideal using either the approximate termination bound for the partial extended GCD or the full termination bound.  We show this for both our 64 bit and 128 bit implementations.  In each case, it is faster on average to use the approximate termination bound.
+
 Figures \ref{fig:idealCompose}, \ref{fig:idealSquare}, and \ref{fig:idealCube} show the average time for ideal multiplication, squaring, and cubing respectively, alongside the timings for each operation using the reference implementation from Pari.  For all discriminant sizes, our 64 bit implementation performs faster than our 128 bit implementation, which performs faster than our GMP implementation.  Table \ref{tab:relativeCostIdealArith} shows the relative costs on average for ideal multiplication, squaring, and cubing for each implementation compared with Pari. For our 64 bit implementation, we only average the times for discriminants less than 60 bits in size, for our 128 bit implementation, we use the times for discriminants less than 119 bits in size, and for our GMP implementation, we use the times for discriminants less than 140 bits in size.
 
 % TODO: Try cancelling an $a_1$ and insert graphs showing reduction after each step, etc.
@@ -2105,6 +2105,12 @@ Cubing         & 0.55412 \\
 \caption[Relative Average Cost of Ideal Arithmetic.]{Relative cost of each implementation on average compared with Pari.}
 \label{tab:relativeCostIdealArith}
 \end{table}
+
+\mygraph{compose-sqrt-vs-64}{fig:idealComposeSqrt64}{Full or Approximate Square Root for 64 bit Ideal Multiplication}
+\mygraph{cube-sqrt-vs-64}{fig:idealCubeSqrt64}{Full or Approximate Square Root for 64 bit Ideal Multiplication}
+\mygraph{compose-sqrt-vs-128}{fig:idealComposeSqrt128}{Full or Approximate Square Root for 128 bit Ideal Multiplication}
+\mygraph{cube-sqrt-vs-128}{fig:idealCubeSqrt128}{Full or Approximate Square Root for 128 bit Ideal Cubing}
+
 
 \mygraph{compose-all}{fig:idealCompose}{Average Time to Multiply Reduced Ideal Class Representatives.}
 \mygraph{square-all}{fig:idealSquare}{Average Time to Square Reduced Ideal Class Representatives.}
