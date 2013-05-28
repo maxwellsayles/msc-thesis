@@ -282,7 +282,7 @@ A final contribution of this thesis is an improved integer factoring algorithm, 
 \chapter{Ideal Arithmetic}
 \label{chap:idealArithmetic}
 
-% TODO: An example for every definition?
+% TODO(bauer, jacobson): An example for every definition?
 
 A focus of this thesis is arithmetic and exponentiation in the ideal class group of imaginary quadratic number fields.  We begin with the relevant theory of quadratic number fields, then discuss quadratic orders and ideals of quadratic orders.  Finally, we discuss arithmetic in the ideal class group.  The theory presented here is available in detail in reference texts on algebraic number theory such as \cite{Cohn1980}, \cite{Hua2012}, or \cite{Ireland1990}. 
 
@@ -1640,7 +1640,7 @@ This is easily extended for any $2^k$ where $k$ is a positive integer.  The algo
 \section{Left-to-Right Binary Extended GCD}
 \label{sec:gcdL2R}
 
-%TODO: Introduce Brent \cite{Brent1976}.
+%TODO(max): Introduce Brent \cite{Brent1976}.
 
 Just as exponentiation can be performed from high-order to low-order, so too can an extended binary GCD computation.  This is termed a left-to-right binary GCD, since it works from the left most bit to the right most bit of the written binary representation of the inputs.
 
@@ -1731,7 +1731,7 @@ We then continue with the outer loop of the computation until $t = 0$.  In the e
 
 Lehmer's original description \cite{Lehmer1938} uses the extended Euclidean algorithm to compute each step of the single precision extended GCD, however, other single precision extended GCD computations will work.  In Section \ref{sec:gcdResults}, we give timing results for extended GCD computations using an implementation of Lehmer's extended GCD for both a single precision extended Euclidean GCD and a single precision left-to-right binary extended GCD.  We also experimented with precomputing the result of the single precision extended GCD for 8 bit machine words.  Pseudo-code for Lehmer's extended GCD is given in Algorithm \ref{alg:lehmerGcd}.
 
-% TODO: Mike says we should continue with the previous values.  But his code doesn't do this.  I could time it to see which is faster.  It's not obvious from the original text what should be used.
+% TODO(jacobson): Mike says we should continue with the previous values.   It's not obvious from the paper what to do.  I timed several variations of this, and the version presented here, without continuing on the previous values, is faster.  Future work to explain why?
 
 \begin{algorithm}[htb]
 \caption{Lehmer's extended GCD (\cite{Lehmer1938}).}
@@ -1966,9 +1966,9 @@ The next chapter studies the performance of our implementations of ideal class a
 \chapter{Ideal Arithmetic Experiments}
 \label{chap:idealExperiments}
 
-The previous chapter demonstrated results that lead to practical improvements in computing the extended GCD -- the dominating operation of reduced ideal multiplication.  This chapter discusses our implementations of ideal arithmetic, which make extensive use of the results of the previous chapter.  In particular, when computing either the full, left-only, or partial extended GCD, if arguments are less than 32 bits, we use our 32 bit implementation of the extended Euclidean algorithm.  If arguments are larger than 31 bits, but smaller than 64 bits, we use our 64 bit implementation of the simplified left-to-right binary extended GCD.  When arguments are larger than 63 bits and smaller than 119 bits, we use our 128 bit implementation of the simplified left-to-right binary extended GCD, and when they are larger than 118 bits, we use our 128 bit implementation of Lehmer's extended GCD using our 64 bit implementation of our simplified left-to-right binary extended GCD for the inner extended GCD.  Finally, when arguments are larger than 127 bits, we use the implementation of the extended GCD and left-only extended GCD provided by GMP, and for the partial extended GCD we use an implementation of Lehmer's extended GCD using a 64 bit extended Euclidean algorithm for GMP types.
+The previous chapter demonstrated results that lead to practical improvements in computing the extended GCD -- occupying roughly half the time to compute reduced ideal multiplication, squaring, and cubing.  This chapter discusses our implementations of ideal arithmetic, which make extensive use of the results of the previous chapter.  In particular, when computing either the full, left-only, or partial extended GCD, if arguments are less than 32 bits, we use our 32 bit implementation of the extended Euclidean algorithm.  If arguments are larger than 31 bits, but smaller than 64 bits, we use our 64 bit implementation of the simplified left-to-right binary extended GCD.  When arguments are larger than 63 bits and smaller than 119 bits, we use our 128 bit implementation of the simplified left-to-right binary extended GCD, and when they are larger than 118 bits, we use our 128 bit implementation of Lehmer's extended GCD using our 64 bit implementation of our simplified left-to-right binary extended GCD for the inner extended GCD.  Finally, when arguments are larger than 127 bits, we use the implementation of the extended GCD and left-only extended GCD provided by GMP, and for the partial extended GCD we use an implementation of Lehmer's extended GCD using a 64 bit extended Euclidean algorithm for GMP types.
 
-To further improve the performance of ideal arithmetic, specialized implementations using at most a single machine word, i.e.\ 64 bits, or at most two machine words, i.e.\ 128 bits were developed.  A reference implementation using GMP (or MPIR), that works for unbounded discriminant sizes, was developed for comparison.  Our 64 bit implementation of ideal arithmetic is free of arithmetic overflows for negative discriminants less than 60 bits in size, while our 128 bit implementation of ideal arithmetic is is also free of arithmetic overflows for discriminants less than 119 bits.  This holds for all class group operations such as ideal class multiplication, squaring, and cubing.
+To further improve the performance of ideal arithmetic, specialized implementations using at most a single machine word, i.e.\ 64 bits, or at most two machine words, i.e.\ 128 bits were developed.  A reference implementation using GMP (or MPIR), that works for unbounded discriminant sizes, was developed for comparison.  To verify the correctness of our implementations, we used a randomized test suite.  We continuously multiplied, squared, and cubed random prime ideals using each implementation and verified that our 64 bit and 128 bit implementations gave the same result as our reference implementations.  In addition, we verified the results of ideal class exponentiation using each of the techniques discussed in Chapter \ref{chap:powExperiments} for random exponents up to 16384 bits in size.  Our 64 bit implementation of ideal arithmetic has been verified to be correct for negative discriminants less than 60 bits in size, while our 128 bit implementation of ideal arithmetic has also been verified to be correct for discriminants less than 119 bits.  This holds for all class group operations such as ideal class multiplication, squaring, and cubing.  
 
 As a general rule, in our 64 bit implementation, if intermediate terms fit within a 32 bit word, we use 32 bit arithmetic.  If terms do not fit within a 32 bit word, but within a 64 bit word, we use 64 bit arithmetic.  Only when terms do not fit within a 64 bit word do we use two machine words and 128 bit arithmetic.  Similarly, for our 128 bit implementation, if terms fit within a single 64 bit word, then we use 64 bit arithmetic.  Only when terms do not fit within a single 64 bit word do we use two 64 bit words and perform 128 bit arithmetic.  In the extreme case that an intermediate term does not fit within two 64 bit words, i.e.\ the term is larger than 128 bits, only then do we fall back on GMP for multiprecision arithmetic.  The size of arithmetic operations used are determined at points in the algorithm where overflow is likely to occur.
 
@@ -1977,7 +1977,7 @@ The software developed for this chapter uses the \compiler{}, and assembly langu
 \section{Specialized Implementations of Ideal Arithmetic}
 \label{sec:implementationOfIdealArithmetic}
 
-% TODO: Emphasis that 128 bit NUCUBE has many branches for different sized intermediates.
+% TODO(jacobson): Emphasis that 128 bit NUCUBE has many branches for different sized intermediates and that the growth is explained by GMP.   Possibly insert more graphs, but not necessarily.
 
 Throughout this thesis, an ideal class $[\mathfrak a]$ is represented using the $\ZZ$-module basis for the reduced ideal representative $\mathfrak a = [a, (b + \sqrt{\Delta})/2]$.  Ideal class multiplication and ideal reduction use the value $c = (b^2 - \Delta)/4a$, which is also useful in determining if an ideal is an ambiguous ideal (see Subsection \ref{subsec:forms} for additional details).  For this reason, our implementation represents an ideal class using the triple $(a, b, c)$.  We represent the ideal class group $Cl_\Delta$ using the discriminant $\Delta$, and maintain this separately from the representation of each ideal class.  We do this to reduce the memory footprint of the representation of each ideal class.
 
@@ -2059,7 +2059,7 @@ For ideal multiplication, squaring, and cubing, we use Algorithms \ref{alg:nucom
 
 To time the performance of squaring and cubing, we iterate 1000 times either $[\mathfrak a] \gets [\mathfrak a]^2$ or $\aclass \gets [\mathfrak a]^3$ respectively.  Dividing the total cost by 10,000,000 gives the average time to square or cube an ideal.  For multiplication, we initially set $\bclass \gets [\mathfrak a]$.  We then iterate 1000 times the sequence of operations $\cclass \gets \aclass \cdot \bclass$, $\aclass \gets \bclass$, and $\bclass \gets \cclass$.
 
-% TODO: Compare gpowsg with gmul+gsqr
+% TODO(jacobson, scheidler): Compare gpowsg with gmul+gsqr
 
 To time the performance of Pari, we statically link with the Pari library.  We determine the discriminant and prime ideal class in exactly the same way as with the other implementations.  We then convert the ideal class into a Pari \texttt{GEN} object using \texttt{qfi}, Pari's function to create a binary quadratic form.  The only operations timed are calls to \texttt{gmul}, in the case of multiplication, \texttt{gsqr}, in the case of squaring, and \texttt{gpowsg}, for cubing.  Pari does not appear to implement ideal class cubing and so we use the general powering function, \texttt{gpowsg}.  We perform garbage collection in Pari by recording Pari's stack pointer, \texttt{avma}, and then restoring it after all the timings are completed.
 
@@ -2067,7 +2067,7 @@ Figures \ref{fig:idealComposeSqrt64}, \ref{fig:idealCubeSqrt64}, \ref{fig:idealC
 
 Figures \ref{fig:idealCompose}, \ref{fig:idealSquare}, and \ref{fig:idealCube} show the average time for ideal multiplication, squaring, and cubing respectively, alongside the timings for each operation using the reference implementation from Pari.  For all discriminant sizes, our 64 bit implementation performs faster than our 128 bit implementation, which performs faster than our GMP implementation.  Table \ref{tab:relativeCostIdealArith} shows the relative costs on average for ideal multiplication, squaring, and cubing for each implementation compared with Pari. For our 64 bit implementation, we only average the times for discriminants less than 60 bits in size, for our 128 bit implementation, we use the times for discriminants less than 119 bits in size, and for our GMP implementation, we use the times for discriminants less than 140 bits in size.
 
-% TODO: Try cancelling an $a_1$ and insert graphs showing reduction after each step, etc.
+% TODO(max): Try cancelling an $a_1$ and insert graphs showing reduction after each step, etc.
 
 In Figures \ref{fig:cubingVs64}, \ref{fig:cubingVs128}, and \ref{fig:cubingVsMpz}, we compare the average time to cube against the average time to multiply a representative with its square.  One thing to notice is that our 128 bit implementation of cubing performs more poorly than that of multiplying an ideal with its square when the discriminant is larger than 69 bits.  This is possibly because when $a_1$ is large, computing modulo ${a_1}^2$ means the intermediate before reduction might be larger than $\Delta$ and then larger than 128 bits.  In this case, we rely on GMP for multiple precision arithmetic.  Also, when computing the coefficients 
 \begin{align*}
@@ -2616,7 +2616,7 @@ The exponentiation stage of SuperSPAR computes $\bclass = \aclass ^{2^\ell E}$ w
 
 For each ideal in our data set $\idealDataSet$, let the factorization of the order be represented by $\ord(\aclass) = \prod {p_i}^{e_i}$ for $p_i$ prime.  For each prime power factor $3^{e_2}$, $5^{e_3}$, $7^{e_4}$, $11^{e_5}$, $13^{e_6}$, and $17^{e_7}$, more than 99\% of the ideals studied had either $e_2 \le 4$, $e_3 \le 2$, $e_4 \le 2$, $e_5 \le 1$, $e_6 \le 1$, or $e_7 \le 1$.  This is captured by Table \ref{tab:ninetyNine}.  This is not to say that more than 99\% of the ideals in the data set were such that $\ord(\aclass^{3^4 5^2 7^2 11^1 13^1 17^1})$ is coprime to $3 \times 5 \times 7 \times 11 \times 13 \times 17$, but only that $\ord(\aclass^{3^4})$ is coprime to 3, and so on. 
 
-% TODO: Transpose this table if we get the chance.
+% TODO(max): Transpose this table if we get the chance.
 \begin{table}[htb]
 \centering
 \begin{tabular}{| r | r | r | r | r | r | r |}
@@ -3208,9 +3208,12 @@ Table \ref{tab:ssparParams} shows the values used for the exponentiation and sea
 \clearpage
 
 \section{Reference SPAR}
-
-% TODO: Implement this section.
 \label{sec:referenceSpar}
+
+% TODO(all): Implement this section.
+
+COMING SOON!
+
 
 \section{Comparison to Other Factoring Implementations}
 \label{sec:ssparComparison}
