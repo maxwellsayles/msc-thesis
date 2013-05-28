@@ -406,7 +406,7 @@ Let $\zeta_1 = (x_1 u - y_1 v) + (y_1u + x_1v)i$ and $\zeta_2 = (x_2 u - y_2 v) 
 
 Let $\OO_\Delta$ be a maximal order.  Then for $\alpha, \beta \in \OO_\Delta$, the set $\ideal a = \{x \alpha + y \beta : x, y \in \OO_\Delta\}$ is an ideal of the order $\OO_\Delta$ and is denoted $(\alpha, \beta)$ \cite[p.16]{Ramachandran2006}.  Every ideal of a quadratic order $\OO_\Delta$ can be represented by at most two generators \cite[p.125--126]{Cohn1980}, while some can be represented by a single generator.  An ideal represented by a single generator is a \emph{principal} ideal and is denoted $(\alpha) = \{ x \alpha : x \in \OO_\Delta \}$ \cite[p.87]{Jacobson2009}.
 
-For two ideals, $\ideal a = (\alpha_1, \beta_1)$ and $\ideal b = (\alpha_2, \beta_2)$ of $\OO_\Delta$, their product is
+By \cite[p.16]{Ramachandran2006}, for two ideals, $\ideal a = (\alpha_1, \beta_1)$ and $\ideal b = (\alpha_2, \beta_2)$ of $\OO_\Delta$, their product is
 \begin{equation}
 	\ideal a \ideal b = (\alpha_1 \alpha_2, \alpha_1 \beta_2, \beta_1 \alpha_2, \beta_1 \beta_2) = (\alpha_3, \beta_3) \label{eq:idealProduct}
 \end{equation}
@@ -417,14 +417,13 @@ Equation \ref{eq:idealProduct} shows that ideals are closed under multiplication
 \begin{defn}
 \cite[\S 2.1]{Jacobson2009} A \emph{fractional ideal} of $\OO_\Delta$ is a subset $\ideal a$ of $\QQ(\sqrt \Delta)$ such that $d \ideal a$ is an integral ideal of $\OO_\Delta$ for some $d \in \ZZgtz$.
 \end{defn}
-%\begin{defn}
-%\cite[Definition 2.13]{Ramachandran2006} An ideal $\ideal a$ of $\OO_\Delta$ is a \emph{fractional ideal} if there exists an ideal $\ideal b$ and a non-zero $c \in \OO_\Delta$ such that $\ideal a = c^{-1} \ideal b$.
-%\end{defn}
+
+% TODO: Maybe come up with an example?
 
 Using fractional ideals, we are able to define inverses.
 
 \begin{prop}
-\cite[Proposition 2.14]{Ramachandran2006} Let $\ideal a$ be a fractional ideal of $\OO_\Delta$, where $\OO_\Delta$ is a maximal order in the quadratic field $\QQ(\sqrt \Delta)$.  The inverse of $\ideal a$ is then
+\cite[Proposition 2.14]{Ramachandran2006} Let $\ideal a$ be a fractional ideal of $\OO_\Delta$, where $\OO_\Delta$ is a maximal order in the quadratic field $\QQ(\sqrt \Delta)$.  The inverse of $\ideal a$ is defined as
 \[
 	\ideal a^{-1} = \{ d \in \QQ(\sqrt \Delta) : d \ideal a \subseteq \OO_\Delta \}
 \]
@@ -437,7 +436,7 @@ All fractional ideals of $\OO_\Delta$ are invertible, and the set of invertible 
 \cite[p.88]{Jacobson2009} Two invertible ideals $\ideal a$ and $\ideal b$ are \emph{equivalent} if there exist principal ideals $\alpha, \beta \in \OO_\Delta$ such that $\alpha \beta \neq 0$ and $(\alpha)\ideal a = (\beta) \ideal b$.
 \end{defn}
 
-We write $\aclass$ to denote the set of all ideals equivalent to $\ideal a$, and call this an \emph{ideal class}.  The \emph{ideal class group}, denoted $Cl_\Delta$, is the set of all equivalence classes of invertible ideals, with the group operation defined as the product of class representatives.  By \cite[p.136]{Cohn1980}, the ideal class group is a finite Abelian group.
+We write $\aclass$ to denote the set of all ideals equivalent to $\ideal a$, and call this an \emph{ideal class}.  The \emph{ideal class group}, denoted $Cl_\Delta$, is the set of all equivalence classes of invertible ideals, with the group operation defined as the product of class representatives.  By \cite[p.136]{Cohn1980}, the group operation is well defined and the ideal class group is a finite Abelian group.
 
 \begin{defn}
 The number of ideal classes in the class group $Cl_\Delta$ is the \emph{class number} and is denoted $h_\Delta$ \cite[p.153]{Jacobson2009}.
@@ -472,7 +471,7 @@ Using this representation, the inverse $\ideal a^{-1}$ of an ideal is given by \
 \label{eq:idealInverse}
 	{\ideal a}^{-1} = \frac{q}{\mathcal N(\mathfrak a)} \left[a, \frac{-b+\sqrt{\Delta}}{2} \right]
 \end{equation}
-where $\mathcal N(\ideal a) = q^2a$ is the norm of $\ideal a$ and is multiplicative.  For a primitive invertible ideal $(a, b)$, the inverse is given by $\frac{1}{a}(a, -b)$.  Let $\aclass$ be an ideal class represented by the primitive ideal $\ideal a$.  Then the inverse $\idealclass{a^{-1}}$ is given simply as $(a, -b)$ \cite[p.20]{Ramachandran2006}.  Therefore, computing the inverse of an ideal class is virtually free. 
+where $\mathcal N(\ideal a) = q^2a$ is the norm of $\ideal a$ and is multiplicative.  For a primitive invertible ideal $(a, b)$, the inverse is given by $\frac{1}{a}(a, -b)$.  Let $\aclass$ be an ideal class represented by the primitive ideal $\ideal a$.  Then the inverse $\idealclass{a^{-1}}$ is given simply as the class represented by $(a, -b)$ \cite[p.20]{Ramachandran2006}.  Therefore, computing the inverse of an ideal class is virtually free. 
 
 Since an ideal class contains an infinitude of ideals, we work with reduced representatives.  This also makes arithmetic faster, since the size of generators are typically smaller.  Subsection \ref{subsec:reduction} defines the reduced form of a representative and gives an algorithm for finding the reduced form.  For two reduced class representatives, Subsection \ref{subsec:idealMultiply} shows how to compute their product.  Subsection \ref{subsec:nucomp} discusses how to perform multiplication such that the result is a reduced or almost reduced representative.  This is then extended to the case of computing the square (Subsection \ref{subsec:nudupl}) and cube (Subsection \ref{subsec:nucube}) of an ideal class.  
 
@@ -507,7 +506,7 @@ A primitive ideal $\ideal a = [a, (b+\sqrt{\Delta})/2]$ with $\Delta < 0$ is a \
 \end{algorithmic}
 \end{algorithm}
 
-In an imaginary quadratic field, every ideal class contains exactly one reduced ideal \cite[p.20]{Ramachandran2006}.  There are several algorithms to compute a reduced ideal, many of which are listed in \cite{Jacobson2006}.  Here we present the algorithm we use.  We adapt the work presented in \cite[p.90]{Jacobson2006} and \cite[p.99]{Jacobson2009}. If $\ideal a = [a, (b + \sqrt\Delta)/2]$ is a representative of the class $\aclass$ then
+In an imaginary quadratic field, every ideal class contains exactly one reduced ideal \cite[p.20]{Ramachandran2006}.  There are several algorithms to compute a reduced ideal, many of which are listed in \cite{Jacobson2006}.  Here we present the algorithm we use, which is given by Algorithm \ref{alg:reduce}.  We adapt the work presented in \cite[p.90]{Jacobson2006} and \cite[p.99]{Jacobson2009}. If $\ideal a = [a, (b + \sqrt\Delta)/2]$ is a representative of the class $\aclass$ then
 \begin{equation}
 \label{eq:idealSwapNorm}
 	\ideal b = \left[ \frac{b^2-\Delta}{4a}, \frac{-b + \sqrt\Delta}{2} \right]
@@ -521,7 +520,7 @@ Since $c = (b^2 - \Delta)/4a$ we have
 \label{eq:idealSwapAC}
 	\ideal b = \left[ c, \frac{-b + \sqrt\Delta}{2} \right].
 \end{equation}
-The first step is to decrease $a$ by setting $\ideal a = [c, (-b + \sqrt\Delta)/2]$, if $a > c$.  Then $b$ is reduced since $b$ is unique modulo $2a$.  These steps are repeated while $\ideal a$ is not reduced. In the case that $a = c$, we use the absolute value of $b$, since by Equation \ref{eq:idealSwapAC} the ideals $[a, (b + \sqrt\Delta)/2]$ and $[c, (-b+\sqrt\Delta)/2]$ are equivalent.  Algorithm \ref{alg:reduce} gives Pseudo-code.
+The first step is to decrease $a$ by setting $\ideal a = [c, (-b + \sqrt\Delta)/2]$, if $a > c$.  Then $b$ is decreased since $b$ is unique modulo $2a$.  These steps are repeated while $\ideal a$ is not reduced. In the case that $a = c$, we use the absolute value of $b$, since by Equation \ref{eq:idealSwapAC} the ideals $[a, (b + \sqrt\Delta)/2]$ and $[c, (-b+\sqrt\Delta)/2]$ are equivalent.  
 
 We point out here that by Definition \ref{defn:reducedIdeal}, $|b| \le a$.  It follows that $-\Delta = 4ac - b^2 \ge 4ac -a^2$, and using $a \le c$, we have $|b| \le a \le \sqrt{|\Delta|/3}$.  These bounds will be useful to our implementations of ideal class arithmetic in Chapter \ref{chap:idealExperiments}.
 
