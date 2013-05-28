@@ -425,8 +425,9 @@ Let $\OO = [1, \sqrt{-5}]$ be the maximal order in the field $\QQ(\sqrt{-5})$.  
 \]
 is a fractional ideal because
 \[
-	7 \ideal f = [2, \sqrt{-5}].
+	7 \ideal f = \{2x + \sqrt{-5}y : x, y \in \OO\}
 \]
+is an integral ideal in the order $[1, \sqrt{-5}]$.
 \end{example}
 
 %\begin{example}
@@ -556,6 +557,17 @@ Since $c = (b^2 - \Delta)/4a$ we have
 	\ideal b = \left[ c, \frac{-b + \sqrt\Delta}{2} \right].
 \end{equation}
 The first step is to decrease $a$ by setting $\ideal a = [c, (-b + \sqrt\Delta)/2]$, if $a > c$.  Then $b$ is decreased since $b$ is unique modulo $2a$.  These steps are repeated while $\ideal a$ is not reduced. In the case that $a = c$, we use the absolute value of $b$, since by Equation \ref{eq:idealSwapAC} the ideals $[a, (b + \sqrt\Delta)/2]$ and $[c, (-b+\sqrt\Delta)/2]$ are equivalent.  
+
+\begin{example}
+Let $\ideal = [72, (130 + \sqrt{\Delta})/2]$ with $\Delta = -1536$.  Initially, we have $a = 72, b = 130, c = 64$.  Using Algorithm \ref{alg:reduce}, the steps to compute a reduced ideal equivalent to $\ideal a$ are as follows.
+\begin{align*}
+1. && a &= 72 &b &= 130 &c &= 64 & \textrm{\{initial values\}} \\
+2. && a &= 64 &b &= -130 &c &= 72 & \textrm{\{swap $a$ and $c$ and negate $b$\}} \\
+3. && a &= 64 &b &= -2 &c &= 6 & \textrm{\{decrease $b \bmod 2a$, recalculate $c$\}} \\
+4. && a &= 6  &b &= 2  &c &= 64 & \textrm{\{swap $a$ and $c$ and negate $b$\}}
+\end{align*}
+The final ideal $\ideal{a'} = [6, (2 + \sqrt \Delta)/2]$ is reduced as it satisfies Definition \ref{defn:reducedIdeal}.
+\end{example}
 
 We point out here that by Definition \ref{defn:reducedIdeal}, $|b| \le a$.  It follows that $-\Delta = 4ac - b^2 \ge 4ac -a^2$, and using $a \le c$, we have $|b| \le a \le \sqrt{|\Delta|/3}$.  These bounds will be useful to our implementations of ideal class arithmetic in Chapter \ref{chap:idealExperiments}.
 
