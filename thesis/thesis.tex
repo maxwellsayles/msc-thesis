@@ -1344,7 +1344,7 @@ where $p_i$ is the $i^{\textrm{th}}$ prime.  Following Sutherland \cite[p.57]{Su
 \end{equation}
 Let $e_i = \floor{\log_{p_i} M}$ for $1 \le i \le w$ and $E = 2^{e_2} \times 3^{e_3} \times \cdots \times {p_w}^{e_w}$.  Then compute $\beta = \alpha^E$.  The bound on the largest baby step is $s = m P_w$, and we compute $h' = \ord(\beta)$ by taking at most $m \phi(P_w)$ baby steps coprime to $P_w$ and at most $m \phi(P_w)$ giant steps of size $m P_w$.  Pseudo-code for the bounded Primorial Steps technique is given in Algorithm \ref{alg:primorialSteps}.  By \cite[p.59~Proposition~4.2]{Sutherland2007}, the number of group operations in the worst case is bound by $O(\sqrt{M / \log \log M})$.
 
-To compute $h = \ord(\alpha)$ given $h' = \ord(\beta)$, one uses a fast order finding algorithm.  One fast order finding algorithm, $\mathcal A(\alpha^{h'}, E)$, uses the factorization of $E=\prod {p_i}^{e_i}$, which is trivially known.  Notice that $\alpha^{Eh'} = \beta^{h'} = 1_G$.  The idea is to iterate on the factors of $E$, removing each factor $p$ before computing $\zeta = \alpha^{E'h'}$ for the product $E' = E/p$. If $\zeta \neq 1_G$, then $\ord(\alpha)$ does not divide $E'h'$ and $p$ must be a factor of the order of $\alpha$.  The algorithm then continues with the next prime factor of $E'$.  Additional fast order finding algorithms are given in \mbox{\cite[Chapter~7]{Sutherland2007}}.
+To compute $h = \ord(\alpha)$ given $h' = \ord(\beta)$, one uses a fast order finding algorithm.  One fast order finding algorithm, $\mathcal A(\alpha^{h'}, E)$, uses the factorization of $E=\prod {p_i}^{e_i}$, which is trivially known.  Notice that $\alpha^{Eh'} = \beta^{h'} = 1_G$.  The idea is to iterate on the factors of $E$, removing each factor $p$ before computing $\zeta = \alpha^{E'h'}$ for the quotient $E' = E/p$. If $\zeta \neq 1_G$, then $\ord(\alpha)$ does not divide $E'h'$ and $p$ must be a factor of the order of $\alpha$.  The algorithm then continues with the next prime factor of $E'$.  Additional fast order finding algorithms are given in \mbox{\cite[Chapter~7]{Sutherland2007}}.
 
 \subsection{Primorial Steps for a Set}
 \label{subsec:primorialStepsForASet}
@@ -1483,7 +1483,7 @@ Using this, we can simultaneously add $b$ to $X$ and subtract $a$ from $Y$ when 
 
 \begin{thm}
 \label{thm:addBSubA}
-When $t$ is even, either both $X$ and $Y$ are even, or $Y$ is odd and both $X+b$ and $Y-a$ are even.
+Assume that $a$ is odd.  When $t$ is even, either both $X$ and $Y$ are even, or $Y$ is odd and both $X+b$ and $Y-a$ are even.
 \end{thm}
 
 \begin{proof}
@@ -1729,7 +1729,7 @@ Lehmer's original description \cite{Lehmer1938} uses the extended Euclidean algo
 
 Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and \ref{subsec:nucube} describe algorithms to perform ideal class multiplication (NUCOMP), squaring (NUDUPL), and cubing (NUCUBE) respectively, where the result requires at most two reduction operations to be reduced \cite[p.122]{Jacobson2009}.  Each of these algorithms involve computing a simple continued fraction expansion, which is done using an extended GCD computation (see \cite[\S 3.2]{Jacobson2009}).  Unlike the extended GCD algorithms previously described in this chapter, the extended GCD used to compute the simple continued fraction for ideal multiplication terminates once the next remainder computed is within a given bound.  For this reason, this computation is referred to as the \emph{partial extended GCD}.
 
-The descriptions of NUCUBE, NUDUPL, and NUCUBE use the variables $R_i$ and $C_i$.  These variables can be related to the description of the extended Euclidean algorithm (see Section \ref{sec:gcdEEA}) using
+The descriptions of NUCOMP, NUDUPL, and NUCUBE use the variables $R_i$ and $C_i$.  These variables can be related to the description of the extended Euclidean algorithm (see Section \ref{sec:gcdEEA}) using
 \[
 	\matrixtt{s}{U}{t}{X} = \matrixtt{R_{i-1}}{C_{i-1}}{R_i}{C_i}.
 \]
@@ -1852,9 +1852,9 @@ Ideal class arithmetic uses a variant of the extended GCD where only $s$ and $U$
 
 Figures \ref{fig:gcdRef32} through \ref{fig:gcdBest32} show performance timings for each of our implementations of the extended GCD, as well as the reference implementations, for inputs less than 32 bits. For each bit size $k$ from 1 through 31, a set of 1,000,000 pseudorandom positive integers of at most $k$ bits was created.  The times shown are the average time for a single extended GCD computation.  In each case, our 32 bit implementations perform faster than our corresponding 64 bit and 128 bit implementations.  Figure \ref{fig:gcdRef32} shows that for inputs of this size, Pari is the fastest of the reference implementations tested.  Figure \ref{fig:gcdSteins32} shows the performance of our 32 bit implementations of Stein's right-to-left binary extended GCD for window sizes from 1 bit to 5 bits.  Of these implementations, the 1 bit window is fastest for inputs up to 15 bits, and then the 3 bit window is faster up to 29 bits.  
 
-% TODO: How do we test correctness.  Also what do we mean by "correct"?
+Each of the implementations tested here have been verified to produce correct results for inputs up to 31 bits, with the exception of our 32 bit implementations of Stein's right-to-left binary extended GCD, which fails verification for inputs larger than 29 bits.  The output is a solution to the equation $s = Ua + Vb$.  We verify that the equation is satisfied by the output values given the inputs, and that $s$ is the greatest common divisor of both $a$ and $b$.
 
-All the implementations tested here are known to be produce correct results for inputs up to 31 bits, with the exception of our 32 bit implementations of Stein's right-to-left binary extended GCD, which is only known to be correct up to 29 bits.  Figure \ref{fig:gcdBest32} shows the best performing implementations from among the reference implementations and each of our 32 bit implementations.  In the case of our implementations of Stein's right-to-left binary extended GCD, this figure only includes the 1 bit and 3 bit windowed implementations, since these were the best performing of the windowed implementations.  This figure shows that for inputs less than 32 bits, our 32 bit implementation of the extended Euclidean performs best, and takes roughly only 63\% as long as the fastest reference implementation, for inputs of this size.
+Figure \ref{fig:gcdBest32} shows the best performing implementations from among the reference implementations and each of our 32 bit implementations.  In the case of our implementations of Stein's right-to-left binary extended GCD, this figure only includes the 1 bit and 3 bit windowed implementations, since these were the best performing of the windowed implementations.  This figure shows that for inputs less than 32 bits, our 32 bit implementation of the extended Euclidean performs best, and takes roughly only 63\% as long as the fastest reference implementation, for inputs of this size.
 
 \mygraph{reference-impl-32}{fig:gcdRef32}{Reference Implementations for 32 bit Inputs.}
 \mygraph{divrem-32}{fig:gcdDivrem32}{Extended Euclidean GCD for 32 bit Inputs.}
@@ -1906,7 +1906,7 @@ Figures \ref{fig:gcdRef128} through \ref{fig:gcdBest128} show the performance ti
 
 We briefly restate the results in this section.  For inputs less than 32 bits, our 32 bit implementation of the extended Euclidean algorithm is the fastest on average and on average takes roughly 63\% of the time of the best reference implementation, which is Pari.  For inputs less than 64 bits, our 64 bit implementation of our simplified left-to-right binary extended GCD is the fastest on average and takes on average roughly 77\% of the time of the best reference implementation, which, again, is Pari.  For inputs less than 119 bits, our 128 bit implementation of our simplified left-to-right binary extended GCD is the fastest on average and typically only takes roughly 95\% of the time of either Pari or GMP.  For inputs larger than 118 bits, our 128 bit implementation of Lehmer's extended GCD using our simplified left-to-right binary extended GCD for 64 bit words is the fastest on average, taking roughly 88\% of the time of Pari or GMP on average.
 
-All of the 32 bit implementations tested in this Chapter produce correct results for inputs up to 31 bits, with the exception of each of the variants of Stein's right-to-left binary extended GCD, which is only correct for inputs up to 29 bits.  Similarly, our 64 bit implementations are correct for inputs up to 63 bits, but our implementations of Stein's right-to-left binary extended GCD are only correct for inputs no larger than 60 bits.  Finally, our 128 bit implementations are correct for inputs up to 127 bits, with the exception of our 128 bit implementations of Stein's right-to-left binary extended GCD, which is correct for inputs no larger than 124 bits.
+All of the 32 bit implementations tested in this Chapter were verified to produce correct results for inputs up to 31 bits, with the exception of each of the variants of Stein's right-to-left binary extended GCD, which were only correct for inputs up to 29 bits.  Similarly, our 64 bit implementations were verified for inputs up to 63 bits, but our implementations of Stein's right-to-left binary extended GCD were only verified to be correct for inputs no larger than 60 bits.  Finally, our 128 bit implementations were verified to be correct for inputs up to 127 bits, with the exception of our 128 bit implementations of Stein's right-to-left binary extended GCD, which were only verified to be correct for inputs no larger than 124 bits.  In the case of Stein's right-to-left binary extended GCD, for each implementation, when the algorithm did not verify correctly, it is believe that the variables $U$ and $V$ overflowed.
 
 For each of our implementations (with the exception of our implementations of Stein's right-to-left binary extended GCD), overflows of intermediates do not occur and we did not have to use arithmetic of a larger word size.  However, this is not the case for our implementations of Stein's right-to-left binary extended GCD.  In this case, we could have used arithmetic of a larger word size, but this would have made the implementation slower than it currently is and we wanted each of our implementations to be as fast as possible for comparison.  Our implementation of Stein's right-to-left binary extended GCD is not the fastest on average for any bit range, and so altering it to handle intermediate overflow did not seem useful.
 
@@ -1984,7 +1984,7 @@ Since we represent an ideal class using the triple $(a, b, c)$, it is necessary 
 	c &= (b^2 - \Delta)/4a \\
 	  &= ((2aq + r)^2 - \Delta)/4a \\
 	  &= (4a^2q^2 + 4aqr + r^2 - \Delta)/4a \\
-	  &= (r^2 - \Delta)/4a + aq^2 + qr \\
+	  &= \left((r^2 - \Delta)/4a\right) + aq^2 + qr \\
 	  &= c' + q(aq + r) \\
 	  &= c' + q(2aq + r - aq) \\
 	  &= c' + q(b - aq) \\
@@ -2073,7 +2073,7 @@ Cubing         & 0.55412 \\
 
 \section{Summary}
 
-This chapter discussed our implementations of ideal class arithmetic.  We then demonstrated the average time for multiplication, squaring, and cubing.  We showed that for discriminants smaller than 60 bits, our 64 bit implementation of ideal class arithmetic is significantly faster than the reference implementation provided by Pari.  For discriminants larger than 59 bits, but smaller than 119 bits, our 128 bit implementation of ideal class arithmetic is significantly faster than the reference implementation provided by Pari, and finally, for discriminants larger than 118 bits, our GMP implementation is still faster on average than the reference implementation provided by Pari.
+This chapter discussed our implementations of ideal class arithmetic.  We then demonstrated the average time for multiplication, squaring, and cubing.  We showed that for discriminants smaller than 60 bits, our 64 bit implementation of ideal class arithmetic is significantly faster than the reference implementation provided by Pari.  For discriminants larger than 59 bits, but smaller than 119 bits, our 128 bit implementation of ideal class arithmetic is significantly faster than the reference implementation provided by Pari.  Finally, for discriminants larger than 118 bits, our GMP implementation is still faster on average than the reference implementation provided by Pari.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2257,7 +2257,7 @@ R_k = \left\{\sum_{i=1}^k\pm 2^{a_i}3^{b_i} : 0 \le a_1 < \cdots < a_k \le A \te
 \]
 We iterate over the set $R$ and for each integer represented, we record the \emph{lowest cost} representation for that integer in $R$.  Notice that the powers of 2 are constrained such that $0 \le a_i < a_j \le A$ for each $i < j$, while the powers of 3 are only constrained such that $0 \le b_j \le B$.  This removes a dimension of redundancy, while still allowing for representations to be unchained.
 
-In our experiments, we searched for representations for 16 bit integers. We initially chose $A = \ceil{\log_2\left(2^{16}\right)} = 16$, $B = \ceil{\log_3 \left(2^{16}\right)} = 11$, and iterated the number of terms $k$ from 1 through 5. For representations of $k = 6$ terms, our implementation did not complete after a week of execution.  We then ran our search again using $A=18$ and $B=12$ and found that none of our minimal representations were improved.
+In our experiments, we searched for representations for 16 bit integers. We initially chose $A = \ceil{\log_2\left(2^{16}\right)} = 16$, $B = \ceil{\log_3 \left(2^{16}\right)} = 11$, and iterated the number of terms $k$ from 1 through 5.  For representations of $k = 6$ terms, our implementation had not finished after a week of execution.  We then ran our search again using $A=18$ and $B=12$ and found that none of our minimal representations were improved.
 
 Since the method proposed here is computationally expensive, we only computed chains for 16 bit exponents.  This is still useful when we consider methods that partition large exponents into smaller blocks using their binary representation, or when we consider repeated exponentiation by a list of prime powers, as we do in the next section.
 
@@ -2294,7 +2294,7 @@ Another way we can use 16 bit representations is when we know the prime factoriz
 \]
 using a series of $w$ small exponentiations.
 
-Figures \ref{fig:expBlockList64} and \ref{fig:expBlockList128} in Section \ref{sec:expResults} show that repeated exponentiation by a series of prime powers is faster on average, at least when exponentiating by power primorials, than exponentiating by the product using 16 bit blocks.
+Figures \ref{fig:expBlockList64} and \ref{fig:expBlockList128} in Section \ref{sec:expResults} show that when exponentiating by a power primorial, it is faster on average to exponentiate by a series of small prime powers than by using 16 bit blocks.
 
 \section{Experimental Results}
 \label{sec:expResults}
