@@ -821,7 +821,7 @@ Next, develop the simple continued fraction expansion of $sU/{a_1}^2$ until
 \]
 Finally, compute the representative $\mathfrak a^3 = [a, (b + \sqrt\Delta)/2]$ using the equations
 \begin{align*}
-	M_1 &= \frac{(R_ia_1 + C_iUa_1)}{{a_1}^2}, \\
+	M_1 &= \frac{R_i + C_i U}{a_1}, \\
 	M_2 &= \frac{R_i(b_1 + Ua_1) - sC_ic_1}{{a_1}^2}, \\
 	a &= (-1)^{i+1} (R_i M_1 - C_i M_2), \\
 	b &= \left( \frac{2(R_ia_1/s - C_{i-1}a)}{C_i} - b_1 \right) \bmod 2a.
@@ -2059,9 +2059,7 @@ For ideal multiplication, squaring, and cubing, we use Algorithms \ref{alg:nucom
 
 To time the performance of squaring and cubing, we iterate 1000 times either $[\mathfrak a] \gets [\mathfrak a]^2$ or $\aclass \gets [\mathfrak a]^3$ respectively.  Dividing the total cost by 10,000,000 gives the average time to square or cube an ideal.  For multiplication, we initially set $\bclass \gets [\mathfrak a]$.  We then iterate 1000 times the sequence of operations $\cclass \gets \aclass \cdot \bclass$, $\aclass \gets \bclass$, and $\bclass \gets \cclass$.
 
-% TODO(jacobson, scheidler): Compare gpowsg with gmul+gsqr
-
-To time the performance of Pari, we statically link with the Pari library.  We determine the discriminant and prime ideal class in exactly the same way as with the other implementations.  We then convert the ideal class into a Pari \texttt{GEN} object using \texttt{qfi}, Pari's function to create a binary quadratic form.  The only operations timed are calls to \texttt{gmul}, in the case of multiplication, \texttt{gsqr}, in the case of squaring, and \texttt{gpowsg}, for cubing.  Pari does not appear to implement ideal class cubing and so we use the general powering function, \texttt{gpowsg}.  We perform garbage collection in Pari by recording Pari's stack pointer, \texttt{avma}, and then restoring it after all the timings are completed.
+To time the performance of Pari, we statically link with the Pari library.  We determine the discriminant and prime ideal class in exactly the same way as with the other implementations.  We then convert the ideal class into a Pari \texttt{GEN} object using \texttt{qfi}, Pari's function to create a binary quadratic form.  The only operations timed are calls to \texttt{gmul}, in the case of multiplication, \texttt{gsqr}, in the case of squaring, and \texttt{gpowsg} (or a combination of \texttt{gmul} and \texttt{gsqr}), for cubing.  Pari does not appear to implement ideal class cubing and so we timed both the general powering function, \texttt{gpowsg}, as well as multiplication with the square.  We perform garbage collection in Pari by recording Pari's stack pointer, \texttt{avma}, and then restoring it after all the timings are completed.
 
 Figures \ref{fig:idealComposeSqrt64}, \ref{fig:idealCubeSqrt64}, \ref{fig:idealComposeSqrt128}, and \ref{fig:idealCubeSqrt128} compare the average time to multiply two ideals or to cube an ideal using either the approximate termination bound for the partial extended GCD or the full termination bound.  We show this for both our 64 bit and 128 bit implementations.  In each case, it is faster on average to use the approximate termination bound.
 
@@ -2069,12 +2067,20 @@ Figures \ref{fig:idealCompose}, \ref{fig:idealSquare}, and \ref{fig:idealCube} s
 
 % TODO(max): Try cancelling an $a_1$ and insert graphs showing reduction after each step, etc.
 
-In Figures \ref{fig:cubingVs64}, \ref{fig:cubingVs128}, and \ref{fig:cubingVsMpz}, we compare the average time to cube against the average time to multiply a representative with its square.  One thing to notice is that our 128 bit implementation of cubing performs more poorly than that of multiplying an ideal with its square when the discriminant is larger than 69 bits.  This is possibly because when $a_1$ is large, computing modulo ${a_1}^2$ means the intermediate before reduction might be larger than $\Delta$ and then larger than 128 bits.  In this case, we rely on GMP for multiple precision arithmetic.  Also, when computing the coefficients 
+In Figures \ref{fig:cubingVs64}, \ref{fig:cubingVs128}, \ref{fig:cubingVsMpz}, and \ref{fig:cubingVsPari} we compare the average time to cube against the average time to multiply a representative with its square.  For both our 64 bit implementation and our GMP implementation, cubing is faster than multiplying with the square.  For Pari, multiplying an ideal with its square (using \texttt{gmul} and \texttt{gsqr}) is faster than using the general powering function (\texttt{gpowsg}).
+ 
+One thing to notice about Figure \ref{fig:cubingVs128} is that our 128 bit implementation of cubing performs more poorly than that of multiplying an ideal with its square when the discriminant is larger than 69 bits.  In order to improve the performance of our 128 bit implementation of cubing, we implemented several code paths depending on the predicted size of intermediate operands.  When operands are likely to be larger than 128 bits, we use GMP for multiple precision arithmetic.  Profiling revealed that for discriminants smaller than 65 bits, none of the GMP code paths were being executed, but that as the discriminant size grew above 65 bits, the GMP code paths were being executed more frequently.
+
+The GMP code paths are only necessary in a few places for our 128 bit implementation of ideal cubing.  First, recall that the input to ideal cubing as described by Algorithm \ref{alg:nucube} is an ideal $\ideal a = [a_1, (b_1 + \sqrt \Delta)/2]$ where $a_1$ may be as large as $\sqrt{|\Delta|/3}$ (see Subsection \ref{subsec:reduction}).  This means that ${a_1}^2$ may be as large as $\Delta$ in size.  There are three equations in Algorithm \ref{alg:nucube} that compute using ${a_1}^2$,  
 \begin{align*}
-M_1 &\gets (R_ia_1 + C_iUa_1) / {a_1}^2 \\
-M_2 &\gets (R_i(b_1 + Ua_1) - sC_ic_1) / {a_1}^2
+U &= Y'c_1(Y'(b_1 - Y'c_1a_1) - 2) \bmod {a_1}^2 & \textrm{\{line 4\}}\\
+U &= -c_1(XY'a_1+Yb_1) \bmod {a_1}^2/s & \textrm{\{line 7\}} \\
+M_2 &= \frac{R_i(b_1 + Ua_1) - sC_ic_1}{{a_1}^2} & \textrm{\{line 20\}}.
 \end{align*}
-in Algorithm \ref{alg:nucube}, the intermediate before dividing by ${a_1}^2$ may be larger than $\Delta$ in size, and for this reason will require the use of multiple precision arithmetic.  On the other hand, none of the intermediates in our 128 bit implementation of ideal multiplication or squaring are ever larger than $\Delta$ in size.  Contrast this to our 64 bit implementation that does not use GMP at all, and our GMP implementation that only uses GMP for arithmetic -- in both of these implementations, cubing is faster than multiplying an ideal with its square.
+
+We tried several methods to compute each of the above.  The method that worked the best in practice is as follows.  When computing $U$, we look at the size of ${a_1}^2$ or ${a_1}^2/s$.  If this value is larger than 64 bits, then division with remainder uses a 128 bit denominator, namely ${a_1}^2$ or ${a_1}^2/s$.  Since the denominator is a 128 bit argument, we use GMP for multiple precision arithmetic.  In this case, we compute $U$ without computing the remainder until the very last step.  If the denominator is smaller than 64 bits, then we use 64 bit arithmetic and compute the remainder after each multiplication.  When computing $M_2$, on the other hand, the method that works best in practice is to estimate the size of the numerator.  If the numerator is predicted to be larger than 128 bits, then we use GMP for multiple precision arithmetic.  Otherwise, we use 128 bit arithmetic.
+
+For computing $U$, we tried two additional methods.  For each multiplication performed, we estimate the size of the product.  If the predicted size is larger than 128 bits, then we use GMP to compute the product, and otherwise we use 128 bit arithmetic.  The two methods here differ as to when we compute the remainder modulo ${a_1}^2$ or ${a_1}^2/s$.  In the first case, we compute the remainder after each product, and in the second case we only compute the remainder if the product is larger than ${a_1}^2$ or ${a_1}^2/s$ as appropriate.  The results are show in Figure \ref{fig:idealSmartCubing}.  These two methods perform essentially the same, and both are slower than the method described above.
 
 
 \begin{table}[htb]
@@ -2119,6 +2125,9 @@ Cubing         & 0.55412 \\
 \mygraph{cube-vs-64}{fig:cubingVs64}{Time to compute $[\mathfrak a^3]$ in our 64 bit implementation.}
 \mygraph{cube-vs-128}{fig:cubingVs128}{Time to compute $[\mathfrak a^3]$ in our 128 bit implementation.}
 \mygraph{cube-vs-mpz}{fig:cubingVsMpz}{Time to compute $[\mathfrak a^3]$ in our GMP implementation.}
+\mygraph{cube-vs-pari}{fig:cubingVsPari}{Time to compute $[\mathfrak a^3]$ using Pari.}
+
+\mygraph{smart-cubing-128}{fig:idealSmartCubing}{Methods of Handling ${a_1}^2$ in 128 bit Cubing.}
 
 \clearpage
 
