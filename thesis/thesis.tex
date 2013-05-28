@@ -303,7 +303,7 @@ and therefore,
 \[
 	\QQ(b^2-4ac) = \QQ(\alpha).
 \]
-Let $f^2 D = b^2-4ac$ for $f, D \in \ZZ$ and $D$ square-free, then $\QQ(\sqrt D) = \QQ(\alpha)$ also.  When $D < 0$, then we call $\QQ(\sqrt D)$ an \emph{imaginary} quadratic number field, and when $D > 0$, we call $\QQ(\sqrt D)$ a \emph{real} quadratic number field.  The assumption throughout this thesis is that $D$ is negative.
+Let $f^2 D = b^2-4ac$ for $f, D \in \ZZ$ and $D$ square-free, then $\QQ(\sqrt D) = \QQ(\alpha)$ also.  When $D < 0$, we call $\QQ(\sqrt D)$ an \emph{imaginary} quadratic number field, and when $D > 0$, we call $\QQ(\sqrt D)$ a \emph{real} quadratic number field.  The assumption throughout this thesis is that $D$ is negative.
 
 When $\xi \in \QQ(\sqrt D)$ is a root of a \emph{monic} quadratic polynomial with integer coefficients, then $\xi$ is a \emph{quadratic integer}, or more simply an integer of $\QQ(\sqrt D)$.
 
@@ -388,16 +388,16 @@ An (integral) \emph{ideal} $\ideal a$ is an additive subgroup of an order $\OO$ 
 \end{defn}
 
 \begin{example}
-Let $\OO = [1, i]$ for $i^2 = -1$ be a maximal order, and $\ideal a = \{2 x + y i : x, y \in \OO\}$ be an additive subgroup of $\OO$.  Then by Proposition \ref{prop:quadInts}, for some $\xi \in \OO$ we have $\xi = u + v i$ for $u,v \in \ZZ$ and for some $\alpha \in \ideal a$ we have $\alpha = 2 \omega_1 + \omega_2 i$ for $\omega_1, \omega_2 \in \OO$.  Since $\omega_1, \omega_2 \in \OO$, there exists $x_1, y_1, x_2, y_2 \in \ZZ$ with $\omega_1 = 2 x_1 + y_1 i$ and $\omega_2 = 2 x_2 + y_2 i$.  Now it follows that
+Let $\OO = [1, i]$ for $i^2 = -1$ be a maximal order, and $\ideal a = \{2 x + y i : x, y \in \OO\}$ be an additive subgroup of $\OO$.  Then by Proposition \ref{prop:quadInts}, for some $\xi \in \OO$ we have $\xi = u + v i$ for $u,v \in \ZZ$ and for some $\alpha \in \ideal a$ we have $\alpha = 2 \omega_1 + \omega_2 i$ for $\omega_1, \omega_2 \in \OO$.  Since $\omega_1, \omega_2 \in \OO$, there exists $x_1, y_1, x_2, y_2 \in \ZZ$ with $\omega_1 = x_1 + y_1 i$ and $\omega_2 = x_2 + y_2 i$.  Now it follows that
 \begin{align*}
 \xi \alpha &= (u + v i)(2 \omega_1 + \omega_2 i) \\
 &= (u + v i)(2 (x_1 + y_1 i) + (x_2 + y_2 i) i) \\
 &= (u + v i)(2 x_1 + 2 y_1 i + x_2 i - y_2) \\
 &= 2 x_1 u + 2 y_1 u i + x_2 u i - y_2 u
- + 2 x_1 v i - 2 y_1 v + x_2 v - y_2 v i \\
-&= 2 ((x_1 u - y_1 v) + (y_1u + x_1v)i) + ((x_2 u - y_2 v) + (y_2 u - x_2 v) i) i.
+ + 2 x_1 v i - 2 y_1 v - x_2 v - y_2 v i \\
+&= 2 ((x_1 u - y_1 v) + (y_1u + x_1v)i) + ((x_2 u - y_2 v) + (y_2 u + x_2 v) i) i.
 \end{align*}
-Let $\zeta_1 = (x_1 u - y_1 v) + (y_1u + x_1v)i$ and $\zeta_2 = (x_2 u - y_2 v) + (y_2 u - x_2 v) i$.  Since $\zeta_1, \zeta_2 \in \OO$, it follows that $\xi \alpha = 2 \zeta_1 + \zeta_2 i$ and $\xi \alpha \in \ideal a$.  Therefore, $\ideal a$ is an ideal of $\OO$.
+Let $\zeta_1 = (x_1 u - y_1 v) + (y_1u + x_1v)i$ and $\zeta_2 = (x_2 u - y_2 v) + (y_2 u + x_2 v) i$.  Since $\zeta_1, \zeta_2 \in \OO$, it follows that $\xi \alpha = 2 \zeta_1 + \zeta_2 i$ and $\xi \alpha \in \ideal a$.  Therefore, $\ideal a$ is an ideal of $\OO$.
 \end{example}
 
 %\begin{defn}
@@ -418,7 +418,42 @@ Equation \ref{eq:idealProduct} shows that ideals are closed under multiplication
 \cite[\S 2.1]{Jacobson2009} A \emph{fractional ideal} of $\OO_\Delta$ is a subset $\ideal a$ of $\QQ(\sqrt \Delta)$ such that $d \ideal a$ is an integral ideal of $\OO_\Delta$ for some $d \in \ZZgtz$.
 \end{defn}
 
-% TODO: Maybe come up with an example?
+\begin{example}
+Let $\OO = [1, \sqrt{-5}]$ be the maximal order in the field $\QQ(\sqrt{-5})$.  Then the set
+\[
+\ideal f = \left \{ \frac{2 x + \sqrt{-5}y}{7} : x,y \in \OO \right \}
+\]
+is a fractional ideal because
+\[
+	7 \ideal f = [2, \sqrt{-5}].
+\]
+\end{example}
+
+%\begin{example}
+%Let $\OO = [1, 3i]$ for $i^2 = -1$ be a non-maximal order and $\ideal a = \{3x + y i : x, y \in \OO\}$ be an additive subgroup of $\OO$.  Then by Proposition \ref{prop:quadInts}, for some $\xi \in \OO$ we have $\xi = u + 3v i$ for $u,v \in \ZZ$ and for some $\alpha \in \ideal a$ we have $\alpha = 3 \omega_1 + \omega_2 i$ for $\omega_1, \omega_2 \in \OO$.  Since $\omega_1, \omega_2 \in \OO$, there exists $x_1, y_1, x_2, y_2 \in \ZZ$ with $\omega_1 = x_1 + 3 y_1 i$ and $\omega_2 = x_2 + 3 y_2 i$.  Now it follows that
+%\begin{align*}
+%\xi \alpha &= (u + 3 v i)(3 \omega_1 + \omega_2 i) \\
+%&= (u + 3 v i)(3 (x_1 + 3 y_1 i) + (x_2 + 3 y_2 i) i) \\
+%&= (u + 3 v i)(3 x_1 + 9 y_1 i + x_2 i - 3 y_2) \\
+%&= 3 x_1 u + 9 y_1 u i + x_2 u i - 3 y_2 u
+% + 9 x_1 v i - 27 y_1 v - 3 x_2 v - 9 y_2 v i \\
+%&= 3 ((x_1 u - 9 y_1 v) + 3(3 y_1 u + 3 x_1 v) i) 
+% +   ((x_2 u - 9 y_2 v) + 3(y_2 u - x_2 v) i) i.
+%\end{align*}
+%\end{example}
+
+%\begin{example}
+%Let $\OO = [1, 3i]$ for $i^2 = -1$ be a non-maximal order and $\ideal a = \{2x + 3y i : x, y \in \OO\}$ be an additive subgroup of $\OO$.  Then by Proposition \ref{prop:quadInts}, for some $\xi \in \OO$ we have $\xi = u + 3v i$ for $u,v \in \ZZ$ and for some $\alpha \in \ideal a$ we have $\alpha = 2 \omega_1 + 3 \omega_2 i$ for $\omega_1, \omega_2 \in \OO$.  Since $\omega_1, \omega_2 \in \OO$, there exists $x_1, y_1, x_2, y_2 \in \ZZ$ with $\omega_1 = x_1 + 3 y_1 i$ and $\omega_2 = x_2 + 3 y_2 i$.  Now it follows that
+%\begin{align*}
+%\xi \alpha &= (u + 3 v i)(2 \omega_1 + 3 \omega_2 i) \\
+%&= (u + 3 v i)(2 (x_1 + 3 y_1 i) + 3 (x_2 + 3 y_2 i) i) \\
+%&= (u + 3 v i)(2 x_1 + 6 y_1 i + 3 x_2 i - 9 y_2) \\
+%&= 2 x_1 u + 6 y_1 u i + 3 x_2 u i - 9 y_2 u
+% + 6 x_1 v i - 18 y_1 v - 9 x_2 v - 27 y_2 v i \\
+%&= 2 ((x_1 u - 9 y_1 v) + 3(2 y_1 u + 2 x_1 v) i) 
+% + 3 ((x_2 u - 9 y_2 v) + 3(y_2 u - x_2 v) i) i.
+%\end{align*}
+%\end{example}
 
 Using fractional ideals, we are able to define inverses.
 
