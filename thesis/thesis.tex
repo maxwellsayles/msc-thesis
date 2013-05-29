@@ -417,15 +417,15 @@ Equation \ref{eq:idealProduct} shows that ideals are closed under multiplication
 \end{defn}
 
 \begin{example}
-Let $\OO = [1, \sqrt{-5}]$ be the maximal order in the field $\QQ(\sqrt{-5})$.  Then the set
+Let $\OO = [1, i]$ for $i^2 = -1$ be the maximal order in the field $\QQ(i)$.  Then the set
 \[
-\ideal f = \left \{ \frac{2 x + \sqrt{-5}y}{7} : x,y \in \OO \right \}
+\ideal f = \left \{ \frac{2 x + y i}{7} : x,y \in \OO \right \}
 \]
 is a fractional ideal because
 \[
-	7 \ideal f = \{2x + \sqrt{-5}y : x, y \in \OO\}
+	7 \ideal f = \{2x + y i : x, y \in \OO\}
 \]
-is an integral ideal in the order $[1, \sqrt{-5}]$.
+is an integral ideal in the order $[1, i]$.
 \end{example}
 
 %\begin{example}
@@ -495,8 +495,8 @@ C. Siegel \cite[p.247]{Crandall2001} showed that $h_\Delta = |\Delta|^{1/2 + o(1
 \label{sec:idealArithmetic}
 
 % TODO: Use Pari/GP.
-% a = qfbprimeform(-143, 2)
-% b = qfbprimeform(-143, 7)
+% a = qfbprimeform(-131, 3)
+% b = qfbprimeform(-131, 7)
 % These give nice ideals and 7 is non-reduced so we can show raw multiplication.
 %
 % Maybe \Delta = -131 will work better since that is \equiv 3 \pmod 4.
