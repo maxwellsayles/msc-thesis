@@ -336,13 +336,13 @@ A \emph{quadratic order} $\OO$ of $\QQ(\sqrt D)$ is a sub-ring of the quadratic 
 When a quadratic order $\OO$ consists of all the quadratic integers in $\QQ(\sqrt D)$ then it is called the \emph{maximal order}, since it is not contained within any larger order.  Following \mbox{\cite[p.80]{Jacobson2009}}, the $\ZZ$-module $[1, \omega]$ is an order of $\KK = \QQ(\sqrt D)$ and we denote this $\OO_{\KK}$.
 
 \begin{example}
-Let $i^2 = -1$, then $[1, 2i]$ is an order of $\QQ(i)$ that is \emph{not} maximal since it is contained in the order $[1, i]$.
+$[1, 2 \sqrt{-1}]$ is an order of $\QQ(\sqrt{-1})$ that is \emph{not} maximal since it is contained in the order $[1, \sqrt{-1}]$.
 \end{example}
 
 \begin{defn}
 \cite[Definition 4.16]{Jacobson2009} Let $\OO = [\xi_1, \xi_2]$ be any order of $\QQ(\sqrt D)$.  Then the \emph{discriminant} $\Delta$ of $\OO$ is defined as
 \[
-	\Delta = {\left| \begin{array}{rr} \xi_1 & \xi_2 \\ \overline{\xi_1} & \overline{\xi_2} \end{array} \right|}^2
+	\Delta = {\left[ \begin{array}{rr} \xi_1 & \xi_2 \\ \overline{\xi_1} & \overline{\xi_2} \end{array} \right]}^2
 	       = (\xi_1 \overline{\xi_2} - \overline{\xi_1} \xi_2)^2
 \]
 where $\overline{\xi}$ denotes the complex conjugate of $\xi$.
@@ -350,13 +350,13 @@ where $\overline{\xi}$ denotes the complex conjugate of $\xi$.
 
 \begin{example}
 \label{ex:discriminant}
-The discriminant $\Delta'$ of the non-maximal order $[1,2i]$ is
+Let $i^2 = \sqrt{-1}$.  The discriminant $\Delta'$ of the non-maximal order $[1, 2 i]$ is
 \[
-	\Delta' = {\left| \begin{array}{rr} 1 & 2i \\ 1 & -2i \end{array} \right|}^2 = (-4i)^2 = -16,
+	\Delta' = {\left[ \begin{array}{rr} 1 & 2i \\ 1 & -2i \end{array} \right]}^2 = (-4i)^2 = -16,
 \]
 while the discriminant $\Delta$ of the maximal order $[1,i]$ is
 \[
-	\Delta = {\left| \begin{array}{rr} 1 & i \\ 1 & -i \end{array} \right|}^2 = (-2i)^2 = -4.
+	\Delta = {\left[ \begin{array}{rr} 1 & i \\ 1 & -i \end{array} \right]}^2 = (-2i)^2 = -4.
 \]
 \end{example}
 
@@ -564,14 +564,15 @@ Since $c = (b^2 - \Delta)/4a$ we have
 The first step is to decrease $a$ by setting $\ideal a = [c, (-b + \sqrt\Delta)/2]$, if $a > c$.  Then $b$ is decreased since $b$ is unique modulo $2a$.  These steps are repeated while $\ideal a$ is not reduced. In the case that $a = c$, we use the absolute value of $b$, since by Equation \ref{eq:idealSwapAC} the ideals $[a, (b + \sqrt\Delta)/2]$ and $[c, (-b+\sqrt\Delta)/2]$ are equivalent.  
 
 \begin{example}
-Let $\ideal = [72, (130 + \sqrt{\Delta})/2]$ with $\Delta = -1536$.  Initially, we have $a = 72, b = 130, c = 64$.  Using Algorithm \ref{alg:reduce}, the steps to compute a reduced ideal equivalent to $\ideal a$ are as follows.
+Let $\ideal a = [5, (6 + \sqrt{\Delta})/2]$ with $\Delta = -4$.  Initially, we have $a = 5, b = 6, c = 2$.  Using Algorithm \ref{alg:reduce}, the steps to compute a reduced ideal equivalent to $\ideal a$ are as follows.
 \begin{align*}
-1. && a &= 72 &b &= 130 &c &= 64 & \textrm{\{initial values\}} \\
-2. && a &= 64 &b &= -130 &c &= 72 & \textrm{\{swap $a$ and $c$ and negate $b$\}} \\
-3. && a &= 64 &b &= -2 &c &= 6 & \textrm{\{decrease $b \bmod 2a$, recalculate $c$\}} \\
-4. && a &= 6  &b &= 2  &c &= 64 & \textrm{\{swap $a$ and $c$ and negate $b$\}}
+1. && a &= 5 &b &= 6 &c &= 2 & \textrm{\{initial values\}} \\
+2. && a &= 2 &b &= -6 &c &= 5 & \textrm{\{swap $a$ and $c$ and negate $b$\}} \\
+3. && a &= 2 &b &= -2 &c &= 1 & \textrm{\{decrease $b \bmod 2a$, recalculate $c$\}} \\
+4. && a &= 1 &b &= 2  &c &= 2 & \textrm{\{swap $a$ and $c$ and negate $b$\}} \\
+5. && a &= 1 &b &= 0  &c &= 1 & \textrm{\{decrease $b \bmod 2a$, recalculate $c$\}}
 \end{align*}
-The final ideal $\ideal{a'} = [6, (2 + \sqrt \Delta)/2]$ is reduced as it satisfies Definition \ref{defn:reducedIdeal}.
+The final ideal $\ideal{a'} = [1, (0 + \sqrt \Delta)/2]$ is reduced as it satisfies Definition \ref{defn:reducedIdeal}.
 \end{example}
 
 We point out here that by Definition \ref{defn:reducedIdeal}, $|b| \le a$.  It follows that $-\Delta = 4ac - b^2 \ge 4ac -a^2$, and using $a \le c$, we have $|b| \le a \le \sqrt{|\Delta|/3}$.  These bounds will be useful to our implementations of ideal class arithmetic in Chapter \ref{chap:idealExperiments}.
