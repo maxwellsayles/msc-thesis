@@ -2007,11 +2007,11 @@ For ideal squaring we simply use $\ceil{|\Delta/4|^{1/4}}$, and for ideal cubing
 We further approximate the computation of integer square roots when computing the termination bound for fast multiplication.  We note that 
 \begin{equation*}
 \begin{array}{rrlrlr}
-	& x^{1/2} &=& 2^{(\log_2x)/2} &\approx& 2^{\floor{\floor{\log_2x+1}/2}} \\
-	\Rightarrow & x / x^{1/2} &=& x / 2^{(\log_2x)/2} &\approx& x / 2^{\floor{\floor{\log_2x+1}/2}},
+	& x^{1/2} &=& 2^{(\log_2x)/2} &\approx& 2^{\floor{\floor{(\log_2x)+1}/2}} \\
+	\Rightarrow & x / x^{1/2} &=& x / 2^{(\log_2x)/2} &\approx& x / 2^{\floor{\floor{(\log_2x)+1}/2}},
 \end{array}
 \end{equation*}
-where $\floor{\log_2x+1}$ is the number of bits in the binary representation of $x$.  Using this approximation, we compute the integer square root of $x$ as roughly $\floor{x / 2^{\floor{\floor{\log_2x+1}/2}}}$.  This is simply a bit shift right by half the number of bits in $x$.
+where $\floor{(\log_2x)+1}$ is the number of bits in the binary representation of $x$.  Using this approximation, we compute the integer square root of $x$ as roughly $\floor{x / 2^{\floor{\floor{(\log_2x)+1}/2}}}$.  This is simply a bit shift right by half the number of bits in $x$.
 
 Other practical considerations are to minimize the size of variables and intermediate values, as smaller operands often lead to faster arithmetic.  Recall from Subsection \ref{subsec:reduction} that $|b| \le a \le \sqrt{\Delta/3}$.  In our 64 bit implementation, both $a$ and $b$ require only 32 bits at most, so we take advantage of 32 bit operations when possible (such as our 32 bit implementation of the extended Euclidean GCD from Section \ref{sec:gcdEEA}).  Similarly in our 128 bit implementation, both $a$ and $b$ fit within one 64 bit machine word.  Again, we use 64 bit arithmetic when possible (such as our simplified 64 bit left-to-right binary extended GCD from Section \ref{sec:gcdL2R}), and even 32 bit when operands are small.  However, since intermediates may be larger, we sometimes require the full 64 bits or 128 bits of the implementation.  Cubing sometimes requires even larger intermediates, for example, when computing modulo ${a_1}^2$.  Since ${a_1}^2$ can be as large as $\Delta$, intermediates before reduction might be larger than $\Delta$ in size.  Therefore, our 64 bit implementation of cubing requires some 128 bit arithmetic, while our 128 bit implementation uses GMP when necessary.
 
@@ -2555,7 +2555,7 @@ Algorithm \ref{alg:deltaWheel} computes $\coprimelist_{w+1}$ given $\coprimelist
 
 \subsection{Comparison}
 
-The coprime sieve requires $b$ bits of memory, while the coprime wheel requires $\phi(P_w)$ integers for the list of deltas, where $\phi(P_w)$ is the number of positive integers coprime to $P_w$ and no larger than $P_w$.  Table \ref{tab:primorialRateOfGrowth} shows the values of $\phi(P_w)$ for the first 12 primorials.  The delta list for the tenth primorial, $\phi(P_{10}) = 1021870080$, requires over a billion integers.  For this reason, the coprime sieve is preferred when the primorial is large, while the coprime wheel may be more efficient for large values of $b$.  This is because the coprime wheel generates deltas directly, whereas each entry in the sieve must be inspected to find integers coprime to the primorial.
+The coprime sieve requires $b$ bits of memory, while the coprime wheel requires $\phi(P_w)$ integers for the list of deltas, where $\phi(P_w) = \prod_{p \le p_w}(p-1)$ for $p$ prime is the number of positive integers coprime to $P_w$ and no larger than $P_w$.  Table \ref{tab:primorialRateOfGrowth} shows the values of $\phi(P_w)$ for the first 12 primorials.  The delta list for the tenth primorial, $\phi(P_{10}) = 1021870080$, requires over a billion integers.  For this reason, the coprime sieve is preferred when the primorial is large, while the coprime wheel may be more efficient for large values of $b$.  This is because the coprime wheel generates deltas directly, whereas each entry in the sieve must be inspected to find integers coprime to the primorial.
 
 \begin{table}[htb]
 \centering
