@@ -170,7 +170,7 @@
 \newcommand{\PariGP}{Pari/GP 2.5.3}
 \newcommand{\MPIR}{MPIR 2.6.0}
 
-\graphicspath{{gcd-eps/}{ideal-eps/}{exp-eps/}{sspar-eps/}}
+\graphicspath{{gcd-eps/}{ideal-eps/}{exp-eps/}{sspar-eps/}{sspar-evolve-eps/}}
 
 \begin{document}
 
@@ -3221,12 +3221,32 @@ Table \ref{tab:ssparParams} shows the values used for the exponentiation and sea
 
 \clearpage
 
+% EVOLUTION OF SUPERSPAR
 \section{Reference SPAR}
 \label{sec:referenceSpar}
 
-% TODO(all): Implement this section.
+This section compares each of the practical performance improvements from the previous sections to our reference implementation of SPAR.  Our reference implementation uses all of the improvements to arithmetic in the ideal class group from Chapters \ref{chap:xgcdExperiments} and \ref{chap:idealExperiments}, as well as the improvements to exponentiation by power primorials from Chapter \ref{chap:powExperiments}.  We use the theoretically optimal parameters as described by Schnorr and Lenstra in \cite{Schnorr1984}.  The search stage uses a Pollar-Brent recursion as describe on \cite[p.296]{Schnorr1984}.  We briefly describe the search stage using this algorithm here.  The exponentiation stage computes an ideal class $\bclass = \aclass^{2^\ell E}$ with $\ell = \floor{\log_2 \hdelta}$.  The search stage in SPAR first computes $\idealclass{q_i} = \bclass^{r_i}$ for random $r_i \in [p_t, {p_t}^2]$ and $0 \le i \le 15$.  Let $\idealclass{c_0} = \bclass$ and $h_0 = 0$.  We then iterate computing
+\begin{align*}
+	\idealclass{c_{i+1}} &= \idealclass{c_i} \cdot \idealclass{q_{(i \bmod 16)}} \\
+	h_{i+1} &= h_i + r_{(i \bmod 16)}
+\end{align*}
+until we find some $\idealclass{c_i} = \idealclass{c_j}$ with $j < i$.  Then $h' = h_i - h_j$ is a multiple of the order of the ideal class $\bclass$.  Following the recommendation of Schnorr and Lenstra \cite[p.296]{Schnorr1984}, we do not store every $\idealclass{c_i}$ computed, but instead maintain a circular queue of at most 7 of these ideal classes.  If $n$ items have been previously added to the queue, the next item is added after $\idealclass{c_i}$ is computed for $i = 1.1^n$.
 
-COMING SOON!
+The experiments in this section were performed on a \cpu{} with 8Gb of RAM and four cores.  Only one of the cores was used during performance testing.  All source code was written for the \compiler{} with x64 assembly language used for 128 bit arithmetic.  The times given are the average time to factor semiprime integers $N = p \cdot q$, with $N$ of the specified size and $p$ and $q$ roughly half the size.  For each bit range, we factor a set of 10,000 integers.  This is the same set of integers as in Section \ref{sec:ssparComparison}.
+
+Figure \ref{fig:sparEvolve1} shows the average time to factor integers using our reference implementation of SPAR.  The first practical performance improvement is shown in Figure \ref{fig:sparEvolve2}.  In this figure, we limit the number of ideal classes tried before switching class groups as determined by Subsection \ref{subsec:ssparExpIdeals}.  Figure \ref{fig:sparEvolve3} shows the practical performance improvements when we simply switch from the Pollar-Brent recursion described above to a bounded primorial steps algorithm as described in Subsection \ref{subsec:boundedPrimorialSteps}.  Since this line is quite flat relative to our reference implementation of SPAR, Figure \ref{fig:sparEvolve4} simply zooms in on this line.  Then by bounding the exponents of the prime powers $e_i$ in the exponent $E = \prod {p_i}^{e_i}$ in the exponentiation stage, we obtain a further practical improvement.  Figure \ref{fig:sparEvolve5} shows the results when the bounds are selected according to Subsection \ref{subsec:ssparPrimePowerBound}.  Figure \ref{fig:sparEvolve6} shows the improvement when the largest prime $p_t$ in the exponent $E = \prod {p_i}^{e_i}$ and the search bound $mP_w$ are chosen according to the approach outlined in Section \ref{sec:ssparEmpirical}.  Finally, Figure \ref{fig:sparEvolve7} shows the benefit of only performing the search stage once per ideal class group.   When we take all these improvements together, the result is quite substantial and is depicted by Figure \ref{fig:sparEvolve8}.
+
+\mygraphX{spar-vanilla}{fig:sparEvolve1}{Reference Implementation of SPAR. This uses improvements to arithmetic in the ideal class group as well as improvements to power primorial exponentiation.}{Reference SPAR}
+\mygraphX{spar-bound-attempts}{fig:sparEvolve2}{Improvement in the average time by limiting the number of ideals tried per class group as determined by Subsection \ref{subsec:ssparExpIdeals}.}{Bound the Number of Ideals per Group}
+\mygraphX{spar-to-sspar}{fig:sparEvolve3}{Simply using a bounded primorial steps search instead of a Pollard-Brent recursion.}{Bounded Primorial Steps Search}
+\mygraphX{sspar-theoretical}{fig:sparEvolve4}{Same as Figure \ref{fig:sparEvolve3} only zoomed in on ``Bounded Primorial Steps''.}{Bounded Primorial Steps Search (Zoomed)}
+\mygraphX{sspar-power-bound}{fig:sparEvolve5}{Bounding the exponent of the prime powers $e_i$ in the exponent $E = \prod {p_i}^{e_i}$ as determined by Subsection \ref{subsec:ssparPrimePowerBound}.}{Bound $e_i$ in Exponent $E = \prod {p_i}^{e_i}$}
+\mygraphX{sspar-noreuse}{fig:sparEvolve6}{Using independently chosen exponent $E$ and search bound $mP_w$ as determined in Section \ref{sec:ssparEmpirical}.}{Independent Exponent $E$ and Search Bound $mP_w$}
+\mygraphX{sspar-optimized}{fig:sparEvolve7}{Only perform the search stage once per class group.}{Perform a Single Search}
+\mygraphX{spar-vs-sspar}{fig:sparEvolve8}{Comparison of our reference implementation of SPAR to our final implementation of SuperSPAR.}{SPAR vs SuperSPAR}
+
+
+\clearpage
 
 
 \section{Comparison to Other Factoring Implementations}
