@@ -72,6 +72,7 @@
 \newcommand{\ZZ}{\mathbb{Z}}
 \newcommand{\QQ}{\mathbb{Q}}
 \newcommand{\RRgtz}{\mathbb{R}_{>0}}
+\newcommand{\RRgez}{\mathbb{R}_{\ge 0}}
 \newcommand{\ZZgtz}{\mathbb{Z}_{>0}}
 \newcommand{\ZZgez}{\mathbb{Z}_{\ge 0}}
 \newcommand{\QQgtz}{\mathbb{Q}_{>0}}
@@ -502,11 +503,11 @@ C. Siegel \cite[p.247]{Crandall2001} showed that $h_\Delta = |\Delta|^{1/2 + o(1
 % Maybe \Delta = -131 will work better since that is \equiv 3 \pmod 4.
 
 
-When performing ideal arithmetic, we choose to represent invertible ideals following Jacobson \cite[p.13, Equation 2.1]{Jacobson1999} using the $\ZZ$-module
+When performing ideal arithmetic, we choose to represent invertible fractional ideals following Jacobson \cite[p.13, Equation 2.1]{Jacobson1999} using the $\ZZ$-module
 \[
 	\ideal a = q\left[a, \frac{b+\sqrt{\Delta}}{2} \right]
 \]
-for $a, b, \in \ZZ, q \in \QQgtz, a > 0$, $\gcd(a, b, (b^2-\Delta)/4a) = 1$, $b^2 \equiv \Delta \pmod{4a}$, and $b$ is unique $\bmod ~2a$.  We also use $q(a, b)$, for short, to represent the ideal $\ideal a$.  When $q = 1$, $\ideal a$ is a \emph{primitive} ideal, and we use the pair $(a, b)$ to represent $\ideal a$.  Our implementation of ideal arithmetic also maintains the value $c = (b^2 - \Delta)/4a$, which will be useful throughout the remainder of this chapter.
+for $a, b, \in \ZZ, q \in \QQgtz, a > 0$, $\gcd(a, b, (b^2-\Delta)/4a) = 1$, $b^2 \equiv \Delta \pmod{4a}$, and $b$ is unique $\bmod ~2a$.  We also use $q(a, b)$, for short, to represent the fractional ideal $\ideal a$.  When $q = 1$, $\ideal a$ is a \emph{primitive} ideal, and we use the pair $(a, b)$ to represent $\ideal a$.  Our implementation of ideal arithmetic also maintains the value $c = (b^2 - \Delta)/4a$, which will be useful throughout the remainder of this chapter.
 
 Using this representation, the inverse $\ideal a^{-1}$ of an ideal is given by \cite[pp.14--15]{Jacobson1999} as
 \begin{equation}
@@ -1227,7 +1228,7 @@ They also found that applying a global bound $A^*$ and $B^*$ such that $0 \le a 
 \subsection{Pruned Tree of $\pm1$ Nodes}
 \label{subsec:pm1Tree}
 
-The next technique for finding strictly chained 2,3 partitions was suggested by Doche and Habsieger \cite{Doche2008}. The idea is similar to the method for generating chains from right to left as described in Subsection \ref{subsec:rtolChains} above, but this technique differs by generating multiple values that may be further reduced by powers of 2 and 3. The procedure is given in Algorithm \ref{alg:pm1Tree}.  The idea is to maintain a tree, $T$, with at most $L$ leaf nodes. At each iteration, each leaf node $v \in T$ generates two new leaves, $v-1$ and $v+1$, which are then reduced as much as possible by removing factors of 2 and 3.  We then discard any duplicate nodes and all but the smallest $L$ elements generated. The path from the root to the first leaf with a value of 1 represents a chained 2,3 partition of the number $n$.
+The next technique that we discuss for finding strictly chained 2,3 partitions was suggested by Doche and Habsieger \cite{Doche2008}. The idea is similar to the method for generating chains from right to left as described in Subsection \ref{subsec:rtolChains} above, but differs by generating multiple values that may be further reduced by powers of 2 and 3. The procedure is given in Algorithm \ref{alg:pm1Tree}.  The idea is to maintain a tree, $T$, with at most $L$ leaf nodes. At each iteration, each leaf node $v \in T$ generates two new leaves, $v-1$ and $v+1$, which are then reduced as much as possible by removing factors of 2 and 3.  We then discard any duplicate nodes and all but the smallest $L$ elements generated. The path from the root to the first leaf with a value of 1 represents a chained 2,3 partition of the number $n$.
 
 \begin{algorithm}[htb]
 \caption{Chain from $\pm 1$ Pruned Tree (Doche and Habsieger \cite{Doche2008}).}
@@ -3382,8 +3383,18 @@ Naturally, future improvements to SuperSPAR should involve comparisons with the 
 %%%%%%%%%%%%%%
 % APPENDIX A %
 %%%%%%%%%%%%%%
-%\appendix
-%Asymptotic
+\appendix
+\chapter{First Appendix}
+
+\section{Definitions of big-Oh notation}
+\begin{align*}
+o(g(n)) &= \{ f : \RRgez \rightarrow \RRgez ~|~ \forall c_2 > 0, \exists n_0 > 0, \forall n \ge n_0 :& 0 \le &f(n) \le c_2g(n) \} \\
+O(g(n)) &= \{ f : \RRgez \rightarrow \RRgez ~|~ \exists c_2 > 0, \exists n_0 > 0, \forall n \ge n_0 :& 0 \le &f(n) \le c_2g(n) \} \\
+\Theta(g(n)) &= \{ f : \RRgez \rightarrow \RRgez ~|~ \exists c_1, c_2 > 0, \exists n_0 > 0, \forall n \ge n_0 :& 0 \le c_1g(n) \le &f(n) \le c_2g(n) \} \\
+\Omega(g(n)) &= \{ f : \RRgez \rightarrow \RRgez ~|~ \exists c_1 > 0, \exists n_0 > 0, \forall n \ge n_0 :& 0 \le c_1g(n) \le &f(n) \} \\
+\omega(g(n)) &= \{ f : \RRgez \rightarrow \RRgez ~|~ \forall c_1 > 0, \exists n_0 > 0, \forall n \ge n_0 :& 0 \le c_1g(n) \le &f(n) \} 
+\end{align*}
+
 
 %%%%%%%%%%%%%%%%
 % BIBLIOGRAPHY %
