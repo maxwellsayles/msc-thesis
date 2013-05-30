@@ -336,7 +336,7 @@ A \emph{quadratic order} $\OO$ of $\QQ(\sqrt D)$ is a sub-ring of the quadratic 
 When a quadratic order $\OO$ consists of all the quadratic integers in $\QQ(\sqrt D)$ then it is called the \emph{maximal order}, since it is not contained within any larger order.  Following \mbox{\cite[p.80]{Jacobson2009}}, the $\ZZ$-module $[1, \omega]$ is an order of $\KK = \QQ(\sqrt D)$ and we denote this $\OO_{\KK}$.
 
 \begin{example}
-$[1, 2 \sqrt{-1}]$ is an order of $\QQ(\sqrt{-1})$ that is \emph{not} maximal since it is contained in the order $[1, \sqrt{-1}]$.
+$[1, 2 \sqrt{-5}]$ is an order of $\QQ(\sqrt{-5})$ that is \emph{not} maximal since it is contained in the order $[1, \sqrt{-5}]$.
 \end{example}
 
 \begin{defn}
@@ -350,13 +350,13 @@ where $\overline{\xi}$ denotes the complex conjugate of $\xi$.
 
 \begin{example}
 \label{ex:discriminant}
-Let $i^2 = -1$.  The discriminant $\Delta'$ of the non-maximal order $[1, 2 i]$ is
+The discriminant $\Delta'$ of the non-maximal order $[1, 2 \sqrt{-5}]$ is
 \[
-	\Delta' = {\left| \begin{array}{rr} 1 & 2i \\ 1 & -2i \end{array} \right|}^2 = (-4i)^2 = -16,
+	\Delta' = {\left| \begin{array}{rr} 1 & 2\sqrt{-5} \\ 1 & -2\sqrt{-5} \end{array} \right|}^2 = \left( -4\sqrt{-5} \right)^2 = -80,
 \]
-while the discriminant $\Delta$ of the maximal order $[1,i]$ is
+while the discriminant $\Delta$ of the maximal order $[1,\sqrt{-5}]$ is
 \[
-	\Delta = {\left| \begin{array}{rr} 1 & i \\ 1 & -i \end{array} \right|}^2 = (-2i)^2 = -4.
+	\Delta = {\left| \begin{array}{rr} 1 & \sqrt{-5} \\ 1 & -\sqrt{-5} \end{array} \right|}^2 = \left( -2\sqrt{-5} \right)^2 = -20.
 \]
 \end{example}
 
@@ -375,7 +375,7 @@ Let $\OO'$ be a non-maximal order of $\QQ(\sqrt D)$ with discriminant $\Delta'$.
 \end{prop}
 
 \noindent
-We call $f$ the \emph{conductor} of the non-maximal order $\OO'$.  Notice that in Example \ref{ex:discriminant}, we had $\Delta' = -16 = 4(-4) = f^2\Delta$ where $f = 2$ and $\Delta = -4$.
+We call $f$ the \emph{conductor} of the non-maximal order $\OO'$.  Notice that in Example \ref{ex:discriminant}, we had $\Delta' = -80 = 4(-20) = f^2\Delta$ where $f = 2$ and $\Delta = -20$.
 
 
 \section{Ideals and the Class Group}
@@ -386,16 +386,16 @@ An (integral) \emph{ideal} $\ideal a$ is an additive subgroup of an order $\OO$ 
 \end{defn}
 
 \begin{example}
-Let $\OO = [1, i]$ for $i^2 = -1$ be a maximal order, and $\ideal a = \{2 x + y i : x, y \in \OO\}$ be an additive subgroup of $\OO$.  Then by Proposition \ref{prop:quadInts}, for some $\xi \in \OO$ we have $\xi = u + v i$ for $u,v \in \ZZ$ and for some $\alpha \in \ideal a$ we have $\alpha = 2 \omega_1 + \omega_2 i$ for $\omega_1, \omega_2 \in \OO$.  Since $\omega_1, \omega_2 \in \OO$, there exists $x_1, y_1, x_2, y_2 \in \ZZ$ with $\omega_1 = x_1 + y_1 i$ and $\omega_2 = x_2 + y_2 i$.  Now it follows that
+Let $\OO = [1, \sqrt{-5}]$ be the maximal order in $\QQ(\sqrt{-5})$.  Then let $\ideal a = \{2 x + \sqrt{-5} y : x, y \in \OO\}$ be an additive subgroup of $\OO$.  Then by Proposition \ref{prop:quadInts}, for some $\xi \in \OO$ we have $\xi = u + \sqrt{-5} v$ for $u,v \in \ZZ$ and for some $\alpha \in \ideal a$ we have $\alpha = 2 \omega_1 + \sqrt{-5} \omega_2$ for $\omega_1, \omega_2 \in \OO$.  Since $\omega_1, \omega_2 \in \OO$, there exists $x_1, y_1, x_2, y_2 \in \ZZ$ with $\omega_1 = x_1 + \sqrt{-5} y_1$ and $\omega_2 = x_2 + \sqrt{-5} y_2$.  Now it follows that
 \begin{align*}
-\xi \alpha &= (u + v i)(2 \omega_1 + \omega_2 i) \\
-&= (u + v i)(2 (x_1 + y_1 i) + (x_2 + y_2 i) i) \\
-&= (u + v i)(2 x_1 + 2 y_1 i + x_2 i - y_2) \\
-&= 2 x_1 u + 2 y_1 u i + x_2 u i - y_2 u
- + 2 x_1 v i - 2 y_1 v - x_2 v - y_2 v i \\
-&= 2 ((x_1 u - y_1 v) + (y_1u + x_1v)i) + ((x_2 u - y_2 v) + (y_2 u + x_2 v) i) i.
+\xi \alpha &= (u + \sqrt{-5} v)(2 \omega_1 + \sqrt{-5} \omega_2) \\
+&= (u + \sqrt{-5} v)(2 (x_1 + \sqrt{-5} y_1) + \sqrt{-5} (x_2 + \sqrt{-5} y_2)) \\
+&= (u + \sqrt{-5} v)(2 x_1 + 2 \sqrt{-5} y_1 + \sqrt{-5} x_2 - 5 y_2) \\
+&= 2 x_1 u + 2 \sqrt{-5} y_1 u + \sqrt{-5} x_2 u - 5 y_2 u
+ + 2 \sqrt{-5} x_1 v - 10 y_1 v - 5 x_2 v - 5 \sqrt{-5} y_2 v \\
+&= 2 ((x_1 u - 5 y_1 v) + \sqrt{-5} (y_1u + x_1v)) + \sqrt{-5} ((x_2 u - 5 y_2 v) + \sqrt{-5} (y_2 u + x_2 v)).
 \end{align*}
-Let $\zeta_1 = (x_1 u - y_1 v) + (y_1u + x_1v)i$ and $\zeta_2 = (x_2 u - y_2 v) + (y_2 u + x_2 v) i$.  Since $\zeta_1, \zeta_2 \in \OO$, it follows that $\xi \alpha = 2 \zeta_1 + \zeta_2 i$ and $\xi \alpha \in \ideal a$.  Therefore, $\ideal a$ is an ideal of $\OO$.
+Let $\zeta_1 = (x_1 u - 5 y_1 v) + \sqrt{-5} (y_1u + x_1v)$ and $\zeta_2 = (x_2 u - 5 y_2 v) + \sqrt{-5} (y_2 u + x_2 v)$.  Since $\zeta_1, \zeta_2 \in \OO$, it follows that $\xi \alpha = 2 \zeta_1 + \sqrt{-5} \zeta_2$ and $\xi \alpha \in \ideal a$.  Therefore, $\ideal a$ is an ideal of $\OO$.
 \end{example}
 
 %\begin{defn}
@@ -465,20 +465,23 @@ and satisfies $\ideal a \ideal a^{-1} = \ideal a^{-1} \ideal a = \OO_\Delta$.
 \end{prop}
 
 \begin{example}
-Let $\OO = [1, i]$ for $i^2 = -1$ be the maximal order in the field $\QQ(i)$ and let 
+Let $\OO = [1, \sqrt{\Delta}]$ for $\Delta = -20$ be an order in the field $\QQ(\sqrt{-5})$ and let 
 \[
-	\ideal a = \{2x + yi : x, y \in \OO\}
-	= (2, i)
+	\ideal a = \left\{7x + \frac{(8 + \sqrt{\Delta})y}{2} : x, y \in \OO \right\}
+	= \left( 7, \frac{8 + \sqrt\Delta}{2} \right)
 \]
 be an ideal of $\OO$.  The inverse of $\ideal a$ is given as
 \[
-  \ideal a^{-1} = \left\{ \frac{-2x + yi}{5} : x, y \in \OO \right\}
-  = \frac{1}{5} (-2, i),
+  \ideal a^{-1} = \left\{ x + \frac{-8 + \sqrt\Delta}{14} y : x, y \in \OO \right\}
+  = \frac{1}{7} \left( 7, \frac{-8 + \sqrt\Delta}{2} \right),
 \]
 which is verified by
-\[
-	\frac{1}{5}(2, i)(-2, i) = \frac{1}{5}(-4, 2i, -2i, -1) = (1) = \OO.
-\]
+\begin{align*}
+	\frac{1}{7}\left(7, \frac{8 + \sqrt\Delta}{2}\right) \left(7, \frac{-8+\sqrt\Delta}{2} \right)
+	&= \frac{1}{7}\left(49, \frac{-56+7\sqrt\Delta}{2}, \frac{56 + 7\sqrt\Delta}{2}, 21 \right) \\
+	&= \left(7, \frac{-8 + \sqrt\Delta}{2}, \frac{8 + \sqrt\Delta}{2}, 3 \right) \\
+	&= (1).
+\end{align*}
 \end{example}
 
 All fractional ideals of $\OO_\Delta$ are invertible, and the set of invertible ideals forms a group under ideal multiplication \cite[Theorem 2.26]{Sawilla2004}.  We now define an equivalence relation on the invertible ideals of $\OO_\Delta$.
