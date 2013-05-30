@@ -932,7 +932,7 @@ The next chapter discusses some exponentiation techniques that use the ideal ari
 
 Exponentiation has many applications. Diffie-Hellman key exchange uses exponentiation so that two parties may jointly establish a shared secret key over an insecure channel.  An application discussed in detail in this thesis is that of computing the order of an ideal class.  The approach used in Chapter \ref{chap:superspar} is to exponentiate an ideal class by the product, $E$, of several small primes.  The result is an ideal class whose order is likely to not be divisible by any of these primes.  The order is then computed using a variant of Shanks' baby-step giant-step algorithm where only powers relatively prime to $E$ are computed.  Computing the order of several ideal classes is one method to factor an integer associated with the ideal class group.  Faster exponentiation means the approach used there is faster.
 
-In Sections \ref{sec:binaryExp} and \ref{sec:naf} we discuss standard exponentiation techniques that rely on a base 2 representation of the exponent.  In Section \ref{sec:dbns} we describe double-base number systems, which, as the name implies, are number systems that make use of two bases in the representation of a number.  We are particularly interested in representations that use bases 2 and 3, since our implementation of ideal class group arithmetic provides multiplication, squaring, and cubing. In Section \ref{sec:dbnsMethods} we discuss some methods to compute double-base representations found in the literature.  Throughout this chapter, the running time and space complexities are given in terms of the number of group operations and elements required, respectively.  They do not take into consideration the binary costs associated with each.  Throughout this thesis, we use big-Oh notation.  See Appendix \ref{chap:appendix} for the definition of these terms.
+In Sections \ref{sec:binaryExp} and \ref{sec:naf} we discuss standard exponentiation techniques that rely on a base 2 representation of the exponent.  In Section \ref{sec:dbns} we describe double-base number systems, which, as the name implies, are number systems that make use of two bases in the representation of a number.  We are particularly interested in representations that use bases 2 and 3, since our implementation of ideal class group arithmetic provides multiplication, squaring, and cubing. In Section \ref{sec:dbnsMethods} we discuss some methods to compute double-base representations found in the literature.  Throughout this chapter, the running time and space complexities are given in terms of the number of group operations and elements required, respectively.  They do not take into consideration the binary costs associated with each.  Throughout this thesis, we use big O notation.  See Appendix \ref{chap:appendix} for the definition of these terms.
 
 
 \section{Binary Exponentiation}
@@ -1335,6 +1335,9 @@ Chapter \ref{chap:powExperiments} discusses several variations of chained and un
 \label{chap:superspar}
 
 One contribution of this thesis is to improve the speed of arithmetic in the ideal class group of imaginary quadratic number fields with an application to integer factoring.  Chapter \ref{chap:idealArithmetic} describes the ideal class group of imaginary quadratic number fields, and Chapter \ref{chap:exponentiation} gives methods for exponentiation in generic groups.  This chapter makes a connection between the two and integer factorization.  Section \ref{sec:spar} discusses an algorithm due to Schnorr and Lenstra \cite{Schnorr1984}, called SPAR, that uses the ideal class group to factor an integer associated with the discriminant.  Section \ref{sec:superSpar} expands on SPAR by incorporating a primorial steps algorithm, due to Sutherland \cite[\S 4.1]{Sutherland2007}, and discussed in Subsection \ref{subsec:boundedPrimorialSteps}.   When the order of any element from a set is sufficient, Sutherland \cite[\S 5.4]{Sutherland2007} gives an algorithm with subexponential complexity, discussed in Subsection \ref{subsec:primorialStepsForASet}.  Finally, Subsection \ref{subsec:ssparAlg} reconsiders the factoring algorithm SPAR in the context of primorial steps for order finding.  We call this new algorithm ``SuperSPAR''.
+
+This chapter uses big O notation, which is defined in Appendix \ref{chap:appendix}.
+
 
 \section{SPAR}
 \label{sec:spar}
@@ -3452,7 +3455,7 @@ Naturally, future improvements to SuperSPAR should involve comparisons with the 
 \chapter{First Appendix}
 \label{chap:appendix}
 
-\section{Definitions of big-Oh notation}
+\section{Definitions of big O notation}
 \begin{align*}
 o(g(n)) &= \{ f : \RRgez \rightarrow \RRgez ~|~ \forall c_2 > 0, \exists n_0 > 0, \forall n \ge n_0 :& 0 \le &f(n) \le c_2g(n) \} \\
 O(g(n)) &= \{ f : \RRgez \rightarrow \RRgez ~|~ \exists c_2 > 0, \exists n_0 > 0, \forall n \ge n_0 :& 0 \le &f(n) \le c_2g(n) \} \\
