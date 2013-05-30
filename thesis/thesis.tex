@@ -417,15 +417,15 @@ A \emph{fractional ideal} of $\OO$ is a subset $\ideal a$ of $\QQ(\sqrt \Delta)$
 \end{defn}
 
 \begin{example}
-Let $\OO = [1, i]$ for $i^2 = -1$ be the maximal order in the field $\QQ(i)$.  Then the set
+Let $\OO = [1, \sqrt{-5}]$ be the maximal order in the field $\QQ(\sqrt{-5})$.  Then the set
 \[
-\ideal f = \left \{ \frac{2 x + y i}{7} : x,y \in \OO \right \}
+\ideal f = \left \{ \frac{2 x + \sqrt{-5} y}{7} : x,y \in \OO \right \}
 \]
 is a fractional ideal because
 \[
-	7 \ideal f = \{2x + y i : x, y \in \OO\}
+	7 \ideal f = \{2x + \sqrt{-5} y : x, y \in \OO\}
 \]
-is an integral ideal in the order $[1, i]$.
+is an integral ideal in the order $\OO$.
 \end{example}
 
 %\begin{example}
@@ -491,15 +491,15 @@ All fractional ideals of $\OO_\Delta$ are invertible, and the set of invertible 
 \end{defn}
 
 \begin{example}
-Let $\OO = [1, i]$ for $i^2 = -1$ be the maximal order in the field $\QQ(i)$ and let $\ideal a = (2, i)$ and $\ideal b = (-3, 6i)$ be two ideals of $\OO$.  Ideals $\ideal a$ and $\ideal b$ are equivalent since
+Let $\OO = [1, \sqrt\Delta]$ for $\Delta = -20$ be an order in the field $\QQ(\sqrt{-5})$ and let $\ideal a = (3, (4+\sqrt\Delta)/2)$ and $\ideal b = (3 \sqrt\Delta, -10 + 2 \sqrt\Delta)$ be two ideals of $\OO$.  Ideals $\ideal a$ and $\ideal b$ are equivalent since
 \[
-(3i)\ideal a = (1)\ideal b
+(\sqrt\Delta) \ideal a = (1)\ideal b
 \]
 implies
 \[
-(3i)(2, i) = (-3, 6i)
+(\sqrt\Delta) \left(3, \frac{4+\sqrt\Delta}{2}\right) = (1)(3 \sqrt\Delta, -10 + 2 \sqrt\Delta)
 \]
-where $(3i)$ and $(1)$ are principle ideals of $\OO$.
+where $(\sqrt\Delta)$ and $(1)$ are principle ideals of $\OO$.
 \end{example}
 
 We write $\aclass$ to denote the set of all ideals equivalent to $\ideal a$, and call this an \emph{ideal class}.  The \emph{ideal class group}, denoted $Cl_\Delta$, is the set of all equivalence classes of invertible ideals, with the group operation defined as the product of class representatives.  By \cite[p.136]{Cohn1980}, the group operation is well defined and the ideal class group is a finite Abelian group.
@@ -509,7 +509,7 @@ The number of ideal classes in the class group $Cl_\Delta$ is the \emph{class nu
 \end{defn}
 
 \begin{example}
-Let $\Delta = -4$ and the number of ideal classes in $Cl_\Delta$ is $h_\Delta = 1$, namely the identity class $\idclass$.
+Let $\Delta = -20$ and the number of ideal classes in $Cl_\Delta$ is $h_\Delta = 2$.
 \end{example}
 
 \noindent
