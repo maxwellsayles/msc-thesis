@@ -411,8 +411,8 @@ for some $\alpha_3, \beta_3 \in \OO_\Delta$ and is also an ideal of $\OO_\Delta$
 
 Equation \ref{eq:idealProduct} shows that ideals are closed under multiplication, and by \cite[p.117]{Cohn1980}, they are associative, commutative, and have identity.  For ideals to form a group, we need inverses, and for this we define \emph{fractional ideals}.
 
-\begin{defn}
-\cite[\S 2.1]{Jacobson2009} A \emph{fractional ideal} of $\OO_\Delta$ is a subset $\ideal a$ of $\QQ(\sqrt \Delta)$ such that $d \ideal a$ is an integral ideal of $\OO_\Delta$ for some $d \in \ZZgtz$.
+\begin{defn} \cite[Definition 2.23]{Sawilla2004}
+A \emph{fractional ideal} of $\OO$ is a subset $\ideal a$ of $\QQ(\sqrt \Delta)$ such that $d \ideal a$ is an integral ideal of $\OO$ for some non-zero $d \in \OO$.
 \end{defn}
 
 \begin{example}
@@ -463,7 +463,24 @@ Using fractional ideals, we are able to define inverses.
 and satisfies $\ideal a \ideal a^{-1} = \ideal a^{-1} \ideal a = \OO_\Delta$.
 \end{prop}
 
-All fractional ideals of $\OO_\Delta$ are invertible, and the set of invertible ideals forms a group under ideal multiplication.  We now define an equivalence relation on the invertible ideals of $\OO_\Delta$.
+\begin{example}
+Let $\OO = [1, i]$ for $i^2 = \sqrt{-1}$ be the maximal order in the field $\QQ(i)$ and let 
+\begin{align*}
+	\ideal a &= \{2x + yi : x, y \in \OO\} \\
+	&= (2, i)
+\end{align*}
+be an ideal of $\OO$.  The inverse of $\ideal a$ is
+\begin{align*}
+  \ideal a^{-1} &= \left\{ \frac{-2x + yi}{5} : x, y \in \OO \right\} \\ 
+  &= \frac{1}{5} (-2, i),
+\end{align*}
+which is verified by
+\[
+\frac{1}{5}(2, i)(-2, i) = \frac{1}{5}(-4, 2i, -2i, -1) = (1) = \OO.
+\]
+\end{example}
+
+All fractional ideals of $\OO_\Delta$ are invertible, and the set of invertible ideals forms a group under ideal multiplication \cite[Theorem 2.26]{Sawilla2004}.  We now define an equivalence relation on the invertible ideals of $\OO_\Delta$.
 
 \begin{defn}
 \cite[p.88]{Jacobson2009} Two invertible ideals $\ideal a$ and $\ideal b$ are \emph{equivalent} if there exist principal ideals $\alpha, \beta \in \OO_\Delta$ such that $\alpha \beta \neq 0$ and $(\alpha)\ideal a = (\beta) \ideal b$.
@@ -3235,7 +3252,7 @@ Table \ref{tab:ssparParams} shows the values used for the exponentiation and sea
 \clearpage
 
 % EVOLUTION OF SUPERSPAR
-\section{Reference SPAR}
+\section{Reference Implementation of SPAR}
 \label{sec:referenceSpar}
 
 This section compares each of the practical performance improvements from the previous sections to our reference implementation of SPAR \cite{refspar}.  Our reference implementation uses all of the improvements to arithmetic in the ideal class group from Chapters \ref{chap:xgcdExperiments} and \ref{chap:idealExperiments}, as well as the improvements to exponentiation by power primorials from Chapter \ref{chap:powExperiments}.  We use the theoretically optimal parameters as described by Schnorr and Lenstra in \cite{Schnorr1984}.  The search stage uses a Pollard-Brent recursion \cite{Brent1980} as described in \cite[p.296]{Schnorr1984}.  We briefly describe the search stage using this algorithm here.  The exponentiation stage computes an ideal class $\bclass = \aclass^{2^\ell E}$ with $\ell = \floor{\log_2 \hdelta}$.  The search stage in SPAR first computes $\idealclass{q_i} = \bclass^{r_i}$ for random $r_i \in [p_t, {p_t}^2]$ and $0 \le i \le 15$.  Let $\idealclass{c_0} = \bclass$ and $h_0 = 0$.  We then iterate computing
