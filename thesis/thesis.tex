@@ -361,12 +361,13 @@ while the discriminant $\Delta$ of the maximal order $[1,i]$ is
 \end{example}
 
 By \cite[p.13]{Ramachandran2006}, the discriminant $\Delta$ of the maximal order $\OO_\KK = [1, \omega]$ can be written as
-\[
+\begin{equation}
+\label{eq:radicandToDiscriminant}
 \Delta = \begin{cases}
 	4D & \textrm{when } D \equiv 2, 3 \pmod 4 \\
 	D  & \textrm{when } D \equiv 1 \pmod 4,
 \end{cases}
-\]
+\end{equation}
 and is an invariant of the quadratic field $\QQ(\sqrt D)$.  A discriminant of a maximal order is called a \emph{fundamental discriminant}.  When $\OO'$ is a non-maximal order of $\QQ(\sqrt D)$, we have the following proposition (see \cite[p.216]{Cohn1980} for a proof).
 
 \begin{prop}
@@ -465,18 +466,18 @@ and satisfies $\ideal a \ideal a^{-1} = \ideal a^{-1} \ideal a = \OO_\Delta$.
 
 \begin{example}
 Let $\OO = [1, i]$ for $i^2 = \sqrt{-1}$ be the maximal order in the field $\QQ(i)$ and let 
-\begin{align*}
-	\ideal a &= \{2x + yi : x, y \in \OO\} \\
-	&= (2, i)
-\end{align*}
+\[
+	\ideal a = \{2x + yi : x, y \in \OO\}
+	= (2, i)
+\]
 be an ideal of $\OO$.  The inverse of $\ideal a$ is
-\begin{align*}
-  \ideal a^{-1} &= \left\{ \frac{-2x + yi}{5} : x, y \in \OO \right\} \\ 
-  &= \frac{1}{5} (-2, i),
-\end{align*}
+\[
+  \ideal a^{-1} = \left\{ \frac{-2x + yi}{5} : x, y \in \OO \right\}
+  = \frac{1}{5} (-2, i),
+\]
 which is verified by
 \[
-\frac{1}{5}(2, i)(-2, i) = \frac{1}{5}(-4, 2i, -2i, -1) = (1) = \OO.
+	\frac{1}{5}(2, i)(-2, i) = \frac{1}{5}(-4, 2i, -2i, -1) = (1) = \OO.
 \]
 \end{example}
 
@@ -485,6 +486,17 @@ All fractional ideals of $\OO_\Delta$ are invertible, and the set of invertible 
 \begin{defn}
 \cite[p.88]{Jacobson2009} Two invertible ideals $\ideal a$ and $\ideal b$ are \emph{equivalent} if there exist principal ideals $\alpha, \beta \in \OO_\Delta$ such that $\alpha \beta \neq 0$ and $(\alpha)\ideal a = (\beta) \ideal b$.
 \end{defn}
+
+\begin{example}
+Let $\OO = [1, i]$ for $i^2 = \sqrt{-1}$ be the maximal order in the field $\QQ(i)$ and let $\ideal a = (2, i)$ and $\ideal b = (-3, 6i)$ be two ideals of $\OO$.  Ideals $\ideal a$ and $\ideal b$ are equivalent since
+\[
+(3i)\ideal a = (1)\ideal b
+\]
+implies
+\[
+(3i)(2, i) = (-3, 6i).
+\]
+\end{example}
 
 We write $\aclass$ to denote the set of all ideals equivalent to $\ideal a$, and call this an \emph{ideal class}.  The \emph{ideal class group}, denoted $Cl_\Delta$, is the set of all equivalence classes of invertible ideals, with the group operation defined as the product of class representatives.  By \cite[p.136]{Cohn1980}, the group operation is well defined and the ideal class group is a finite Abelian group.
 
@@ -522,7 +534,7 @@ C. Siegel \cite[p.247]{Crandall2001} showed that $h_\Delta = |\Delta|^{1/2 + o(1
 % Maybe \Delta = -131 will work better since that is \equiv 3 \pmod 4.
 
 
-When performing ideal arithmetic, we choose to represent invertible fractional ideals following Jacobson \cite[p.13, Equation 2.1]{Jacobson1999} using the $\ZZ$-module
+When performing ideal arithmetic, we represent invertible fractional ideals following Jacobson \cite[p.13, Equation 2.1]{Jacobson1999} using the $\ZZ$-module
 \[
 	\ideal a = q\left[a, \frac{b+\sqrt{\Delta}}{2} \right]
 \]
@@ -584,6 +596,7 @@ Since $c = (b^2 - \Delta)/4a$ we have
 \end{equation}
 The first step is to decrease $a$ by setting $\ideal a = [c, (-b + \sqrt\Delta)/2]$, if $a > c$.  Then $b$ is decreased since $b$ is unique modulo $2a$.  These steps are repeated while $\ideal a$ is not reduced. In the case that $a = c$, we use the absolute value of $b$, since by Equation \ref{eq:idealSwapAC} the ideals $[a, (b + \sqrt\Delta)/2]$ and $[c, (-b+\sqrt\Delta)/2]$ are equivalent.  
 
+\break
 \begin{example}
 Let $\ideal a = [5, (6 + \sqrt{\Delta})/2]$ with $\Delta = -4$.  Initially, we have $a = 5, b = 6, c = 2$.  Using Algorithm \ref{alg:reduce}, the steps to compute a reduced ideal equivalent to $\ideal a$ are as follows.
 \begin{align*}
@@ -611,6 +624,13 @@ The ideal class group operation is multiplication of ideal class representatives
 	b & = (b_2 + 2Ua_2/s) \bmod{2a},                                   \label{eq:idealProductB} \\
 	\mathfrak a \mathfrak b & = s\left[a, \frac{b + \sqrt{\Delta}}{2}\right]. \nonumber
 \end{align}
+
+\begin{example}
+Let $\OO = [1,\sqrt{-1}]$ be the maximal order of $\QQ(\sqrt{-1})$.  By Equation \ref{eq:radicandToDiscriminant},  let $\Delta = -4$.  Now let $\ideal a = [2, (2+\sqrt{\Delta})/2]$ and $\ideal b = [5, (6 + \sqrt{\Delta})/2]$ be reduced ideals of $\OO$.  Multiplication using the above gives
+\[
+	\ideal a \ideal b = \left[10, \frac{6 + \sqrt{\Delta}}{2}\right].
+\]
+\end{example}
 
 The remainder of this subsection is used to derive the above equations.  We adapt much of the presentation given in \cite[pp.117--118]{Jacobson2009}. Using Equation \ref{eq:idealProduct} for the product of two ideals, $\ideal a$ and $\ideal b$, gives
 \begin{equation}
