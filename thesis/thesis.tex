@@ -1178,6 +1178,7 @@ Algorithm \ref{alg:rtolDbnsChain} describes a non-recursive function with group 
 \label{alg:rtolDbnsChain}
 \begin{algorithmic}[1]
 \Require $n \in \ZZgez$
+\Ensure $n$ satisfying $n = \sum_{i=1}^k s_i 2^{a_i} 3^{b_i}$ with $s_i \in \{1, -1\}$, $a_i < a_{i+1}$, and $b_i < b_{i+1}$ for $1 \le i < k$
 \State $(a, b) \gets (0, 0)$
 \State $i \gets 1$
 \While {$n > 0$}
@@ -1199,6 +1200,8 @@ Algorithm \ref{alg:rtolDbnsChain} describes a non-recursive function with group 
 \State \Return $(a_1, b_1, s_1), ..., (a_k, b_k, s_k)$
 \end{algorithmic}
 \end{algorithm}
+
+% TODO(mike): Running example
 
 To see the correctness of the above procedure, consider a modification to the recursive function $\rtol$ such that it returns a partition of the input $n$ as a list of terms $s_i2^{a_i}3^{b_i}$. When the result of the recursive call is squared, this corresponds to incrementing $a_i$ in each term of the list.  Similarly, when the result is cubed, this corresponds to incrementing $b_i$ in each term of the list. When the result is multiplied with $g$, we prepend a term of $+1$ to the partition, and when the result is multiplied with $g^{-1}$, we prepend a term of $-1$ to the partition. On each iteration of the loop, either $n \equiv 0 \pmod 2$ or $n \equiv 0 \pmod 3$, so either $a$ increases or $b$ increases. Since every term $|s_i2^{a_i}3^{b_i}|$ is strictly less than $|s_j2^{a_j}3^{b_j}|$ when $i < j$, the partition is strictly chained.
 
