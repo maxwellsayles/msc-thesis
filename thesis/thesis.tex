@@ -342,7 +342,7 @@ $[1, 2 \sqrt{-1}]$ is an order of $\QQ(\sqrt{-1})$ that is \emph{not} maximal si
 \begin{defn}
 \cite[Definition 4.16]{Jacobson2009} Let $\OO = [\xi_1, \xi_2]$ be any order of $\QQ(\sqrt D)$.  Then the \emph{discriminant} $\Delta$ of $\OO$ is defined as
 \[
-	\Delta = {\left[ \begin{array}{rr} \xi_1 & \xi_2 \\ \overline{\xi_1} & \overline{\xi_2} \end{array} \right]}^2
+	\Delta = {\left| \begin{array}{rr} \xi_1 & \xi_2 \\ \overline{\xi_1} & \overline{\xi_2} \end{array} \right|}^2
 	       = (\xi_1 \overline{\xi_2} - \overline{\xi_1} \xi_2)^2
 \]
 where $\overline{\xi}$ denotes the complex conjugate of $\xi$.
@@ -350,13 +350,13 @@ where $\overline{\xi}$ denotes the complex conjugate of $\xi$.
 
 \begin{example}
 \label{ex:discriminant}
-Let $i^2 = \sqrt{-1}$.  The discriminant $\Delta'$ of the non-maximal order $[1, 2 i]$ is
+Let $i^2 = -1$.  The discriminant $\Delta'$ of the non-maximal order $[1, 2 i]$ is
 \[
-	\Delta' = {\left[ \begin{array}{rr} 1 & 2i \\ 1 & -2i \end{array} \right]}^2 = (-4i)^2 = -16,
+	\Delta' = {\left| \begin{array}{rr} 1 & 2i \\ 1 & -2i \end{array} \right|}^2 = (-4i)^2 = -16,
 \]
 while the discriminant $\Delta$ of the maximal order $[1,i]$ is
 \[
-	\Delta = {\left[ \begin{array}{rr} 1 & i \\ 1 & -i \end{array} \right]}^2 = (-2i)^2 = -4.
+	\Delta = {\left| \begin{array}{rr} 1 & i \\ 1 & -i \end{array} \right|}^2 = (-2i)^2 = -4.
 \]
 \end{example}
 
@@ -375,7 +375,7 @@ Let $\OO'$ be a non-maximal order of $\QQ(\sqrt D)$ with discriminant $\Delta'$.
 \end{prop}
 
 \noindent
-We call $f$ the \emph{conductor} of the non-maximal order $\OO'$.  Note that in Example \ref{ex:discriminant}, we had $\Delta' = -16 = 4(-4) = f^2\Delta$ where $f = 2$ and $\Delta = -4$.
+We call $f$ the \emph{conductor} of the non-maximal order $\OO'$.  Notice that in Example \ref{ex:discriminant}, we had $\Delta' = -16 = 4(-4) = f^2\Delta$ where $f = 2$ and $\Delta = -4$.
 
 
 \section{Ideals and the Class Group}
@@ -402,13 +402,13 @@ Let $\zeta_1 = (x_1 u - y_1 v) + (y_1u + x_1v)i$ and $\zeta_2 = (x_2 u - y_2 v) 
 %An ideal $\ideal a$ is called \emph{primitive} if it cannot be written $\ideal a = m \ideal b$ for some ideal $\ideal b \in \OO_\Delta$ and $|m| > 1, m \in \ZZ$.
 %\end{defn}
 
-Let $\OO_\Delta$ be a maximal order.  Then for $\alpha, \beta \in \OO_\Delta$, the set $\ideal a = \{x \alpha + y \beta : x, y \in \OO_\Delta\}$ is an ideal of the order $\OO_\Delta$ and is denoted $(\alpha, \beta)$ \cite[p.16]{Ramachandran2006}.  Every ideal of a quadratic order $\OO_\Delta$ can be represented by at most two generators \cite[p.125--126]{Cohn1980}, while some can be represented by a single generator.  An ideal represented by a single generator is a \emph{principal} ideal and is denoted $(\alpha) = \{ x \alpha : x \in \OO_\Delta \}$ \cite[p.87]{Jacobson2009}.
+Let $\OO_\Delta$ be a maximal order.  Then by \cite[p.16]{Ramachandran2006}, for $\alpha, \beta \in \OO_\Delta$, the set $\ideal a = \{x \alpha + y \beta : x, y \in \OO_\Delta\}$ is an ideal of the order $\OO_\Delta$ and is denoted $(\alpha, \beta)$.  Every ideal of a quadratic order $\OO_\Delta$ can be represented by at most two generators \cite[p.125--126]{Cohn1980}, while some can be represented by a single generator.  An ideal represented by a single generator is a \emph{principal} ideal and is denoted $(\alpha) = \{ x \alpha : x \in \OO_\Delta \}$ \cite[p.87]{Jacobson2009}.
 
 By \cite[p.16]{Ramachandran2006}, for two ideals, $\ideal a = (\alpha_1, \beta_1)$ and $\ideal b = (\alpha_2, \beta_2)$ of $\OO_\Delta$, their product is
 \begin{equation}
 	\ideal a \ideal b = (\alpha_1 \alpha_2, \alpha_1 \beta_2, \beta_1 \alpha_2, \beta_1 \beta_2) = (\alpha_3, \beta_3) \label{eq:idealProduct}
 \end{equation}
-for some $\alpha_3, \beta_3 \in \OO_\Delta$ and is also an ideal of $\OO_\Delta$. The principal ideal $(1) = \OO_\Delta$ is the \emph{identity} element with respect to ideal multiplication, since $\ideal a = \ideal a \OO_\Delta = \OO_\Delta \ideal a$.  If there exists an ideal $\ideal c$ such that $\ideal a \ideal c = \ideal b$, then $\ideal a$ \emph{divides} $\ideal b$ and we write $\ideal a ~|~ \ideal b$.  Finally, an ideal $\ideal p \neq (1)$ is \emph{prime} when $\ideal p ~|~ \ideal a \ideal b$ implies that either $\ideal p ~|~ \ideal a$ or $\ideal p ~|~ \ideal b$.  For this reason, a prime ideal is divisible only by the identity ideal and itself.
+for some $\alpha_3, \beta_3 \in \OO_\Delta$ and $\ideal a \ideal b$ is also an ideal of $\OO_\Delta$. The principal ideal $(1) = \OO_\Delta$ is the \emph{identity} element with respect to ideal multiplication, since $\ideal a = \ideal a \OO_\Delta = \OO_\Delta \ideal a$.  If there exists an ideal $\ideal c$ such that $\ideal a \ideal c = \ideal b$, then $\ideal a$ \emph{divides} $\ideal b$ and we write $\ideal a ~|~ \ideal b$.  Finally, an ideal $\ideal p \neq (1)$ is \emph{prime} when $\ideal p ~|~ \ideal a \ideal b$ implies that either $\ideal p ~|~ \ideal a$ or $\ideal p ~|~ \ideal b$.  For this reason, a prime ideal is divisible only by the identity ideal and itself.
 
 Equation \ref{eq:idealProduct} shows that ideals are closed under multiplication, and by \cite[p.117]{Cohn1980}, they are associative, commutative, and have identity.  For ideals to form a group, we need inverses, and for this we define \emph{fractional ideals}.
 
@@ -465,12 +465,12 @@ and satisfies $\ideal a \ideal a^{-1} = \ideal a^{-1} \ideal a = \OO_\Delta$.
 \end{prop}
 
 \begin{example}
-Let $\OO = [1, i]$ for $i^2 = \sqrt{-1}$ be the maximal order in the field $\QQ(i)$ and let 
+Let $\OO = [1, i]$ for $i^2 = -1$ be the maximal order in the field $\QQ(i)$ and let 
 \[
 	\ideal a = \{2x + yi : x, y \in \OO\}
 	= (2, i)
 \]
-be an ideal of $\OO$.  The inverse of $\ideal a$ is
+be an ideal of $\OO$.  The inverse of $\ideal a$ is given as
 \[
   \ideal a^{-1} = \left\{ \frac{-2x + yi}{5} : x, y \in \OO \right\}
   = \frac{1}{5} (-2, i),
@@ -488,14 +488,15 @@ All fractional ideals of $\OO_\Delta$ are invertible, and the set of invertible 
 \end{defn}
 
 \begin{example}
-Let $\OO = [1, i]$ for $i^2 = \sqrt{-1}$ be the maximal order in the field $\QQ(i)$ and let $\ideal a = (2, i)$ and $\ideal b = (-3, 6i)$ be two ideals of $\OO$.  Ideals $\ideal a$ and $\ideal b$ are equivalent since
+Let $\OO = [1, i]$ for $i^2 = -1$ be the maximal order in the field $\QQ(i)$ and let $\ideal a = (2, i)$ and $\ideal b = (-3, 6i)$ be two ideals of $\OO$.  Ideals $\ideal a$ and $\ideal b$ are equivalent since
 \[
 (3i)\ideal a = (1)\ideal b
 \]
 implies
 \[
-(3i)(2, i) = (-3, 6i).
+(3i)(2, i) = (-3, 6i)
 \]
+where $(3i)$ and $(1)$ are principle ideals of $\OO$.
 \end{example}
 
 We write $\aclass$ to denote the set of all ideals equivalent to $\ideal a$, and call this an \emph{ideal class}.  The \emph{ideal class group}, denoted $Cl_\Delta$, is the set of all equivalence classes of invertible ideals, with the group operation defined as the product of class representatives.  By \cite[p.136]{Cohn1980}, the group operation is well defined and the ideal class group is a finite Abelian group.
@@ -599,13 +600,17 @@ The first step is to decrease $a$ by setting $\ideal a = [c, (-b + \sqrt\Delta)/
 \break
 \begin{example}
 Let $\ideal a = [5, (6 + \sqrt{\Delta})/2]$ with $\Delta = -4$.  Initially, we have $a = 5, b = 6, c = 2$.  Using Algorithm \ref{alg:reduce}, the steps to compute a reduced ideal equivalent to $\ideal a$ are as follows.
-\begin{align*}
-1. && a &= 5 &b &= 6 &c &= 2 & \textrm{\{initial values\}} \\
-2. && a &= 2 &b &= -6 &c &= 5 & \textrm{\{swap $a$ and $c$ and negate $b$\}} \\
-3. && a &= 2 &b &= -2 &c &= 1 & \textrm{\{decrease $b \bmod 2a$, recalculate $c$\}} \\
-4. && a &= 1 &b &= 2  &c &= 2 & \textrm{\{swap $a$ and $c$ and negate $b$\}} \\
-5. && a &= 1 &b &= 0  &c &= 1 & \textrm{\{decrease $b \bmod 2a$, recalculate $c$\}}
-\end{align*}
+\begin{table}[H]
+\centering
+\begin{tabular}{l l l l l}
+1. & $a = 5$ & $b = 6$ & $c = 2$ & \{initial values\} \\
+2. & $a = 2$ & $b = -6$ & $c = 5$ & \{swap $a$ and $c$ and negate $b$\} \\
+3. & $a = 2$ & $b = -2$ & $c = 1$ & \{decrease $b \bmod 2a$, recalculate $c$\} \\
+4. & $a = 1$ & $b = 2$  & $c = 2$ & \{swap $a$ and $c$ and negate $b$\} \\
+5. & $a = 1$ & $b = 0$  & $c = 1$ & \{decrease $b \bmod 2a$, recalculate $c$\}
+\end{tabular}
+\end{table}
+\nobreak\noindent
 The final ideal $\ideal{a'} = [1, (0 + \sqrt \Delta)/2]$ is reduced as it satisfies Definition \ref{defn:reducedIdeal}.
 \end{example}
 
