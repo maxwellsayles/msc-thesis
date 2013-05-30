@@ -2995,27 +2995,41 @@ For a given pair $(m, w)$ representing a search bound, the total number of steps
 \begin{thm}
 For the pair $(m_i, w_i)$, there does not exist a pair $(m_j, w_j)$ with $m_i \neq m_j$ or $w_i \neq w_j$ such that both $\stepCount(m_i, w_i) = \stepCount(m_j, w_j)$ and $\lastStep(m_i, w_i) = \lastStep(m_j, w_j)$.
 \end{thm}
+
+\break
 \begin{proof}
-By contradiction, suppose there exists $(m_i, w_i)$ and $(m_j, w_j)$ with $m_i \neq m_j$ or $w_i \neq w_j$ such that $\stepCount(m_i, w_i) = \stepCount(m_j, w_j)$ and $\lastStep(m_i, w_i) = \lastStep(m_j, w_j)$.  Let $w_i < w_j$. Then by Equation (\ref{eq:stepCount})
-\[
+By contradiction, suppose there exists $(m_i, w_i)$ and $(m_j, w_j)$ with $m_i \neq m_j$ or $w_i \neq w_j$ such that $\stepCount(m_i, w_i) = \stepCount(m_j, w_j)$ and $\lastStep(m_i, w_i) = \lastStep(m_j, w_j)$.  Let $w_i < w_j$. By Equation \ref{eq:stepCount}
+\begin{equation}
+\label{eq:fromAbove}
 	2m_i\phi(P_{w_i}) = 2m_j\phi(P_{w_j})
+\end{equation}
+which implies
+\begin{equation}
+\label{eq:mimj1}
+\frac{m_i}{m_j} = \frac{\phi(P_{w_j})}{\phi(P_{w_i})}.
+\end{equation}
+Then by Equation \ref{eq:lastStep}
+\[
+2{m_i}^2\phi(P_{w_i})P_{w_i} = 2{m_j}^2\phi(P_{w_j})P_{w_j}.
+\]
+Substituting from Equation \ref{eq:fromAbove} above gives
+\[
+2m_j\phi(P_{w_j})m_i P_{w_i} = 2{m_j}^2\phi(P_{w_j})P_{w_j}.
+\]
+Cancelling $2m_j\phi(P_{w_j})$ from both sides gives
+\[
+m_iP_{w_i} = m_jP_{w_j}
 \]
 which implies
+\begin{equation}
+\label{eq:mimj2}
+\frac{m_i}{m_j} = \frac{P_{w_j}}{P_{w_i}}.
+\end{equation}
+Then by Equations \ref{eq:mimj1} and \ref{eq:mimj2}, we have
 \[
-	\frac{m_i}{m_j} = \frac{\phi(P_{w_j})}{\phi(P_{w_i})}
+	\frac{\phi(P_{w_j})}{\phi(P_{w_i})} = \frac{P_{w_j}}{P_{w_i}}.
 \]
-and by Equation (\ref{eq:lastStep})
-\begin{align*}
-	& 2{m_i}^2\phi(P_{w_i})P_{w_i} = 2{m_j}^2\phi(P_{w_j})P_{w_j} \\
-\Rightarrow & 2m_j\phi(P_{w_j})m_i P_{w_i} = 2{m_j}^2\phi(P_{w_j})P_{w_j} & \textrm{\{Substituting from above.\}} \\
-\Rightarrow & m_iP_{w_i} = m_jP_{w_j} \\
-\Rightarrow & \frac{m_i}{m_j} = \frac{P_{w_j}}{P_{w_i}}.
-\end{align*}
-Therefore
-\[
-	\frac{\phi(P_{w_j})}{\phi(P_{w_i})} = \frac{P_{w_j}}{P_{w_i}},
-\]
-and this expands to
+This expands to
 \[
 	(p_{w_j} - 1)(p_{w_{j-1}} - 1) \cdots (p_{w_{i+1}} - 1) = p_{w_j} p_{w_{j-1}} \cdots p_{w_{i+1}}.
 \]
