@@ -1223,7 +1223,7 @@ The previous section gives a procedure for generating a strictly chained 2,3 par
 \[
 \closest(n) = s2^a3^b
 \]
-such that $a,b \in \ZZgez$ minimize $\left| |n| - 2^a3^b \right|$ and $s = -1$ when $n < 0$ and $s = 1$ otherwise. A recursive function to compute a 2,3 representation greedily is
+such that $a,b \in \ZZgez$ minimize $\left| |n| - 2^a3^b \right|$.  When $n < 0$, let $s = -1$, otherwise let $s = 1$.  A recursive function to compute a 2,3 representation greedily is
 \begin{align*}
 \greedyltor(n) &= \begin{cases}
               0 & \textrm{if $n = 0$} \\
