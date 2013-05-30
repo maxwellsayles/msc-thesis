@@ -1061,6 +1061,7 @@ Binary and non-adjacent form are special types of strictly chained partitions, s
 \label{alg:expWithChain}
 \begin{algorithmic}[1]
 \Require $g \in G$, $n = \sum_{i=1}^k s_i2^{a_i}3^{b_i}$, $s_1,...,s_k \in \{-1, 1\}$, $0 \le a_1 \le ...\le a_k \in \ZZ$, $0 \le b_1 \le ... \le b_k \in \ZZ$.
+\Ensure $g^n$
 \State $i \gets 1$
 \State $a \gets 0$ \Comment{current power of 2}
 \State $b \gets 0$ \Comment{current power of 3}
@@ -1096,10 +1097,11 @@ Given an unchained 2,3 representation for an integer $n = \sum s_i 2^{a_i} 3^{b_
 \caption{Compute $g^n$ for a 2,3 representation of $n$ (\cite[Section 3.2]{Meloni2009}).}
 \label{alg:yaos}
 \begin{algorithmic}[1]
-\Require $g \in G$, $n = \sum_{i=1}^k s_i2^{a_i}3^{b_i},$
-\algnewline $s_1,...,s_k \in \{-1, 1\}$,
-\algnewline $a_1 \ge ... \ge a_k \in \ZZgez$,
-\algnewline $b_1,...,b_k \in \ZZgez$.
+\Require $g \in G$, $n = \sum_{i=1}^k s_i2^{a_i}3^{b_i}$,
+$s_1,...,s_k \in \{-1, 1\}$,
+$a_1 \ge ... \ge a_k \in \ZZgez$,
+$b_1,...,b_k \in \ZZgez$.
+\Ensure $g^n$
 \State $T_b \gets g^{3^b}$ for $0 \le b \le \max \{ b_1, ..., b_k \}$ \Comment{by repeated cubing}
 \State $R \gets 1_G$
 \State $i \gets 1$
