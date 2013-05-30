@@ -1530,11 +1530,14 @@ and Equations \eqref{eq:initialGcd1} and \eqref{eq:initialGcd2} hold.  We mainta
 	\end{cases}
 \]
 
+% TODO: If possible, adjust the line spacing.
+
 \begin{algorithm}[htb]
 \caption{Extended Euclidean Algorithm.}
 \label{alg:EeaDivRem}
 \begin{algorithmic}[1]
 \Require $a,b \in \ZZgez$
+\Ensure $(s, U, V)$ satisfying $s = Ua + Vb$ with $s = \gcd(a, b)$.
 \State $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets 
         \matrixThreeTwo{a}{1}{0}{b}{0}{1}$
 \If {$t > s$}
@@ -1639,6 +1642,7 @@ This ensures that $s$ is odd, $t$ is even, and that both $s$ and $t$ are positiv
 \label{alg:r2lBinGcd}
 \begin{algorithmic}[1]
 \Require $a,b, \in \ZZgtz$.
+\Ensure $(s, U, V)$ satisfying $s = Ua + Vb$ with $s = \gcd(a, b)$.
 \State let $r$ be the largest integer such that $2^r$ divides both $a$ and $b$
 \State $a \gets a / 2^r, b \gets b / 2^r$
 \State swap $a$ and $b$ if $a$ is not odd
@@ -1675,6 +1679,7 @@ This is easily extended for any $2^k$ where $k$ is a positive integer.  The algo
 \label{alg:windowedR2lBinGcd}
 \begin{algorithmic}[1]
 \Require $a,b, \in \ZZgtz$ and let $k \in \ZZgtz$ be the window size in bits.
+\Ensure $(s, U, V)$ satisfying $s = Ua + Vb$ with $s = \gcd(a, b)$.
 \State let $r$ be the largest integer such that $2^r$ divides both $a$ and $b$
 \State $a \gets a / 2^r, b \gets b / 2^r$
 \State swap $a$ and $b$ if $a$ is not odd
@@ -1726,6 +1731,7 @@ Notice that after this step $s$ has the previous value of $t$ and that the binar
 \label{alg:shallitGcd}
 \begin{algorithmic}[1]
 \Require $a,b \in \ZZ$
+\Ensure $(s, U, V)$ satisfying $s = Ua + Vb$ with $s = \gcd(a, b)$.
 \State $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets 
         \matrixThreeTwo{a}{1}{0}{b}{0}{1}$
 \If {$t > s$}
@@ -1801,6 +1807,7 @@ Lehmer's original description \cite{Lehmer1938} uses the extended Euclidean algo
 \label{alg:lehmerGcd}
 \begin{algorithmic}[1]
 \Require $a,b, \in \ZZ$ and $a \ge b > 0$. Let $m$ be the number of bits in a machine word.
+\Ensure $(s, U, V)$ satisfying $s = Ua + Vb$ with $s = \gcd(a, b)$.
 \State $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixThreeTwo{a}{1}{0}{b}{0}{1}$
 \While{$t \neq 0$}
 	\State $k \gets \floor{\log_2 s} + 1 - m$
@@ -1811,8 +1818,8 @@ Lehmer's original description \cite{Lehmer1938} uses the extended Euclidean algo
 	\While{$t' \neq 0$}
 		\State perform one step of a single precision extended GCD on $\matrixThreeTwo{s'}{A}{B}{t'}{C}{D}$
 		\If{$i$ is even}
-			\If{$(t' < -D$ or $s' - t' < C - A)$} \textbf{break} \EndIf
-		\Else \If{$(t' < -C$ or $s' - t' < D - B)$} \textbf{break} \EndIf
+			\If{$(t' < -D$ or $s' - t' < C - A)$} use previous $A, B, C, D$ and \textbf{break} \EndIf
+		\Else \If{$(t' < -C$ or $s' - t' < D - B)$} use previous $A, B, C, D$ and \textbf{break} \EndIf
 		\EndIf
 		\State $i \gets i + 1$
 	\EndWhile
@@ -1832,7 +1839,7 @@ Lehmer's original description \cite{Lehmer1938} uses the extended Euclidean algo
 \section{Partial Extended GCD}
 \label{sec:gcdPartial}
 
-Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and \ref{subsec:nucube} describe algorithms to perform ideal class multiplication (NUCOMP), squaring (NUDUPL), and cubing (NUCUBE) respectively, where the result requires at most two reduction operations to be reduced \cite[p.122]{Jacobson2009}.  Each of these algorithms involve computing a simple continued fraction expansion, which is done using an extended GCD computation (see \cite[\S 3.2]{Jacobson2009}).  Unlike the extended GCD algorithms previously described in this chapter, the extended GCD used to compute the simple continued fraction for ideal multiplication terminates once the next remainder computed is within a given bound.  For this reason, this computation is referred to as the \emph{partial extended GCD}.
+Subsections \ref{subsec:nucomp}, \ref{subsec:nudupl}, and \ref{subsec:nucube} describe algorithms to perform ideal class multiplication (NUCOMP), squaring (NUDUPL), and cubing (NUCUBE) respectively, where the result requires at most two reduction operations to be reduced \cite[p.122]{Jacobson2009}.  Each of these algorithms involves computing a simple continued fraction expansion, which is done using an extended GCD computation (see \cite[\S 3.2]{Jacobson2009}).  Unlike the extended GCD algorithms previously described in this chapter, the extended GCD used to compute the simple continued fraction for ideal multiplication terminates once the next remainder computed is within a given bound.  For this reason, this computation is referred to as the \emph{partial extended GCD}.
 
 The descriptions of NUCOMP, NUDUPL, and NUCUBE use the variables $R_i$ and $C_i$.  These variables can be related to the description of the extended Euclidean algorithm (see Section \ref{sec:gcdEEA}) using
 \[
