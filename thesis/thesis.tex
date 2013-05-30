@@ -488,10 +488,10 @@ which is verified by
 \end{align*}
 \end{example}
 
-All fractional ideals of $\OO_\Delta$ are invertible, and the set of invertible ideals forms a group under ideal multiplication \cite[Theorem 2.26]{Sawilla2004}.  We now define an equivalence relation on the invertible ideals of $\OO_\Delta$.
+All fractional ideals of $\OO_\Delta$ are invertible, and the set of fractional ideals forms a group under ideal multiplication \cite[Theorem 2.26]{Sawilla2004}.  We now define an equivalence relation on the invertible ideals of $\OO_\Delta$.
 
 \begin{defn}
-\cite[p.88]{Jacobson2009} Two invertible ideals $\ideal a$ and $\ideal b$ are \emph{equivalent} if there exist principal ideals $\alpha, \beta \in \OO_\Delta$ such that $\alpha \beta \neq 0$ and $(\alpha)\ideal a = (\beta) \ideal b$.
+\cite[p.88]{Jacobson2009} Two ideals $\ideal a$ and $\ideal b$ are \emph{equivalent} if there exist principal ideals $\alpha, \beta \in \OO_\Delta$ such that $\alpha \beta \neq 0$ and $(\alpha)\ideal a = (\beta) \ideal b$.
 \end{defn}
 
 \begin{example}
@@ -503,7 +503,7 @@ implies
 \[
 (\sqrt\Delta) \left(3, \frac{4+\sqrt\Delta}{2}\right) = (1)(3 \sqrt\Delta, -10 + 2 \sqrt\Delta)
 \]
-where $(\sqrt\Delta)$ and $(1)$ are principle ideals of $\OO$.
+for principle ideals $(\sqrt\Delta)$ and $(1)$ of $\OO$.
 \end{example}
 
 We write $\aclass$ to denote the set of all ideals equivalent to $\ideal a$, and call this an \emph{ideal class}.  The \emph{ideal class group}, denoted $Cl_\Delta$, is the set of all equivalence classes of invertible ideals, with the group operation defined as the product of class representatives.  By \cite[p.136]{Cohn1980}, the group operation is well defined and the ideal class group is a finite Abelian group.
@@ -553,7 +553,7 @@ Using this representation, the inverse $\ideal a^{-1}$ of an ideal is given by \
 \label{eq:idealInverse}
 	{\ideal a}^{-1} = \frac{q}{\mathcal N(\mathfrak a)} \left[a, \frac{-b+\sqrt{\Delta}}{2} \right]
 \end{equation}
-where $\mathcal N(\ideal a) = q^2a$ is the norm of $\ideal a$ and is multiplicative.  For a primitive invertible ideal $(a, b)$, the inverse is given by $\frac{1}{a}(a, -b)$.  Let $\aclass$ be an ideal class represented by the primitive ideal $\ideal a$.  Then the inverse $\idealclass{a^{-1}}$ is given simply as the class represented by $(a, -b)$ \cite[p.20]{Ramachandran2006}.  Therefore, computing the inverse of an ideal class is virtually free. 
+where $\mathcal N(\ideal a) = q^2a$ is the norm of $\ideal a$ and is multiplicative.  For a primitive invertible ideal $(a, b)$, the inverse is given by $\frac{1}{a}(a, -b)$.  Let $\aclass$ be an ideal class represented by the primitive ideal $\ideal a$.  Then the inverse $\idealclass a^{-1}$ is given simply as the class represented by $(a, -b)$ \cite[p.20]{Ramachandran2006}.  Therefore, computing the inverse of an ideal class is virtually free. 
 
 Since an ideal class contains an infinitude of ideals, we work with reduced representatives.  This also makes arithmetic faster, since the size of generators are typically smaller.  Subsection \ref{subsec:reduction} defines the reduced form of a representative and gives an algorithm for finding the reduced form.  For two reduced class representatives, Subsection \ref{subsec:idealMultiply} shows how to compute their product.  Subsection \ref{subsec:nucomp} discusses how to perform multiplication such that the result is a reduced or almost reduced representative.  This is then extended to the case of computing the square (Subsection \ref{subsec:nudupl}) and cube (Subsection \ref{subsec:nucube}) of an ideal class.  
 
