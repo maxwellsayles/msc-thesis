@@ -1914,6 +1914,8 @@ Two words, $x$ and $y$, are conditionally swapped when $x < y$ by using two addi
 \caption{Conditionally swap $(s, U, V)$ with $(t, X, Y)$ when $s < t$.}
 \label{alg:condSwap3}
 \begin{algorithmic}[1]
+\Require $(s, U, V)$ and ($t, X, Y)$.
+\Ensure the triples are swapped in place satisfying $s \ge t$.
 \State $d \gets s - t$
 \State $m \gets \texttt{sign\_mask}(d)$
 \State $d \gets d \band m$
@@ -1935,6 +1937,8 @@ Often our implementation uses the number of bits in a positive integer $x$.  In 
 \caption{Return the index of the most significant set bit of $x$.}
 \label{alg:msb}
 \begin{algorithmic}[1]
+\Require $x \in \ZZgez$, $m \in \ZZgtz$, with $x < 2^m$.
+\Ensure $i$ such that $i$ is the index of the most significant set bit of $x$.
 \State $i \gets 0$
 \State $k \gets \floor{m/2}$ \Comment{$m$ is the number of bits in a machine word.}
 \While {$k \neq 0$}
