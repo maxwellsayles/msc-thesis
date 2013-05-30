@@ -2426,8 +2426,8 @@ where $0 \le b_i < 2^{16}$.  Assuming that we can exponentiate a group element $
 
 Another way we can use 16 bit representations is when we know the prime factorization of the exponent $n$ and $n$ is the product of prime powers smaller than $2^{16}$.  Since we are interested in exponentiation by power primorials (i.e.\ the product of the first $w$ prime powers), the prime factorization is trivial.  Given a power primorial $E = \prod_{i=1}^w {p_i}^{e_i}$ where $p_i$ is the $i^{\textrm{th}}$ prime and each ${p_i}^{e_i} < 2^{16}$, we can compute $g^E$ as
 \[
-\left(\left(\left(g^{\left({p_1}^{e_i}\right)}\right)
-    ^{\left({p_2}^{e_2}\right)}\right)^{\cdots}\right)^{\left({p_w}^{e_w}\right)}
+\left(\left(\left(g^{{p_1}^{e_i}}\right)
+    ^{{p_2}^{e_2}}\right)^{\cdots}\right)^{{p_w}^{e_w}}
 \]
 using a series of $w$ small exponentiations.
 
