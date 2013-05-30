@@ -1285,6 +1285,7 @@ The next technique that we discuss for finding strictly chained 2,3 partitions w
 \label{alg:pm1Tree}
 \begin{algorithmic}[1]
 \Require $n \in \ZZgtz$ and a bound $L \in \ZZgtz$.
+\Ensure $(a_1, b_1, s_1), ..., (a_k, b_k, s_k)$ satisfying $n = \sum_{i=1}^k s_i 2^{a_i} 3^{b_i}$ with $s_i \in \{1, -1\}$, $a_i, b_i \in \ZZgez$.
 \State $T \gets$ a binary tree on the node $n$
 \While {no leaf is 1}
 	\ForAll {leaf nodes $v \in T$}
