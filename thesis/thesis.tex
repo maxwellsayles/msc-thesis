@@ -600,21 +600,15 @@ Since $c = (b^2 - \Delta)/4a$ we have
 \end{equation}
 The first step is to decrease $a$ by setting $\ideal a = [c, (-b + \sqrt\Delta)/2]$, if $a > c$.  Then $b$ is decreased since $b$ is unique modulo $2a$.  These steps are repeated while $\ideal a$ is not reduced. In the case that $a = c$, we use the absolute value of $b$, since by Equation \ref{eq:idealSwapAC} the ideals $[a, (b + \sqrt\Delta)/2]$ and $[c, (-b+\sqrt\Delta)/2]$ are equivalent.  
 
-\break
 \begin{example}
-Let $\ideal a = [5, (6 + \sqrt{\Delta})/2]$ with $\Delta = -4$.  Initially, we have $a = 5, b = 6, c = 2$.  Using Algorithm \ref{alg:reduce}, the steps to compute a reduced ideal equivalent to $\ideal a$ are as follows.
-\begin{table}[H]
-\centering
-\begin{tabular}{l l l l l}
-1. & $a = 5$ & $b = 6$ & $c = 2$ & \{initial values\} \\
-2. & $a = 2$ & $b = -6$ & $c = 5$ & \{swap $a$ and $c$ and negate $b$\} \\
-3. & $a = 2$ & $b = -2$ & $c = 1$ & \{decrease $b \bmod 2a$, recalculate $c$\} \\
-4. & $a = 1$ & $b = 2$  & $c = 2$ & \{swap $a$ and $c$ and negate $b$\} \\
-5. & $a = 1$ & $b = 0$  & $c = 1$ & \{decrease $b \bmod 2a$, recalculate $c$\}
-\end{tabular}
-\end{table}
-\nobreak\noindent
-The final ideal $\ideal{a'} = [1, (0 + \sqrt \Delta)/2]$ is reduced as it satisfies Definition \ref{defn:reducedIdeal}.
+Let $\ideal a = [7, (8 + \sqrt{\Delta})/2]$ with $\Delta = -20$.  Initially, $a = 7, b = 8, c = 3$.  Using Algorithm \ref{alg:reduce}, the steps to compute a reduced ideal equivalent to $\ideal a$ are as follows.
+\begin{align*}
+1. && a &= 7 & b &= 8 & c &= 3 && \textrm{\{initial values\}} \\
+2. && a &= 3 & b &= -8 & c &= 7 && \textrm{\{swap $a$ and $c$ and negate $b$\}} \\
+3. && a &= 3 & b &= -2 & c &= 2 && \textrm{\{decrease $b \bmod 2a$, recalculate $c$\}} \\
+4. && a &= 2 & b &= 2  & c &= 3 && \textrm{\{swap $a$ and $c$ and negate $b$\}}
+\end{align*}
+The final ideal $\ideal{a'} = [2, (2 + \sqrt \Delta)/2]$ is reduced as it satisfies Definition \ref{defn:reducedIdeal}.
 \end{example}
 
 We point out here that by Definition \ref{defn:reducedIdeal}, $|b| \le a$.  It follows that $-\Delta = 4ac - b^2 \ge 4ac -a^2$, and using $a \le c$, we have $|b| \le a \le \sqrt{|\Delta|/3}$.  These bounds will be useful to our implementations of ideal class arithmetic in Chapter \ref{chap:idealExperiments}.
@@ -634,9 +628,9 @@ The ideal class group operation is multiplication of ideal class representatives
 \end{align}
 
 \begin{example}
-Let $\OO = [1,\sqrt{-1}]$ be the maximal order of $\QQ(\sqrt{-1})$.  By Equation \ref{eq:radicandToDiscriminant},  let $\Delta = -4$.  Now let $\ideal a = [2, (2+\sqrt{\Delta})/2]$ and $\ideal b = [5, (6 + \sqrt{\Delta})/2]$ be reduced ideals of $\OO$.  Multiplication using the above gives
+Let $\OO = [1,\sqrt{\Delta}]$ for $\Delta = -20$ be an order of $\QQ(\sqrt{-5})$.  Now let $\ideal a = [3, (4+\sqrt{\Delta})/2]$ and $\ideal b = [6, (10 + \sqrt{\Delta})/2]$ be reduced ideals of $\OO$.  Multiplication using the above gives
 \[
-	\ideal a \ideal b = \left[10, \frac{6 + \sqrt{\Delta}}{2}\right].
+	\ideal a \ideal b = \left[18, \frac{22 + \sqrt{\Delta}}{2}\right].
 \]
 \end{example}
 
