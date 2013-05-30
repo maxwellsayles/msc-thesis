@@ -765,8 +765,7 @@ Chapter \ref{chap:xgcdExperiments} discusses practical optimizations for computi
 \caption{NUCOMP -- Fast Ideal Multiplication (\cite[pp.441-443]{Jacobson2009}).}
 \label{alg:nucomp}
 \begin{algorithmic}[1]
-\Require Reduced representatives $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$, $\mathfrak b = [a_2, (b_2+\sqrt\Delta)/2]$
-\algnewline with $c_1 = ({b_1}^2-\Delta)/4a_1$, $c_2 = ({b_2}^2-\Delta)/4a_2$, and discriminant $\Delta$.
+\Require Reduced representatives $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$, $\mathfrak b = [a_2, (b_2+\sqrt\Delta)/2]$ with $c_1 = ({b_1}^2-\Delta)/4a_1$, $c_2 = ({b_2}^2-\Delta)/4a_2$, and discriminant $\Delta$.
 \Ensure A reduced or almost reduced representative $\mathfrak a \mathfrak b$.
 \State ensure $\mathcal N(\ideal a) \le \mathcal N(\ideal b)$ by swapping $\mathfrak a$ with $\mathfrak b$ if $a_1 > a_2$
 \State compute $s', V' \in \ZZ$ such that $s' = \gcd(a_1, a_2) = Y'a_1 + V'a_2$ for $Y' \in \ZZ$
@@ -824,8 +823,7 @@ Pseudo-code for our implementation is given in Algorithm \ref{alg:nudupl}.
 \caption{NUDUPL -- Fast Ideal Squaring.}
 \label{alg:nudupl}
 \begin{algorithmic}[1]
-\Require Reduced representative $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$
-\algnewline with $c_1 = ({b_1}^2-\Delta)/4a_1$ and discriminant $\Delta$.
+\Require Reduced representative $\mathfrak a = [a_1, (b_1+\sqrt\Delta)/2]$ with $c_1 = ({b_1}^2-\Delta)/4a_1$ and discriminant $\Delta$.
 \Ensure A reduced or almost reduced representative $\mathfrak a^2$.
 \State compute $s, Y \in \ZZ$ such that $s = \gcd(a_1, b_1) = Xa_1 + Yb_1$ for $X \in \ZZ$
 \State $a_1 \gets a_1/s$
@@ -1796,8 +1794,7 @@ Lehmer's original description \cite{Lehmer1938} uses the extended Euclidean algo
 \caption{Lehmer's extended GCD (\cite{Lehmer1938}).}
 \label{alg:lehmerGcd}
 \begin{algorithmic}[1]
-\Require $a,b, \in \ZZ$ and $a \ge b > 0$.
-\algnewline Let $m$ be the number of bits in a machine word.
+\Require $a,b, \in \ZZ$ and $a \ge b > 0$. Let $m$ be the number of bits in a machine word.
 \State $\matrixThreeTwo{s}{U}{V}{t}{X}{Y} \gets \matrixThreeTwo{a}{1}{0}{b}{0}{1}$
 \While{$t \neq 0$}
 	\State $k \gets \floor{\log_2 s} + 1 - m$
@@ -2582,8 +2579,7 @@ such that $d_i = c_{i+1} - c_i$ for consecutive integers $c_i$ and $c_{i+1}$ cop
 \caption{Compute deltas for $P_{w+1}$ given deltas for $P_w$.}
 \label{alg:deltaWheel}
 \begin{algorithmic}[1]
-\Require A primorial $P_w$, the delta list $\coprimelist_w$, and the next prime $p_{w+1}$.
-\algnewline Let $P_{w+1} = p_{w+1} P_w$ and $\phi(P_{w+1}) = (p_{w+1}-1)\phi(P_w)$.
+\Require A primorial $P_w$, the delta list $\coprimelist_w$, and the next prime $p_{w+1}$.  Let $P_{w+1} = p_{w+1} P_w$ and $\phi(P_{w+1}) = (p_{w+1}-1)\phi(P_w)$.
 \Ensure The delta list $\coprimelist_{w+1}$.
 \State $i \gets 1, j \gets 1, c \gets 1, d \gets 0$
 \While{$j \le \phi(P_{w+1})$}
