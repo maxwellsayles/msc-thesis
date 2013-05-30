@@ -1178,7 +1178,7 @@ Algorithm \ref{alg:rtolDbnsChain} describes a non-recursive function with group 
 \label{alg:rtolDbnsChain}
 \begin{algorithmic}[1]
 \Require $n \in \ZZgez$
-\Ensure $n$ satisfying $n = \sum_{i=1}^k s_i 2^{a_i} 3^{b_i}$ with $s_i \in \{1, -1\}$, $a_i < a_{i+1}$, and $b_i < b_{i+1}$ for $1 \le i < k$
+\Ensure $(a_1, b_1, s_1), ..., (a_k, b_k, s_k)$ satisfying $n = \sum_{i=1}^k s_i 2^{a_i} 3^{b_i}$ with $s_i \in \{1, -1\}$, $a_i < a_{i+1}$, and $b_i < b_{i+1}$ for $1 \le i < k$
 \State $(a, b) \gets (0, 0)$
 \State $i \gets 1$
 \While {$n > 0$}
@@ -1252,6 +1252,7 @@ We present pseudo-code in Algorithm \ref{alg:greedyltor}. Note that on successiv
 \label{alg:greedyltor}
 \begin{algorithmic}[1]
 \Require $n \in \ZZ$, $\amax, \bmax \in \{\ZZgez, +\infty\}$ \Comment{$+\infty$ for unbounded $a$ or $b$}
+\Ensure $(s_1, a_1, b_1), ..., (s_k, a_k, b_k)$ satisfying $n = \sum_{i=1}^k s_i 2^{a_i} 3^{b_i}$, $s_i \in \{1, -1\}$, $a_i, b_i \in \ZZgez$.
 \State $L \gets \textrm{empty list}$
 \While {$n \ne 0$}
 	\State compute integers $a$ and $b$ that minimize $\left||n| - 2^a3^b \right|$
