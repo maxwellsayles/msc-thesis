@@ -15,7 +15,7 @@
 \thesisyear{2013}
 \thesis{thesis}    % the word dissertation can be inserted between {}
 \newcommand{\thesistitle}{Improved Arithmetic in the Ideal Class Group of Imaginary Quadratic Number Fields with an Application to Integer Factoring}
-\monthname{June}
+\monthname{May}
 \dept{COMPUTER SCIENCE}
 \degree{MASTER OF SCIENCE}
 %
@@ -284,8 +284,6 @@ The source code for the libraries used throughout this thesis is available onlin
 \chapter{Ideal Arithmetic}
 \label{chap:idealArithmetic}
 
-% TODO(bauer, jacobson): An example for every definition?
-
 A focus of this thesis is arithmetic and exponentiation in the ideal class group of imaginary quadratic number fields.  We begin with the relevant theory of quadratic number fields, then discuss quadratic orders and ideals of quadratic orders.  Finally, we discuss arithmetic in the ideal class group.  The theory presented here is available in detail in reference texts on algebraic number theory such as \cite{Cohn1980}, \cite{Hua2012}, or \cite{Ireland1990}. 
 
 
@@ -533,14 +531,6 @@ C. Siegel \cite[p.247]{Crandall2001} showed that $h_\Delta = |\Delta|^{1/2 + o(1
 
 \section{Ideal Arithmetic}
 \label{sec:idealArithmetic}
-
-% TODO: Use Pari/GP.
-% a = qfbprimeform(-131, 3)
-% b = qfbprimeform(-131, 7)
-% These give nice ideals and 7 is non-reduced so we can show raw multiplication.
-%
-% Maybe \Delta = -131 will work better since that is \equiv 3 \pmod 4.
-
 
 When performing ideal arithmetic, we represent invertible fractional ideals following Jacobson \cite[p.13, Equation 2.1]{Jacobson1999} using the $\ZZ$-module
 \[
@@ -1204,8 +1194,6 @@ Algorithm \ref{alg:rtolDbnsChain} describes a non-recursive function with group 
 \end{algorithmic}
 \end{algorithm}
 
-% TODO(mike): Running example
-
 To see the correctness of the above procedure, consider a modification to the recursive function $\rtol$ such that it returns a partition of the input $n$ as a list of terms $s_i2^{a_i}3^{b_i}$. When the result of the recursive call is squared, this corresponds to incrementing $a_i$ in each term of the list.  Similarly, when the result is cubed, this corresponds to incrementing $b_i$ in each term of the list. When the result is multiplied with $g$, we prepend a term of $+1$ to the partition, and when the result is multiplied with $g^{-1}$, we prepend a term of $-1$ to the partition. On each iteration of the loop, either $n \equiv 0 \pmod 2$ or $n \equiv 0 \pmod 3$, so either $a$ increases or $b$ increases. Since every term $|s_i2^{a_i}3^{b_i}|$ is strictly less than $|s_j2^{a_j}3^{b_j}|$ when $i < j$, the partition is strictly chained.
 
 
@@ -1537,8 +1525,6 @@ and Equations \eqref{eq:initialGcd1} and \eqref{eq:initialGcd2} hold.  We mainta
 	\end{cases}
 \]
 
-% TODO: If possible, adjust the line spacing.
-
 \begin{algorithm}[htb]
 \caption{Extended Euclidean Algorithm.}
 \label{alg:EeaDivRem}
@@ -1806,8 +1792,6 @@ represents the concatenation of the operations performed during the single preci
 We then continue with the outer loop of the computation until $t = 0$.  In the event that $B=0$, then $s$ and $t$ differ in length by more than a single machine word, and we use a step of the full precision extended Euclidean GCD computation to adjust their lengths.
 
 Lehmer's original description \cite{Lehmer1938} uses the extended Euclidean algorithm to compute each step of the single precision extended GCD, however, other single precision extended GCD computations will work.  In Section \ref{sec:gcdResults}, we give timing results for extended GCD computations using an implementation of Lehmer's extended GCD for both a single precision extended Euclidean GCD and a single precision left-to-right binary extended GCD.  We also experimented with precomputing the result of the single precision extended GCD for 8 bit machine words.  Pseudo-code for Lehmer's extended GCD is given in Algorithm \ref{alg:lehmerGcd}.
-
-% TODO(jacobson): Mike says we should continue with the previous values.   It's not obvious from the paper what to do.  I timed several variations of this, and the version presented here, without continuing on the previous values, is faster.  Future work to explain why?
 
 \begin{algorithm}[htb]
 \caption{Lehmer's extended GCD (\cite{Lehmer1938}).}
@@ -2148,8 +2132,6 @@ To time the performance of Pari, we statically link with the Pari library.  We d
 Figures \ref{fig:idealComposeSqrt64}, \ref{fig:idealCubeSqrt64}, \ref{fig:idealComposeSqrt128}, and \ref{fig:idealCubeSqrt128} compare the average time to multiply two ideals or to cube an ideal using either the approximate termination bound for the partial extended GCD or the full termination bound.  We show this for both our 64-bit and 128-bit implementations.  In each case, it is faster on average to use the approximate termination bound.
 
 Figures \ref{fig:idealCompose}, \ref{fig:idealSquare}, and \ref{fig:idealCube} show the average time for ideal multiplication, squaring, and cubing respectively, alongside the timings for each operation using the reference implementation from Pari.  For all discriminant sizes, our 64-bit implementation performs faster than our 128-bit implementation, which performs faster than our GMP implementation.  Table \ref{tab:relativeCostIdealArith} shows the relative costs on average for ideal multiplication, squaring, and cubing for each implementation compared with Pari. For our 64-bit implementation, we only average the times for discriminants less than 60 bits in size, for our 128-bit implementation, we use the times for discriminants less than 119 bits in size, and for our GMP implementation, we use the times for discriminants less than 140 bits in size.
-
-% TODO(max): Try cancelling an $a_1$ and insert graphs showing reduction after each step, etc.
 
 In Figures \ref{fig:cubingVs64}, \ref{fig:cubingVs128}, \ref{fig:cubingVsMpz}, and \ref{fig:cubingVsPari} we compare the average time to cube against the average time to multiply a representative with its square.  For both our 64-bit implementation and our GMP implementation, cubing is faster than multiplying with the square.  For Pari, multiplying an ideal with its square (using \texttt{gmul} and \texttt{gsqr}) is faster than using the general powering function (\texttt{gpowsg}).
  
